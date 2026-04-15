@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
 import {
   Home, Dice5, Target, BookOpen, MoreHorizontal, Sun, Moon,
-  Swords, User, BarChart3, Activity, Package, StickyNote, Wrench, Users, Timer, MessageSquare,
+  Swords, User, BarChart3, Activity, Package, StickyNote, Wrench, Users, Timer, MessageSquare, Store,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -21,6 +21,7 @@ const MORE_LINKS = [
   
   { path: "/conditions", label: "Stany", icon: Activity },
   { path: "/inventory", label: "Ekwipunek i łup", icon: Package },
+  { path: "/shop", label: "Sklep", icon: Store },
   { path: "/character", label: "Postać", icon: User },
   { path: "/notes", label: "Notatki", icon: StickyNote },
   { path: "/simulations", label: "Symulacje", icon: BarChart3 },

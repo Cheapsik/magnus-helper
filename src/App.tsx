@@ -19,6 +19,7 @@ import TimersPage from "@/pages/TimersPage";
 import RumorsPage from "@/pages/RumorsPage";
 import NotFound from "@/pages/NotFound";
 import SimulationsPage from "./pages/SimulationsPage";
+import ShopPage from "./pages/ShopPage";
 
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/simulations" element={<SimulationsPage />} />
               <Route path="/conditions" element={<ConditionsPage />} />
               <Route path="/inventory" element={<LootGeneratorPage />} />
+              <Route path="/shop" element={<ShopPage />} />
               <Route path="/loot" element={<Navigate to="/inventory" replace />} />
               <Route path="/notes" element={<SessionNotesPage />} />
               <Route path="/gm-toolbox" element={<GmToolboxPage />} />

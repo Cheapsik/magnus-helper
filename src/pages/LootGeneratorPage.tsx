@@ -1,4 +1,5 @@
 import { useMemo, useState, useId } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Gem, Plus, Trash2, Edit2, Check, Dice5, Pencil, Package, Sword, Shield, Flame, Coins, Minus, X } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import type { LootRank } from "@/context/AppContext";
@@ -113,10 +114,19 @@ const CARRY_CATEGORIES = [
   { id: "coins", label: "Pieniądze", icon: Coins },
 ];
 
+const VALID_TABS = ["generate", "ranks", "items", "carry"] as const;
+
 export default function LootGeneratorPage() {
+  const [searchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get("tab");
+  const initialTab =
+    tabFromUrl && (VALID_TABS as readonly string[]).includes(tabFromUrl)
+      ? (tabFromUrl as (typeof VALID_TABS)[number])
+      : "generate";
+
   const { lootConfig, setLootConfig, lootItems, setLootItems, inventory, setInventory } = useApp();
   const defaultCurrency = lootConfig.itemCurrency ?? "sz";
-  const [tab, setTab] = useState<"generate" | "ranks" | "items" | "carry">("generate");
+  const [tab, setTab] = useState<"generate" | "ranks" | "items" | "carry">(initialTab);
   const [result, setResult] = useState<GeneratedLoot | null>(null);
 
   const [editingRankId, setEditingRankId] = useState<string | null>(null);
