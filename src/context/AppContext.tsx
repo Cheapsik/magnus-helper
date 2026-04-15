@@ -1,10 +1,12 @@
 import { createContext, useContext, ReactNode } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { initLootStorage } from "@/lib/lootDb";
+import type { LootDbItem } from "@/lib/lootDb";
 import type { DiceRoll, TestResult } from "@/lib/dice";
 import type { CharacterData } from "@/data/character";
 import { DEFAULT_CHARACTER } from "@/data/character";
 
-/* ── Shared types ── */
+initLootStorage();
 
 export interface Combatant {
   id: string;
@@ -58,7 +60,6 @@ export interface SavedNpc {
   occupation: string;
   traits: string;
   description: string;
-  // Main stats
   ww: number;
   us: number;
   s: number;
@@ -67,7 +68,6 @@ export interface SavedNpc {
   int: number;
   sw: number;
   ogd: number;
-  // Secondary stats
   a: number;
   sz: number;
   mag: number;
@@ -91,14 +91,6 @@ export interface LootRank {
   chance: number;
 }
 
-export interface LootItem {
-  id: string;
-  name: string;
-  type: string;
-  rankId: string;
-  description: string;
-}
-
 export interface CoinRange {
   min: number;
   max: number;
@@ -106,7 +98,7 @@ export interface CoinRange {
 
 export interface LootConfig {
   ranks: LootRank[];
-  items: LootItem[];
+  itemCurrency?: string;
   coinRanges: { gold: CoinRange; silver: CoinRange; copper: CoinRange };
   itemCount: { min: number; max: number };
 }
@@ -117,8 +109,6 @@ export interface CodexEntry {
   category: string;
   content: string;
 }
-
-/* ── Defaults ── */
 
 const DEFAULT_COMBATANTS: Combatant[] = [
   { id: "c1", name: "Aldric (Gracz)", initiative: 42, ww: 42, us: 35, sb: 3, hp: { current: 11, max: 14 }, armor: 1, toughness: 4, statuses: [], notes: "", isEnemy: false },
@@ -178,17 +168,7 @@ const DEFAULT_LOOT_CONFIG: LootConfig = {
     { id: "r4", name: "Ciekawy", chance: 10 },
     { id: "r5", name: "Wyjątkowy", chance: 5 },
   ],
-  items: [
-    { id: "l1", name: "Zardzewiały miecz", type: "broń", rankId: "r1", description: "Ledwo trzyma się kupy" },
-    { id: "l2", name: "Połamana tarcza", type: "zbroja", rankId: "r1", description: "" },
-    { id: "l3", name: "Miecz żołnierski", type: "broń", rankId: "r2", description: "Standardowy miecz" },
-    { id: "l4", name: "Skórzany kaftan", type: "zbroja", rankId: "r2", description: "" },
-    { id: "l5", name: "Mikstura lecznicza", type: "mikstura", rankId: "r2", description: "Leczy 1k10 PŻ" },
-    { id: "l6", name: "Elficki łuk", type: "broń", rankId: "r3", description: "Pięknie zdobiony" },
-    { id: "l7", name: "Kolczuga krasnoludzka", type: "zbroja", rankId: "r3", description: "+1 PP ekstra" },
-    { id: "l8", name: "Amulet ochrony", type: "gadżet", rankId: "r4", description: "+5 do testów Wt" },
-    { id: "l9", name: "Miecz runiczny", type: "broń", rankId: "r5", description: "+10 WW, magiczny" },
-  ],
+  itemCurrency: "sz",
   coinRanges: {
     gold: { min: 0, max: 2 },
     silver: { min: 0, max: 15 },
@@ -196,8 +176,6 @@ const DEFAULT_LOOT_CONFIG: LootConfig = {
   },
   itemCount: { min: 1, max: 4 },
 };
-
-/* ── Context type ── */
 
 interface AppContextType {
   rollHistory: DiceRoll[];
@@ -230,6 +208,8 @@ interface AppContextType {
   setDifficultyPresets: (fn: DifficultyPreset[] | ((prev: DifficultyPreset[]) => DifficultyPreset[])) => void;
   lootConfig: LootConfig;
   setLootConfig: (fn: LootConfig | ((prev: LootConfig) => LootConfig)) => void;
+  lootItems: LootDbItem[];
+  setLootItems: (fn: LootDbItem[] | ((prev: LootDbItem[]) => LootDbItem[])) => void;
   codexEntries: CodexEntry[];
   setCodexEntries: (fn: CodexEntry[] | ((prev: CodexEntry[]) => CodexEntry[])) => void;
 }
@@ -251,6 +231,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [savedNpcs, setSavedNpcs] = useLocalStorage<SavedNpc[]>("magnus-saved-npcs", []);
   const [difficultyPresets, setDifficultyPresets] = useLocalStorage<DifficultyPreset[]>("magnus-difficulty-presets", DEFAULT_DIFFICULTY_PRESETS);
   const [lootConfig, setLootConfig] = useLocalStorage<LootConfig>("rpg_loot_config", DEFAULT_LOOT_CONFIG);
+  const [lootItems, setLootItems] = useLocalStorage<LootDbItem[]>("rpg_items_db", []);
   const [codexEntries, setCodexEntries] = useLocalStorage<CodexEntry[]>("magnus-codex-entries", []);
 
   const addRoll = (roll: DiceRoll) => setRollHistory((prev) => [roll, ...prev].slice(0, 50));
@@ -274,6 +255,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       savedNpcs, setSavedNpcs,
       difficultyPresets, setDifficultyPresets,
       lootConfig, setLootConfig,
+      lootItems, setLootItems,
       codexEntries, setCodexEntries,
     }}>
       {children}
@@ -286,3 +268,5 @@ export function useApp() {
   if (!ctx) throw new Error("useApp must be used within AppProvider");
   return ctx;
 }
+
+export type { LootDbItem } from "@/lib/lootDb";

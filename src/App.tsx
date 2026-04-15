@@ -1,5 +1,5 @@
 import { ThemeProvider } from "next-themes";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
@@ -11,7 +11,6 @@ import CheatSheetsPage from "@/pages/CheatSheetsPage";
 import CharacterPage from "@/pages/CharacterPage";
 import CombatPage from "@/pages/CombatPage";
 import ConditionsPage from "@/pages/ConditionsPage";
-import InventoryPage from "@/pages/InventoryPage";
 import SessionNotesPage from "@/pages/SessionNotesPage";
 import GmToolboxPage from "@/pages/GmToolboxPage";
 import NpcManagerPage from "@/pages/NpcManagerPage";
@@ -26,7 +25,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <AppProvider>
-        <BrowserRouter>
+        <HashRouter>
           <Layout>
             <Routes>
               <Route path="/" element={<Index />} />
@@ -37,17 +36,17 @@ const App = () => (
               <Route path="/combat" element={<CombatPage />} />
               <Route path="/simulations" element={<SimulationsPage />} />
               <Route path="/conditions" element={<ConditionsPage />} />
-              <Route path="/inventory" element={<InventoryPage />} />
+              <Route path="/inventory" element={<LootGeneratorPage />} />
+              <Route path="/loot" element={<Navigate to="/inventory" replace />} />
               <Route path="/notes" element={<SessionNotesPage />} />
               <Route path="/gm-toolbox" element={<GmToolboxPage />} />
               <Route path="/npcs" element={<NpcManagerPage />} />
-              <Route path="/loot" element={<LootGeneratorPage />} />
               <Route path="/timers" element={<TimersPage />} />
               <Route path="/rumors" element={<RumorsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
-        </BrowserRouter>
+        </HashRouter>
       </AppProvider>
     </TooltipProvider>
   </ThemeProvider>
