@@ -1,0 +1,288 @@
+import { createContext, useContext, ReactNode } from "react";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import type { DiceRoll, TestResult } from "@/lib/dice";
+import type { CharacterData } from "@/data/character";
+import { DEFAULT_CHARACTER } from "@/data/character";
+
+/* ── Shared types ── */
+
+export interface Combatant {
+  id: string;
+  name: string;
+  initiative: number;
+  ww: number;
+  us: number;
+  sb: number;
+  hp: { current: number; max: number };
+  armor: number;
+  toughness: number;
+  statuses: string[];
+  notes: string;
+  isEnemy: boolean;
+}
+
+export interface GmEnemy {
+  id: string;
+  name: string;
+  ww: number;
+  hp: number;
+  armor: number;
+  weapon: string;
+}
+
+export interface SessionNote {
+  id: string;
+  text: string;
+  category: string;
+  timestamp: number;
+}
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  category: string;
+  quantity: number;
+  maxQuantity?: number;
+}
+
+export interface ActiveCondition {
+  id: string;
+  name: string;
+  rounds?: number;
+  severity: "low" | "medium" | "high";
+}
+
+export interface SavedNpc {
+  id: string;
+  name: string;
+  occupation: string;
+  traits: string;
+  description: string;
+  // Main stats
+  ww: number;
+  us: number;
+  s: number;
+  wt: number;
+  zr: number;
+  int: number;
+  sw: number;
+  ogd: number;
+  // Secondary stats
+  a: number;
+  sz: number;
+  mag: number;
+  po: number;
+  pp: number;
+  hp: number;
+  armor: number;
+  weapon: string;
+  notes: string;
+}
+
+export interface DifficultyPreset {
+  label: string;
+  labelPl: string;
+  modifier: number;
+}
+
+export interface LootRank {
+  id: string;
+  name: string;
+  chance: number;
+}
+
+export interface LootItem {
+  id: string;
+  name: string;
+  type: string;
+  rankId: string;
+  description: string;
+}
+
+export interface CoinRange {
+  min: number;
+  max: number;
+}
+
+export interface LootConfig {
+  ranks: LootRank[];
+  items: LootItem[];
+  coinRanges: { gold: CoinRange; silver: CoinRange; copper: CoinRange };
+  itemCount: { min: number; max: number };
+}
+
+export interface CodexEntry {
+  id: string;
+  title: string;
+  category: string;
+  content: string;
+}
+
+/* ── Defaults ── */
+
+const DEFAULT_COMBATANTS: Combatant[] = [
+  { id: "c1", name: "Aldric (Gracz)", initiative: 42, ww: 42, us: 35, sb: 3, hp: { current: 11, max: 14 }, armor: 1, toughness: 4, statuses: [], notes: "", isEnemy: false },
+  { id: "c2", name: "Goblin Łucznik", initiative: 35, ww: 25, us: 30, sb: 2, hp: { current: 6, max: 6 }, armor: 0, toughness: 3, statuses: [], notes: "Ma krótki łuk", isEnemy: true },
+  { id: "c3", name: "Goblin Wojownik", initiative: 28, ww: 30, us: 20, sb: 3, hp: { current: 8, max: 8 }, armor: 0, toughness: 3, statuses: [], notes: "", isEnemy: true },
+];
+
+const DEFAULT_ENEMIES: GmEnemy[] = [
+  { id: "e1", name: "Goblin", ww: 25, hp: 6, armor: 0, weapon: "Zardzewiały tasak (SB+2)" },
+  { id: "e2", name: "Ork", ww: 35, hp: 12, armor: 1, weapon: "Choppa (SB+4)" },
+  { id: "e3", name: "Szkielet", ww: 25, hp: 5, armor: 0, weapon: "Stary miecz (SB+3)" },
+  { id: "e4", name: "Bandyta", ww: 30, hp: 10, armor: 1, weapon: "Miecz (SB+4)" },
+  { id: "e5", name: "Wilk", ww: 35, hp: 8, armor: 0, weapon: "Kły (SB+2)" },
+  { id: "e6", name: "Ghul", ww: 30, hp: 12, armor: 0, weapon: "Pazury (SB+3), Zatruty" },
+];
+
+const DEFAULT_NOTES: SessionNote[] = [
+  { id: "n1", text: "Podróż do Ubersreiku z drużyną", category: "general", timestamp: Date.now() },
+  { id: "n2", text: "Heinz — kupiec, jestem mu winien przysługę", category: "npc", timestamp: Date.now() },
+  { id: "n3", text: "Nie ufam elfowi w drużynie", category: "general", timestamp: Date.now() },
+  { id: "n4", text: "Uzupełnić zapasy w następnym mieście", category: "objective", timestamp: Date.now() },
+  { id: "n5", text: "Ubersreik — cel podróży", category: "location", timestamp: Date.now() },
+];
+
+const DEFAULT_INVENTORY: InventoryItem[] = [
+  { id: "i1", name: "Miecz", category: "weapons", quantity: 1 },
+  { id: "i2", name: "Sztylet", category: "weapons", quantity: 1 },
+  { id: "i3", name: "Łuk krótki", category: "weapons", quantity: 1 },
+  { id: "i4", name: "Strzały", category: "weapons", quantity: 20, maxQuantity: 20 },
+  { id: "i5", name: "Skórzany kaftan", category: "armor", quantity: 1 },
+  { id: "i6", name: "Kolczy czepiec", category: "armor", quantity: 1 },
+  { id: "i7", name: "Okład leczniczy", category: "consumables", quantity: 2 },
+  { id: "i8", name: "Racje żywnościowe", category: "consumables", quantity: 3 },
+  { id: "i9", name: "Lina (10m)", category: "gear", quantity: 1 },
+  { id: "i10", name: "Latarnia", category: "gear", quantity: 1 },
+  { id: "i11", name: "Krzesiwo", category: "gear", quantity: 1 },
+  { id: "i12", name: "Złote korony", category: "coins", quantity: 0 },
+  { id: "i13", name: "Srebrne szylingi", category: "coins", quantity: 12 },
+  { id: "i14", name: "Miedziane pensy", category: "coins", quantity: 8 },
+];
+
+const DEFAULT_DIFFICULTY_PRESETS: DifficultyPreset[] = [
+  { label: "Very Easy", labelPl: "Bardzo łatwy", modifier: 30 },
+  { label: "Easy", labelPl: "Łatwy", modifier: 20 },
+  { label: "Routine", labelPl: "Rutynowy", modifier: 10 },
+  { label: "Average", labelPl: "Przeciętny", modifier: 0 },
+  { label: "Challenging", labelPl: "Wymagający", modifier: -10 },
+  { label: "Hard", labelPl: "Trudny", modifier: -20 },
+  { label: "Very Hard", labelPl: "Bardzo trudny", modifier: -30 },
+];
+
+const DEFAULT_LOOT_CONFIG: LootConfig = {
+  ranks: [
+    { id: "r1", name: "Zniszczony", chance: 35 },
+    { id: "r2", name: "Pospolity", chance: 30 },
+    { id: "r3", name: "Rzadki", chance: 20 },
+    { id: "r4", name: "Ciekawy", chance: 10 },
+    { id: "r5", name: "Wyjątkowy", chance: 5 },
+  ],
+  items: [
+    { id: "l1", name: "Zardzewiały miecz", type: "broń", rankId: "r1", description: "Ledwo trzyma się kupy" },
+    { id: "l2", name: "Połamana tarcza", type: "zbroja", rankId: "r1", description: "" },
+    { id: "l3", name: "Miecz żołnierski", type: "broń", rankId: "r2", description: "Standardowy miecz" },
+    { id: "l4", name: "Skórzany kaftan", type: "zbroja", rankId: "r2", description: "" },
+    { id: "l5", name: "Mikstura lecznicza", type: "mikstura", rankId: "r2", description: "Leczy 1k10 PŻ" },
+    { id: "l6", name: "Elficki łuk", type: "broń", rankId: "r3", description: "Pięknie zdobiony" },
+    { id: "l7", name: "Kolczuga krasnoludzka", type: "zbroja", rankId: "r3", description: "+1 PP ekstra" },
+    { id: "l8", name: "Amulet ochrony", type: "gadżet", rankId: "r4", description: "+5 do testów Wt" },
+    { id: "l9", name: "Miecz runiczny", type: "broń", rankId: "r5", description: "+10 WW, magiczny" },
+  ],
+  coinRanges: {
+    gold: { min: 0, max: 2 },
+    silver: { min: 0, max: 15 },
+    copper: { min: 0, max: 30 },
+  },
+  itemCount: { min: 1, max: 4 },
+};
+
+/* ── Context type ── */
+
+interface AppContextType {
+  rollHistory: DiceRoll[];
+  addRoll: (roll: DiceRoll) => void;
+  clearRollHistory: () => void;
+  testHistory: TestResult[];
+  addTestResult: (result: TestResult) => void;
+  clearTestHistory: () => void;
+  character: CharacterData;
+  updateCharacter: (data: CharacterData) => void;
+  pinnedSheets: string[];
+  togglePinSheet: (id: string) => void;
+  combatants: Combatant[];
+  setCombatants: (fn: Combatant[] | ((prev: Combatant[]) => Combatant[])) => void;
+  combatRound: number;
+  setCombatRound: (fn: number | ((prev: number) => number)) => void;
+  combatTurn: number;
+  setCombatTurn: (fn: number | ((prev: number) => number)) => void;
+  conditions: ActiveCondition[];
+  setConditions: (fn: ActiveCondition[] | ((prev: ActiveCondition[]) => ActiveCondition[])) => void;
+  inventory: InventoryItem[];
+  setInventory: (fn: InventoryItem[] | ((prev: InventoryItem[]) => InventoryItem[])) => void;
+  sessionNotes: SessionNote[];
+  setSessionNotes: (fn: SessionNote[] | ((prev: SessionNote[]) => SessionNote[])) => void;
+  gmEnemies: GmEnemy[];
+  setGmEnemies: (fn: GmEnemy[] | ((prev: GmEnemy[]) => GmEnemy[])) => void;
+  savedNpcs: SavedNpc[];
+  setSavedNpcs: (fn: SavedNpc[] | ((prev: SavedNpc[]) => SavedNpc[])) => void;
+  difficultyPresets: DifficultyPreset[];
+  setDifficultyPresets: (fn: DifficultyPreset[] | ((prev: DifficultyPreset[]) => DifficultyPreset[])) => void;
+  lootConfig: LootConfig;
+  setLootConfig: (fn: LootConfig | ((prev: LootConfig) => LootConfig)) => void;
+  codexEntries: CodexEntry[];
+  setCodexEntries: (fn: CodexEntry[] | ((prev: CodexEntry[]) => CodexEntry[])) => void;
+}
+
+const AppContext = createContext<AppContextType | null>(null);
+
+export function AppProvider({ children }: { children: ReactNode }) {
+  const [rollHistory, setRollHistory] = useLocalStorage<DiceRoll[]>("grim-rolls", []);
+  const [testHistory, setTestHistory] = useLocalStorage<TestResult[]>("grim-tests", []);
+  const [character, setCharacter] = useLocalStorage<CharacterData>("grim-character", DEFAULT_CHARACTER);
+  const [pinnedSheets, setPinnedSheets] = useLocalStorage<string[]>("grim-pinned", []);
+  const [combatants, setCombatants] = useLocalStorage<Combatant[]>("magnus-combatants", DEFAULT_COMBATANTS);
+  const [combatRound, setCombatRound] = useLocalStorage<number>("magnus-combat-round", 1);
+  const [combatTurn, setCombatTurn] = useLocalStorage<number>("magnus-combat-turn", 0);
+  const [conditions, setConditions] = useLocalStorage<ActiveCondition[]>("magnus-conditions", []);
+  const [inventory, setInventory] = useLocalStorage<InventoryItem[]>("magnus-inventory", DEFAULT_INVENTORY);
+  const [sessionNotes, setSessionNotes] = useLocalStorage<SessionNote[]>("magnus-session-notes", DEFAULT_NOTES);
+  const [gmEnemies, setGmEnemies] = useLocalStorage<GmEnemy[]>("magnus-gm-enemies", DEFAULT_ENEMIES);
+  const [savedNpcs, setSavedNpcs] = useLocalStorage<SavedNpc[]>("magnus-saved-npcs", []);
+  const [difficultyPresets, setDifficultyPresets] = useLocalStorage<DifficultyPreset[]>("magnus-difficulty-presets", DEFAULT_DIFFICULTY_PRESETS);
+  const [lootConfig, setLootConfig] = useLocalStorage<LootConfig>("rpg_loot_config", DEFAULT_LOOT_CONFIG);
+  const [codexEntries, setCodexEntries] = useLocalStorage<CodexEntry[]>("magnus-codex-entries", []);
+
+  const addRoll = (roll: DiceRoll) => setRollHistory((prev) => [roll, ...prev].slice(0, 50));
+  const clearRollHistory = () => setRollHistory([]);
+  const addTestResult = (result: TestResult) => setTestHistory((prev) => [result, ...prev].slice(0, 50));
+  const clearTestHistory = () => setTestHistory([]);
+  const updateCharacter = (data: CharacterData) => setCharacter(data);
+  const togglePinSheet = (id: string) => setPinnedSheets((prev) => prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]);
+
+  return (
+    <AppContext.Provider value={{
+      rollHistory, addRoll, clearRollHistory,
+      testHistory, addTestResult, clearTestHistory,
+      character, updateCharacter,
+      pinnedSheets, togglePinSheet,
+      combatants, setCombatants, combatRound, setCombatRound, combatTurn, setCombatTurn,
+      conditions, setConditions,
+      inventory, setInventory,
+      sessionNotes, setSessionNotes,
+      gmEnemies, setGmEnemies,
+      savedNpcs, setSavedNpcs,
+      difficultyPresets, setDifficultyPresets,
+      lootConfig, setLootConfig,
+      codexEntries, setCodexEntries,
+    }}>
+      {children}
+    </AppContext.Provider>
+  );
+}
+
+export function useApp() {
+  const ctx = useContext(AppContext);
+  if (!ctx) throw new Error("useApp must be used within AppProvider");
+  return ctx;
+}
