@@ -217,22 +217,22 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [rollHistory, setRollHistory] = useLocalStorage<DiceRoll[]>("grim-rolls", []);
-  const [testHistory, setTestHistory] = useLocalStorage<TestResult[]>("grim-tests", []);
-  const [character, setCharacter] = useLocalStorage<CharacterData>("grim-character", DEFAULT_CHARACTER);
-  const [pinnedSheets, setPinnedSheets] = useLocalStorage<string[]>("grim-pinned", []);
-  const [combatants, setCombatants] = useLocalStorage<Combatant[]>("magnus-combatants", DEFAULT_COMBATANTS);
-  const [combatRound, setCombatRound] = useLocalStorage<number>("magnus-combat-round", 1);
-  const [combatTurn, setCombatTurn] = useLocalStorage<number>("magnus-combat-turn", 0);
-  const [conditions, setConditions] = useLocalStorage<ActiveCondition[]>("magnus-conditions", []);
-  const [inventory, setInventory] = useLocalStorage<InventoryItem[]>("magnus-inventory", DEFAULT_INVENTORY);
-  const [sessionNotes, setSessionNotes] = useLocalStorage<SessionNote[]>("magnus-session-notes", DEFAULT_NOTES);
-  const [gmEnemies, setGmEnemies] = useLocalStorage<GmEnemy[]>("magnus-gm-enemies", DEFAULT_ENEMIES);
-  const [savedNpcs, setSavedNpcs] = useLocalStorage<SavedNpc[]>("magnus-saved-npcs", []);
-  const [difficultyPresets, setDifficultyPresets] = useLocalStorage<DifficultyPreset[]>("magnus-difficulty-presets", DEFAULT_DIFFICULTY_PRESETS);
+  const [rollHistory, setRollHistory] = useLocalStorage<DiceRoll[]>("rpg_dice_rolls", []);
+  const [testHistory, setTestHistory] = useLocalStorage<TestResult[]>("rpg_test_results", []);
+  const [character, setCharacter] = useLocalStorage<CharacterData>("rpg_character", DEFAULT_CHARACTER);
+  const [pinnedSheets, setPinnedSheets] = useLocalStorage<string[]>("rpg_codex_pins", []);
+  const [combatants, setCombatants] = useLocalStorage<Combatant[]>("rpg_combatants", DEFAULT_COMBATANTS);
+  const [combatRound, setCombatRound] = useLocalStorage<number>("rpg_combat_round", 1);
+  const [combatTurn, setCombatTurn] = useLocalStorage<number>("rpg_combat_turn", 0);
+  const [conditions, setConditions] = useLocalStorage<ActiveCondition[]>("rpg_conditions", []);
+  const [inventory, setInventory] = useLocalStorage<InventoryItem[]>("rpg_inventory", DEFAULT_INVENTORY);
+  const [sessionNotes, setSessionNotes] = useLocalStorage<SessionNote[]>("rpg_session_notes", DEFAULT_NOTES);
+  const [gmEnemies, setGmEnemies] = useLocalStorage<GmEnemy[]>("rpg_gm_enemies", DEFAULT_ENEMIES);
+  const [savedNpcs, setSavedNpcs] = useLocalStorage<SavedNpc[]>("rpg_saved_npcs", []);
+  const [difficultyPresets, setDifficultyPresets] = useLocalStorage<DifficultyPreset[]>("rpg_difficulty_presets", DEFAULT_DIFFICULTY_PRESETS);
   const [lootConfig, setLootConfig] = useLocalStorage<LootConfig>("rpg_loot_config", DEFAULT_LOOT_CONFIG);
   const [lootItems, setLootItems] = useLocalStorage<LootDbItem[]>("rpg_items_db", []);
-  const [codexEntries, setCodexEntries] = useLocalStorage<CodexEntry[]>("magnus-codex-entries", []);
+  const [codexEntries, setCodexEntries] = useLocalStorage<CodexEntry[]>("rpg_codex_entries", []);
 
   const addRoll = (roll: DiceRoll) => setRollHistory((prev) => [roll, ...prev].slice(0, 50));
   const clearRollHistory = () => setRollHistory([]);

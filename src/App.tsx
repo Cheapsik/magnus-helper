@@ -20,9 +20,10 @@ import RumorsPage from "@/pages/RumorsPage";
 import NotFound from "@/pages/NotFound";
 import SimulationsPage from "./pages/SimulationsPage";
 import ShopPage from "./pages/ShopPage";
+import AmbientPage from "./pages/AmbientPage";
 
 const App = () => (
-  <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+  <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="rpg_theme">
     <TooltipProvider>
       <Toaster />
       <AppProvider>
@@ -45,6 +46,7 @@ const App = () => (
               <Route path="/npcs" element={<NpcManagerPage />} />
               <Route path="/timers" element={<TimersPage />} />
               <Route path="/rumors" element={<RumorsPage />} />
+              <Route path="/ambient" element={<AmbientPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
