@@ -52,11 +52,18 @@ function saveTimers(timers: TimerData[]) {
   );
 }
 
-/* ── Audio ── */
+/* ── Audio (lazy AudioContext; resume na mobile) ── */
 
-function playBeep() {
+let beepCtx: AudioContext | null = null;
+
+async function playBeep() {
   try {
-    const ctx = new AudioContext();
+    const AC = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AC) return;
+    if (!beepCtx) beepCtx = new AC();
+    if (beepCtx.state === "suspended") await beepCtx.resume();
+
+    const ctx = beepCtx;
     const beep = (delay: number) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -71,8 +78,9 @@ function playBeep() {
     beep(0);
     beep(0.3);
     beep(0.6);
-    setTimeout(() => ctx.close(), 1500);
-  } catch {}
+  } catch {
+    /* ignore */
+  }
 }
 
 /* ── Helpers ── */
@@ -137,7 +145,7 @@ function TimerCard({
       alertedRef.current = true;
       const name = timer.label || "Timer";
       toast(`⏰ Timer zakończony: ${name}`);
-      playBeep();
+      void playBeep();
     }
   }, [timer.finished, timer.label]);
 

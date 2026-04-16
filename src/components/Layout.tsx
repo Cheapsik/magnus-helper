@@ -4,10 +4,13 @@ import { useTheme } from "next-themes";
 import {
   Home, Dice5, Target, BookOpen, MoreHorizontal, Sun, Moon,
   Swords, User, BarChart3, Activity, Package, StickyNote, Wrench, Users, Timer, MessageSquare, Store,
+  Music,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import Logo from "@/components/Logo";
+import RpgDataBackupControls from "@/components/RpgDataBackupControls";
+
+const faviconSrc = `${import.meta.env.BASE_URL}favicon.png`;
 
 const NAV_TABS = [
   { path: "/", label: "Start", icon: Home },
@@ -28,6 +31,7 @@ const MORE_LINKS = [
   { path: "/npcs", label: "NPC", icon: Users },
   { path: "/timers", label: "Timery", icon: Timer },
   { path: "/rumors", label: "Plotki", icon: MessageSquare },
+  { path: "/ambient", label: "Soundboard", icon: Music },
   { path: "/gm-toolbox", label: "Skrzynka MG", icon: Wrench },
 ];
 
@@ -46,16 +50,28 @@ export default function Layout({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-md">
         <div className="flex items-center justify-between px-4 h-12 max-w-4xl mx-auto">
           <Link to="/" className="flex items-center gap-2">
-            <Logo />
+            <img
+              src={faviconSrc}
+              alt=""
+              width={28}
+              height={28}
+              decoding="async"
+              className="h-7 w-7 shrink-0 rounded-sm object-cover"
+              aria-hidden
+            />
             <span className="font-semibold text-sm tracking-wide text-foreground">Magnus Helper</span>
           </Link>
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-            aria-label="Przełącz motyw"
-          >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
+          <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
+            <RpgDataBackupControls />
+            <button
+              type="button"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              aria-label="Przełącz motyw"
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
       </header>
 
