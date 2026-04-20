@@ -87,14 +87,22 @@ export default function Layout({ children }: { children: ReactNode }) {
 
       <main
         className={cn(
-          "flex-1 pb-20 w-full px-4 py-4",
+          "flex-1 w-full px-4 pt-4 pb-4",
           isQuestsFullWidth ? "max-w-none" : "max-w-4xl mx-auto",
         )}
       >
         {children}
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 backdrop-blur-md safe-area-pb">
+      <div
+        aria-hidden
+        className="pointer-events-none w-full shrink-0 select-none"
+        style={{
+          height: "calc(5.75rem + env(safe-area-inset-bottom, 0px))",
+        }}
+      />
+
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 backdrop-blur-md pb-[env(safe-area-inset-bottom,0px)]">
         <div className="flex justify-around items-center h-16 max-w-lg mx-auto">
           {NAV_TABS.map((tab) => (
             <Link
