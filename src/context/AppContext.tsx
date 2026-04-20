@@ -1,12 +1,20 @@
-import { createContext, useContext, ReactNode } from "react";
+import { createContext, useContext, useMemo, ReactNode } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { initLootStorage } from "@/lib/lootDb";
 import type { LootDbItem } from "@/lib/lootDb";
 import type { DiceRoll, TestResult } from "@/lib/dice";
 import type { CharacterData } from "@/data/character";
 import { DEFAULT_CHARACTER } from "@/data/character";
+import type { SessionNote, NoteSessionCatalog } from "@/lib/sessionNoteModel";
+import {
+  migrateSessionNotesFromUnknown,
+  reviveNoteSessionCatalog,
+  readNoteSessionCatalogFromStorage,
+} from "@/lib/sessionNotesMigration";
 
 initLootStorage();
+
+export type { SessionNote, SessionNoteScope, NamedNoteSession, NoteSessionCatalog } from "@/lib/sessionNoteModel";
 
 export interface Combatant {
   id: string;
@@ -30,13 +38,6 @@ export interface GmEnemy {
   hp: number;
   armor: number;
   weapon: string;
-}
-
-export interface SessionNote {
-  id: string;
-  text: string;
-  category: string;
-  timestamp: number;
 }
 
 export interface InventoryItem {
@@ -126,11 +127,11 @@ const DEFAULT_ENEMIES: GmEnemy[] = [
 ];
 
 const DEFAULT_NOTES: SessionNote[] = [
-  { id: "n1", text: "Podróż do Ubersreiku z drużyną", category: "general", timestamp: Date.now() },
-  { id: "n2", text: "Heinz — kupiec, jestem mu winien przysługę", category: "npc", timestamp: Date.now() },
-  { id: "n3", text: "Nie ufam elfowi w drużynie", category: "general", timestamp: Date.now() },
-  { id: "n4", text: "Uzupełnić zapasy w następnym mieście", category: "objective", timestamp: Date.now() },
-  { id: "n5", text: "Ubersreik — cel podróży", category: "location", timestamp: Date.now() },
+  { id: "n1", text: "Podróż do Ubersreiku z drużyną", category: "general", timestamp: Date.now(), scope: "global", pinned: false },
+  { id: "n2", text: "Heinz — kupiec, jestem mu winien przysługę", category: "npc", timestamp: Date.now(), scope: "global", pinned: false },
+  { id: "n3", text: "Nie ufam elfowi w drużynie", category: "general", timestamp: Date.now(), scope: "global", pinned: false },
+  { id: "n4", text: "Uzupełnić zapasy w następnym mieście", category: "objective", timestamp: Date.now(), scope: "global", pinned: false },
+  { id: "n5", text: "Ubersreik — cel podróży", category: "location", timestamp: Date.now(), scope: "global", pinned: false },
 ];
 
 const DEFAULT_INVENTORY: InventoryItem[] = [
@@ -200,6 +201,9 @@ interface AppContextType {
   setInventory: (fn: InventoryItem[] | ((prev: InventoryItem[]) => InventoryItem[])) => void;
   sessionNotes: SessionNote[];
   setSessionNotes: (fn: SessionNote[] | ((prev: SessionNote[]) => SessionNote[])) => void;
+  /** Lista nazwanych sesji + aktualnie wybrana (notatki, filtry). */
+  noteSessionCatalog: NoteSessionCatalog;
+  setNoteSessionCatalog: (fn: NoteSessionCatalog | ((prev: NoteSessionCatalog) => NoteSessionCatalog)) => void;
   gmEnemies: GmEnemy[];
   setGmEnemies: (fn: GmEnemy[] | ((prev: GmEnemy[]) => GmEnemy[])) => void;
   savedNpcs: SavedNpc[];
@@ -226,7 +230,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [combatTurn, setCombatTurn] = useLocalStorage<number>("rpg_combat_turn", 0);
   const [conditions, setConditions] = useLocalStorage<ActiveCondition[]>("rpg_conditions", []);
   const [inventory, setInventory] = useLocalStorage<InventoryItem[]>("rpg_inventory", DEFAULT_INVENTORY);
-  const [sessionNotes, setSessionNotes] = useLocalStorage<SessionNote[]>("rpg_session_notes", DEFAULT_NOTES);
+  const [sessionNotes, setSessionNotes] = useLocalStorage<SessionNote[]>("rpg_session_notes", DEFAULT_NOTES, {
+    revive: migrateSessionNotesFromUnknown,
+  });
+  const catalogInitial = useMemo(() => readNoteSessionCatalogFromStorage(), []);
+  const [noteSessionCatalog, setNoteSessionCatalog] = useLocalStorage<NoteSessionCatalog>(
+    "rpg_notes_session_catalog",
+    catalogInitial,
+    { revive: reviveNoteSessionCatalog },
+  );
   const [gmEnemies, setGmEnemies] = useLocalStorage<GmEnemy[]>("rpg_gm_enemies", DEFAULT_ENEMIES);
   const [savedNpcs, setSavedNpcs] = useLocalStorage<SavedNpc[]>("rpg_saved_npcs", []);
   const [difficultyPresets, setDifficultyPresets] = useLocalStorage<DifficultyPreset[]>("rpg_difficulty_presets", DEFAULT_DIFFICULTY_PRESETS);
@@ -251,6 +263,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       conditions, setConditions,
       inventory, setInventory,
       sessionNotes, setSessionNotes,
+      noteSessionCatalog, setNoteSessionCatalog,
       gmEnemies, setGmEnemies,
       savedNpcs, setSavedNpcs,
       difficultyPresets, setDifficultyPresets,
