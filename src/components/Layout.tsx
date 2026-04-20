@@ -5,6 +5,7 @@ import {
   Home, Dice5, Target, BookOpen, MoreHorizontal, Sun, Moon,
   Swords, User, BarChart3, Activity, Package, StickyNote, Wrench, Users, Timer, MessageSquare, Store,
   Music,
+  ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -32,6 +33,7 @@ const MORE_LINKS = [
   { path: "/timers", label: "Timery", icon: Timer },
   { path: "/rumors", label: "Plotki", icon: MessageSquare },
   { path: "/ambient", label: "Soundboard", icon: Music },
+  { path: "/quests", label: "Wątki", icon: ClipboardList },
   { path: "/gm-toolbox", label: "Skrzynka MG", icon: Wrench },
 ];
 
@@ -45,10 +47,18 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   const isMoreActive = MORE_LINKS.some((l) => isActive(l.path));
 
+  const isQuestsFullWidth =
+    location.pathname === "/quests" || location.pathname.startsWith("/quests/");
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-md">
-        <div className="flex items-center justify-between px-4 h-12 max-w-4xl mx-auto">
+        <div
+          className={cn(
+            "flex items-center justify-between px-4 h-12 w-full",
+            !isQuestsFullWidth && "max-w-4xl mx-auto",
+          )}
+        >
           <Link to="/" className="flex items-center gap-2">
             <img
               src={faviconSrc}
@@ -75,7 +85,12 @@ export default function Layout({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1 pb-20 max-w-4xl mx-auto w-full px-4 py-4">
+      <main
+        className={cn(
+          "flex-1 pb-20 w-full px-4 py-4",
+          isQuestsFullWidth ? "max-w-none" : "max-w-4xl mx-auto",
+        )}
+      >
         {children}
       </main>
 
