@@ -21,6 +21,7 @@ import NotFound from "@/pages/NotFound";
 import SimulationsPage from "./pages/SimulationsPage";
 import ShopPage from "./pages/ShopPage";
 import AmbientPage from "./pages/AmbientPage";
+import QuestsPage from "./pages/QuestsPage";
 
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="rpg_theme">
@@ -47,6 +48,7 @@ const App = () => (
               <Route path="/timers" element={<TimersPage />} />
               <Route path="/rumors" element={<RumorsPage />} />
               <Route path="/ambient" element={<AmbientPage />} />
+              <Route path="/quests" element={<QuestsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
