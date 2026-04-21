@@ -11,6 +11,8 @@ import {
   reviveNoteSessionCatalog,
   readNoteSessionCatalogFromStorage,
 } from "@/lib/sessionNotesMigration";
+import type { SavedNpc } from "@/components/character-sheet/types";
+import { normalizeSavedNpcArray } from "@/components/character-sheet/migrateLegacyStorage";
 
 initLootStorage();
 
@@ -55,30 +57,7 @@ export interface ActiveCondition {
   severity: "low" | "medium" | "high";
 }
 
-export interface SavedNpc {
-  id: string;
-  name: string;
-  occupation: string;
-  traits: string;
-  description: string;
-  ww: number;
-  us: number;
-  s: number;
-  wt: number;
-  zr: number;
-  int: number;
-  sw: number;
-  ogd: number;
-  a: number;
-  sz: number;
-  mag: number;
-  po: number;
-  pp: number;
-  hp: number;
-  armor: number;
-  weapon: string;
-  notes: string;
-}
+export type { SavedNpc } from "@/components/character-sheet/types";
 
 export interface DifficultyPreset {
   label: string;
@@ -240,7 +219,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     { revive: reviveNoteSessionCatalog },
   );
   const [gmEnemies, setGmEnemies] = useLocalStorage<GmEnemy[]>("rpg_gm_enemies", DEFAULT_ENEMIES);
-  const [savedNpcs, setSavedNpcs] = useLocalStorage<SavedNpc[]>("rpg_saved_npcs", []);
+  const [savedNpcs, setSavedNpcs] = useLocalStorage<SavedNpc[]>("rpg_saved_npcs", [], {
+    revive: (parsed) => normalizeSavedNpcArray(parsed),
+  });
   const [difficultyPresets, setDifficultyPresets] = useLocalStorage<DifficultyPreset[]>("rpg_difficulty_presets", DEFAULT_DIFFICULTY_PRESETS);
   const [lootConfig, setLootConfig] = useLocalStorage<LootConfig>("rpg_loot_config", DEFAULT_LOOT_CONFIG);
   const [lootItems, setLootItems] = useLocalStorage<LootDbItem[]>("rpg_items_db", []);

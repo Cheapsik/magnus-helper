@@ -22,7 +22,7 @@ const NAV_TABS = [
 
 const MORE_LINKS = [
   { path: "/combat", label: "Tracker walki", icon: Swords },
-  
+  { path: "/heroes", label: "Bohaterowie", icon: Users },
   { path: "/conditions", label: "Stany", icon: Activity },
   { path: "/inventory", label: "Ekwipunek i łup", icon: Package },
   { path: "/shop", label: "Sklep", icon: Store },
@@ -50,13 +50,18 @@ export default function Layout({ children }: { children: ReactNode }) {
   const isQuestsFullWidth =
     location.pathname === "/quests" || location.pathname.startsWith("/quests/");
 
+  const isWideSheet = ["/heroes", "/npcs"].some(
+    (p) => location.pathname === p || location.pathname.startsWith(`${p}/`),
+  );
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-md">
         <div
           className={cn(
             "flex items-center justify-between px-4 h-12 w-full",
-            !isQuestsFullWidth && "max-w-4xl mx-auto",
+            !isQuestsFullWidth && isWideSheet && "max-w-none",
+            !isQuestsFullWidth && !isWideSheet && "max-w-4xl mx-auto",
           )}
         >
           <Link to="/" className="flex items-center gap-2">
@@ -88,7 +93,9 @@ export default function Layout({ children }: { children: ReactNode }) {
       <main
         className={cn(
           "flex-1 w-full px-4 pt-4 pb-4",
-          isQuestsFullWidth ? "max-w-none" : "max-w-4xl mx-auto",
+          isQuestsFullWidth && "max-w-none",
+          !isQuestsFullWidth && isWideSheet && "max-w-none",
+          !isQuestsFullWidth && !isWideSheet && "max-w-4xl mx-auto",
         )}
       >
         {children}

@@ -36,6 +36,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { getNpcDisplayName, NpcQuickPreview } from "@/components/character-sheet";
 
 /* ────────────────────────────────────────────── Layout config (types + columns) */
 
@@ -443,7 +444,8 @@ function QuestCard({
 
   const linkedNpcsObjs = quest.linkedNpcs
     .map((id) => savedNpcs.find((n) => n.id === id))
-    .filter(Boolean) as { id: string; name: string }[];
+    .filter(Boolean)
+    .map((n) => ({ id: n!.id, name: getNpcDisplayName(n!) }));
 
   const linkedQuestsObjs = quest.linkedQuests
     .map((id) => allQuests.find((q) => q.id === id))
@@ -451,7 +453,9 @@ function QuestCard({
 
   const npcOptions = savedNpcs
     .filter((n) => !quest.linkedNpcs.includes(n.id))
-    .filter((n) => !npcQuery || n.name.toLowerCase().includes(npcQuery.toLowerCase()));
+    .filter(
+      (n) => !npcQuery || getNpcDisplayName(n).toLowerCase().includes(npcQuery.toLowerCase()),
+    );
 
   const questOptions = allQuests
     .filter((q) => q.id !== quest.id && !quest.linkedQuests.includes(q.id))
@@ -637,7 +641,7 @@ function QuestCard({
                         setShowNpcPicker(false);
                       }}
                     >
-                      👤 {npc.name}
+                      👤 {getNpcDisplayName(npc)}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -1476,43 +1480,10 @@ export default function QuestsPage() {
       <Sheet open={!!openNpcId} onOpenChange={(v) => !v && setOpenNpcId(null)}>
         <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
           <SheetHeader>
-            <SheetTitle>{openNpc?.name ?? "NPC"}</SheetTitle>
+            <SheetTitle>{openNpc ? getNpcDisplayName(openNpc) : "NPC"}</SheetTitle>
           </SheetHeader>
           {openNpc ? (
-            <div className="mt-4 space-y-3 text-sm">
-              {openNpc.occupation && (
-                <div>
-                  <div className="text-xs text-muted-foreground">Profesja</div>
-                  <div className="font-medium">{openNpc.occupation}</div>
-                </div>
-              )}
-              {openNpc.traits && (
-                <div>
-                  <div className="text-xs text-muted-foreground">Cechy</div>
-                  <div>{openNpc.traits}</div>
-                </div>
-              )}
-              {openNpc.description && (
-                <div>
-                  <div className="text-xs text-muted-foreground">Opis</div>
-                  <div className="whitespace-pre-wrap">{openNpc.description}</div>
-                </div>
-              )}
-              <div className="grid grid-cols-4 gap-1.5 pt-2">
-                {(["ww", "us", "s", "wt", "zr", "int", "sw", "ogd"] as const).map((k) => (
-                  <div key={k} className="rounded bg-muted p-1.5 text-center">
-                    <div className="text-[10px] uppercase text-muted-foreground">{k}</div>
-                    <div className="text-sm font-bold">{String((openNpc as unknown as Record<string, unknown>)[k] ?? "")}</div>
-                  </div>
-                ))}
-              </div>
-              {openNpc.notes && (
-                <div>
-                  <div className="text-xs text-muted-foreground">Notatki</div>
-                  <div className="whitespace-pre-wrap text-xs">{openNpc.notes}</div>
-                </div>
-              )}
-            </div>
+            <NpcQuickPreview npc={openNpc} />
           ) : (
             <div className="mt-4 text-sm text-muted-foreground">NPC nie znaleziony</div>
           )}

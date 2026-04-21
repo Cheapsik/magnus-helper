@@ -29,6 +29,8 @@ function migratePair(from: string, to: string) {
   }
 }
 
+import { migrateSavedNpcsStorage } from "@/components/character-sheet/migrateLegacyStorage";
+
 /** Przenosi dane ze starych kluczy do `rpg_*` oraz motyw z `theme` → `rpg_theme`. */
 export function migrateRpgStorageKeys() {
   if (typeof window === "undefined" || !window.localStorage) return;
@@ -38,4 +40,5 @@ export function migrateRpgStorageKeys() {
   }
 
   migratePair("theme", "rpg_theme");
+  migrateSavedNpcsStorage();
 }
