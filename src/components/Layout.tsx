@@ -22,7 +22,6 @@ const NAV_TABS = [
 
 const MORE_LINKS = [
   { path: "/combat", label: "Tracker walki", icon: Swords },
-  { path: "/heroes", label: "Bohaterowie", icon: Users },
   { path: "/conditions", label: "Stany", icon: Activity },
   { path: "/inventory", label: "Ekwipunek i łup", icon: Package },
   { path: "/shop", label: "Sklep", icon: Store },
@@ -50,9 +49,8 @@ export default function Layout({ children }: { children: ReactNode }) {
   const isQuestsFullWidth =
     location.pathname === "/quests" || location.pathname.startsWith("/quests/");
 
-  const isWideSheet = ["/heroes", "/npcs"].some(
-    (p) => location.pathname === p || location.pathname.startsWith(`${p}/`),
-  );
+  const isWideSheet =
+    location.pathname === "/npcs" || location.pathname.startsWith("/npcs/");
 
   return (
     <div className="min-h-screen flex flex-col">

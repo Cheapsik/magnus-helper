@@ -22,7 +22,6 @@ import SimulationsPage from "./pages/SimulationsPage";
 import ShopPage from "./pages/ShopPage";
 import AmbientPage from "./pages/AmbientPage";
 import QuestsPage from "./pages/QuestsPage";
-import HeroesPage from "./pages/HeroesPage";
 
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="rpg_theme">
@@ -46,7 +45,7 @@ const App = () => (
               <Route path="/notes" element={<SessionNotesPage />} />
               <Route path="/gm-toolbox" element={<GmToolboxPage />} />
               <Route path="/npcs" element={<NpcManagerPage />} />
-              <Route path="/heroes" element={<HeroesPage />} />
+              <Route path="/heroes" element={<Navigate to="/npcs" replace />} />
               <Route path="/timers" element={<TimersPage />} />
               <Route path="/rumors" element={<RumorsPage />} />
               <Route path="/ambient" element={<AmbientPage />} />

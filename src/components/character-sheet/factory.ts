@@ -1,5 +1,5 @@
 import { DEFAULT_BASIC_SKILLS } from "./constants";
-import type { CharacterSheetCore, Hero, KampaniaBlock, SavedNpc, StatRow, StatRow2 } from "./types";
+import type { CharacterSheetCore, SavedNpc, StatRow, StatRow2 } from "./types";
 
 export const newId = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -26,13 +26,6 @@ export const emptyStat2 = (): StatRow2 => ({
   mag: "",
   po: "",
   pp: "",
-});
-
-export const defaultKampania = (): KampaniaBlock => ({
-  gracz: "",
-  kampania: "",
-  mistrzGry: "",
-  rokKampanii: "",
 });
 
 export function createCharacterSheetCore(): CharacterSheetCore {
@@ -77,14 +70,6 @@ export function createCharacterSheetCore(): CharacterSheetCore {
     zdolnosci: [],
     pieniadze: { zk: "", s: "", p: "" },
     wyposazenie: [],
-  };
-}
-
-export function createEmptyHero(): Hero {
-  return {
-    id: newId(),
-    ...createCharacterSheetCore(),
-    kampania: defaultKampania(),
   };
 }
 
