@@ -238,7 +238,7 @@ function NpcSheet({
         </Button>
       </div>
 
-      <CharacterSheet variant="npc" value={draft} onChange={setDraft} />
+      <CharacterSheet value={draft} onChange={setDraft} />
     </div>
   );
 }

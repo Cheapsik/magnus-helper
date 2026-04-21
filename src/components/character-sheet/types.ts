@@ -111,19 +111,6 @@ export interface CharacterSheetCore {
   wyposazenie: Wyposazenie[];
 }
 
-export type KampaniaBlock = {
-  gracz: string;
-  kampania: string;
-  mistrzGry: string;
-  rokKampanii: string;
-};
-
-/** Bohater: karta + id + blok kampanii. */
-export type Hero = CharacterSheetCore & {
-  id: string;
-  kampania?: KampaniaBlock;
-};
-
 /** NPC: karta + id + pola poza oficjalnym PDF. */
 export type SavedNpc = CharacterSheetCore & {
   id: string;

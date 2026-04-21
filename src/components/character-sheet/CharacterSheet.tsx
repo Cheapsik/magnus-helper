@@ -1,6 +1,6 @@
-import type { Bron, CharacterSheetCore, Hero, PancerzProsty, PancerzZlozony, SavedNpc, Zdolnosc, Wyposazenie } from "./types";
+import type { Bron, CharacterSheetCore, PancerzProsty, PancerzZlozony, SavedNpc, Zdolnosc, Wyposazenie } from "./types";
 import { STAT_MAIN, STAT_SECONDARY } from "./constants";
-import { defaultKampania, newId } from "./factory";
+import { newId } from "./factory";
 import { Section } from "./sub/Section";
 import { PaperField } from "./sub/PaperField";
 import { StatTable } from "./sub/StatTable";
@@ -9,52 +9,35 @@ import { SkillsTable } from "./sub/SkillsTable";
 import { BodyArmor } from "./sub/BodyArmor";
 import { ZestawienieAkcji } from "./sub/ZestawienieAkcji";
 
-export type CharacterSheetProps =
-  | { variant: "hero"; value: Hero; onChange: (next: Hero) => void }
-  | { variant: "npc"; value: SavedNpc; onChange: (next: SavedNpc) => void };
+export type CharacterSheetProps = {
+  value: SavedNpc;
+  onChange: (next: SavedNpc) => void;
+};
 
-export function CharacterSheet(props: CharacterSheetProps) {
-  const { variant, value, onChange } = props;
-
+export function CharacterSheet({ value, onChange }: CharacterSheetProps) {
   const update = <K extends keyof CharacterSheetCore>(key: K, val: CharacterSheetCore[K]) => {
-    onChange({ ...value, [key]: val } as never);
+    onChange({ ...value, [key]: val });
   };
 
-  const km = variant === "hero" ? { ...defaultKampania(), ...(value as Hero).kampania } : null;
-  const setKampania = (patch: Partial<ReturnType<typeof defaultKampania>>) => {
-    if (variant !== "hero" || !km) return;
-    const h = value as Hero;
-    onChange({ ...h, kampania: { ...km, ...patch } } as never);
+  const npcExtras = {
+    cechyCharakteru: value.cechyCharakteru,
+    opisOgolny: value.opisOgolny,
+    notatkiMG: value.notatkiMG,
+    setCechy: (v: string) => onChange({ ...value, cechyCharakteru: v }),
+    setOpis: (v: string) => onChange({ ...value, opisOgolny: v }),
+    setNotatki: (v: string) => onChange({ ...value, notatkiMG: v }),
   };
-
-  const npcExtras =
-    variant === "npc"
-      ? {
-          cechyCharakteru: (value as SavedNpc).cechyCharakteru,
-          opisOgolny: (value as SavedNpc).opisOgolny,
-          notatkiMG: (value as SavedNpc).notatkiMG,
-          setCechy: (v: string) => onChange({ ...(value as SavedNpc), cechyCharakteru: v } as never),
-          setOpis: (v: string) => onChange({ ...(value as SavedNpc), opisOgolny: v } as never),
-          setNotatki: (v: string) => onChange({ ...(value as SavedNpc), notatkiMG: v } as never),
-        }
-      : null;
 
   return (
     <div className="wfrp-sheet">
       <div className="wfrp-page wfrp-page-1">
         <div className="wfrp-p1-grid">
           <div className="wfrp-p1-left">
-            {variant === "npc" && npcExtras && (
-              <Section title="NPC — MG" className="wfrp-mt-section">
-                <PaperField
-                  label="Cechy charakteru"
-                  value={npcExtras.cechyCharakteru}
-                  onChange={npcExtras.setCechy}
-                />
-                <PaperField label="Opis / wygląd" value={npcExtras.opisOgolny} onChange={npcExtras.setOpis} />
-                <PaperField label="Notatki MG" value={npcExtras.notatkiMG} onChange={npcExtras.setNotatki} />
-              </Section>
-            )}
+            <Section title="NPC — MG" className="wfrp-mt-section">
+              <PaperField label="Cechy charakteru" value={npcExtras.cechyCharakteru} onChange={npcExtras.setCechy} />
+              <PaperField label="Opis / wygląd" value={npcExtras.opisOgolny} onChange={npcExtras.setOpis} />
+              <PaperField label="Notatki MG" value={npcExtras.notatkiMG} onChange={npcExtras.setNotatki} />
+            </Section>
             <Section title="BOHATER">
               <PaperField
                 label="Imię"
@@ -137,17 +120,6 @@ export function CharacterSheet(props: CharacterSheetProps) {
 
             <div className="wfrp-xp-ruch-stack">
               <div className="wfrp-xp-ruch-armor">
-                {variant === "hero" && km && (
-                  <div className="paper-subbox wfrp-gracz-span">
-                    <h4 className="paper-subhead">Gracz / kampania</h4>
-                    <div className="paper-field-grid wfrp-gracz-grid">
-                      <PaperField label="Imię gracza" value={km.gracz} onChange={(v) => setKampania({ gracz: v })} />
-                      <PaperField label="Kampania" value={km.kampania} onChange={(v) => setKampania({ kampania: v })} />
-                      <PaperField label="Mistrz gry" value={km.mistrzGry} onChange={(v) => setKampania({ mistrzGry: v })} />
-                      <PaperField label="Rok kampanii" value={km.rokKampanii} onChange={(v) => setKampania({ rokKampanii: v })} />
-                    </div>
-                  </div>
-                )}
                 <div className="paper-subbox wfrp-xp-box">
                   <h4 className="paper-subhead">Punkty doświadczenia</h4>
                   <PaperField label="Obecne" value={value.xp.obecne} onChange={(v) => update("xp", { ...value.xp, obecne: v })} />

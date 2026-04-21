@@ -1,8 +1,6 @@
 export type {
   Bron,
   CharacterSheetCore,
-  Hero,
-  KampaniaBlock,
   PancerzProsty,
   PancerzZlozony,
   SavedNpc,
@@ -15,9 +13,7 @@ export type {
 export { AKCJE_GRUPY, DEFAULT_BASIC_SKILLS, STAT_MAIN, STAT_SECONDARY } from "./constants";
 export {
   createCharacterSheetCore,
-  createEmptyHero,
   createEmptyNpc,
-  defaultKampania,
   emptyStat,
   emptyStat2,
   newId,
