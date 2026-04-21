@@ -17,7 +17,8 @@ import {
   CalendarPlus,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
-import type { SavedNpc, SessionNote, NamedNoteSession } from "@/context/AppContext";
+import type { SessionNote, NamedNoteSession } from "@/context/AppContext";
+import { getNpcDisplayName, NpcQuickPreview } from "@/components/character-sheet";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import {
   categoryLabel,
@@ -173,45 +174,6 @@ function SessionEditRow({
         </p>
       )}
     </li>
-  );
-}
-
-function NpcPreviewBody({ npc }: { npc: SavedNpc }) {
-  return (
-    <div className="mt-4 space-y-3 text-sm">
-      {npc.occupation && (
-        <div>
-          <div className="text-xs text-muted-foreground">Profesja</div>
-          <div className="font-medium">{npc.occupation}</div>
-        </div>
-      )}
-      {npc.traits && (
-        <div>
-          <div className="text-xs text-muted-foreground">Cechy</div>
-          <div>{npc.traits}</div>
-        </div>
-      )}
-      {npc.description && (
-        <div>
-          <div className="text-xs text-muted-foreground">Opis</div>
-          <div className="whitespace-pre-wrap">{npc.description}</div>
-        </div>
-      )}
-      <div className="grid grid-cols-4 gap-1.5 pt-2">
-        {(["ww", "us", "s", "wt", "zr", "int", "sw", "ogd"] as const).map((k) => (
-          <div key={k} className="rounded bg-muted p-1.5 text-center">
-            <div className="text-[10px] uppercase text-muted-foreground">{k}</div>
-            <div className="text-sm font-bold">{String((npc as unknown as Record<string, unknown>)[k] ?? "")}</div>
-          </div>
-        ))}
-      </div>
-      {npc.notes && (
-        <div>
-          <div className="text-xs text-muted-foreground">Notatki</div>
-          <div className="whitespace-pre-wrap text-xs">{npc.notes}</div>
-        </div>
-      )}
-    </div>
   );
 }
 
@@ -489,7 +451,9 @@ export default function SessionNotesPage() {
   const filteredNpcsForPicker = useMemo(() => {
     const ids = editorDraft.linkedNpcIds;
     const q = npcQuery.trim().toLowerCase();
-    return savedNpcs.filter((n) => !ids.includes(n.id) && (!q || n.name.toLowerCase().includes(q)));
+    return savedNpcs.filter(
+      (n) => !ids.includes(n.id) && (!q || getNpcDisplayName(n).toLowerCase().includes(q)),
+    );
   }, [savedNpcs, npcQuery, editorDraft.linkedNpcIds]);
 
   const lastUsedTemplates = useMemo(() => {
@@ -647,7 +611,7 @@ export default function SessionNotesPage() {
                             }
                           }}
                         >
-                          {npc?.name ?? "NPC"}
+                          {npc ? getNpcDisplayName(npc) : "NPC"}
                         </span>
                       );
                     })}
@@ -788,7 +752,7 @@ export default function SessionNotesPage() {
                     return (
                       <span key={id} className="inline-flex items-center gap-0.5 rounded-full border bg-muted/40 px-2 py-0.5 text-[11px]">
                         <button type="button" className="truncate max-w-[120px]" onClick={() => setOpenNpcId(id)}>
-                          {npc?.name ?? id.slice(0, 6)}
+                          {npc ? getNpcDisplayName(npc) : id.slice(0, 6)}
                         </button>
                         <button
                           type="button"
@@ -1086,7 +1050,7 @@ export default function SessionNotesPage() {
                 {filteredNpcsForPicker.map((npc) => (
                   <li key={npc.id}>
                     <Button type="button" variant="ghost" className="h-9 w-full justify-start px-2 text-sm font-normal" onClick={() => addNpcFromPicker(npc.id)}>
-                      {npc.name}
+                      {getNpcDisplayName(npc)}
                     </Button>
                   </li>
                 ))}
@@ -1099,11 +1063,11 @@ export default function SessionNotesPage() {
       <Sheet open={!!openNpcId} onOpenChange={(v) => !v && setOpenNpcId(null)}>
         <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
           <SheetHeader>
-            <SheetTitle>{openNpc?.name ?? "NPC"}</SheetTitle>
+            <SheetTitle>{openNpc ? getNpcDisplayName(openNpc) : "NPC"}</SheetTitle>
           </SheetHeader>
           {openNpc ? (
             <>
-              <NpcPreviewBody npc={openNpc} />
+              <NpcQuickPreview npc={openNpc} />
               <Button type="button" variant="outline" size="sm" className="mt-4 w-full h-9 text-xs" asChild>
                 <Link to="/npcs">Otwórz w NPC</Link>
               </Button>
