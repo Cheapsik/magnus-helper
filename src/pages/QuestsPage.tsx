@@ -37,6 +37,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { getNpcDisplayName, NpcQuickPreview } from "@/components/character-sheet";
+import { MentionTextarea } from "@/components/mention/MentionTextarea";
 
 /* ────────────────────────────────────────────── Layout config (types + columns) */
 
@@ -281,37 +282,6 @@ function useFinePointer() {
     return () => mq.removeEventListener("change", onChange);
   }, []);
   return fine;
-}
-
-/* ────────────────────────────────────────────── Auto-resize textarea */
-
-function AutoTextarea({
-  value,
-  onChange,
-  placeholder,
-  className,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-  className?: string;
-}) {
-  const ref = useRef<HTMLTextAreaElement>(null);
-  useEffect(() => {
-    const ta = ref.current;
-    if (!ta) return;
-    ta.style.height = "auto";
-    ta.style.height = ta.scrollHeight + "px";
-  }, [value]);
-  return (
-    <Textarea
-      ref={ref}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className={cn("resize-none overflow-hidden min-h-[100px]", className)}
-    />
-  );
 }
 
 /* ────────────────────────────────────────────── Emoji popover */
@@ -563,7 +533,7 @@ function QuestCard({
 
         {!bodyCollapsed && (
           <>
-            <AutoTextarea
+            <MentionTextarea
               value={notesDraft}
               onChange={handleNotesChange}
               placeholder="Co wiadomo? Co jest niejasne? Co dalej?"
