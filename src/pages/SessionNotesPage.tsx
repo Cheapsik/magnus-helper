@@ -67,6 +67,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { MentionTextarea } from "@/components/mention/MentionTextarea";
 
 const NOTE_CATEGORY_ICONS: Record<string, typeof StickyNote> = {
   general: StickyNote,
@@ -678,14 +679,11 @@ export default function SessionNotesPage() {
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">Treść *</label>
-              <Textarea
+              <MentionTextarea
                 value={editorDraft.text}
-                onChange={(e) => setEditorDraft((d) => ({ ...d, text: e.target.value }))}
+                onChange={(next) => setEditorDraft((d) => ({ ...d, text: next }))}
                 className="min-h-[100px] resize-y text-sm"
                 placeholder="Treść…"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && e.metaKey) saveFromEditor();
-                }}
               />
             </div>
 

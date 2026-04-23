@@ -5,7 +5,6 @@ import { CHEAT_SHEETS, CATEGORIES } from "@/data/cheatsheets";
 import type { CodexEntry } from "@/context/AppContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -14,6 +13,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
+import { MentionTextarea } from "@/components/mention/MentionTextarea";
 
 export default function CheatSheetsPage() {
   const { pinnedSheets, togglePinSheet, codexEntries, setCodexEntries } = useApp();
@@ -113,7 +113,7 @@ export default function CheatSheetsPage() {
             <h3 className="text-xs font-semibold">Nowy wpis</h3>
             <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Tytuł" className="h-8 text-xs" />
             <Input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="Kategoria" className="h-8 text-xs" />
-            <Textarea value={newContent} onChange={(e) => setNewContent(e.target.value)} placeholder="Treść…" rows={4} className="text-xs" />
+            <MentionTextarea value={newContent} onChange={setNewContent} placeholder="Treść…" className="min-h-[100px] text-xs" />
             <div className="flex gap-1.5">
               <Button size="sm" className="h-7 text-xs flex-1 gap-1" onClick={addEntry}><Check className="h-3 w-3" />Dodaj</Button>
               <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setAdding(false)}>Anuluj</Button>
@@ -195,7 +195,7 @@ function SheetAccordion({
               <div className="py-3 space-y-2">
                 <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="h-8 text-xs" placeholder="Tytuł" />
                 <Input value={editCategory} onChange={(e) => setEditCategory(e.target.value)} className="h-8 text-xs" placeholder="Kategoria" />
-                <Textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} rows={5} className="text-xs" placeholder="Treść…" />
+                <MentionTextarea value={editContent} onChange={setEditContent} className="min-h-[120px] text-xs" placeholder="Treść…" />
                 <div className="flex gap-1.5">
                   <Button size="sm" className="h-7 text-xs flex-1 gap-1" onClick={onSaveEdit}><Check className="h-3 w-3" />Zapisz</Button>
                   <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={onCancelEdit}>Anuluj</Button>
