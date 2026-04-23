@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
 import {
@@ -6,10 +6,13 @@ import {
   Swords, User, BarChart3, Activity, Package, StickyNote, Wrench, Users, Timer, MessageSquare, Store,
   Music,
   ClipboardList,
+  Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import RpgDataBackupControls from "@/components/RpgDataBackupControls";
+import { useCommandPalette } from "@/context/CommandPaletteContext";
+import { useDrawer } from "@/context/DrawerContext";
 
 const faviconSrc = `${import.meta.env.BASE_URL}favicon.png`;
 
@@ -39,7 +42,29 @@ const MORE_LINKS = [
 export default function Layout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const { theme, setTheme } = useTheme();
+  const { open: openCommandPalette, isOpen: isCommandPaletteOpen } = useCommandPalette();
+  const { isOpen: isDrawerOpen } = useDrawer();
   const [moreOpen, setMoreOpen] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window === "undefined" ? 1440 : window.innerWidth,
+  );
+
+  useEffect(() => {
+    const onResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        openCommandPalette();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [openCommandPalette]);
 
   const isActive = (path: string) =>
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
@@ -51,6 +76,9 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   const isWideSheet =
     location.pathname === "/npcs" || location.pathname.startsWith("/npcs/");
+
+  const isDesktop = windowWidth >= 768;
+  const shouldPushLayout = isDrawerOpen && windowWidth >= 1200;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -75,6 +103,21 @@ export default function Layout({ children }: { children: ReactNode }) {
             <span className="font-semibold text-sm tracking-wide text-foreground">Magnus Helper</span>
           </Link>
           <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
+            {isDesktop && (
+              <button
+                type="button"
+                onClick={openCommandPalette}
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs text-muted-foreground transition-colors",
+                  "hover:bg-accent hover:text-foreground",
+                )}
+                aria-label="Szukaj"
+              >
+                <Search className="h-3.5 w-3.5" />
+                <span>Szukaj...</span>
+                <span className="hidden md:inline">⌘K</span>
+              </button>
+            )}
             <RpgDataBackupControls />
             <button
               type="button"
@@ -91,6 +134,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       <main
         className={cn(
           "flex-1 w-full px-4 pt-4 pb-4",
+          shouldPushLayout && "pr-[440px] transition-[padding] duration-200 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none",
           isQuestsFullWidth && "max-w-none",
           !isQuestsFullWidth && isWideSheet && "max-w-none",
           !isQuestsFullWidth && !isWideSheet && "max-w-4xl mx-auto",
@@ -122,6 +166,19 @@ export default function Layout({ children }: { children: ReactNode }) {
               <span>{tab.label}</span>
             </Link>
           ))}
+
+          <button
+            type="button"
+            onClick={openCommandPalette}
+            className={cn(
+              "flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors min-w-[56px]",
+              isCommandPaletteOpen ? "text-primary" : "text-muted-foreground hover:text-foreground",
+            )}
+            aria-label="Szukaj"
+          >
+            <Search className="h-5 w-5" />
+            <span>Szukaj</span>
+          </button>
 
           <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
             <SheetTrigger asChild>
