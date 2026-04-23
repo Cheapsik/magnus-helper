@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeftRight, ChevronLeft, ExternalLink, X } from "lucide-react";
 import { Drawer, DrawerContent, DrawerOverlay, DrawerPortal } from "@/components/ui/drawer";
 import { useDrawer } from "@/context/DrawerContext";
 import { cn } from "@/lib/utils";
+import { DrawerContent as DrawerContentRenderer } from "@/components/global-drawer/DrawerContent";
 
 type DrawerMode = "desktopPush" | "tabletOverlay" | "mobileSheet";
 
@@ -103,7 +104,15 @@ function DrawerHeaderBar() {
   );
 }
 
-function DrawerCard({ indexFromTop, isDesktopPush }: { indexFromTop: number; isDesktopPush: boolean }) {
+function DrawerCard({
+  indexFromTop,
+  isDesktopPush,
+  content,
+}: {
+  indexFromTop: number;
+  isDesktopPush: boolean;
+  content: ReactNode;
+}) {
   const layer = Math.max(0, 2 - indexFromTop);
   const offsetPx = layer * 20;
   const scale = 1 - layer * 0.02;
@@ -121,9 +130,7 @@ function DrawerCard({ indexFromTop, isDesktopPush }: { indexFromTop: number; isD
     >
       <DrawerHeaderBar />
       <div className="h-[calc(100%-57px)] overflow-y-auto p-4">
-        <div className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
-          Kontener Drawera jest gotowy. Zawartosc szczegolowa zostanie podpieta w kolejnym kroku.
-        </div>
+        {content}
       </div>
     </section>
   );
@@ -165,7 +172,12 @@ export function GlobalDrawer() {
           <DrawerContent className="h-[85dvh] rounded-t-2xl border-0 bg-background p-0">
             <div className="relative h-full overflow-hidden">
               {layers.map((_, index) => (
-                <DrawerCard key={`${index}-${layers[index]?.id}`} indexFromTop={index} isDesktopPush={false} />
+                <DrawerCard
+                  key={`${index}-${layers[index]?.id}`}
+                  indexFromTop={index}
+                  isDesktopPush={false}
+                  content={<DrawerContentRenderer item={layers[index]} />}
+                />
               ))}
             </div>
           </DrawerContent>
@@ -193,7 +205,12 @@ export function GlobalDrawer() {
       >
         <div className="relative h-full overflow-hidden">
           {layers.map((_, index) => (
-            <DrawerCard key={`${index}-${layers[index]?.id}`} indexFromTop={index} isDesktopPush={isDesktopPush} />
+            <DrawerCard
+              key={`${index}-${layers[index]?.id}`}
+              indexFromTop={index}
+              isDesktopPush={isDesktopPush}
+              content={<DrawerContentRenderer item={layers[index]} />}
+            />
           ))}
         </div>
       </aside>
