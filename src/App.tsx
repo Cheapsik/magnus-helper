@@ -22,38 +22,48 @@ import SimulationsPage from "./pages/SimulationsPage";
 import ShopPage from "./pages/ShopPage";
 import AmbientPage from "./pages/AmbientPage";
 import QuestsPage from "./pages/QuestsPage";
+import { DrawerProvider } from "@/context/DrawerContext";
+import { CommandPaletteProvider } from "@/context/CommandPaletteContext";
+import { GlobalDrawer } from "@/components/global-drawer/GlobalDrawer";
+import { CommandPalette } from "@/components/command-palette/CommandPalette";
 
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="rpg_theme">
     <TooltipProvider>
       <Toaster />
       <AppProvider>
-        <HashRouter>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/dice" element={<DicePage />} />
-              <Route path="/tests" element={<TestsPage />} />
-              <Route path="/codex" element={<CheatSheetsPage />} />
-              <Route path="/character" element={<CharacterPage />} />
-              <Route path="/combat" element={<CombatPage />} />
-              <Route path="/simulations" element={<SimulationsPage />} />
-              <Route path="/conditions" element={<ConditionsPage />} />
-              <Route path="/inventory" element={<LootGeneratorPage />} />
-              <Route path="/shop" element={<ShopPage />} />
-              <Route path="/loot" element={<Navigate to="/inventory" replace />} />
-              <Route path="/notes" element={<SessionNotesPage />} />
-              <Route path="/gm-toolbox" element={<GmToolboxPage />} />
-              <Route path="/npcs" element={<NpcManagerPage />} />
-              <Route path="/heroes" element={<Navigate to="/npcs" replace />} />
-              <Route path="/timers" element={<TimersPage />} />
-              <Route path="/rumors" element={<RumorsPage />} />
-              <Route path="/ambient" element={<AmbientPage />} />
-              <Route path="/quests" element={<QuestsPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Layout>
-        </HashRouter>
+        <DrawerProvider>
+          <CommandPaletteProvider>
+            <HashRouter>
+              <Layout>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/dice" element={<DicePage />} />
+                  <Route path="/tests" element={<TestsPage />} />
+                  <Route path="/codex" element={<CheatSheetsPage />} />
+                  <Route path="/character" element={<CharacterPage />} />
+                  <Route path="/combat" element={<CombatPage />} />
+                  <Route path="/simulations" element={<SimulationsPage />} />
+                  <Route path="/conditions" element={<ConditionsPage />} />
+                  <Route path="/inventory" element={<LootGeneratorPage />} />
+                  <Route path="/shop" element={<ShopPage />} />
+                  <Route path="/loot" element={<Navigate to="/inventory" replace />} />
+                  <Route path="/notes" element={<SessionNotesPage />} />
+                  <Route path="/gm-toolbox" element={<GmToolboxPage />} />
+                  <Route path="/npcs" element={<NpcManagerPage />} />
+                  <Route path="/heroes" element={<Navigate to="/npcs" replace />} />
+                  <Route path="/timers" element={<TimersPage />} />
+                  <Route path="/rumors" element={<RumorsPage />} />
+                  <Route path="/ambient" element={<AmbientPage />} />
+                  <Route path="/quests" element={<QuestsPage />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Layout>
+              <GlobalDrawer />
+              <CommandPalette />
+            </HashRouter>
+          </CommandPaletteProvider>
+        </DrawerProvider>
       </AppProvider>
     </TooltipProvider>
   </ThemeProvider>
