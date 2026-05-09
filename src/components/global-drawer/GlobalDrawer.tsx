@@ -198,7 +198,7 @@ export function GlobalDrawer() {
       ) : null}
       <aside
         className={cn(
-          "fixed right-0 top-0 z-[100] h-screen overflow-hidden border-l bg-background shadow-2xl transition-transform duration-[220ms] [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none",
+          "fixed right-0 top-0 z-[100] h-screen overflow-hidden border-l bg-background shadow-2xl transition-transform [transition-duration:220ms] [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none",
           widthClass,
           isOpen ? "translate-x-0" : "translate-x-full",
         )}

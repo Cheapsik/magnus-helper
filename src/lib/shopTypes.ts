@@ -140,7 +140,7 @@ export function normalizeShopConfig(raw: unknown, ranks: LootRank[]): ShopConfig
     };
   }
 
-  let rankPriceRanges: Record<string, { min: number; max: number }> = { ...defaultRanges };
+  const rankPriceRanges: Record<string, { min: number; max: number }> = { ...defaultRanges };
   if (o.rankPriceRanges && typeof o.rankPriceRanges === "object") {
     const rr = o.rankPriceRanges as Record<string, unknown>;
     for (const r of ranks) {

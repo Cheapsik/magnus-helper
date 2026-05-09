@@ -15,6 +15,14 @@ import {
 import { cn } from "@/lib/utils";
 import { MentionTextarea } from "@/components/mention/MentionTextarea";
 
+type CheatSheetView = {
+  id: string;
+  title: string;
+  category: string;
+  content: string;
+  isCustom?: boolean;
+};
+
 export default function CheatSheetsPage() {
   const { pinnedSheets, togglePinSheet, codexEntries, setCodexEntries } = useApp();
   const [search, setSearch] = useState("");
@@ -182,7 +190,7 @@ function SheetAccordion({
   editingId: string | null;
   editTitle: string; editContent: string; editCategory: string;
   setEditTitle: (v: string) => void; setEditContent: (v: string) => void; setEditCategory: (v: string) => void;
-  onStartEdit: (sheet: any) => void; onSaveEdit: () => void; onCancelEdit: () => void;
+  onStartEdit: (sheet: CheatSheetView) => void; onSaveEdit: () => void; onCancelEdit: () => void;
   deleteConfirm: string | null; setDeleteConfirm: (id: string | null) => void; onDelete: (id: string) => void;
 }) {
   return (

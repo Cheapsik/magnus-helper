@@ -1,10 +1,16 @@
-/** Zbiera surowe wartości localStorage dla wszystkich kluczy `rpg_*`. */
+const EXTRA_BACKUP_KEYS = new Set(["nexus_scenes", "nexus_last_roll"]);
+
+function shouldBackupStorageKey(key: string) {
+  return key.startsWith("rpg_") || EXTRA_BACKUP_KEYS.has(key);
+}
+
+/** Zbiera surowe wartości localStorage dla wszystkich obsługiwanych kluczy aplikacji. */
 export function collectRpgStorageSnapshot(): Record<string, string> {
   const out: Record<string, string> = {};
   try {
     for (let i = 0; i < window.localStorage.length; i++) {
       const key = window.localStorage.key(i);
-      if (!key || !key.startsWith("rpg_")) continue;
+      if (!key || !shouldBackupStorageKey(key)) continue;
       const value = window.localStorage.getItem(key);
       if (value !== null) out[key] = value;
     }
@@ -46,14 +52,14 @@ function valueToStorageString(raw: unknown): string | null {
   return null;
 }
 
-/** Zapisuje wpisy z kopii do localStorage (tylko klucze `rpg_*`). */
+/** Zapisuje wpisy z kopii do localStorage (tylko znane klucze aplikacji). */
 export function applyRpgStorageImport(parsed: unknown): { ok: true; keysWritten: number } | { ok: false; error: string } {
   if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
     return { ok: false, error: "Plik musi zawierać obiekt JSON." };
   }
   let keysWritten = 0;
   for (const [key, rawVal] of Object.entries(parsed as Record<string, unknown>)) {
-    if (!key.startsWith("rpg_")) continue;
+    if (!shouldBackupStorageKey(key)) continue;
     const v = valueToStorageString(rawVal);
     if (v === null) continue;
     try {
@@ -64,7 +70,7 @@ export function applyRpgStorageImport(parsed: unknown): { ok: true; keysWritten:
     }
   }
   if (keysWritten === 0) {
-    return { ok: false, error: "Brak poprawnych kluczy rpg_* w pliku." };
+    return { ok: false, error: "Brak poprawnych kluczy aplikacji w pliku." };
   }
   return { ok: true, keysWritten };
 }
