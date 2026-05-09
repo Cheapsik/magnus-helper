@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
-import { Command } from "cmdk";
-import { Search } from "lucide-react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { useNavigate } from "react-router-dom";
 import { useCommandPalette } from "@/context/CommandPaletteContext";
 import { useDrawer } from "@/context/DrawerContext";
-import { useIsMobile } from "@/hooks/use-mobile";
+import type { DrawerEntityType } from "@/context/DrawerContext";
 import { buildSearchIndex, searchIndex, type SearchResultItem } from "@/components/command-palette/searchUtils";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command";
+import { Dialog, DialogOverlay, DialogPortal } from "@/components/ui/dialog";
+import { CommandResultPreviewModal } from "@/components/command-palette/CommandResultPreviewModal";
+import type { EntityPreviewType } from "@/components/global-drawer/DrawerContent";
 
 const QUICK_ACTIONS = [
   { id: "new-npc", icon: "⚔️", label: "Nowy NPC", drawerType: "quickAction" as const },
@@ -29,10 +32,10 @@ function ResultRow({
   const highlightIndex = lowerQuery ? lowerTitle.indexOf(lowerQuery) : -1;
 
   return (
-    <Command.Item
+    <CommandItem
       value={`${item.type}-${item.id}-${item.title}`}
       onSelect={onSelect}
-      className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm aria-selected:bg-accent"
+      className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm"
     >
       <span>{item.icon}</span>
       <div className="min-w-0 flex-1">
@@ -52,158 +55,163 @@ function ResultRow({
       <span className="rounded bg-secondary px-2 py-0.5 text-[10px] uppercase tracking-wide text-secondary-foreground">
         {item.typeLabel}
       </span>
-    </Command.Item>
+    </CommandItem>
   );
 }
 
 export function CommandPalette() {
   const { isOpen, close, recentItems, addToRecent } = useCommandPalette();
   const { openDrawer } = useDrawer();
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [index, setIndex] = useState<SearchResultItem[]>([]);
-  const isMobile = useIsMobile();
-
-  useEffect(() => {
-    if (!isOpen) return;
-    setIndex(buildSearchIndex());
-  }, [isOpen]);
+  const [selectedResult, setSelectedResult] = useState<{ type: EntityPreviewType; id: string; title: string } | null>(null);
 
   useEffect(() => {
     if (!isOpen) {
       setQuery("");
+      return;
     }
+    setIndex(buildSearchIndex());
   }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        close();
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [close, isOpen]);
 
   const groups = useMemo(() => searchIndex(index, query), [index, query]);
   const hasQuery = query.trim().length > 0;
   const showEmptyState = hasQuery && groups.length === 0;
 
-  if (!isOpen || typeof document === "undefined") {
+  const isPreviewType = (type: DrawerEntityType): type is EntityPreviewType =>
+    type === "npc" || type === "monster" || type === "item" || type === "quest" || type === "hero";
+
+  const getTargetRoute = (type: DrawerEntityType) => {
+    switch (type) {
+      case "npc":
+        return "/npcs";
+      case "monster":
+        return "/combat";
+      case "item":
+        return "/inventory";
+      case "quest":
+        return "/quests";
+      case "hero":
+        return "/character";
+      case "rumorTemplate":
+        return "/rumors";
+      case "shopSnapshot":
+        return "/shop";
+      default:
+        return null;
+    }
+  };
+
+  const handleSelectResult = (item: { type: DrawerEntityType; id: string; title: string }) => {
+    const targetRoute = getTargetRoute(item.type);
+    if (!isPreviewType(item.type)) {
+      if (targetRoute) {
+        navigate(targetRoute);
+      }
+      close();
+      return;
+    }
+    setSelectedResult({ type: item.type, id: item.id, title: item.title });
+    close();
+  };
+
+  if (typeof document === "undefined") {
     return null;
   }
 
-  const body = (
-    <div className="fixed inset-0 z-[9999]">
-      <button type="button" className="absolute inset-0 bg-black/60" onClick={close} aria-label="Zamknij wyszukiwarke" />
-      <div
-        className={
-          isMobile
-            ? "absolute inset-0 bg-background p-3"
-            : "absolute left-1/2 top-20 w-[min(640px,calc(100vw-2rem))] -translate-x-1/2 rounded-xl border bg-background shadow-2xl"
-        }
-      >
-        <Command loop className="w-full">
-          <div className="flex items-center gap-2 border-b px-3 py-2">
-            <Search className="h-4 w-4 text-muted-foreground" />
-            <Command.Input
-              autoFocus
-              value={query}
-              onValueChange={setQuery}
-              className="h-9 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-              placeholder="Szukaj NPC, przedmiotow, watkow, potworow..."
-            />
-            {isMobile ? (
-              <button type="button" className="text-sm text-muted-foreground" onClick={close}>
-                Anuluj
-              </button>
-            ) : (
-              <span className="text-xs text-muted-foreground">Esc</span>
-            )}
-          </div>
-          <Command.List className="max-h-[65vh] overflow-y-auto p-2">
-            {!hasQuery ? (
-              <>
-                <div className="px-2 pb-1 pt-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Ostatnio otwierane
-                </div>
-                {recentItems.slice(0, 5).map((item) => (
-                  <Command.Item
-                    key={`${item.type}-${item.id}`}
-                    value={`recent-${item.type}-${item.id}`}
-                    onSelect={() => {
-                      openDrawer(item.type, item.id, item.name);
-                      close();
-                    }}
-                    className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm aria-selected:bg-accent"
-                  >
-                    <span className="text-muted-foreground">↺</span>
-                    <span className="truncate">{item.name}</span>
-                  </Command.Item>
-                ))}
-                <div className="px-2 pb-1 pt-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Szybkie akcje
-                </div>
-                {QUICK_ACTIONS.map((action) => (
-                  <Command.Item
-                    key={action.id}
-                    value={`quick-${action.id}`}
-                    onSelect={() => {
-                      openDrawer(action.drawerType, action.id, action.label);
-                      close();
-                    }}
-                    className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm aria-selected:bg-accent"
-                  >
-                    <span>{action.icon}</span>
-                    <span>{action.label}</span>
-                  </Command.Item>
-                ))}
-              </>
-            ) : (
-              groups.map((group) => (
-                <div key={group.key} className="pb-2">
-                  <div className="px-2 pb-1 pt-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    {group.label} · {group.total} wyniki
+  return (
+    <>
+      <Dialog open={isOpen} onOpenChange={(nextOpen) => !nextOpen && close()}>
+        <DialogPortal>
+          <DialogOverlay className="z-[9998] bg-black/60" />
+          <DialogPrimitive.Content
+            className="fixed left-1/2 top-[15%] z-[9999] w-[min(640px,calc(100vw-2rem))] -translate-x-1/2 overflow-hidden rounded-xl border bg-background shadow-2xl outline-none duration-200 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-top-4 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-4 data-[state=closed]:zoom-out-95 motion-reduce:transition-none"
+          >
+            <DialogPrimitive.Title className="sr-only">Wyszukiwarka</DialogPrimitive.Title>
+            <Command loop shouldFilter={false} className="w-full">
+              <CommandInput autoFocus value={query} onValueChange={setQuery} placeholder="Szukaj NPC, przedmiotow, watkow, potworow..." />
+              <CommandList className="max-h-[65vh] overflow-y-auto p-2">
+                <CommandEmpty className="hidden" />
+                {!hasQuery ? (
+                  <>
+                    <CommandGroup heading="Ostatnio otwierane">
+                      {recentItems.slice(0, 5).map((item) => (
+                        <CommandItem
+                          key={`${item.type}-${item.id}`}
+                          value={`recent-${item.type}-${item.id}`}
+                          onSelect={() => handleSelectResult({ type: item.type, id: item.id, title: item.name })}
+                          className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm"
+                        >
+                          <span className="text-muted-foreground">↺</span>
+                          <span className="truncate">{item.name}</span>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                    <CommandSeparator />
+                    <CommandGroup heading="Szybkie akcje">
+                      {QUICK_ACTIONS.map((action) => (
+                        <CommandItem
+                          key={action.id}
+                          value={`quick-${action.id}`}
+                          onSelect={() => {
+                            openDrawer(action.drawerType, action.id, action.label);
+                            close();
+                          }}
+                          className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm"
+                        >
+                          <span>{action.icon}</span>
+                          <span>{action.label}</span>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </>
+                ) : (
+                  groups.map((group) => (
+                    <CommandGroup key={group.key} heading={`${group.label} · ${group.total} wyniki`}>
+                      {group.items.map((item) => (
+                        <ResultRow
+                          key={`${item.type}-${item.id}`}
+                          item={item}
+                          query={query}
+                          onSelect={() => {
+                            addToRecent({ id: item.id, type: item.type, name: item.title });
+                            handleSelectResult({ type: item.type, id: item.id, title: item.title });
+                          }}
+                        />
+                      ))}
+                      {group.total > 5 ? <div className="px-3 py-1 text-xs text-muted-foreground">Pokaz wiecej →</div> : null}
+                    </CommandGroup>
+                  ))
+                )}
+                {showEmptyState ? (
+                  <div className="py-10 text-center text-sm text-muted-foreground">
+                    <div className="mb-2 text-2xl">🔍</div>
+                    Nic nie znaleziono dla "{query}".
                   </div>
-                  {group.items.map((item) => (
-                    <ResultRow
-                      key={`${item.type}-${item.id}`}
-                      item={item}
-                      query={query}
-                      onSelect={() => {
-                        openDrawer(item.type, item.id, item.title);
-                        addToRecent({ id: item.id, type: item.type, name: item.title });
-                        close();
-                      }}
-                    />
-                  ))}
-                  {group.total > 5 ? (
-                    <div className="px-3 py-1 text-xs text-muted-foreground">Pokaz wiecej →</div>
-                  ) : null}
-                </div>
-              ))
-            )}
-            {showEmptyState ? (
-              <div className="py-10 text-center text-sm text-muted-foreground">
-                <div className="mb-2 text-2xl">🔍</div>
-                Nic nie znaleziono dla "{query}".
-              </div>
-            ) : null}
-          </Command.List>
-        </Command>
-      </div>
-    </div>
+                ) : null}
+              </CommandList>
+            </Command>
+          </DialogPrimitive.Content>
+        </DialogPortal>
+      </Dialog>
+      <CommandResultPreviewModal
+        isOpen={selectedResult !== null}
+        type={selectedResult?.type ?? null}
+        id={selectedResult?.id ?? ""}
+        title={selectedResult?.title ?? ""}
+        onClose={() => setSelectedResult(null)}
+        onOpenFullPage={() => {
+          if (!selectedResult) {
+            return;
+          }
+          const route = getTargetRoute(selectedResult.type);
+          if (route) {
+            navigate(route);
+          }
+          setSelectedResult(null);
+        }}
+      />
+    </>
   );
-
-  return createPortal(body, document.body);
 }

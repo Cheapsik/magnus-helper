@@ -71,7 +71,9 @@ function loadConfig(): RumorsConfig {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
-  } catch {}
+  } catch {
+    return DEFAULT_CONFIG;
+  }
   return DEFAULT_CONFIG;
 }
 
@@ -235,7 +237,7 @@ function TemplateEditor({
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
 
-  useEffect(() => { setNameDraft(template.name); setResult(""); }, [template.id]);
+  useEffect(() => { setNameDraft(template.name); setResult(""); }, [template.id, template.name]);
 
   const commitName = () => {
     setEditingName(false);
@@ -290,7 +292,9 @@ function TemplateEditor({
       await navigator.clipboard.writeText(text);
       setCopiedId(id);
       setTimeout(() => setCopiedId(null), 2000);
-    } catch {}
+    } catch {
+      setCopiedId(null);
+    }
   };
 
   const hasEntries = template.segments.some((s) => s.entries.length > 0);
