@@ -1,20 +1,28 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useTheme } from "next-themes";
 import {
-  Home, Dice5, Target, BookOpen, MoreHorizontal, Sun, Moon, Search,
+  Home, Dice5, Target, BookOpen, MoreHorizontal, Search,
   Swords, User, BarChart3, Activity, Package, StickyNote, Wrench, Users, Gem, Timer, MessageSquare, Music, Network, ScrollText,
-  Drama, KeyRound, MapPin,
+  Drama, KeyRound, MapPin, Settings as SettingsIcon,
   type LucideIcon,
 } from "lucide-react";
 import { useScene } from "@/context/SceneContext";
 import { useCommandPalette } from "@/context/CommandPaletteContext";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useMode, isVisibleInMode } from "@/context/ModeContext";
-import RpgDataBackupControls from "@/components/RpgDataBackupControls";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import StatusBar from "@/components/StatusBar";
 import Logo from "./Logo";
+
+const SIDEBAR_MIN_WIDTH = 200;
+const SIDEBAR_MAX_WIDTH = 420;
+const SIDEBAR_DEFAULT_WIDTH = 240;
+const SIDEBAR_WIDTH_STORAGE_KEY = "nexus_sidebar_width";
+
+const clampSidebarWidth = (w: number) =>
+  Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, Math.round(w)));
 
 const NAV_TABS = [
   { path: "/", label: "Start", icon: Home },
@@ -71,11 +79,79 @@ const MORE_LINKS = SIDEBAR_GROUPS.flatMap((g) => g.items).filter(
 
 export default function Layout({ children }: { children: ReactNode }) {
   const location = useLocation();
-  const { theme, setTheme } = useTheme();
   const [moreOpen, setMoreOpen] = useState(false);
   const palette = useCommandPalette();
   const { mode, setMode } = useMode();
   const { activeScene } = useScene();
+
+  const [storedWidth, setStoredWidth] = useLocalStorage<number>(
+    SIDEBAR_WIDTH_STORAGE_KEY,
+    SIDEBAR_DEFAULT_WIDTH,
+  );
+  const [sidebarWidth, setSidebarWidth] = useState<number>(() => clampSidebarWidth(storedWidth));
+  const [isResizing, setIsResizing] = useState(false);
+  const dragStateRef = useRef<{ startX: number; startWidth: number } | null>(null);
+
+  // Synchronizuj initial state, gdy zmieni się wartość z localStorage (np. inna karta)
+  useEffect(() => {
+    setSidebarWidth(clampSidebarWidth(storedWidth));
+  }, [storedWidth]);
+
+  const beginResize = useCallback((clientX: number) => {
+    dragStateRef.current = { startX: clientX, startWidth: sidebarWidth };
+    setIsResizing(true);
+  }, [sidebarWidth]);
+
+  useEffect(() => {
+    if (!isResizing) return;
+    const onMove = (e: MouseEvent) => {
+      if (!dragStateRef.current) return;
+      const delta = e.clientX - dragStateRef.current.startX;
+      setSidebarWidth(clampSidebarWidth(dragStateRef.current.startWidth + delta));
+    };
+    const onUp = () => {
+      setIsResizing(false);
+      dragStateRef.current = null;
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    const prevUserSelect = document.body.style.userSelect;
+    const prevCursor = document.body.style.cursor;
+    document.body.style.userSelect = "none";
+    document.body.style.cursor = "col-resize";
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      document.body.style.userSelect = prevUserSelect;
+      document.body.style.cursor = prevCursor;
+    };
+  }, [isResizing]);
+
+  // Zapisuj szerokość dopiero po zakończeniu dragowania, żeby nie spamować localStorage.
+  useEffect(() => {
+    if (isResizing) return;
+    if (sidebarWidth === storedWidth) return;
+    setStoredWidth(sidebarWidth);
+  }, [isResizing, sidebarWidth, storedWidth, setStoredWidth]);
+
+  const onResizeKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const STEP = e.shiftKey ? 32 : 8;
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      setSidebarWidth((w) => clampSidebarWidth(w - STEP));
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      setSidebarWidth((w) => clampSidebarWidth(w + STEP));
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      setSidebarWidth(SIDEBAR_MIN_WIDTH);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      setSidebarWidth(SIDEBAR_MAX_WIDTH);
+    }
+  };
+
+  const resetSidebarWidth = () => setSidebarWidth(SIDEBAR_DEFAULT_WIDTH);
 
   const visibleGroups = SIDEBAR_GROUPS
     .map((g) => ({ ...g, items: g.items.filter((it) => isVisibleInMode(it.path, mode)) }))
@@ -92,7 +168,11 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="h-screen flex overflow-hidden">
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex flex-col w-[240px] shrink-0 border-r border-border bg-sidebar sticky top-0 h-screen overflow-y-auto">
+      <aside
+        className="hidden md:flex flex-col shrink-0 border-r border-border bg-sidebar sticky top-0 h-screen"
+        style={{ width: sidebarWidth }}
+      >
+        <div className="flex flex-col h-full overflow-y-auto">
         <Link to="/" className="flex items-center gap-2 px-5 h-14 border-b border-border">
           <Logo />
           <span className="font-display text-lg tracking-wide text-foreground">Magnus</span>
@@ -159,7 +239,38 @@ export default function Layout({ children }: { children: ReactNode }) {
             </button>
           </div>
         </div>
+        </div>
 
+        {/* Resize handle */}
+        <div
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Zmień szerokość paska bocznego"
+          aria-valuemin={SIDEBAR_MIN_WIDTH}
+          aria-valuemax={SIDEBAR_MAX_WIDTH}
+          aria-valuenow={sidebarWidth}
+          tabIndex={0}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            beginResize(e.clientX);
+          }}
+          onDoubleClick={resetSidebarWidth}
+          onKeyDown={onResizeKeyDown}
+          title="Przeciągnij, aby zmienić szerokość. Dwuklik = reset."
+          className={cn(
+            "group absolute top-0 right-0 h-full w-1.5 -mr-[3px] z-20",
+            "cursor-col-resize select-none",
+            "focus:outline-none",
+          )}
+        >
+          <span
+            className={cn(
+              "block h-full w-px mx-auto transition-colors",
+              isResizing ? "bg-primary" : "bg-transparent group-hover:bg-primary/50 group-focus-visible:bg-primary/60",
+            )}
+            aria-hidden
+          />
+        </div>
       </aside>
 
       <div className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden">
@@ -178,14 +289,18 @@ export default function Layout({ children }: { children: ReactNode }) {
               >
                 <Search className="h-4 w-4" />
               </button>
-              <RpgDataBackupControls />
-              <button
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Przełącz motyw"
-              >
-                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    to="/settings"
+                    className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="Ustawienia"
+                  >
+                    <SettingsIcon className="h-[18px] w-[18px]" />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent>Ustawienia</TooltipContent>
+              </Tooltip>
             </div>
           </div>
         </header>
@@ -203,14 +318,18 @@ export default function Layout({ children }: { children: ReactNode }) {
             </kbd>
           </button>
           <div className="flex items-center gap-2">
-            <RpgDataBackupControls />
-            <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Przełącz motyw"
-            >
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  to="/settings"
+                  className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Ustawienia"
+                >
+                  <SettingsIcon className="h-[18px] w-[18px]" />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>Ustawienia</TooltipContent>
+            </Tooltip>
           </div>
         </header>
 
