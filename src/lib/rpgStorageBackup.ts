@@ -1,7 +1,10 @@
-const EXTRA_BACKUP_KEYS = new Set(["nexus_scenes", "nexus_last_roll"]);
+/** Szybki backup z nagłówka: `rpg_*` oraz `magnus_*` poza ustawieniami aplikacji. */
+const HEADER_BACKUP_EXCLUDE_MAGNUS = new Set(["magnus_settings"]);
 
 function shouldBackupStorageKey(key: string) {
-  return key.startsWith("rpg_") || EXTRA_BACKUP_KEYS.has(key);
+  if (key.startsWith("rpg_")) return true;
+  if (key.startsWith("magnus_")) return !HEADER_BACKUP_EXCLUDE_MAGNUS.has(key);
+  return false;
 }
 
 /** Zbiera surowe wartości localStorage dla wszystkich obsługiwanych kluczy aplikacji. */

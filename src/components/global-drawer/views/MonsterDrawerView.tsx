@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { readStorageValue, updateStorageCollectionItem } from "@/components/global-drawer/drawerStorage";
-import { useApp, type GmEnemy } from "@/context/AppContext";
+import { useApp } from "@/context/AppContext";
+import type { GmEnemy } from "@/lib/gmEnemy";
+import { gmEnemyToCombatant, reviveGmEnemies } from "@/lib/gmEnemy";
 
 const MONSTER_STORAGE_KEY = "rpg_gm_enemies";
 
@@ -17,7 +19,8 @@ export function MonsterDrawerView({ id }: MonsterDrawerViewProps) {
   const saveTimer = useRef<number | null>(null);
 
   useEffect(() => {
-    const all = readStorageValue<GmEnemy[]>(MONSTER_STORAGE_KEY, []);
+    const raw = readStorageValue<unknown[]>(MONSTER_STORAGE_KEY, []);
+    const all = reviveGmEnemies(raw);
     setMonster(all.find((item) => item.id === id) ?? null);
   }, [id]);
 
@@ -35,19 +38,10 @@ export function MonsterDrawerView({ id }: MonsterDrawerViewProps) {
     setCombatants((prev) => {
       const next = [...prev];
       for (let i = 0; i < count; i += 1) {
+        const c = gmEnemyToCombatant(monster);
         next.push({
-          id: crypto.randomUUID(),
-          name: count > 1 ? `${monster.name} ${i + 1}` : monster.name,
-          initiative: 30,
-          ww: monster.ww,
-          us: 25,
-          sb: 3,
-          hp: { current: monster.hp, max: monster.hp },
-          armor: monster.armor,
-          toughness: 3,
-          statuses: [],
-          notes: monster.weapon,
-          isEnemy: true,
+          ...c,
+          name: count > 1 ? `${monster.name} ${i + 1}` : c.name,
         });
       }
       return next;

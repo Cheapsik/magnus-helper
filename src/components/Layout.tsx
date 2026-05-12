@@ -19,7 +19,7 @@ import Logo from "./Logo";
 const SIDEBAR_MIN_WIDTH = 200;
 const SIDEBAR_MAX_WIDTH = 420;
 const SIDEBAR_DEFAULT_WIDTH = 240;
-const SIDEBAR_WIDTH_STORAGE_KEY = "nexus_sidebar_width";
+const SIDEBAR_WIDTH_STORAGE_KEY = "magnus_sidebar_width";
 
 const clampSidebarWidth = (w: number) =>
   Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, Math.round(w)));
@@ -173,9 +173,9 @@ export default function Layout({ children }: { children: ReactNode }) {
         style={{ width: sidebarWidth }}
       >
         <div className="flex flex-col h-full overflow-y-auto">
-        <Link to="/" className="flex items-center gap-2 px-5 h-14 border-b border-border">
+        <Link to="/" className="flex items-center gap-2 px-5 h-14 border-b border-border min-w-0">
           <Logo />
-          <span className="font-display text-lg tracking-wide text-foreground">Magnus</span>
+          <span className="font-display text-lg tracking-wide text-foreground truncate min-w-0">Magnus Helper</span>
         </Link>
 
         <nav className="flex-1 px-2 py-3 space-y-4 animate-fade-in" key={mode}>
@@ -276,12 +276,18 @@ export default function Layout({ children }: { children: ReactNode }) {
       <div className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden">
         {/* Mobile header */}
         <header className="md:hidden shrink-0 border-b border-border bg-card/80 backdrop-blur-md">
-          <div className="flex items-center justify-between px-4 h-12">
-            <Link to="/" className="flex items-center gap-2">
-              <Logo />
-              <span className="font-display text-base tracking-wide text-foreground">Magnus</span>
+          <div className="grid grid-cols-3 items-center h-12 px-2 gap-1">
+            <div className="min-w-0" aria-hidden />
+            <Link
+              to="/"
+              className="flex items-center gap-2 min-w-0 max-w-full justify-center"
+            >
+              <Logo className="h-6 w-6 shrink-0" />
+              <span className="font-display text-base tracking-wide text-foreground truncate">
+                Magnus Helper
+              </span>
             </Link>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center justify-end gap-0.5 min-w-0">
               <button
                 onClick={palette.open}
                 className="p-2 text-muted-foreground hover:text-foreground transition-colors"
@@ -333,15 +339,8 @@ export default function Layout({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto w-full">
-          <div
-            className={cn(
-              "px-4 md:px-6 py-4 pb-20 md:pb-4",
-              location.pathname.startsWith("/quests") || location.pathname.startsWith("/heroes") || location.pathname.startsWith("/rumors")
-                ? "max-w-none"
-                : "max-w-6xl mx-auto",
-            )}
-          >
+        <main className="flex-1 overflow-y-auto w-full min-w-0">
+          <div className="w-full max-w-none min-w-0 px-3 md:px-4 py-4 pb-20 md:pb-4">
             {children}
           </div>
         </main>

@@ -14,7 +14,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   theme: "steel_and_gold",
 };
 
-export const SETTINGS_STORAGE_KEY = "nexus_settings";
+export const SETTINGS_STORAGE_KEY = "magnus_settings";
 
 /**
  * Definicja motywu — surowe wartości HEX (CSS variables w postaci, jakiej

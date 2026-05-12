@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Plus, Trash2, Minus, Swords, RotateCcw, Crosshair, Edit2, Check, Copy,
   ChevronDown, ChevronUp, Shield, Heart, Eye, EyeOff, Target, Zap, X, RotateCcw as Redo,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import type { Combatant } from "@/context/AppContext";
+import { useLocation } from "react-router-dom";
 import { rollDie, rollPercentile } from "@/lib/dice";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { NumberInput } from "@/components/ui/number-input";
 import { cn } from "@/lib/utils";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ReadyOpponentsPanel } from "@/components/combat/ReadyOpponentsPanel";
 
 const COMMON_STATUSES = ["Ogłuszony", "Powalony", "Krwawienie", "Zmęczony", "Przestraszony", "Oślepiony", "Oszołomiony", "Bezbronny", "Unieruchomiony", "Zatruty"];
 
@@ -291,7 +294,20 @@ function CombatActionPanel({
 /* ── Main Combat Page ── */
 
 export default function CombatPage() {
-  const { character, combatants, setCombatants, combatRound, setCombatRound, combatTurn, setCombatTurn, difficultyPresets } = useApp();
+  const location = useLocation();
+  const {
+    character,
+    combatants,
+    setCombatants,
+    combatRound,
+    setCombatRound,
+    combatTurn,
+    setCombatTurn,
+    difficultyPresets,
+    gmEnemies,
+    setGmEnemies,
+  } = useApp();
+  const [combatTab, setCombatTab] = useState<"walka" | "gotowi">("walka");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<Combatant | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -309,6 +325,11 @@ export default function CombatPage() {
   const [newToughness, setNewToughness] = useState(3);
   const [newIsEnemy, setNewIsEnemy] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
+
+  useEffect(() => {
+    const tab = (location.state as { combatTab?: string } | null)?.combatTab;
+    if (tab === "gotowi") setCombatTab("gotowi");
+  }, [location.state]);
 
   const sorted = useMemo(() => [...combatants].sort((a, b) => b.initiative - a.initiative), [combatants]);
   const displayed = showDead ? sorted : sorted.filter((c) => c.hp.current > 0);
@@ -375,9 +396,26 @@ export default function CombatPage() {
 
   return (
     <div className="space-y-3 animate-fade-in">
-      {/* Header */}
+      <div className="space-y-2">
+        <h1 className="text-lg font-bold leading-tight">Tracker walki</h1>
+        <Tabs value={combatTab} onValueChange={(v) => setCombatTab(v as "walka" | "gotowi")}>
+          <TabsList className="flex h-9 w-full items-stretch gap-0.5 rounded-lg bg-muted p-0.5">
+            <TabsTrigger
+              value="walka"
+              className="flex-1 basis-0 min-w-0 rounded-md px-2 py-0 text-sm font-medium shadow-none data-[state=active]:shadow-sm"
+            >
+              Walka
+            </TabsTrigger>
+            <TabsTrigger
+              value="gotowi"
+              className="flex-1 basis-0 min-w-0 rounded-md px-2 py-0 text-sm font-medium shadow-none data-[state=active]:shadow-sm"
+            >
+              Gotowi przeciwnicy
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="walka" className="mt-3 space-y-3">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold">Tracker walki</h1>
+        <span className="text-xs font-medium text-muted-foreground">Aktywna walka</span>
         <div className="flex items-center gap-1.5">
           <Badge variant="outline" className="text-xs font-mono">Runda {combatRound}</Badge>
           <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setShowDead(!showDead)} title={showDead ? "Ukryj poległych" : "Pokaż poległych"}>
@@ -425,7 +463,7 @@ export default function CombatPage() {
       )}
 
       {/* Combatant list */}
-      <div className="space-y-2">
+      <div className="space-y-2 min-h-[120px] p-1">
         {displayed.map((c) => {
           const realIndex = sorted.findIndex((s) => s.id === c.id);
           const hpPercent = c.hp.max > 0 ? (c.hp.current / c.hp.max) * 100 : 0;
@@ -587,10 +625,8 @@ export default function CombatPage() {
             </Card>
           );
         })}
-      </div>
-
       {sorted.length === 0 && (
-        <Card><CardContent className="p-6 text-center text-muted-foreground text-sm">Brak uczestników walki. Dodaj kogoś poniżej.</CardContent></Card>
+        <Card><CardContent className="p-6 text-center text-muted-foreground text-sm">Brak uczestników walki. Dodaj kogoś poniżej albo użyj „+ Do walki” w zakładce „Gotowi przeciwnicy”.</CardContent></Card>
       )}
 
       {/* Add combatant */}
@@ -627,6 +663,13 @@ export default function CombatPage() {
           </CardContent>
         </Card>
       )}
+      </div>
+        </TabsContent>
+        <TabsContent value="gotowi" className="mt-3">
+          <ReadyOpponentsPanel gmEnemies={gmEnemies} setGmEnemies={setGmEnemies} setCombatants={setCombatants} />
+        </TabsContent>
+      </Tabs>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { ArrowLeft, Plus, Trash2, ScrollText } from "lucide-react";
+import { useApp } from "@/context/AppContext";
+import { getCharacterSheetCombatStats } from "@/components/character-sheet/npcAccessors";
+import { toast } from "sonner";
+import { ArrowLeft, Plus, Trash2, ScrollText, Swords } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -80,9 +84,12 @@ const createEmptyHero = (): Hero => ({
   wyposazenie: [],
 });
 
-/* ──────────────────────── Główny komponent ──────────────────────── */
+function getHeroDisplayName(h: Hero) {
+  return h.daneOgolne.imie.trim() || "Bohater";
+}
 
 export default function HeroesPage() {
+  const { setCombatants } = useApp();
   const [heroes, setHeroes] = useLocalStorage<Hero[]>("rpg_characters", []);
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -103,8 +110,39 @@ export default function HeroesPage() {
     setHeroes((prev) => prev.map((h) => (h.id === updated.id ? updated : h)));
   };
 
+  const addHeroToCombat = (h: Hero) => {
+    const c = getCharacterSheetCombatStats(h);
+    const name = getHeroDisplayName(h);
+    const hint = [h.daneOgolne.obecnaProfesja, h.daneOgolne.rasa].filter(Boolean).join(" · ");
+    setCombatants((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        name,
+        initiative: c.initiative,
+        ww: c.ww,
+        us: c.us,
+        sb: c.sb,
+        hp: { current: c.hp, max: Math.max(1, c.hpMax) },
+        armor: c.armor,
+        toughness: c.toughness,
+        statuses: [],
+        notes: hint || c.weapon,
+        isEnemy: false,
+      },
+    ]);
+    toast.success(`Dodano ${name} do walki`);
+  };
+
   if (activeHero) {
-    return <HeroSheet hero={activeHero} onBack={() => setActiveId(null)} onSave={updateHero} />;
+    return (
+      <HeroSheet
+        hero={activeHero}
+        onBack={() => setActiveId(null)}
+        onSave={updateHero}
+        onAddToCombat={() => addHeroToCombat(activeHero)}
+      />
+    );
   }
 
   return (
@@ -141,7 +179,11 @@ export default function HeroesPage() {
                   {[h.daneOgolne.rasa, h.daneOgolne.obecnaProfesja].filter(Boolean).join(" · ") || "Brak danych"}
                 </div>
               </div>
-              <AlertDialog>
+              <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                <Button size="sm" variant="secondary" className="h-8 text-xs gap-1 px-2" onClick={() => addHeroToCombat(h)}>
+                  <Swords className="h-3 w-3" /> Walka
+                </Button>
+                <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <button
                     onClick={(e) => e.stopPropagation()}
@@ -164,6 +206,7 @@ export default function HeroesPage() {
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
+              </div>
             </div>
           ))}
         </div>
@@ -174,7 +217,17 @@ export default function HeroesPage() {
 
 /* ──────────────────────── Karta bohatera ──────────────────────── */
 
-function HeroSheet({ hero, onBack, onSave }: { hero: Hero; onBack: () => void; onSave: (h: Hero) => void }) {
+function HeroSheet({
+  hero,
+  onBack,
+  onSave,
+  onAddToCombat,
+}: {
+  hero: Hero;
+  onBack: () => void;
+  onSave: (h: Hero) => void;
+  onAddToCombat: () => void;
+}) {
   const [draft, setDraft] = useState<Hero>(hero);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFirstRender = useRef(true);
@@ -195,11 +248,14 @@ function HeroSheet({ hero, onBack, onSave }: { hero: Hero; onBack: () => void; o
   return (
     <div className="paper-sheet animate-fade-in">
       {/* Top bar */}
-      <div className="paper-topbar">
-        <button onClick={onBack} className="paper-back-btn min-h-[44px]">
+      <div className="paper-topbar flex flex-wrap items-center gap-2">
+        <button type="button" onClick={onBack} className="paper-back-btn min-h-[44px]">
           <ArrowLeft className="h-4 w-4" /> Wróć do listy
         </button>
-        <h1 className="paper-title">Karta Postaci: {draft.daneOgolne.imie || "—"}</h1>
+        <h1 className="paper-title m-0 flex-1 min-w-0">Karta Postaci: {draft.daneOgolne.imie || "—"}</h1>
+        <Button type="button" size="sm" variant="secondary" className="h-9 text-xs gap-1 shrink-0" onClick={onAddToCombat}>
+          <Swords className="h-3.5 w-3.5" /> Dodaj do walki
+        </Button>
       </div>
 
       <div className="paper-grid">

@@ -10,9 +10,6 @@ import {
   ChevronUp,
   Settings2,
 } from "lucide-react";
-import EmojiPicker, { Theme as EmojiPickerTheme } from "emoji-picker-react";
-import type { EmojiClickData } from "emoji-picker-react";
-import { useTheme } from "next-themes";
 import { useApp } from "@/context/AppContext";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Card, CardContent } from "@/components/ui/card";
@@ -33,8 +30,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { EmojiPickerButton } from "@/components/emoji/EmojiPickerButton";
 import { toast } from "sonner";
 import { getNpcDisplayName, NpcQuickPreview } from "@/components/character-sheet";
 import { MentionTextarea } from "@/components/mention/MentionTextarea";
@@ -55,6 +52,7 @@ interface QuestTypeConfig {
 interface QuestColumnConfig {
   id: string;
   label: string;
+  emoji: string;
   /** Hex color e.g. #ef4444 — drives header + column tint */
   color: string;
 }
@@ -76,9 +74,9 @@ const DEFAULT_QUEST_LAYOUT: QuestsLayoutConfig = {
     { id: "inne", emoji: "📜", label: "Inne", accent: "#9ca3af" },
   ],
   columns: [
-    { id: "aktywne", label: "Aktywne", color: "#ca8a04" },
-    { id: "uspione", label: "Uśpione", color: "#2563eb" },
-    { id: "zamkniete", label: "Zamknięte", color: "#6b7280" },
+    { id: "aktywne", label: "Aktywne", emoji: "⚡", color: "#ca8a04" },
+    { id: "uspione", label: "Uśpione", emoji: "💤", color: "#2563eb" },
+    { id: "zamkniete", label: "Zamknięte", emoji: "📁", color: "#6b7280" },
   ],
 };
 
@@ -185,8 +183,8 @@ const defaultColById = Object.fromEntries(DEFAULT_QUEST_LAYOUT.columns.map((c) =
   QuestColumnConfig
 >;
 /** Legacy column id from older installs */
-const LEGACY_COL_FALLBACK: Record<string, Pick<QuestColumnConfig, "label" | "color">> = {
-  gorace: { label: "Gorące", color: "#ef4444" },
+const LEGACY_COL_FALLBACK: Record<string, Pick<QuestColumnConfig, "label" | "color" | "emoji">> = {
+  gorace: { label: "Gorące", emoji: "🔥", color: "#ef4444" },
 };
 
 function isLikelyHexColor(s: string): boolean {
@@ -225,9 +223,14 @@ function normalizeQuestsLayout(raw: QuestsLayoutConfig): QuestsLayoutConfig {
     const rawLabel = typeof c.label === "string" ? c.label : def?.label ?? "";
     const label =
       rawLabel.trim() !== "" ? rawLabel.trim().slice(0, 80) : (def?.label ?? "Kolumna").slice(0, 80);
+    const rawEmoji = typeof (c as QuestColumnConfig).emoji === "string" ? (c as QuestColumnConfig).emoji : "";
+    const defEmoji = def && "emoji" in def ? (def as QuestColumnConfig).emoji : undefined;
+    const emoji =
+      rawEmoji.trim() !== "" ? rawEmoji.trim().slice(0, 8) : (defEmoji && String(defEmoji).trim()) || "📌";
     return {
       id: String(c.id || "kol").slice(0, 64),
       label,
+      emoji,
       color,
     };
   });
@@ -282,49 +285,6 @@ function useFinePointer() {
     return () => mq.removeEventListener("change", onChange);
   }, []);
   return fine;
-}
-
-/* ────────────────────────────────────────────── Emoji popover */
-
-function EmojiPickerButton({
-  emoji,
-  onPick,
-  className,
-}: {
-  emoji: string;
-  onPick: (e: string) => void;
-  className?: string;
-}) {
-  const [open, setOpen] = useState(false);
-  const { resolvedTheme } = useTheme();
-  const pickerTheme = resolvedTheme === "light" ? EmojiPickerTheme.LIGHT : EmojiPickerTheme.DARK;
-
-  const onEmojiClick = useCallback(
-    (data: EmojiClickData) => {
-      onPick(data.emoji);
-      setOpen(false);
-    },
-    [onPick],
-  );
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className={cn(
-            "inline-flex h-9 min-w-[2.25rem] items-center justify-center rounded-md border border-input bg-background px-2 text-lg leading-none hover:bg-accent",
-            className,
-          )}
-        >
-          {emoji || "➕"}
-        </button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto max-w-[min(100vw-2rem,420px)] border p-0 shadow-lg" align="start">
-        <EmojiPicker theme={pickerTheme} width={360} height={420} onEmojiClick={onEmojiClick} searchPlaceHolder="Szukaj emoji…" />
-      </PopoverContent>
-    </Popover>
-  );
 }
 
 /* ────────────────────────────────────────────── Corner ribbon (type accent) */
@@ -1018,7 +978,7 @@ export default function QuestsPage() {
     const id = uniqueSlug("kolumna", existing);
     setConfigDraft({
       ...configDraft,
-      columns: [...configDraft.columns, { id, label: "Nowa kolumna", color: "#6366f1" }],
+      columns: [...configDraft.columns, { id, label: "Nowa kolumna", emoji: "📌", color: "#6366f1" }],
     });
   };
 
@@ -1085,6 +1045,7 @@ export default function QuestsPage() {
           onClick={() => setCollapsedCols((p) => ({ ...p, [col.id]: !p[col.id] }))}
         >
           <span className="flex items-center gap-2 text-sm font-semibold">
+            <span className="text-lg leading-none" aria-hidden>{col.emoji || "📌"}</span>
             <span>{col.label}</span>
             <span className="font-normal opacity-80">· {quests.length}</span>
           </span>
@@ -1297,6 +1258,19 @@ export default function QuestsPage() {
                 <div className="space-y-2">
                   {configDraft.columns.map((c) => (
                     <div key={c.id} className="flex flex-wrap items-center gap-2 rounded-lg border border-border/60 bg-card/50 p-2.5">
+                      <EmojiPickerButton
+                        emoji={c.emoji}
+                        onPick={(e) =>
+                          setConfigDraft((d) =>
+                            d
+                              ? {
+                                  ...d,
+                                  columns: d.columns.map((x) => (x.id === c.id ? { ...x, emoji: e } : x)),
+                                }
+                              : d,
+                          )
+                        }
+                      />
                       <Input
                         className="h-9 min-w-[8rem] flex-1 text-xs font-medium"
                         value={c.label}

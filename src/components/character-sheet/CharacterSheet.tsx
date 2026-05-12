@@ -8,7 +8,6 @@ import { DynTable } from "./sub/DynTable";
 import { SkillsTable } from "./sub/SkillsTable";
 import { BodyArmor } from "./sub/BodyArmor";
 import { ZestawienieAkcji } from "./sub/ZestawienieAkcji";
-import { MentionTextarea } from "@/components/mention/MentionTextarea";
 
 export type CharacterSheetProps = {
   value: SavedNpc;
@@ -23,10 +22,8 @@ export function CharacterSheet({ value, onChange }: CharacterSheetProps) {
   const npcExtras = {
     cechyCharakteru: value.cechyCharakteru,
     opisOgolny: value.opisOgolny,
-    notatkiMG: value.notatkiMG,
     setCechy: (v: string) => onChange({ ...value, cechyCharakteru: v }),
     setOpis: (v: string) => onChange({ ...value, opisOgolny: v }),
-    setNotatki: (v: string) => onChange({ ...value, notatkiMG: v }),
   };
 
   return (
@@ -37,15 +34,6 @@ export function CharacterSheet({ value, onChange }: CharacterSheetProps) {
             <Section title="NPC — MG" className="wfrp-mt-section">
               <PaperField label="Cechy charakteru" value={npcExtras.cechyCharakteru} onChange={npcExtras.setCechy} />
               <PaperField label="Opis / wygląd" value={npcExtras.opisOgolny} onChange={npcExtras.setOpis} />
-              <div className="paper-field">
-                <label className="paper-field-label">Notatki MG</label>
-                <MentionTextarea
-                  value={npcExtras.notatkiMG}
-                  onChange={npcExtras.setNotatki}
-                  className="min-h-[120px] text-xs"
-                  placeholder="Notatki MG..."
-                />
-              </div>
             </Section>
             <Section title="BOHATER">
               <PaperField

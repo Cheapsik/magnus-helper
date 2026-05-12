@@ -1,6 +1,6 @@
 import { useMemo, useState, useId } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Gem, Plus, Trash2, Edit2, Check, Dice5, Pencil, Package, Sword, Shield, Flame, Coins, Minus, X } from "lucide-react";
+import { Plus, Trash2, Edit2, Check, Dice5, Pencil, Package, Sword, Shield, Flame, Coins, Minus, X } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import type { LootRank } from "@/context/AppContext";
 import type { LootDbItem } from "@/lib/lootDb";
@@ -304,13 +304,7 @@ export default function LootGeneratorPage() {
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center justify-between gap-2">
-        <h1 className="text-lg font-bold flex items-center gap-2 min-w-0">
-          <span className="flex items-center gap-1 shrink-0">
-            <Package className="h-5 w-5" />
-            <Gem className="h-5 w-5" />
-          </span>
-          <span className="truncate leading-tight">Ekwipunek i generator łupu</span>
-        </h1>
+        <h1 className="text-lg font-bold text-foreground truncate leading-tight min-w-0">Ekwipunek i generator łupu</h1>
       </div>
 
       <div className="flex flex-wrap gap-1.5">

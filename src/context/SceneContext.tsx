@@ -38,7 +38,7 @@ const SceneContext = createContext<SceneContextValue | null>(null);
 const now = () => new Date().toISOString();
 
 export function SceneProvider({ children }: { children: ReactNode }) {
-  const [scenes, setScenes] = useLocalStorage<Scene[]>("nexus_scenes", []);
+  const [scenes, setScenes] = useLocalStorage<Scene[]>("magnus_scenes", []);
   const ambient = useAmbient();
 
   const activeScene = useMemo(() => scenes.find((s) => s.isActive) ?? null, [scenes]);

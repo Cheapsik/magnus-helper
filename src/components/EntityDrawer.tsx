@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { SavedNpc } from "@/context/AppContext";
+import { getNpcCombatStats } from "@/components/character-sheet/npcAccessors";
 
 export type EntityKind = "monster" | "npc" | "hero" | "quest" | "item";
 
@@ -234,11 +235,6 @@ function HeroBody({ id, onClose }: { id: string; onClose: () => void }) {
   );
 }
 
-function statToNumber(value: string | undefined, fallback: number) {
-  const parsed = Number.parseInt(value ?? "", 10);
-  return Number.isFinite(parsed) ? parsed : fallback;
-}
-
 function getNpcName(npc: SavedNpc) {
   return npc.daneOgolne.imie || "NPC";
 }
@@ -254,26 +250,22 @@ function NpcBody({ id, onClose }: { id: string; onClose: () => void }) {
   if (!npc) return <p className="text-sm text-muted-foreground p-4">Nie znaleziono NPC.</p>;
   const name = getNpcName(npc);
   const occupation = getNpcOccupation(npc);
-  const activeMain = npc.cechyGlowne.a;
-  const activeSecondary = npc.cechyDrugorzedne.a;
-  const hp = statToNumber(activeSecondary.zyw, 10);
-  const strengthBonus = statToNumber(activeSecondary.s, 3);
-  const toughnessBonus = statToNumber(activeSecondary.wt, 3);
+  const stats = getNpcCombatStats(npc);
   const send = () => {
     setCombatants((prev) => [
       ...prev,
       {
         id: crypto.randomUUID(),
         name,
-        initiative: 0,
-        ww: statToNumber(activeMain.ww, 25),
-        us: statToNumber(activeMain.us, 25),
-        sb: strengthBonus,
-        hp: { current: hp, max: hp },
-        armor: 0,
-        toughness: toughnessBonus,
+        initiative: stats.initiative,
+        ww: stats.ww,
+        us: stats.us,
+        sb: stats.sb,
+        hp: { current: stats.hp, max: Math.max(1, stats.hpMax) },
+        armor: stats.armor,
+        toughness: stats.toughness,
         statuses: [],
-        notes: occupation || npc.notatkiMG,
+        notes: [occupation, npc.notatkiMG, stats.notes].filter(Boolean).join(" · ") || stats.weapon,
         isEnemy: true,
       },
     ]);

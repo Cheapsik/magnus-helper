@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useAmbient, type SoundItem, type Category } from "@/context/AmbientContext";
 import { unlockMobileAudio } from "@/lib/mobileAudioUnlock";
+import { EmojiPickerButton } from "@/components/emoji/EmojiPickerButton";
 
 function genId() { return Math.random().toString(36).slice(2, 10); }
 
@@ -67,7 +68,7 @@ export default function AmbientPage() {
     let catId = form.categoryId;
     let newCat: Category | null = null;
     if (catId === "__new__" && form.newCategory.trim()) {
-      newCat = { id: genId(), name: form.newCategory.trim(), collapsed: false };
+      newCat = { id: genId(), name: form.newCategory.trim(), collapsed: false, emoji: "📌" };
       catId = newCat.id;
     }
     if (!catId) { toast.error("Wybierz kategorię"); return; }
@@ -100,17 +101,23 @@ export default function AmbientPage() {
       const cats = c.categories.filter((ct) => ct.id !== cat.id);
       const sounds = c.sounds.map((s) => s.categoryId === cat.id ? { ...s, categoryId: "__uncategorized__" } : s);
       if (sounds.some((s) => s.categoryId === "__uncategorized__") && !cats.some((ct) => ct.id === "__uncategorized__")) {
-        cats.push({ id: "__uncategorized__", name: "Bez kategorii", collapsed: false });
+        cats.push({ id: "__uncategorized__", name: "Bez kategorii", collapsed: false, emoji: "📂" });
       }
       return { categories: cats, sounds };
     });
   };
-  const addCategory = () => { save((c) => ({ ...c, categories: [...c.categories, { id: genId(), name: "Nowa kategoria", collapsed: false }] })); };
+  const setCategoryEmoji = (catId: string, emoji: string) => {
+    save((c) => ({
+      ...c,
+      categories: c.categories.map((cat) => (cat.id === catId ? { ...cat, emoji } : cat)),
+    }));
+  };
+  const addCategory = () => { save((c) => ({ ...c, categories: [...c.categories, { id: genId(), name: "Nowa kategoria", collapsed: false, emoji: "📌" }] })); };
 
   const grouped = config.categories.map((cat) => ({ category: cat, sounds: config.sounds.filter((s) => s.categoryId === cat.id) }));
   const uncatSounds = config.sounds.filter((s) => !config.categories.some((c) => c.id === s.categoryId));
   if (uncatSounds.length > 0) {
-    const uncatCat = config.categories.find((c) => c.id === "__uncategorized__") || { id: "__uncategorized__", name: "Bez kategorii", collapsed: false };
+    const uncatCat = config.categories.find((c) => c.id === "__uncategorized__") || { id: "__uncategorized__", name: "Bez kategorii", collapsed: false, emoji: "📂" };
     if (!grouped.some((g) => g.category.id === "__uncategorized__")) grouped.push({ category: uncatCat, sounds: uncatSounds });
   }
 
@@ -155,6 +162,11 @@ export default function AmbientPage() {
             <button onClick={() => toggleCollapse(cat.id)} className="min-h-[44px] min-w-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground">
               {cat.collapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
             </button>
+            <EmojiPickerButton
+              emoji={cat.emoji ?? "📌"}
+              onPick={(e) => setCategoryEmoji(cat.id, e)}
+              className="h-8 min-w-[2rem] shrink-0 text-base"
+            />
             <CategoryName name={cat.name} onRename={(n) => renameCategory(cat.id, n)} />
             <Badge variant="secondary" className="text-xs">{sounds.length} dźwięk{sounds.length === 1 ? "" : sounds.length < 5 ? "i" : "ów"}</Badge>
             {cat.id !== "__uncategorized__" && (
@@ -212,7 +224,10 @@ export default function AmbientPage() {
             </div>
             <div className="space-y-1">
               <Label>Emoji ikony</Label>
-              <Input value={form.emoji} onChange={(e) => setForm((f) => ({ ...f, emoji: e.target.value.slice(0, 2) }))} placeholder="🔊" className="w-20" />
+              <div className="flex items-center gap-2">
+                <EmojiPickerButton emoji={form.emoji} onPick={(e) => setForm((f) => ({ ...f, emoji: e }))} />
+                <span className="text-xs text-muted-foreground">Kliknij aby wybrać</span>
+              </div>
             </div>
             <div className="space-y-1">
               <Label>URL lub link YouTube *</Label>
@@ -238,7 +253,10 @@ export default function AmbientPage() {
                 <SelectTrigger><SelectValue placeholder="Wybierz kategorię" /></SelectTrigger>
                 <SelectContent>
                   {config.categories.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    <SelectItem key={c.id} value={c.id}>
+                      <span className="mr-1.5">{c.emoji ?? "📌"}</span>
+                      {c.name}
+                    </SelectItem>
                   ))}
                   <SelectItem value="__new__">Nowa kategoria...</SelectItem>
                 </SelectContent>
