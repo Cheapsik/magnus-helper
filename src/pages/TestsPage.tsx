@@ -38,7 +38,7 @@ export default function TestsPage() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <h1 className="text-lg font-bold">Test procentowy</h1>
+      <h1 className="font-app-brand text-lg font-bold">Test procentowy</h1>
 
       <div className="grid grid-cols-2 gap-3">
         <div>

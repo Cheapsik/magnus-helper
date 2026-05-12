@@ -397,7 +397,7 @@ export default function CombatPage() {
   return (
     <div className="space-y-3 animate-fade-in">
       <div className="space-y-2">
-        <h1 className="text-lg font-bold leading-tight">Tracker walki</h1>
+        <h1 className="font-app-brand text-lg font-bold leading-tight">Tracker walki</h1>
         <Tabs value={combatTab} onValueChange={(v) => setCombatTab(v as "walka" | "gotowi")}>
           <TabsList className="flex h-9 w-full items-stretch gap-0.5 rounded-lg bg-muted p-0.5">
             <TabsTrigger

@@ -77,7 +77,7 @@ export default function CharacterPage() {
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold">Postać</h1>
+        <h1 className="font-app-brand text-lg font-bold">Postać</h1>
         <div className="flex gap-1.5">
           {editing && <Button size="sm" variant="ghost" className="text-xs" onClick={cancel}>Anuluj</Button>}
           <Button size="sm" variant={editing ? "default" : "outline"} className="gap-1.5 text-xs" onClick={editing ? handleSave : startEdit}>

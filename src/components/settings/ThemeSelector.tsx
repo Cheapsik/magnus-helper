@@ -31,7 +31,7 @@ export default function ThemeSelector() {
 
   return (
     <section className="space-y-3">
-      <h2 className="font-display text-base tracking-wide text-foreground">Wygląd</h2>
+      <h2 className="text-base tracking-wide text-foreground">Wygląd</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {THEME_ORDER.map((id) => {
           const theme = THEMES[id];
@@ -52,7 +52,7 @@ export default function ThemeSelector() {
             >
               <ThemeSwatches themeId={id} />
               <div className="flex w-full items-center justify-between gap-2">
-                <span className="font-display text-sm text-foreground">{theme.label}</span>
+                <span className="text-sm text-foreground">{theme.label}</span>
                 {active && (
                   <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.12em] text-primary">
                     <Check className="h-3 w-3" /> Aktywny

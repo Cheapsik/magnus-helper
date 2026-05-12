@@ -36,7 +36,7 @@ export default function InventoryPage() {
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <h1 className="text-lg font-bold">Szybki ekwipunek</h1>
+      <h1 className="font-app-brand text-lg font-bold">Szybki ekwipunek</h1>
 
       <div className="flex flex-wrap gap-1.5">
         <Button size="sm" variant={activeCategory === "all" ? "default" : "secondary"} className="text-xs" onClick={() => setActiveCategory("all")}>Wszystko</Button>

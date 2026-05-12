@@ -108,7 +108,7 @@ export default function CheatSheetsPage() {
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold">Kodeks</h1>
+        <h1 className="font-app-brand text-lg font-bold">Kodeks</h1>
         <Button size="sm" className="text-xs gap-1 h-7" onClick={() => setAdding(true)}>
           <Plus className="h-3 w-3" /> Dodaj wpis
         </Button>

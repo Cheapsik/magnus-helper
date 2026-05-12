@@ -401,7 +401,7 @@ export default function TimersPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-foreground">Timery</h1>
+        <h1 className="font-app-brand text-xl font-bold text-foreground">Timery</h1>
         <Button onClick={addTimer} size="sm" className="min-h-[44px]">
           <Plus className="h-4 w-4 mr-1" /> Dodaj timer
         </Button>

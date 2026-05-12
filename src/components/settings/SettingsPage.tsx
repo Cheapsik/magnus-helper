@@ -7,7 +7,7 @@ export default function SettingsPage() {
     <div className="max-w-[640px] mx-auto space-y-6">
       <header className="flex items-center gap-2.5">
         <SettingsIcon className="h-5 w-5 text-primary" />
-        <h1 className="font-display text-2xl tracking-wide text-foreground">Ustawienia</h1>
+        <h1 className="font-app-brand text-2xl tracking-wide text-foreground">Ustawienia</h1>
       </header>
 
       <ThemeSelector />

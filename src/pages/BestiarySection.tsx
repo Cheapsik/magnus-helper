@@ -581,7 +581,7 @@ export default function BestiarySection() {
           <option value="all">Wszystkie typy</option>
           {types.map((t) => <option key={t} value={t}>{t}</option>)}
         </select>
-        <Button onClick={openNew} className="h-10 gap-1.5 sm:w-auto font-display tracking-wide">
+        <Button onClick={openNew} className="h-10 gap-1.5 sm:w-auto tracking-wide">
           <Plus className="h-4 w-4" /> Nowy potwór
         </Button>
       </div>
@@ -638,7 +638,7 @@ function BestiaryCard({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="text-[10px] uppercase tracking-[0.18em] text-primary font-sans">{m.typ}</div>
-          <h3 className="font-display text-xl text-foreground leading-tight truncate">{m.nazwa}</h3>
+          <h3 className="text-xl text-foreground leading-tight truncate">{m.nazwa}</h3>
         </div>
       </div>
 

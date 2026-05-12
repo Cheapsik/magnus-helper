@@ -1087,6 +1087,7 @@ export default function QuestsPage() {
 
   return (
     <div className="space-y-4 animate-fade-in">
+      <h1 className="font-app-brand text-xl font-bold text-foreground">Wątki</h1>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           <Button

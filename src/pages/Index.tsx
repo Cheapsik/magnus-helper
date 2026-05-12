@@ -118,7 +118,7 @@ export default function Index() {
           <div className="px-5 py-4">
             <div className="text-[10px] uppercase tracking-[0.18em] text-primary/70 mb-1">Aktywna postać</div>
             <Link to="/character" className="block group">
-              <div className="font-display text-xl text-foreground leading-tight group-hover:text-primary transition-colors">
+              <div className="text-xl text-foreground leading-tight group-hover:text-primary transition-colors">
                 {character.name}
               </div>
               <div className="text-xs text-muted-foreground mt-0.5">
@@ -250,7 +250,7 @@ export default function Index() {
                         <Pin className="h-3.5 w-3.5 text-primary/70" />
                       )}
                     </span>
-                    <span className="text-sm font-display text-foreground group-hover:text-primary truncate">
+                    <span className="text-sm text-foreground group-hover:text-primary truncate">
                       {q.title}
                     </span>
                   </Link>
@@ -292,7 +292,7 @@ export default function Index() {
         <section className="border border-border bg-card/30 p-5 panel-enter" style={stagger(4)}>
           <SectionLabel>Aktywna postać</SectionLabel>
           <Link to="/character" className="block group">
-            <h3 className="font-display text-2xl text-foreground group-hover:text-primary leading-tight">
+            <h3 className="text-2xl text-foreground group-hover:text-primary leading-tight">
               {character.name}
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5 mb-3">
@@ -360,7 +360,7 @@ export default function Index() {
                   <Link to="/combat" className="flex items-center gap-2 text-sm group min-w-0">
                     <Swords className="h-4 w-4 text-destructive shrink-0" />
                     <span className="text-foreground group-hover:text-primary truncate">
-                      Runda {combatRound} · tura: <span className="font-display">{currentTurnName}</span>
+                      Runda {combatRound} · tura: <span className="font-medium">{currentTurnName}</span>
                     </span>
                   </Link>
                   <button

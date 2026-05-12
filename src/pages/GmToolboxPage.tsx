@@ -339,7 +339,7 @@ export default function GmToolboxPage() {
   return (
     <div className="space-y-8 animate-fade-in pb-4">
       <div>
-        <h1 className="text-lg font-bold text-foreground">Centrum dowodzenia sesji</h1>
+        <h1 className="font-app-brand text-lg font-bold text-foreground">Centrum dowodzenia sesji</h1>
         <p className="text-xs text-muted-foreground mt-1">Skróty, stan sesji i narzędzia MG w jednym miejscu.</p>
       </div>
 

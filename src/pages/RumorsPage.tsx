@@ -566,7 +566,7 @@ export default function RumorsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold text-foreground">Plotki & Haczyki</h1>
+      <h1 className="font-app-brand text-xl font-bold text-foreground">Plotki & Haczyki</h1>
       {desktopLayout}
       {mobileLayout}
     </div>

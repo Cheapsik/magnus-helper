@@ -289,7 +289,7 @@ export default function NpcManagerPage() {
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center justify-between gap-2 flex-wrap">
-        <h1 className="text-lg font-bold flex items-center gap-2">
+        <h1 className="font-app-brand text-lg font-bold flex items-center gap-2">
           <Users className="h-5 w-5" />
           NPC
         </h1>

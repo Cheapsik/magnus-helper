@@ -731,7 +731,7 @@ export default function ShopPage() {
 
   return (
     <div className="space-y-4 animate-fade-in max-w-6xl mx-auto">
-      <h1 className="text-lg font-bold flex items-center gap-2">
+      <h1 className="font-app-brand text-lg font-bold flex items-center gap-2">
         <Store className="h-5 w-5 shrink-0" />
         Sklep
       </h1>

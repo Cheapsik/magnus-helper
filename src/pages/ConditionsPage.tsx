@@ -60,7 +60,7 @@ export default function ConditionsPage() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <h1 className="text-lg font-bold">Stany i efekty</h1>
+      <h1 className="font-app-brand text-lg font-bold">Stany i efekty</h1>
 
       <section>
         <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">

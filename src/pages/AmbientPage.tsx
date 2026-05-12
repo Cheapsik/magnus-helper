@@ -134,7 +134,7 @@ export default function AmbientPage() {
       )}
 
       <div className="flex items-center justify-between gap-2 flex-wrap">
-        <h1 className="text-xl font-bold text-foreground">🎵 Ambient</h1>
+        <h1 className="font-app-brand text-xl font-bold text-foreground">🎵 Ambient</h1>
         <div className="flex items-center gap-2">
           <Button size="sm" variant="outline" onClick={stopAll} className="min-h-[44px]" disabled={!anyPlaying}>
             <Square className="h-4 w-4 mr-1" /> Zatrzymaj wszystko

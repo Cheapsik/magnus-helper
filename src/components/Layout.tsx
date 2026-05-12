@@ -175,7 +175,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         <div className="flex flex-col h-full overflow-y-auto">
         <Link to="/" className="flex items-center gap-2 px-5 h-14 border-b border-border min-w-0">
           <Logo />
-          <span className="font-display text-lg tracking-wide text-foreground truncate min-w-0">Magnus Helper</span>
+          <span className="font-app-brand text-lg tracking-wide text-foreground truncate min-w-0">Magnus Helper</span>
         </Link>
 
         <nav className="flex-1 px-2 py-3 space-y-4 animate-fade-in" key={mode}>
@@ -283,7 +283,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               className="flex items-center gap-2 min-w-0 max-w-full justify-center"
             >
               <Logo className="h-6 w-6 shrink-0" />
-              <span className="font-display text-base tracking-wide text-foreground truncate">
+              <span className="font-app-brand text-base tracking-wide text-foreground truncate">
                 Magnus Helper
               </span>
             </Link>
@@ -376,7 +376,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             </SheetTrigger>
             <SheetContent side="bottom" className="border-t border-primary/30">
               <SheetHeader>
-                <SheetTitle className="font-display text-foreground">Więcej narzędzi</SheetTitle>
+                <SheetTitle className="text-foreground">Więcej narzędzi</SheetTitle>
               </SheetHeader>
               <div className="grid grid-cols-2 gap-2 py-4">
                 {visibleMore.map((link) => (

@@ -168,7 +168,7 @@ export default function SimulationsPage() {
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <h1 className="text-lg font-bold">Symulacje</h1>
+      <h1 className="font-app-brand text-lg font-bold">Symulacje</h1>
 
       {/* Mode selector */}
       <div className="flex gap-1.5">
