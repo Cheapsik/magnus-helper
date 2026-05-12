@@ -480,8 +480,10 @@ export default function RumorsPage() {
         <Card
           key={t.id}
           className={cn(
-            "cursor-pointer transition-colors",
-            t.id === config.activeTemplateId && "ring-2 ring-primary"
+            "cursor-pointer transition-colors border bg-card shadow-sm",
+            t.id === config.activeTemplateId
+              ? "border-primary bg-primary/5"
+              : "border-border hover:border-border/80",
           )}
           onClick={() => selectTemplate(t.id)}
         >
@@ -508,7 +510,7 @@ export default function RumorsPage() {
   /* ── Desktop ── */
   const desktopLayout = (
     <div className="hidden md:grid grid-cols-[30%_1fr] gap-4 h-[calc(100vh-8rem)]">
-      <div className="overflow-y-auto pr-2">
+      <div className="overflow-y-auto pr-2 pl-1">
         <h2 className="text-sm font-medium text-muted-foreground mb-3">Szablony</h2>
         {templateList}
       </div>

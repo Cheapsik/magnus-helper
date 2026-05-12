@@ -13,6 +13,8 @@ import {
 } from "@/lib/sessionNotesMigration";
 import type { SavedNpc } from "@/components/character-sheet/types";
 import { normalizeSavedNpcArray } from "@/components/character-sheet/migrateLegacyStorage";
+import type { GmEnemy } from "@/lib/gmEnemy";
+import { reviveGmEnemies } from "@/lib/gmEnemy";
 
 initLootStorage();
 
@@ -33,14 +35,7 @@ export interface Combatant {
   isEnemy: boolean;
 }
 
-export interface GmEnemy {
-  id: string;
-  name: string;
-  ww: number;
-  hp: number;
-  armor: number;
-  weapon: string;
-}
+export type { GmEnemy } from "@/lib/gmEnemy";
 
 export interface InventoryItem {
   id: string;
@@ -58,6 +53,12 @@ export interface ActiveCondition {
 }
 
 export type { SavedNpc } from "@/components/character-sheet/types";
+
+export interface NpcGroup {
+  id: string;
+  name: string;
+  collapsed: boolean;
+}
 
 export interface DifficultyPreset {
   label: string;
@@ -187,6 +188,8 @@ interface AppContextType {
   setGmEnemies: (fn: GmEnemy[] | ((prev: GmEnemy[]) => GmEnemy[])) => void;
   savedNpcs: SavedNpc[];
   setSavedNpcs: (fn: SavedNpc[] | ((prev: SavedNpc[]) => SavedNpc[])) => void;
+  npcGroups: NpcGroup[];
+  setNpcGroups: (fn: NpcGroup[] | ((prev: NpcGroup[]) => NpcGroup[])) => void;
   difficultyPresets: DifficultyPreset[];
   setDifficultyPresets: (fn: DifficultyPreset[] | ((prev: DifficultyPreset[]) => DifficultyPreset[])) => void;
   lootConfig: LootConfig;
@@ -218,10 +221,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     catalogInitial,
     { revive: reviveNoteSessionCatalog },
   );
-  const [gmEnemies, setGmEnemies] = useLocalStorage<GmEnemy[]>("rpg_gm_enemies", DEFAULT_ENEMIES);
+  const [gmEnemies, setGmEnemies] = useLocalStorage<GmEnemy[]>("rpg_gm_enemies", DEFAULT_ENEMIES, {
+    revive: reviveGmEnemies,
+  });
   const [savedNpcs, setSavedNpcs] = useLocalStorage<SavedNpc[]>("rpg_saved_npcs", [], {
     revive: (parsed) => normalizeSavedNpcArray(parsed),
   });
+  const [npcGroups, setNpcGroups] = useLocalStorage<NpcGroup[]>("rpg_npc_groups", []);
   const [difficultyPresets, setDifficultyPresets] = useLocalStorage<DifficultyPreset[]>("rpg_difficulty_presets", DEFAULT_DIFFICULTY_PRESETS);
   const [lootConfig, setLootConfig] = useLocalStorage<LootConfig>("rpg_loot_config", DEFAULT_LOOT_CONFIG);
   const [lootItems, setLootItems] = useLocalStorage<LootDbItem[]>("rpg_items_db", []);
@@ -247,6 +253,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       noteSessionCatalog, setNoteSessionCatalog,
       gmEnemies, setGmEnemies,
       savedNpcs, setSavedNpcs,
+      npcGroups, setNpcGroups,
       difficultyPresets, setDifficultyPresets,
       lootConfig, setLootConfig,
       lootItems, setLootItems,

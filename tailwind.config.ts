@@ -63,6 +63,10 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
       },
+      fontFamily: {
+        // Nagłówki / branding — Google Fonts MedievalSharp
+        display: ['"MedievalSharp"', "cursive"],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

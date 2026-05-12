@@ -74,7 +74,7 @@ export default function Index() {
     const state = readJson<{ quests?: QuestLite[] }>("rpg_quests", {});
     setQuests(state.quests ?? []);
     setTimers(readJson<TimerLite[]>("rpg_timers", []));
-    setLastRoll(readJson<LastRoll | null>("nexus_last_roll", null));
+    setLastRoll(readJson<LastRoll | null>("magnus_last_roll", null));
   }, []);
 
   /* Derived values */

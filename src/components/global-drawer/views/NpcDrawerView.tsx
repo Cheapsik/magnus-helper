@@ -53,7 +53,7 @@ export function NpcDrawerView({ id }: NpcDrawerViewProps) {
         ww: stats.ww,
         us: stats.us,
         sb: stats.sb,
-        hp: { current: stats.hp, max: Math.max(1, stats.hp) },
+        hp: { current: stats.hp, max: Math.max(1, stats.hpMax) },
         armor: stats.armor,
         toughness: stats.toughness,
         statuses: [],

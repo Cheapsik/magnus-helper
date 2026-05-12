@@ -117,4 +117,6 @@ export type SavedNpc = CharacterSheetCore & {
   cechyCharakteru: string;
   opisOgolny: string;
   notatkiMG: string;
+  /** Id grupy z AppContext.npcGroups; brak = lista „Bez grupy”. */
+  npcGroupId?: string;
 };

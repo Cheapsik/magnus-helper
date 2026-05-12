@@ -5,52 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Plus, Play, Pause, RotateCcw, Trash2, Square } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-
-/* ── Types ── */
-
-interface TimerData {
-  id: string;
-  label: string;
-  mode: "stopwatch" | "countdown";
-  /** countdown target in seconds */
-  countdownSet: number;
-}
-
-interface TimerRuntime extends TimerData {
-  running: boolean;
-  /** elapsed ms for stopwatch, remaining ms for countdown */
-  displayMs: number;
-  startedAt: number | null; // Date.now() when started
-  accumulatedMs: number; // ms accumulated before last pause
-  finished: boolean;
-}
-
-/* ── Persistence ── */
-
-const STORAGE_KEY = "rpg_timers";
-
-function loadTimers(): TimerData[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveTimers(timers: TimerData[]) {
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(
-      timers.map(({ id, label, mode, countdownSet }) => ({
-        id,
-        label,
-        mode,
-        countdownSet,
-      }))
-    )
-  );
-}
+import {
+  type TimerRuntime,
+  loadTimersFromStorage,
+  saveTimersToStorage,
+  formatTimerMs,
+  dataToRuntime,
+} from "@/lib/rpgTimersStorage";
 
 /* ── Audio (lazy AudioContext; resume na mobile) ── */
 
@@ -84,26 +45,6 @@ async function playBeep() {
 }
 
 /* ── Helpers ── */
-
-function formatTime(ms: number): string {
-  const totalSec = Math.max(0, Math.floor(ms / 1000));
-  const h = Math.floor(totalSec / 3600);
-  const m = Math.floor((totalSec % 3600) / 60);
-  const s = totalSec % 60;
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
-}
-
-function dataToRuntime(d: TimerData): TimerRuntime {
-  return {
-    ...d,
-    running: false,
-    displayMs: d.mode === "countdown" ? d.countdownSet * 1000 : 0,
-    startedAt: null,
-    accumulatedMs: 0,
-    finished: false,
-  };
-}
 
 /* ── Timer Card ── */
 
@@ -280,7 +221,7 @@ function TimerCard({
             timer.finished && "text-destructive"
           )}
         >
-          {formatTime(timer.displayMs)}
+          {formatTimerMs(timer.displayMs)}
         </div>
 
         {/* Countdown set inputs */}
@@ -364,14 +305,14 @@ function TimerCard({
 
 export default function TimersPage() {
   const [timers, setTimers] = useState<TimerRuntime[]>(() =>
-    loadTimers().map(dataToRuntime)
+    loadTimersFromStorage().map(dataToRuntime)
   );
   const timersRef = useRef(timers);
   timersRef.current = timers;
 
   // Persist on config change
   useEffect(() => {
-    saveTimers(timers);
+    saveTimersToStorage(timers);
   }, [timers]);
 
   // Tick loop

@@ -142,6 +142,7 @@ export function normalizeSavedNpcEntry(item: unknown): SavedNpc | null {
       umiejetnosciZaawansowane: Array.isArray(n.umiejetnosciZaawansowane) ? n.umiejetnosciZaawansowane : [],
       zdolnosci: Array.isArray(n.zdolnosci) ? n.zdolnosci : [],
       wyposazenie: Array.isArray(n.wyposazenie) ? n.wyposazenie : [],
+      npcGroupId: typeof n.npcGroupId === "string" && n.npcGroupId.trim() ? n.npcGroupId.trim() : undefined,
     };
   }
   return null;

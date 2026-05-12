@@ -15,6 +15,7 @@ export interface Category {
   id: string;
   name: string;
   collapsed: boolean;
+  emoji?: string;
 }
 
 export interface SoundboardConfig {
@@ -24,9 +25,9 @@ export interface SoundboardConfig {
 
 const DEFAULT_CONFIG: SoundboardConfig = {
   categories: [
-    { id: "env", name: "Środowisko", collapsed: false },
-    { id: "music", name: "Muzyka", collapsed: false },
-    { id: "fx", name: "Efekty", collapsed: false },
+    { id: "env", name: "Środowisko", collapsed: false, emoji: "🌍" },
+    { id: "music", name: "Muzyka", collapsed: false, emoji: "🎵" },
+    { id: "fx", name: "Efekty", collapsed: false, emoji: "✨" },
   ],
   sounds: [
     { id: "s1", name: "Deszcz", emoji: "🌧️", url: "https://www.youtube.com/watch?v=q76bMs-NwRk", type: "loop", categoryId: "env", volume: 70 },
@@ -38,6 +39,37 @@ const DEFAULT_CONFIG: SoundboardConfig = {
     { id: "s8", name: "Dzwon kościelny", emoji: "🔔", url: "https://www.youtube.com/watch?v=D1hddNfO7C0", type: "loop", categoryId: "fx", volume: 70 },
   ],
 };
+
+function reviveSoundboardConfig(parsed: unknown): SoundboardConfig {
+  if (!parsed || typeof parsed !== "object") return DEFAULT_CONFIG;
+  const raw = parsed as Partial<SoundboardConfig>;
+  const defaultEmojiById = Object.fromEntries(
+    DEFAULT_CONFIG.categories.map((c) => [c.id, c.emoji ?? "📌"]),
+  );
+  const catsIn = Array.isArray(raw.categories) ? raw.categories : [];
+  const categories: Category[] =
+    catsIn.length > 0
+      ? catsIn.map((item) => {
+          const c = item as Category;
+          const id = String(c.id || "").trim() || Math.random().toString(36).slice(2, 10);
+          return {
+            id,
+            name: typeof c.name === "string" && c.name.trim() ? c.name.trim() : "Kategoria",
+            collapsed: !!c.collapsed,
+            emoji:
+              typeof c.emoji === "string" && c.emoji.trim()
+                ? c.emoji.trim().slice(0, 8)
+                : defaultEmojiById[id] ?? "📌",
+          };
+        })
+      : DEFAULT_CONFIG.categories;
+  const soundsIn = Array.isArray(raw.sounds) ? raw.sounds : [];
+  const sounds: SoundItem[] =
+    soundsIn.length > 0
+      ? (soundsIn as SoundItem[])
+      : DEFAULT_CONFIG.sounds;
+  return { categories, sounds };
+}
 
 const YT_REGEX = /(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
 function extractYouTubeId(url: string): string | null {
@@ -106,7 +138,9 @@ const FADE_OUT_MS = 1200;
 const FADE_IN_MS = 600;
 
 export function AmbientProvider({ children }: { children: ReactNode }) {
-  const [config, setConfig] = useLocalStorage<SoundboardConfig>("rpg_soundboard_config", DEFAULT_CONFIG);
+  const [config, setConfig] = useLocalStorage<SoundboardConfig>("rpg_soundboard_config", DEFAULT_CONFIG, {
+    revive: reviveSoundboardConfig,
+  });
   const [masterVolume, setMasterVolumeState] = useLocalStorage<number>("rpg_ambient_master", 80);
 
   const [playing, setPlaying] = useState<Record<string, boolean>>({});

@@ -81,9 +81,9 @@ function buildShadcnVars(theme: ThemeDefinition): Record<string, string> {
 }
 
 function applyTheme(themeId: ThemeId) {
-  const theme = THEMES[themeId] ?? THEMES.blood_and_gold;
+  const theme = THEMES[themeId] ?? THEMES[DEFAULT_SETTINGS.theme];
   const root = document.documentElement;
-  Object.entries(theme.vars).forEach(([k, val]) => root.style.setProperty(k, val));
+  Object.entries(theme.vars).forEach(([k, val]) => root.style.setProperty(k, String(val)));
   Object.entries(buildShadcnVars(theme)).forEach(([k, val]) => root.style.setProperty(k, val));
   root.dataset.theme = theme.id;
 }
@@ -93,7 +93,7 @@ function applyTheme(themeId: ThemeId) {
  * ────────────────────────────────────────────────────────────*/
 
 const SETTINGS_KEYS_TO_PRESERVE = new Set<string>([SETTINGS_STORAGE_KEY]);
-const APP_DATA_PREFIXES = ["nexus_", "rpg_"] as const;
+const APP_DATA_PREFIXES = ["magnus_", "rpg_"] as const;
 
 function isAppDataKey(key: string): boolean {
   if (SETTINGS_KEYS_TO_PRESERVE.has(key)) return false;
