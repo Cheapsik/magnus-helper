@@ -304,7 +304,7 @@ export default function LootGeneratorPage() {
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center justify-between gap-2">
-        <h1 className="text-lg font-bold text-foreground truncate leading-tight min-w-0">Ekwipunek i generator łupu</h1>
+        <h1 className="font-app-brand text-lg font-bold text-foreground truncate leading-tight min-w-0">Ekwipunek i generator łupu</h1>
       </div>
 
       <div className="flex flex-wrap gap-1.5">

@@ -92,7 +92,7 @@ export default function DicePage() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <h1 className="text-lg font-bold">Rzut kośćmi</h1>
+      <h1 className="font-app-brand text-lg font-bold">Rzut kośćmi</h1>
 
       {/* Typ kości */}
       <section>

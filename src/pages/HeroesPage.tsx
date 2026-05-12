@@ -148,7 +148,7 @@ export default function HeroesPage() {
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold">Bohaterowie</h1>
+        <h1 className="font-app-brand text-lg font-bold">Bohaterowie</h1>
         <button
           onClick={addHero}
           className="inline-flex items-center gap-2 h-11 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors min-h-[44px]"

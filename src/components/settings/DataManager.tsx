@@ -57,7 +57,7 @@ export default function DataManager() {
 
   return (
     <section className="space-y-3">
-      <h2 className="font-display text-base tracking-wide text-foreground">Dane</h2>
+      <h2 className="text-base tracking-wide text-foreground">Dane</h2>
 
       <input
         ref={fileRef}

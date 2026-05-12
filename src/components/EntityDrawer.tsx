@@ -117,7 +117,7 @@ function MonsterBody({ id, onClose }: { id: string; onClose: () => void }) {
         <Badge variant="outline" className="text-[10px] uppercase tracking-widest border-primary/40 text-primary">
           {m.typ}
         </Badge>
-        <h2 className="font-display text-3xl mt-2 leading-tight text-foreground">{m.nazwa}</h2>
+        <h2 className="text-3xl mt-2 leading-tight text-foreground">{m.nazwa}</h2>
         {m.opis && <p className="text-sm text-muted-foreground mt-2 italic">{m.opis}</p>}
       </div>
 
@@ -132,7 +132,7 @@ function MonsterBody({ id, onClose }: { id: string; onClose: () => void }) {
           ] as const).map(([l, v]) => (
             <div key={l} className="border border-border bg-secondary/30 py-1.5">
               <div className="text-[9px] uppercase text-muted-foreground tracking-wider">{l}</div>
-              <div className="font-display text-lg text-foreground">{v ?? "—"}</div>
+              <div className="text-lg text-foreground">{v ?? "—"}</div>
             </div>
           ))}
         </div>
@@ -147,7 +147,7 @@ function MonsterBody({ id, onClose }: { id: string; onClose: () => void }) {
           ] as const).map(([l, v]) => (
             <div key={l} className="border border-border bg-secondary/30 py-1.5">
               <div className="text-[9px] uppercase text-muted-foreground tracking-wider">{l}</div>
-              <div className="font-display text-lg text-foreground">{v ?? "—"}</div>
+              <div className="text-lg text-foreground">{v ?? "—"}</div>
             </div>
           ))}
         </div>
@@ -201,7 +201,7 @@ function MonsterBody({ id, onClose }: { id: string; onClose: () => void }) {
         />
       </section>
 
-      <Button onClick={sendToCombat} size="lg" className="w-full gap-2 font-display text-base">
+      <Button onClick={sendToCombat} size="lg" className="w-full gap-2 text-base">
         <Swords className="h-5 w-5" /> Wyślij do Walki
       </Button>
     </div>
@@ -218,7 +218,7 @@ function HeroBody({ id, onClose }: { id: string; onClose: () => void }) {
         <Badge variant="outline" className="text-[10px] uppercase tracking-widest border-primary/40 text-primary">
           {h.profesja || h.rasa || "Bohater"}
         </Badge>
-        <h2 className="font-display text-3xl mt-2 leading-tight text-foreground">{h.imie || "Bez imienia"}</h2>
+        <h2 className="text-3xl mt-2 leading-tight text-foreground">{h.imie || "Bez imienia"}</h2>
         <p className="text-sm text-muted-foreground mt-1">
           {[h.rasa, h.profesja, h.plec].filter(Boolean).join(" · ")}
         </p>
@@ -226,7 +226,7 @@ function HeroBody({ id, onClose }: { id: string; onClose: () => void }) {
       <div className="gold-divider" />
       <Button
         onClick={() => { navigate("/heroes"); onClose(); }}
-        className="w-full gap-2 font-display text-base"
+        className="w-full gap-2 text-base"
         size="lg"
       >
         <Edit2 className="h-4 w-4" /> Otwórz pełną kartę
@@ -276,7 +276,7 @@ function NpcBody({ id, onClose }: { id: string; onClose: () => void }) {
     <div className="flex flex-col gap-5 p-5">
       <div>
         <Badge variant="outline" className="text-[10px] uppercase tracking-widest border-primary/40 text-primary">NPC</Badge>
-        <h2 className="font-display text-3xl mt-2 leading-tight text-foreground">{name}</h2>
+        <h2 className="text-3xl mt-2 leading-tight text-foreground">{name}</h2>
         <p className="text-sm text-muted-foreground italic">{occupation}</p>
       </div>
       {npc.opisOgolny && <p className="text-sm text-muted-foreground">{npc.opisOgolny}</p>}
@@ -284,7 +284,7 @@ function NpcBody({ id, onClose }: { id: string; onClose: () => void }) {
         <p className="text-sm border-l-2 border-primary/60 pl-2 text-foreground/90">{npc.notatkiMG}</p>
       )}
       <div className="gold-divider" />
-      <Button onClick={send} size="lg" className="w-full gap-2 font-display text-base">
+      <Button onClick={send} size="lg" className="w-full gap-2 text-base">
         <Swords className="h-5 w-5" /> Wyślij do Walki
       </Button>
     </div>

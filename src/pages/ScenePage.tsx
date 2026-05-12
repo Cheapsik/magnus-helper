@@ -160,7 +160,7 @@ export default function ScenePage() {
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold flex items-center gap-2"><MapPin className="h-5 w-5" /> Scena</h1>
+        <h1 className="font-app-brand text-lg font-bold flex items-center gap-2"><MapPin className="h-5 w-5" /> Scena</h1>
         <Button size="sm" className="gap-1" onClick={openCreate}><Plus className="h-3.5 w-3.5" /> Nowa scena</Button>
       </div>
 
@@ -188,7 +188,7 @@ export default function ScenePage() {
       <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
         <SheetContent side="right" className="w-full sm:max-w-[480px] overflow-y-auto">
           <SheetHeader>
-            <SheetTitle className="font-display">{editingId ? "Edycja sceny" : "Nowa scena"}</SheetTitle>
+            <SheetTitle>{editingId ? "Edycja sceny" : "Nowa scena"}</SheetTitle>
           </SheetHeader>
 
           <div className="space-y-5 py-4 pb-24">
@@ -312,7 +312,7 @@ function SceneCard({ scene, ambientNames, onActivate, onEdit, onDelete }: {
           <span className="absolute top-2 right-2 text-[9px] px-1.5 py-0.5 bg-primary/20 text-primary uppercase tracking-wider">Aktywna</span>
         )}
         <div className="flex items-center justify-between gap-2">
-          <h3 className="font-display text-base flex items-center gap-2">
+          <h3 className="text-base flex items-center gap-2">
             <span className={cn("inline-block w-1.5 h-1.5 rounded-full", scene.isActive ? "bg-primary" : "bg-muted-foreground/40")} />
             {scene.name}
           </h3>
@@ -362,7 +362,7 @@ function ActiveSceneView({ scene, onEdit, onDeactivate, ambient, savedNpcs, ques
       <Card className="border-primary" style={{ boxShadow: "0 0 24px hsl(var(--primary) / 0.18)" }}>
         <CardContent className="p-4 space-y-2">
           <div className="flex items-center justify-between gap-2">
-            <h1 className="text-xl font-display flex items-center gap-2"><MapPin className="h-5 w-5 text-primary" /> {scene.name}</h1>
+            <h1 className="font-app-brand text-xl font-bold flex items-center gap-2"><MapPin className="h-5 w-5 text-primary" /> {scene.name}</h1>
             <div className="flex items-center gap-1">
               <Button size="sm" variant="outline" onClick={onEdit}><Edit2 className="h-3.5 w-3.5" /></Button>
               <Button size="sm" variant="ghost" onClick={onDeactivate}>Dezaktywuj</Button>
@@ -447,7 +447,7 @@ function ActiveSceneView({ scene, onEdit, onDeactivate, ambient, savedNpcs, ques
           <Card className="max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
             <CardContent className="p-6 space-y-3">
               <div className="flex items-start justify-between">
-                <p className="text-base font-display">{quickResult}</p>
+                <p className="text-base">{quickResult}</p>
                 <Button size="icon" variant="ghost" className="h-7 w-7" onClick={clearQuick}><X className="h-4 w-4" /></Button>
               </div>
             </CardContent>

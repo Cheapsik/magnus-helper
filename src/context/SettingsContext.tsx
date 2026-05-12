@@ -114,7 +114,8 @@ function loadSettings(): AppSettings {
     const raw = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
     if (!raw) return DEFAULT_SETTINGS;
     const parsed = JSON.parse(raw) as Partial<AppSettings>;
-    const theme: ThemeId = parsed.theme && parsed.theme in THEMES ? parsed.theme : DEFAULT_SETTINGS.theme;
+    const theme: ThemeId =
+      parsed.theme && parsed.theme in THEMES ? parsed.theme : DEFAULT_SETTINGS.theme;
     return { ...DEFAULT_SETTINGS, ...parsed, theme };
   } catch {
     return DEFAULT_SETTINGS;
