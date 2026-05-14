@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { NumberInput } from "@/components/ui/number-input";
 import { cn } from "@/lib/utils";
+import { StatAbbrWithTooltip } from "@/components/game/StatAbbrWithTooltip";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from "recharts";
@@ -251,8 +252,14 @@ export default function SimulationsPage() {
               <CardContent className="p-3 space-y-2">
                 <label className="text-xs font-semibold text-foreground">Atakujący</label>
                 <div className="grid grid-cols-2 gap-1.5">
-                  <div><label className="text-[10px] text-muted-foreground">WW</label><NumberInput value={atkWw} onChange={setAtkWw} className="h-8 text-xs text-center" /></div>
-                  <div><label className="text-[10px] text-muted-foreground">SB</label><NumberInput value={atkSb} onChange={setAtkSb} className="h-8 text-xs text-center" /></div>
+                  <div>
+                    <div className="text-[10px] text-muted-foreground"><StatAbbrWithTooltip statKey="ww" className="text-[10px] text-muted-foreground">WW</StatAbbrWithTooltip></div>
+                    <NumberInput value={atkWw} onChange={setAtkWw} className="h-8 text-xs text-center" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-muted-foreground"><StatAbbrWithTooltip statKey="sb" className="text-[10px] text-muted-foreground">SB</StatAbbrWithTooltip></div>
+                    <NumberInput value={atkSb} onChange={setAtkSb} className="h-8 text-xs text-center" />
+                  </div>
                 </div>
                 <div><label className="text-[10px] text-muted-foreground">Obrażenia broni</label><NumberInput value={atkWeaponDmg} onChange={setAtkWeaponDmg} className="h-8 text-xs text-center" /></div>
               </CardContent>
@@ -261,12 +268,24 @@ export default function SimulationsPage() {
               <CardContent className="p-3 space-y-2">
                 <label className="text-xs font-semibold text-foreground">Obrońca</label>
                 <div className="grid grid-cols-2 gap-1.5">
-                  <div><label className="text-[10px] text-muted-foreground">WW</label><NumberInput value={defWw} onChange={setDefWw} className="h-8 text-xs text-center" /></div>
-                  <div><label className="text-[10px] text-muted-foreground">PŻ</label><NumberInput value={defHp} onChange={setDefHp} min={1} className="h-8 text-xs text-center" /></div>
+                  <div>
+                    <div className="text-[10px] text-muted-foreground"><StatAbbrWithTooltip statKey="ww" className="text-[10px] text-muted-foreground">WW</StatAbbrWithTooltip></div>
+                    <NumberInput value={defWw} onChange={setDefWw} className="h-8 text-xs text-center" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-muted-foreground"><StatAbbrWithTooltip statKey="pż" className="text-[10px] text-muted-foreground">PŻ</StatAbbrWithTooltip></div>
+                    <NumberInput value={defHp} onChange={setDefHp} min={1} className="h-8 text-xs text-center" />
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-1.5">
-                  <div><label className="text-[10px] text-muted-foreground">Wt</label><NumberInput value={defToughness} onChange={setDefToughness} className="h-8 text-xs text-center" /></div>
-                  <div><label className="text-[10px] text-muted-foreground">Pancerz</label><NumberInput value={defArmor} onChange={setDefArmor} className="h-8 text-xs text-center" /></div>
+                  <div>
+                    <div className="text-[10px] text-muted-foreground"><StatAbbrWithTooltip statKey="wt" className="text-[10px] text-muted-foreground">Wt</StatAbbrWithTooltip></div>
+                    <NumberInput value={defToughness} onChange={setDefToughness} className="h-8 text-xs text-center" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-muted-foreground"><StatAbbrWithTooltip statKey="pnc" className="text-[10px] text-muted-foreground">Pancerz</StatAbbrWithTooltip></div>
+                    <NumberInput value={defArmor} onChange={setDefArmor} className="h-8 text-xs text-center" />
+                  </div>
                 </div>
               </CardContent>
             </Card>

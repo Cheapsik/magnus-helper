@@ -1,4 +1,6 @@
 import type { StatRow, StatRow2 } from "../types";
+import type { GameStatKey } from "@/lib/gameStatGlossary";
+import { StatAbbrWithTooltip } from "@/components/game/StatAbbrWithTooltip";
 
 export function StatTable<T extends StatRow | StatRow2>({
   cols,
@@ -21,7 +23,9 @@ export function StatTable<T extends StatRow | StatRow2>({
           <tr>
             <th></th>
             {cols.map((c) => (
-              <th key={String(c.key)}>{c.label}</th>
+              <th key={String(c.key)}>
+                <StatAbbrWithTooltip statKey={c.key as GameStatKey}>{c.label}</StatAbbrWithTooltip>
+              </th>
             ))}
           </tr>
         </thead>

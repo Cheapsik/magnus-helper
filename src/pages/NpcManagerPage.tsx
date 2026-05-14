@@ -7,6 +7,7 @@ import { createEmptyNpc } from "@/components/character-sheet/factory";
 import { generateRandomNpcSheet } from "@/components/character-sheet/random";
 import { getNpcCombatStats, getNpcDisplayName } from "@/components/character-sheet/npcAccessors";
 import { cn } from "@/lib/utils";
+import { StatAbbrWithTooltip } from "@/components/game/StatAbbrWithTooltip";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -86,13 +87,16 @@ function NpcListCard({
             )}
             <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-1.5 text-[10px] text-muted-foreground">
               <span>
-                WW <span className="font-bold text-foreground">{npc.cechyGlowne.p.ww || "—"}</span>
+                <StatAbbrWithTooltip statKey="ww" className="text-muted-foreground">WW</StatAbbrWithTooltip>{" "}
+                <span className="font-bold text-foreground">{npc.cechyGlowne.p.ww || "—"}</span>
               </span>
               <span>
-                US <span className="font-bold text-foreground">{npc.cechyGlowne.p.us || "—"}</span>
+                <StatAbbrWithTooltip statKey="us" className="text-muted-foreground">US</StatAbbrWithTooltip>{" "}
+                <span className="font-bold text-foreground">{npc.cechyGlowne.p.us || "—"}</span>
               </span>
               <span>
-                Żyw <span className="font-bold text-foreground">{npc.cechyDrugorzedne.p.zyw || "—"}</span>
+                <StatAbbrWithTooltip statKey="zyw" className="text-muted-foreground">Żyw</StatAbbrWithTooltip>{" "}
+                <span className="font-bold text-foreground">{npc.cechyDrugorzedne.p.zyw || "—"}</span>
               </span>
             </div>
           </button>

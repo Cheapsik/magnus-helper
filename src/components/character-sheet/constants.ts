@@ -1,4 +1,9 @@
 import type { StatRow, StatRow2 } from "./types";
+import { STAT_MAIN_COLUMNS, STAT_SECONDARY_COLUMNS } from "@/lib/gameStatGlossary";
+
+/** Kolumny cech — etykiety ze wspólnego słownika ([`gameStatGlossary`](@/lib/gameStatGlossary)). */
+export const STAT_MAIN: { key: keyof StatRow; label: string }[] = STAT_MAIN_COLUMNS;
+export const STAT_SECONDARY: { key: keyof StatRow2; label: string }[] = STAT_SECONDARY_COLUMNS;
 
 export const DEFAULT_BASIC_SKILLS = [
   "Charakteryzacja",
@@ -21,28 +26,6 @@ export const DEFAULT_BASIC_SKILLS = [
   "Wspinaczka",
   "Wycena",
   "Zastraszanie",
-];
-
-export const STAT_MAIN: { key: keyof StatRow; label: string }[] = [
-  { key: "ww", label: "WW" },
-  { key: "us", label: "US" },
-  { key: "k", label: "K" },
-  { key: "odp", label: "Odp" },
-  { key: "zr", label: "Zr" },
-  { key: "int", label: "Int" },
-  { key: "sw", label: "SW" },
-  { key: "ogd", label: "Ogd" },
-];
-
-export const STAT_SECONDARY: { key: keyof StatRow2; label: string }[] = [
-  { key: "a", label: "A" },
-  { key: "zyw", label: "Żyw" },
-  { key: "s", label: "S" },
-  { key: "wt", label: "Wt" },
-  { key: "sz", label: "Sz" },
-  { key: "mag", label: "Mag" },
-  { key: "po", label: "PO" },
-  { key: "pp", label: "PP" },
 ];
 
 /** Zestawienie akcji — treść jak na karcie PDF (tylko odczyt). */

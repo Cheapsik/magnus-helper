@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { SavedNpc } from "@/context/AppContext";
 import { getNpcCombatStats } from "@/components/character-sheet/npcAccessors";
+import { StatAbbrWithTooltip } from "@/components/game/StatAbbrWithTooltip";
 
 export type EntityKind = "monster" | "npc" | "hero" | "quest" | "item";
 
@@ -131,7 +132,9 @@ function MonsterBody({ id, onClose }: { id: string; onClose: () => void }) {
             ["Zr", m.cechyGlowne?.zr], ["Int", m.cechyGlowne?.int], ["SW", m.cechyGlowne?.sw], ["Ogd", m.cechyGlowne?.ogd],
           ] as const).map(([l, v]) => (
             <div key={l} className="border border-border bg-secondary/30 py-1.5">
-              <div className="text-[9px] uppercase text-muted-foreground tracking-wider">{l}</div>
+              <div className="text-[9px] uppercase text-muted-foreground tracking-wider">
+                <StatAbbrWithTooltip abbr={l} className="text-[9px] uppercase text-muted-foreground tracking-wider">{l}</StatAbbrWithTooltip>
+              </div>
               <div className="text-lg text-foreground">{v ?? "—"}</div>
             </div>
           ))}
@@ -146,7 +149,9 @@ function MonsterBody({ id, onClose }: { id: string; onClose: () => void }) {
             ["S", m.cechyDrugorzedne?.s], ["Wt", m.cechyDrugorzedne?.wt],
           ] as const).map(([l, v]) => (
             <div key={l} className="border border-border bg-secondary/30 py-1.5">
-              <div className="text-[9px] uppercase text-muted-foreground tracking-wider">{l}</div>
+              <div className="text-[9px] uppercase text-muted-foreground tracking-wider">
+                <StatAbbrWithTooltip abbr={l} className="text-[9px] uppercase text-muted-foreground tracking-wider">{l}</StatAbbrWithTooltip>
+              </div>
               <div className="text-lg text-foreground">{v ?? "—"}</div>
             </div>
           ))}

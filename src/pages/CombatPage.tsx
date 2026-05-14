@@ -16,6 +16,7 @@ import { NumberInput } from "@/components/ui/number-input";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReadyOpponentsPanel } from "@/components/combat/ReadyOpponentsPanel";
+import { StatAbbrWithTooltip } from "@/components/game/StatAbbrWithTooltip";
 
 const COMMON_STATUSES = ["Ogłuszony", "Powalony", "Krwawienie", "Zmęczony", "Przestraszony", "Oślepiony", "Oszołomiony", "Bezbronny", "Unieruchomiony", "Zatruty"];
 
@@ -217,20 +218,34 @@ function CombatActionPanel({
 
             {/* Weapon / toughness / armor */}
             <div className="grid grid-cols-3 gap-1.5">
-              {[
-                { label: "Broń", value: weaponDamage, set: setWeaponDamage },
-                { label: "Wt celu", value: targetToughness, set: setTargetToughness },
-                { label: "Pancerz", value: targetArmor, set: setTargetArmor },
-              ].map((p) => (
-                <div key={p.label} className="text-center">
-                  <label className="text-[9px] text-muted-foreground block mb-0.5">{p.label}</label>
-                  <div className="flex items-center justify-center gap-0.5">
-                    <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => p.set(Math.max(0, p.value - 1))}><span className="text-[10px]">-</span></Button>
-                    <span className="font-bold text-xs min-w-[2ch]">{p.value}</span>
-                    <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => p.set(p.value + 1)}><span className="text-[10px]">+</span></Button>
-                  </div>
+              <div key="bron" className="text-center">
+                <div className="text-[9px] text-muted-foreground block mb-0.5">Broń</div>
+                <div className="flex items-center justify-center gap-0.5">
+                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => setWeaponDamage(Math.max(0, weaponDamage - 1))}><span className="text-[10px]">-</span></Button>
+                  <span className="font-bold text-xs min-w-[2ch]">{weaponDamage}</span>
+                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => setWeaponDamage(weaponDamage + 1)}><span className="text-[10px]">+</span></Button>
                 </div>
-              ))}
+              </div>
+              <div key="wt" className="text-center">
+                <div className="text-[9px] text-muted-foreground block mb-0.5">
+                  <StatAbbrWithTooltip abbr="Wt celu" className="text-[9px] text-muted-foreground">Wt celu</StatAbbrWithTooltip>
+                </div>
+                <div className="flex items-center justify-center gap-0.5">
+                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => setTargetToughness(Math.max(0, targetToughness - 1))}><span className="text-[10px]">-</span></Button>
+                  <span className="font-bold text-xs min-w-[2ch]">{targetToughness}</span>
+                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => setTargetToughness(targetToughness + 1)}><span className="text-[10px]">+</span></Button>
+                </div>
+              </div>
+              <div key="pnc" className="text-center">
+                <div className="text-[9px] text-muted-foreground block mb-0.5">
+                  <StatAbbrWithTooltip statKey="pnc" className="text-[9px] text-muted-foreground">Pancerz</StatAbbrWithTooltip>
+                </div>
+                <div className="flex items-center justify-center gap-0.5">
+                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => setTargetArmor(Math.max(0, targetArmor - 1))}><span className="text-[10px]">-</span></Button>
+                  <span className="font-bold text-xs min-w-[2ch]">{targetArmor}</span>
+                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => setTargetArmor(targetArmor + 1)}><span className="text-[10px]">+</span></Button>
+                </div>
+              </div>
             </div>
 
             <Button onClick={resolveAttack} className="w-full h-10 text-sm font-semibold gap-2">
@@ -252,7 +267,7 @@ function CombatActionPanel({
               <>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div><span className="text-[10px] text-muted-foreground block">Lokacja</span><span className="font-semibold">{result.location}</span></div>
-                  <div><span className="text-[10px] text-muted-foreground block">Rzut</span><span className="font-semibold">{result.damageRoll} + {derivedSB}(SB) + {weaponDamage}(broń)</span></div>
+                  <div><span className="text-[10px] text-muted-foreground block">Rzut</span><span className="font-semibold">{result.damageRoll} + {derivedSB}(<StatAbbrWithTooltip statKey="sb" className="font-semibold">SB</StatAbbrWithTooltip>) + {weaponDamage}(broń)</span></div>
                   <div><span className="text-[10px] text-muted-foreground block">Suma</span><span className="font-semibold">{result.totalDamage}</span></div>
                   <div><span className="text-[10px] text-muted-foreground block">Redukcja</span><span className="font-semibold">-{targetToughness + targetArmor}</span></div>
                 </div>
@@ -490,16 +505,40 @@ export default function CombatPage() {
                       </div>
                     </div>
                     <div className="grid grid-cols-4 gap-1.5">
-                      <div><label className="text-[9px] text-muted-foreground">Inicjatywa</label><NumberInput value={d.initiative} onChange={(v) => setEditDraft({ ...d, initiative: v })} className="h-7 text-xs text-center" /></div>
-                      <div><label className="text-[9px] text-muted-foreground">WW</label><NumberInput value={d.ww} onChange={(v) => setEditDraft({ ...d, ww: v })} className="h-7 text-xs text-center" /></div>
-                      <div><label className="text-[9px] text-muted-foreground">US</label><NumberInput value={d.us} onChange={(v) => setEditDraft({ ...d, us: v })} className="h-7 text-xs text-center" /></div>
-                      <div><label className="text-[9px] text-muted-foreground">SB</label><NumberInput value={d.sb} onChange={(v) => setEditDraft({ ...d, sb: v })} className="h-7 text-xs text-center" /></div>
+                      <div>
+                        <div className="text-[9px] text-muted-foreground"><StatAbbrWithTooltip statKey="inic" className="text-[9px] text-muted-foreground">Inicjatywa</StatAbbrWithTooltip></div>
+                        <NumberInput value={d.initiative} onChange={(v) => setEditDraft({ ...d, initiative: v })} className="h-7 text-xs text-center" />
+                      </div>
+                      <div>
+                        <div className="text-[9px] text-muted-foreground"><StatAbbrWithTooltip statKey="ww" className="text-[9px] text-muted-foreground">WW</StatAbbrWithTooltip></div>
+                        <NumberInput value={d.ww} onChange={(v) => setEditDraft({ ...d, ww: v })} className="h-7 text-xs text-center" />
+                      </div>
+                      <div>
+                        <div className="text-[9px] text-muted-foreground"><StatAbbrWithTooltip statKey="us" className="text-[9px] text-muted-foreground">US</StatAbbrWithTooltip></div>
+                        <NumberInput value={d.us} onChange={(v) => setEditDraft({ ...d, us: v })} className="h-7 text-xs text-center" />
+                      </div>
+                      <div>
+                        <div className="text-[9px] text-muted-foreground"><StatAbbrWithTooltip statKey="sb" className="text-[9px] text-muted-foreground">SB</StatAbbrWithTooltip></div>
+                        <NumberInput value={d.sb} onChange={(v) => setEditDraft({ ...d, sb: v })} className="h-7 text-xs text-center" />
+                      </div>
                     </div>
                     <div className="grid grid-cols-4 gap-1.5">
-                      <div><label className="text-[9px] text-muted-foreground">PŻ akt.</label><NumberInput value={d.hp.current} onChange={(v) => setEditDraft({ ...d, hp: { ...d.hp, current: v } })} className="h-7 text-xs text-center" /></div>
-                      <div><label className="text-[9px] text-muted-foreground">PŻ max</label><NumberInput value={d.hp.max} onChange={(v) => setEditDraft({ ...d, hp: { ...d.hp, max: v } })} className="h-7 text-xs text-center" /></div>
-                      <div><label className="text-[9px] text-muted-foreground">Pancerz</label><NumberInput value={d.armor} onChange={(v) => setEditDraft({ ...d, armor: v })} className="h-7 text-xs text-center" /></div>
-                      <div><label className="text-[9px] text-muted-foreground">Wt</label><NumberInput value={d.toughness} onChange={(v) => setEditDraft({ ...d, toughness: v })} className="h-7 text-xs text-center" /></div>
+                      <div>
+                        <div className="text-[9px] text-muted-foreground"><StatAbbrWithTooltip statKey="pż" className="text-[9px] text-muted-foreground">PŻ akt.</StatAbbrWithTooltip></div>
+                        <NumberInput value={d.hp.current} onChange={(v) => setEditDraft({ ...d, hp: { ...d.hp, current: v } })} className="h-7 text-xs text-center" />
+                      </div>
+                      <div>
+                        <div className="text-[9px] text-muted-foreground"><StatAbbrWithTooltip statKey="pż" className="text-[9px] text-muted-foreground">PŻ max</StatAbbrWithTooltip></div>
+                        <NumberInput value={d.hp.max} onChange={(v) => setEditDraft({ ...d, hp: { ...d.hp, max: v } })} className="h-7 text-xs text-center" />
+                      </div>
+                      <div>
+                        <div className="text-[9px] text-muted-foreground"><StatAbbrWithTooltip statKey="pnc" className="text-[9px] text-muted-foreground">Pancerz</StatAbbrWithTooltip></div>
+                        <NumberInput value={d.armor} onChange={(v) => setEditDraft({ ...d, armor: v })} className="h-7 text-xs text-center" />
+                      </div>
+                      <div>
+                        <div className="text-[9px] text-muted-foreground"><StatAbbrWithTooltip statKey="wt" className="text-[9px] text-muted-foreground">Wt</StatAbbrWithTooltip></div>
+                        <NumberInput value={d.toughness} onChange={(v) => setEditDraft({ ...d, toughness: v })} className="h-7 text-xs text-center" />
+                      </div>
                     </div>
                     <Textarea value={d.notes} onChange={(e) => setEditDraft({ ...d, notes: e.target.value })} placeholder="Notatki…" rows={2} className="text-xs min-h-[48px]" />
                     <div className="flex gap-1.5">
@@ -534,12 +573,32 @@ export default function CombatPage() {
 
                       {/* Stats row */}
                       <div className="flex items-center gap-3 mt-1 text-[11px]">
-                        <span className="text-muted-foreground">Inic <span className="font-bold text-foreground">{c.initiative}</span></span>
-                        <span className="text-muted-foreground">WW <span className="font-bold text-foreground">{c.ww}</span></span>
-                        <span className="text-muted-foreground">US <span className="font-bold text-foreground">{c.us}</span></span>
-                        <span className="text-muted-foreground">SB <span className="font-bold text-foreground">{c.sb}</span></span>
-                        <span className="text-muted-foreground flex items-center gap-0.5"><Shield className="h-2.5 w-2.5" /> <span className="font-bold text-foreground">{c.armor}</span></span>
-                        <span className="text-muted-foreground">Wt <span className="font-bold text-foreground">{c.toughness}</span></span>
+                        <span className="text-muted-foreground">
+                          <StatAbbrWithTooltip statKey="inic" className="text-muted-foreground">Inic</StatAbbrWithTooltip>{" "}
+                          <span className="font-bold text-foreground">{c.initiative}</span>
+                        </span>
+                        <span className="text-muted-foreground">
+                          <StatAbbrWithTooltip statKey="ww" className="text-muted-foreground">WW</StatAbbrWithTooltip>{" "}
+                          <span className="font-bold text-foreground">{c.ww}</span>
+                        </span>
+                        <span className="text-muted-foreground">
+                          <StatAbbrWithTooltip statKey="us" className="text-muted-foreground">US</StatAbbrWithTooltip>{" "}
+                          <span className="font-bold text-foreground">{c.us}</span>
+                        </span>
+                        <span className="text-muted-foreground">
+                          <StatAbbrWithTooltip statKey="sb" className="text-muted-foreground">SB</StatAbbrWithTooltip>{" "}
+                          <span className="font-bold text-foreground">{c.sb}</span>
+                        </span>
+                        <span className="text-muted-foreground flex items-center gap-0.5">
+                          <StatAbbrWithTooltip statKey="pnc" className="flex items-center gap-0.5 text-muted-foreground">
+                            <Shield className="h-2.5 w-2.5" />
+                            <span className="font-bold text-foreground">{c.armor}</span>
+                          </StatAbbrWithTooltip>
+                        </span>
+                        <span className="text-muted-foreground">
+                          <StatAbbrWithTooltip statKey="wt" className="text-muted-foreground">Wt</StatAbbrWithTooltip>{" "}
+                          <span className="font-bold text-foreground">{c.toughness}</span>
+                        </span>
                       </div>
                     </div>
 
@@ -643,15 +702,36 @@ export default function CombatPage() {
             </div>
             <Input placeholder="Imię" value={newName} onChange={(e) => setNewName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addCombatant()} className="text-sm h-9" />
             <div className="grid grid-cols-4 gap-2">
-              <div><label className="text-[9px] text-muted-foreground">Inicjatywa</label><NumberInput value={newInit} onChange={setNewInit} className="text-sm h-8 text-center" /></div>
-              <div><label className="text-[9px] text-muted-foreground">WW</label><NumberInput value={newWw} onChange={setNewWw} className="text-sm h-8 text-center" /></div>
-              <div><label className="text-[9px] text-muted-foreground">US</label><NumberInput value={newUs} onChange={setNewUs} className="text-sm h-8 text-center" /></div>
-              <div><label className="text-[9px] text-muted-foreground">SB</label><NumberInput value={newSb} onChange={setNewSb} className="text-sm h-8 text-center" /></div>
+              <div>
+                <div className="text-[9px] text-muted-foreground"><StatAbbrWithTooltip statKey="inic" className="text-[9px] text-muted-foreground">Inicjatywa</StatAbbrWithTooltip></div>
+                <NumberInput value={newInit} onChange={setNewInit} className="text-sm h-8 text-center" />
+              </div>
+              <div>
+                <div className="text-[9px] text-muted-foreground"><StatAbbrWithTooltip statKey="ww" className="text-[9px] text-muted-foreground">WW</StatAbbrWithTooltip></div>
+                <NumberInput value={newWw} onChange={setNewWw} className="text-sm h-8 text-center" />
+              </div>
+              <div>
+                <div className="text-[9px] text-muted-foreground"><StatAbbrWithTooltip statKey="us" className="text-[9px] text-muted-foreground">US</StatAbbrWithTooltip></div>
+                <NumberInput value={newUs} onChange={setNewUs} className="text-sm h-8 text-center" />
+              </div>
+              <div>
+                <div className="text-[9px] text-muted-foreground"><StatAbbrWithTooltip statKey="sb" className="text-[9px] text-muted-foreground">SB</StatAbbrWithTooltip></div>
+                <NumberInput value={newSb} onChange={setNewSb} className="text-sm h-8 text-center" />
+              </div>
             </div>
             <div className="grid grid-cols-3 gap-2">
-              <div><label className="text-[9px] text-muted-foreground">PŻ</label><NumberInput value={newHp} onChange={setNewHp} min={1} className="text-sm h-8 text-center" /></div>
-              <div><label className="text-[9px] text-muted-foreground">Pancerz</label><NumberInput value={newArmor} onChange={setNewArmor} className="text-sm h-8 text-center" /></div>
-              <div><label className="text-[9px] text-muted-foreground">Wt</label><NumberInput value={newToughness} onChange={setNewToughness} className="text-sm h-8 text-center" /></div>
+              <div>
+                <div className="text-[9px] text-muted-foreground"><StatAbbrWithTooltip statKey="pż" className="text-[9px] text-muted-foreground">PŻ</StatAbbrWithTooltip></div>
+                <NumberInput value={newHp} onChange={setNewHp} min={1} className="text-sm h-8 text-center" />
+              </div>
+              <div>
+                <div className="text-[9px] text-muted-foreground"><StatAbbrWithTooltip statKey="pnc" className="text-[9px] text-muted-foreground">Pancerz</StatAbbrWithTooltip></div>
+                <NumberInput value={newArmor} onChange={setNewArmor} className="text-sm h-8 text-center" />
+              </div>
+              <div>
+                <div className="text-[9px] text-muted-foreground"><StatAbbrWithTooltip statKey="wt" className="text-[9px] text-muted-foreground">Wt</StatAbbrWithTooltip></div>
+                <NumberInput value={newToughness} onChange={setNewToughness} className="text-sm h-8 text-center" />
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <div className="flex gap-1.5">

@@ -9,11 +9,11 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import type { StatRow, StatRow2 } from "@/components/character-sheet/types";
+import { STAT_MAIN, STAT_SECONDARY } from "@/components/character-sheet/constants";
+import { StatTable } from "@/components/character-sheet/sub/StatTable";
 
 /* ──────────────────────── Typy ──────────────────────── */
-
-type StatRow = { ww: string; us: string; k: string; odp: string; zr: string; int: string; sw: string; ogd: string };
-type StatRow2 = { a: string; zyw: string; s: string; wt: string; sz: string; mag: string; po: string; pp: string };
 
 interface Bron { id: string; nazwa: string; obc: string; kategoria: string; sila: string; zasieg: string; przeladowanie: string; cechy: string; }
 interface PancerzProsty { id: string; typ: string; pz: string; }
@@ -48,16 +48,6 @@ const DEFAULT_BASIC_SKILLS = [
   "Opieka nad zwierzętami", "Plotkowanie", "Pływanie", "Powożenie", "Przekonywanie",
   "Przeszukiwanie", "Skradanie się", "Spostrzegawczość", "Sztuka przetrwania",
   "Targowanie", "Ukrywanie się", "Wioślarstwo", "Wspinaczka", "Wycena", "Zastraszanie",
-];
-
-const STAT_MAIN: { key: keyof StatRow; label: string }[] = [
-  { key: "ww", label: "WW" }, { key: "us", label: "US" }, { key: "k", label: "K" }, { key: "odp", label: "Odp" },
-  { key: "zr", label: "Zr" }, { key: "int", label: "Int" }, { key: "sw", label: "SW" }, { key: "ogd", label: "Ogd" },
-];
-
-const STAT_SECONDARY: { key: keyof StatRow2; label: string }[] = [
-  { key: "a", label: "A" }, { key: "zyw", label: "Żyw" }, { key: "s", label: "S" }, { key: "wt", label: "Wt" },
-  { key: "sz", label: "Sz" }, { key: "mag", label: "Mag" }, { key: "po", label: "PO" }, { key: "pp", label: "PP" },
 ];
 
 const emptyStat = (): StatRow => ({ ww: "", us: "", k: "", odp: "", zr: "", int: "", sw: "", ogd: "" });
@@ -442,50 +432,6 @@ function PaperField({ label, value, onChange, numeric }: { label: string; value:
         className="paper-input"
       />
     </label>
-  );
-}
-
-function StatTable<T extends StatRow | StatRow2>({
-  cols, rows, onChange,
-}: {
-  cols: { key: keyof T; label: string }[];
-  rows: { p: T; s: T; a: T };
-  onChange: (rowKey: "p" | "s" | "a", colKey: keyof T, val: string) => void;
-}) {
-  const rowDefs: { key: "p" | "s" | "a"; label: string; bold?: boolean }[] = [
-    { key: "p", label: "Początkowa" },
-    { key: "s", label: "Schemat rozwoju" },
-    { key: "a", label: "Aktualna", bold: true },
-  ];
-  return (
-    <div className="paper-table-wrap">
-      <table className="paper-table">
-        <thead>
-          <tr>
-            <th></th>
-            {cols.map((c) => <th key={String(c.key)}>{c.label}</th>)}
-          </tr>
-        </thead>
-        <tbody>
-          {rowDefs.map((r) => (
-            <tr key={r.key}>
-              <th className="paper-row-head">{r.label}</th>
-              {cols.map((c) => (
-                <td key={String(c.key)}>
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    value={(rows[r.key][c.key] as unknown as string) ?? ""}
-                    onChange={(e) => onChange(r.key, c.key, e.target.value)}
-                    className={"paper-input paper-input-cell " + (r.bold ? "font-bold" : "")}
-                  />
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
   );
 }
 
