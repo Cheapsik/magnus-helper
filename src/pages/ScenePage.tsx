@@ -186,12 +186,16 @@ export default function ScenePage() {
       )}
 
       <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-[480px] overflow-y-auto">
-          <SheetHeader>
+        <SheetContent
+          side="right"
+          className="flex h-full max-h-[100dvh] w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-[480px]"
+        >
+          <SheetHeader className="shrink-0 space-y-2 border-b border-border px-6 pb-4 pt-6 text-left">
             <SheetTitle>{editingId ? "Edycja sceny" : "Nowa scena"}</SheetTitle>
           </SheetHeader>
 
-          <div className="space-y-5 py-4 pb-24">
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+            <div className="space-y-5">
             {/* Basics */}
             <div className="space-y-2">
               <label className="text-xs uppercase tracking-wider text-muted-foreground">Nazwa</label>
@@ -287,9 +291,10 @@ export default function ScenePage() {
                 })}
               </div>
             </section>
+            </div>
           </div>
 
-          <div className="absolute left-0 right-0 bottom-0 border-t border-border bg-background p-3 flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2 border-t border-border bg-background px-4 py-3 sm:px-6">
             <Button onClick={handleSave} className="flex-1">Zapisz scenę</Button>
             <Button variant="ghost" onClick={() => setDrawerOpen(false)}>Anuluj</Button>
             {editingId && <Button variant="destructive" size="sm" onClick={handleDelete}><Trash2 className="h-3.5 w-3.5" /></Button>}

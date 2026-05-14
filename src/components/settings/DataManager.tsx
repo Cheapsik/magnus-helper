@@ -49,15 +49,19 @@ export default function DataManager() {
     resetData();
   };
 
-  const ghostBtn = cn(
-    "w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm",
-    "border border-border bg-transparent text-foreground",
-    "hover:bg-white/[0.04] hover:border-primary/60 transition-colors",
+  const dataBtn = cn(
+    "flex w-full items-center justify-center gap-2 rounded-md border border-border bg-white/[0.02] px-4 py-3 text-sm text-foreground transition-[background,border-color] duration-200 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)]",
+    "hover:border-white/[0.13] hover:bg-muted/80",
+  );
+
+  const dangerBtn = cn(
+    dataBtn,
+    "border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/40",
   );
 
   return (
-    <section className="space-y-3">
-      <h2 className="text-base tracking-wide text-foreground">Dane</h2>
+    <section className="space-y-4">
+      <h2 className="text-[11px] font-bold uppercase tracking-[0.09em] text-muted-foreground">Dane</h2>
 
       <input
         ref={fileRef}
@@ -68,35 +72,18 @@ export default function DataManager() {
         onChange={onFileChange}
       />
 
-      <div className="space-y-2">
-        <button type="button" className={ghostBtn} onClick={exportData}>
+      <div className="flex flex-col gap-2">
+        <button type="button" className={dataBtn} onClick={exportData}>
           <Download className="h-4 w-4" />
           Eksportuj dane
         </button>
 
-        <button type="button" className={ghostBtn} onClick={onImportClick}>
+        <button type="button" className={dataBtn} onClick={onImportClick}>
           <Upload className="h-4 w-4" />
           Importuj dane
         </button>
 
-        <button
-          type="button"
-          className={cn(
-            "w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm transition-colors",
-            "border bg-transparent",
-          )}
-          style={{
-            color: "var(--accent-red)",
-            borderColor: "var(--accent-red)",
-          }}
-          onClick={() => setResetStep("confirm")}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = "rgba(139, 26, 26, 0.08)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-          }}
-        >
+        <button type="button" className={dangerBtn} onClick={() => setResetStep("confirm")}>
           <Trash2 className="h-4 w-4" />
           Resetuj wszystkie dane
         </button>
