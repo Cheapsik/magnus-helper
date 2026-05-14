@@ -6,6 +6,7 @@ import type { SavedNpc } from "@/components/character-sheet/types";
 import { getNpcCombatStats, getNpcDisplayName } from "@/components/character-sheet/npcAccessors";
 import { readStorageValue, updateStorageCollectionItem } from "@/components/global-drawer/drawerStorage";
 import { useApp } from "@/context/AppContext";
+import { StatAbbrWithTooltip } from "@/components/game/StatAbbrWithTooltip";
 
 const NPC_STORAGE_KEY = "rpg_saved_npcs";
 
@@ -77,8 +78,18 @@ export function NpcDrawerView({ id }: NpcDrawerViewProps) {
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <Input value={npc.cechyGlowne.p.ww} onChange={(e) => updateNpc({ cechyGlowne: { ...npc.cechyGlowne, p: { ...npc.cechyGlowne.p, ww: e.target.value } } })} placeholder="WW" />
-        <Input value={npc.cechyGlowne.p.us} onChange={(e) => updateNpc({ cechyGlowne: { ...npc.cechyGlowne, p: { ...npc.cechyGlowne.p, us: e.target.value } } })} placeholder="US" />
+        <div className="space-y-1">
+          <div className="text-[10px] text-muted-foreground">
+            <StatAbbrWithTooltip statKey="ww">WW</StatAbbrWithTooltip>
+          </div>
+          <Input value={npc.cechyGlowne.p.ww} onChange={(e) => updateNpc({ cechyGlowne: { ...npc.cechyGlowne, p: { ...npc.cechyGlowne.p, ww: e.target.value } } })} placeholder="WW" />
+        </div>
+        <div className="space-y-1">
+          <div className="text-[10px] text-muted-foreground">
+            <StatAbbrWithTooltip statKey="us">US</StatAbbrWithTooltip>
+          </div>
+          <Input value={npc.cechyGlowne.p.us} onChange={(e) => updateNpc({ cechyGlowne: { ...npc.cechyGlowne, p: { ...npc.cechyGlowne.p, us: e.target.value } } })} placeholder="US" />
+        </div>
       </div>
       <Textarea
         value={npc.notatkiMG}

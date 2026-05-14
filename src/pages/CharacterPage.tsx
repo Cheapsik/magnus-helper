@@ -9,6 +9,7 @@ import { NumberInput } from "@/components/ui/number-input";
 import { Heart, Shield, Swords, Minus, Plus, X, Edit2, Check, Trash2, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CharacterData } from "@/data/character";
+import { StatAbbrFromCharacterStat, StatAbbrWithTooltip } from "@/components/game/StatAbbrWithTooltip";
 
 export default function CharacterPage() {
   const { character, updateCharacter, inventory } = useApp();
@@ -150,7 +151,11 @@ export default function CharacterPage() {
           <div className="grid grid-cols-4 gap-2">
             {data.stats.map((stat, i) => (
               <div key={stat.abbr} className="text-center bg-muted rounded-lg p-2">
-                <div className="text-[10px] text-muted-foreground font-medium">{stat.abbr}</div>
+                <div className="text-[10px] text-muted-foreground font-medium">
+                  <StatAbbrFromCharacterStat abbr={stat.abbr} label={stat.label} className="text-[10px] text-muted-foreground font-medium">
+                    {stat.abbr}
+                  </StatAbbrFromCharacterStat>
+                </div>
                 {editing ? (
                   <NumberInput value={draft.stats[i].value} onChange={(v) => {
                     const stats = [...draft.stats];
@@ -236,7 +241,10 @@ export default function CharacterPage() {
             ) : (
               <div key={i} className="flex items-center justify-between text-sm bg-muted rounded-md px-3 py-2">
                 <span className="font-medium">{a.name}</span>
-                <div className="text-xs text-muted-foreground">PP {a.ap} · {a.locations}</div>
+                <div className="text-xs text-muted-foreground">
+                  <StatAbbrWithTooltip statKey="pp" className="text-xs text-muted-foreground">PP</StatAbbrWithTooltip>{" "}
+                  {a.ap} · {a.locations}
+                </div>
               </div>
             ))}
           </div>

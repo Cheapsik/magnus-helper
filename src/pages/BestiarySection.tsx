@@ -20,6 +20,9 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useEntityDrawer } from "@/components/EntityDrawer";
+import { STAT_MAIN_COLUMNS, STAT_SECONDARY_COLUMNS } from "@/lib/gameStatGlossary";
+import type { GameStatKey } from "@/lib/gameStatGlossary";
+import { StatAbbrWithTooltip } from "@/components/game/StatAbbrWithTooltip";
 
 /* ── Types ── */
 
@@ -48,7 +51,7 @@ interface Monster {
   ataki: MonsterAttack[];
   zdolnosci: MonsterAbility[];
   xp: number;
-  lup: string[]; // item ids from rpg_items_db / lootConfig.items
+  lup: string[];
 }
 
 interface BestiaryStore {
@@ -305,15 +308,6 @@ function MonsterModal({
     onClose();
   };
 
-  const PRIMARY_LABELS: [keyof Monster["cechyGlowne"], string][] = [
-    ["ww", "WW"], ["us", "US"], ["k", "K"], ["odp", "Odp"],
-    ["zr", "Zr"], ["int", "Int"], ["sw", "SW"], ["ogd", "Ogd"],
-  ];
-  const SECONDARY_LABELS: [keyof Monster["cechyDrugorzedne"], string][] = [
-    ["a", "A"], ["zyw", "Żyw"], ["s", "S"], ["wt", "Wt"],
-    ["sz", "Sz"], ["mag", "Mag"], ["po", "PO"], ["pp", "PP"],
-  ];
-
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -364,9 +358,11 @@ function MonsterModal({
           <section className="space-y-2">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cechy główne</h3>
             <div className="grid grid-cols-4 gap-1.5">
-              {PRIMARY_LABELS.map(([key, label]) => (
+              {STAT_MAIN_COLUMNS.map(({ key, label }) => (
                 <div key={key}>
-                  <label className="text-[10px] text-muted-foreground block text-center">{label}</label>
+                  <label className="text-[10px] text-muted-foreground block text-center">
+                    <StatAbbrWithTooltip statKey={key as GameStatKey}>{label}</StatAbbrWithTooltip>
+                  </label>
                   <NumberInput value={draft.cechyGlowne[key]} onChange={(v) => updatePrimary(key, v)} min={0}
                     className="h-9 text-sm text-center font-bold" />
                 </div>
@@ -378,9 +374,11 @@ function MonsterModal({
           <section className="space-y-2">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cechy drugorzędne</h3>
             <div className="grid grid-cols-4 gap-1.5">
-              {SECONDARY_LABELS.map(([key, label]) => (
+              {STAT_SECONDARY_COLUMNS.map(({ key, label }) => (
                 <div key={key}>
-                  <label className="text-[10px] text-muted-foreground block text-center">{label}</label>
+                  <label className="text-[10px] text-muted-foreground block text-center">
+                    <StatAbbrWithTooltip statKey={key as GameStatKey}>{label}</StatAbbrWithTooltip>
+                  </label>
                   <NumberInput value={draft.cechyDrugorzedne[key]} onChange={(v) => updateSecondary(key, v)} min={0}
                     className="h-9 text-sm text-center font-bold" />
                 </div>
@@ -509,7 +507,7 @@ function Check() {
 /* ── Main section ── */
 
 export default function BestiarySection() {
-  const { lootConfig } = useApp();
+  const { lootItems } = useApp();
   const [store, setStore] = useLocalStorage<BestiaryStore>("rpg_bestiary", DEFAULT_BESTIARY);
 
   const [search, setSearch] = useState("");
@@ -527,8 +525,6 @@ export default function BestiarySection() {
       return false;
     }
   }, []);
-
-  const lootItems = lootConfig.items.map((i) => ({ id: i.id, name: i.name, type: i.type }));
 
   const types = useMemo(() => {
     const set = new Set<string>();
@@ -643,10 +639,22 @@ function BestiaryCard({
       </div>
 
       <div className="flex gap-3 text-[11px] text-muted-foreground font-sans">
-        <span>WW <span className="font-semibold text-foreground">{m.cechyGlowne.ww}</span></span>
-        <span>US <span className="font-semibold text-foreground">{m.cechyGlowne.us}</span></span>
-        <span>A <span className="font-semibold text-foreground">{m.cechyDrugorzedne.a}</span></span>
-        <span>Żyw <span className="font-semibold text-foreground">{m.cechyDrugorzedne.zyw}</span></span>
+        <span>
+          <StatAbbrWithTooltip statKey="ww" className="text-muted-foreground">WW</StatAbbrWithTooltip>{" "}
+          <span className="font-semibold text-foreground">{m.cechyGlowne.ww}</span>
+        </span>
+        <span>
+          <StatAbbrWithTooltip statKey="us" className="text-muted-foreground">US</StatAbbrWithTooltip>{" "}
+          <span className="font-semibold text-foreground">{m.cechyGlowne.us}</span>
+        </span>
+        <span>
+          <StatAbbrWithTooltip statKey="a" className="text-muted-foreground">A</StatAbbrWithTooltip>{" "}
+          <span className="font-semibold text-foreground">{m.cechyDrugorzedne.a}</span>
+        </span>
+        <span>
+          <StatAbbrWithTooltip statKey="zyw" className="text-muted-foreground">Żyw</StatAbbrWithTooltip>{" "}
+          <span className="font-semibold text-foreground">{m.cechyDrugorzedne.zyw}</span>
+        </span>
       </div>
 
       {m.tagi.length > 0 && (

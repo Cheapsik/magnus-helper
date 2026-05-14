@@ -111,12 +111,10 @@ export interface CharacterSheetCore {
   wyposazenie: Wyposazenie[];
 }
 
-/** NPC: karta + id + pola poza oficjalnym PDF. */
 export type SavedNpc = CharacterSheetCore & {
   id: string;
   cechyCharakteru: string;
   opisOgolny: string;
   notatkiMG: string;
-  /** Id grupy z AppContext.npcGroups; brak = lista „Bez grupy”. */
   npcGroupId?: string;
 };

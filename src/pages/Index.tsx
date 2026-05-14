@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useApp } from "@/context/AppContext";
 import { useScene } from "@/context/SceneContext";
 import { cn } from "@/lib/utils";
+import { StatAbbrWithTooltip, StatAbbrFromCharacterStat } from "@/components/game/StatAbbrWithTooltip";
 
 /* ── Reading external (non-context) data from localStorage ── */
 
@@ -135,7 +136,9 @@ export default function Index() {
                 <span className="font-bold leading-none" style={{ fontSize: 22, color: hpColor(hpPct) }}>
                   {character.wounds.current} / {character.wounds.max}
                 </span>
-                <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Żyw.</span>
+                <StatAbbrWithTooltip statKey="zywShort" className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Żyw.
+                </StatAbbrWithTooltip>
               </div>
               <div className="h-2 bg-secondary/40 border border-border overflow-hidden rounded-none">
                 <div
@@ -144,9 +147,15 @@ export default function Index() {
                 />
               </div>
               <div className="flex items-center gap-3 text-[11px]">
-                <span className="text-muted-foreground">PO <span className="text-foreground font-mono">{character.fatePoints}</span></span>
+                <span className="text-muted-foreground">
+                  <StatAbbrWithTooltip statKey="po" className="text-muted-foreground">PO</StatAbbrWithTooltip>{" "}
+                  <span className="text-foreground font-mono">{character.fatePoints}</span>
+                </span>
                 <span className="text-border">·</span>
-                <span className="text-muted-foreground">PP <span className="text-foreground font-mono">{character.fatePoints}</span></span>
+                <span className="text-muted-foreground">
+                  <StatAbbrWithTooltip statKey="pp" className="text-muted-foreground">PP</StatAbbrWithTooltip>{" "}
+                  <span className="text-foreground font-mono">{character.fatePoints}</span>
+                </span>
               </div>
             </div>
           </div>
@@ -305,7 +314,9 @@ export default function Index() {
             <span className="font-bold leading-none" style={{ fontSize: 22, color: hpColor(hpPct) }}>
               {character.wounds.current} / {character.wounds.max}
             </span>
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Żyw.</span>
+            <StatAbbrWithTooltip statKey="zywShort" className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Żyw.
+            </StatAbbrWithTooltip>
           </div>
           <div className="h-2 bg-secondary/30 border border-border overflow-hidden mb-3 rounded-none">
             <div
@@ -321,9 +332,11 @@ export default function Index() {
                 key={s.abbr}
                 className="text-[10px] px-1.5 py-0.5 border border-border bg-background/40 font-mono text-foreground"
                 style={{ borderRadius: 4 }}
-                title={s.label}
               >
-                <span className="text-muted-foreground">{s.abbr}</span> {s.value}
+                <StatAbbrFromCharacterStat abbr={s.abbr} label={s.label} className="text-muted-foreground">
+                  {s.abbr}
+                </StatAbbrFromCharacterStat>{" "}
+                {s.value}
               </span>
             ))}
           </div>

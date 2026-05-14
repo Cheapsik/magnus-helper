@@ -5,6 +5,7 @@ import { readStorageValue, updateStorageCollectionItem } from "@/components/glob
 import { useApp } from "@/context/AppContext";
 import type { GmEnemy } from "@/lib/gmEnemy";
 import { gmEnemyToCombatant, reviveGmEnemies } from "@/lib/gmEnemy";
+import { StatAbbrWithTooltip } from "@/components/game/StatAbbrWithTooltip";
 
 const MONSTER_STORAGE_KEY = "rpg_gm_enemies";
 
@@ -54,8 +55,18 @@ export function MonsterDrawerView({ id }: MonsterDrawerViewProps) {
     <div className="space-y-3">
       <Input value={monster.name} onChange={(e) => updateMonster({ name: e.target.value })} placeholder="Nazwa" />
       <div className="grid grid-cols-2 gap-2">
-        <Input value={String(monster.ww)} onChange={(e) => updateMonster({ ww: Number(e.target.value) || 0 })} placeholder="WW" />
-        <Input value={String(monster.hp)} onChange={(e) => updateMonster({ hp: Number(e.target.value) || 1 })} placeholder="Zyw" />
+        <div className="space-y-1">
+          <div className="text-[10px] text-muted-foreground">
+            <StatAbbrWithTooltip statKey="ww">WW</StatAbbrWithTooltip>
+          </div>
+          <Input value={String(monster.ww)} onChange={(e) => updateMonster({ ww: Number(e.target.value) || 0 })} placeholder="WW" />
+        </div>
+        <div className="space-y-1">
+          <div className="text-[10px] text-muted-foreground">
+            <StatAbbrWithTooltip statKey="zyw">Żyw</StatAbbrWithTooltip>
+          </div>
+          <Input value={String(monster.hp)} onChange={(e) => updateMonster({ hp: Number(e.target.value) || 1 })} placeholder="Żyw" />
+        </div>
       </div>
       <Input value={monster.weapon} onChange={(e) => updateMonster({ weapon: e.target.value })} placeholder="Zdolnosci / bron" />
       <div className="flex items-center gap-2">

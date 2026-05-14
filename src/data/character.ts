@@ -1,3 +1,5 @@
+import { getStatFullName, getStatGlossaryEntry, type GameStatKey } from "@/lib/gameStatGlossary";
+
 export interface CharacterData {
     name: string;
     career: string;
@@ -10,22 +12,32 @@ export interface CharacterData {
     weapons: { name: string; damage: string; qualities: string }[];
     armor: { name: string; ap: number; locations: string }[];
     notes: string;
-  }
-  
-  export const DEFAULT_CHARACTER: CharacterData = {
+}
+
+const DEFAULT_CHARACTER_STATS_SPEC: { key: GameStatKey; value: number }[] = [
+  { key: "ww", value: 42 },
+  { key: "us", value: 35 },
+  { key: "s", value: 38 },
+  { key: "wt", value: 40 },
+  { key: "zr", value: 33 },
+  { key: "int", value: 28 },
+  { key: "sw", value: 31 },
+  { key: "ogd", value: 25 },
+];
+
+function buildDefaultCharacterStats(): { label: string; abbr: string; value: number }[] {
+  return DEFAULT_CHARACTER_STATS_SPEC.map(({ key, value }) => ({
+    label: getStatFullName(key),
+    abbr: getStatGlossaryEntry(key).abbr,
+    value,
+  }));
+}
+
+export const DEFAULT_CHARACTER: CharacterData = {
     name: "Aldric Grimwald",
     career: "Żołnierz",
     race: "Człowiek",
-    stats: [
-      { label: "Walka Wręcz", abbr: "WW", value: 42 },
-      { label: "Umiejętności Strzeleckie", abbr: "US", value: 35 },
-      { label: "Siła", abbr: "S", value: 38 },
-      { label: "Wytrzymałość", abbr: "Wt", value: 40 },
-      { label: "Zręczność", abbr: "Zr", value: 33 },
-      { label: "Inteligencja", abbr: "Int", value: 28 },
-      { label: "Siła Woli", abbr: "SW", value: 31 },
-      { label: "Ogłada", abbr: "Ogd", value: 25 },
-    ],
+    stats: buildDefaultCharacterStats(),
     wounds: { current: 11, max: 14 },
     fatePoints: 2,
     conditions: ["Zmęczony"],

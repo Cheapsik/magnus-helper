@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Plus, Trash2, Edit2, Check, X, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import type { GmEnemy } from "@/lib/gmEnemy";
@@ -9,6 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { NumberInput } from "@/components/ui/number-input";
+import type { GameStatKey } from "@/lib/gameStatGlossary";
+import { StatAbbrWithTooltip } from "@/components/game/StatAbbrWithTooltip";
+
+function intersperseStatNodes(nodes: (ReactNode | false | null | undefined)[]): ReactNode[] {
+  const list = nodes.filter(Boolean) as ReactNode[];
+  return list.flatMap((n, i) => (i === 0 ? [n] : [<span key={`sep-${i}`} className="text-muted-foreground"> · </span>, n]));
+}
 
 const emptyOptionalEnemy = (): GmEnemy => ({
   id: "",
@@ -21,17 +28,28 @@ const emptyOptionalEnemy = (): GmEnemy => ({
 
 function OptionalStat({
   label,
+  statKey,
   value,
   onChange,
 }: {
   label: string;
+  statKey?: GameStatKey;
   value: number | undefined;
   onChange: (v: number | undefined) => void;
 }) {
   const display = value === undefined || Number.isNaN(value) ? "" : String(value);
+  const labelNode = statKey ? (
+    <StatAbbrWithTooltip statKey={statKey} className="text-[9px] text-muted-foreground">
+      {label}
+    </StatAbbrWithTooltip>
+  ) : (
+    <StatAbbrWithTooltip abbr={label} className="text-[9px] text-muted-foreground">
+      {label}
+    </StatAbbrWithTooltip>
+  );
   return (
     <div>
-      <label className="text-[9px] text-muted-foreground">{label}</label>
+      <div className="text-[9px] text-muted-foreground">{labelNode}</div>
       <Input
         className="h-7 text-xs text-center"
         inputMode="numeric"
@@ -64,15 +82,21 @@ function EnemyFormFields({
       <Input value={d.name} onChange={(e) => patch({ name: e.target.value })} className="h-7 text-xs" placeholder="Nazwa *" />
       <div className="grid grid-cols-3 gap-1.5">
         <div>
-          <label className="text-[9px] text-muted-foreground">WW *</label>
+          <label className="text-[9px] text-muted-foreground">
+            <StatAbbrWithTooltip statKey="ww">WW</StatAbbrWithTooltip> *
+          </label>
           <NumberInput value={d.ww} onChange={(v) => patch({ ww: v })} className="h-7 text-xs text-center" />
         </div>
         <div>
-          <label className="text-[9px] text-muted-foreground">PŻ (akt.) *</label>
+          <label className="text-[9px] text-muted-foreground">
+            <StatAbbrWithTooltip statKey="pż">PŻ</StatAbbrWithTooltip> (akt.) *
+          </label>
           <NumberInput value={d.hp} onChange={(v) => patch({ hp: v })} className="h-7 text-xs text-center" />
         </div>
         <div>
-          <label className="text-[9px] text-muted-foreground">PŻ max</label>
+          <label className="text-[9px] text-muted-foreground">
+            <StatAbbrWithTooltip statKey="pż">PŻ</StatAbbrWithTooltip> max
+          </label>
           <Input
             className="h-7 text-xs text-center"
             inputMode="numeric"
@@ -87,34 +111,36 @@ function EnemyFormFields({
       </div>
       <div className="grid grid-cols-3 gap-1.5">
         <div>
-          <label className="text-[9px] text-muted-foreground">Pancerz *</label>
+          <label className="text-[9px] text-muted-foreground">
+            <StatAbbrWithTooltip statKey="pnc">Pancerz</StatAbbrWithTooltip> *
+          </label>
           <NumberInput value={d.armor} onChange={(v) => patch({ armor: v })} className="h-7 text-xs text-center" />
         </div>
-        <OptionalStat label="Inicjatywa" value={d.initiative} onChange={(v) => patch({ initiative: v })} />
-        <OptionalStat label="US" value={d.us} onChange={(v) => patch({ us: v })} />
+        <OptionalStat label="Inicjatywa" statKey="inic" value={d.initiative} onChange={(v) => patch({ initiative: v })} />
+        <OptionalStat label="US" statKey="us" value={d.us} onChange={(v) => patch({ us: v })} />
       </div>
       <div className="grid grid-cols-4 gap-1.5">
-        <OptionalStat label="SB" value={d.sb} onChange={(v) => patch({ sb: v })} />
-        <OptionalStat label="Wt" value={d.toughness} onChange={(v) => patch({ toughness: v })} />
-        <OptionalStat label="K" value={d.k} onChange={(v) => patch({ k: v })} />
-        <OptionalStat label="Odp" value={d.odp} onChange={(v) => patch({ odp: v })} />
+        <OptionalStat label="SB" statKey="sb" value={d.sb} onChange={(v) => patch({ sb: v })} />
+        <OptionalStat label="Wt" statKey="wt" value={d.toughness} onChange={(v) => patch({ toughness: v })} />
+        <OptionalStat label="K" statKey="k" value={d.k} onChange={(v) => patch({ k: v })} />
+        <OptionalStat label="Odp" statKey="odp" value={d.odp} onChange={(v) => patch({ odp: v })} />
       </div>
       <div className="grid grid-cols-4 gap-1.5">
-        <OptionalStat label="Zr" value={d.zr} onChange={(v) => patch({ zr: v })} />
-        <OptionalStat label="Int" value={d.int} onChange={(v) => patch({ int: v })} />
-        <OptionalStat label="SW" value={d.sw} onChange={(v) => patch({ sw: v })} />
-        <OptionalStat label="Ogd" value={d.ogd} onChange={(v) => patch({ ogd: v })} />
+        <OptionalStat label="Zr" statKey="zr" value={d.zr} onChange={(v) => patch({ zr: v })} />
+        <OptionalStat label="Int" statKey="int" value={d.int} onChange={(v) => patch({ int: v })} />
+        <OptionalStat label="SW" statKey="sw" value={d.sw} onChange={(v) => patch({ sw: v })} />
+        <OptionalStat label="Ogd" statKey="ogd" value={d.ogd} onChange={(v) => patch({ ogd: v })} />
       </div>
       <div className="grid grid-cols-4 gap-1.5">
-        <OptionalStat label="Mag" value={d.mag} onChange={(v) => patch({ mag: v })} />
-        <OptionalStat label="Sz" value={d.sz} onChange={(v) => patch({ sz: v })} />
-        <OptionalStat label="S" value={d.s} onChange={(v) => patch({ s: v })} />
-        <OptionalStat label="Wt (2)" value={d.wt} onChange={(v) => patch({ wt: v })} />
+        <OptionalStat label="Mag" statKey="mag" value={d.mag} onChange={(v) => patch({ mag: v })} />
+        <OptionalStat label="Sz" statKey="sz" value={d.sz} onChange={(v) => patch({ sz: v })} />
+        <OptionalStat label="S" statKey="s" value={d.s} onChange={(v) => patch({ s: v })} />
+        <OptionalStat label="Wt (2)" statKey="wt2" value={d.wt} onChange={(v) => patch({ wt: v })} />
       </div>
       <div className="grid grid-cols-3 gap-1.5">
-        <OptionalStat label="A" value={d.a} onChange={(v) => patch({ a: v })} />
-        <OptionalStat label="PO" value={d.po} onChange={(v) => patch({ po: v })} />
-        <OptionalStat label="PP" value={d.pp} onChange={(v) => patch({ pp: v })} />
+        <OptionalStat label="A" statKey="a" value={d.a} onChange={(v) => patch({ a: v })} />
+        <OptionalStat label="PO" statKey="po" value={d.po} onChange={(v) => patch({ po: v })} />
+        <OptionalStat label="PP" statKey="pp" value={d.pp} onChange={(v) => patch({ pp: v })} />
       </div>
       <Input value={d.weapon} onChange={(e) => patch({ weapon: e.target.value })} className="h-7 text-xs" placeholder="Broń / oręż" />
       <div>
@@ -245,64 +271,132 @@ export function ReadyOpponentsPanel({
                         </div>
                         <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-muted-foreground">
                           <span>
-                            WW <span className="font-bold text-foreground">{enemy.ww}</span>
+                            <StatAbbrWithTooltip statKey="ww" className="text-muted-foreground">WW</StatAbbrWithTooltip>{" "}
+                            <span className="font-bold text-foreground">{enemy.ww}</span>
                           </span>
                           <span>
-                            PŻ <span className="font-bold text-foreground">{enemy.hp}</span>
+                            <StatAbbrWithTooltip statKey="pż" className="text-muted-foreground">PŻ</StatAbbrWithTooltip>{" "}
+                            <span className="font-bold text-foreground">{enemy.hp}</span>
                             {enemy.hpMax != null && enemy.hpMax !== enemy.hp && (
                               <span className="text-muted-foreground">/{enemy.hpMax}</span>
                             )}
                           </span>
                           <span>
-                            Pnc <span className="font-bold text-foreground">{enemy.armor}</span>
+                            <StatAbbrWithTooltip statKey="pnc" className="text-muted-foreground">Pnc</StatAbbrWithTooltip>{" "}
+                            <span className="font-bold text-foreground">{enemy.armor}</span>
                           </span>
                           {enemy.us != null && (
                             <span>
-                              US <span className="font-bold text-foreground">{enemy.us}</span>
+                              <StatAbbrWithTooltip statKey="us" className="text-muted-foreground">US</StatAbbrWithTooltip>{" "}
+                              <span className="font-bold text-foreground">{enemy.us}</span>
                             </span>
                           )}
                           {enemy.initiative != null && (
                             <span>
-                              Inic <span className="font-bold text-foreground">{enemy.initiative}</span>
+                              <StatAbbrWithTooltip statKey="inic" className="text-muted-foreground">Inic</StatAbbrWithTooltip>{" "}
+                              <span className="font-bold text-foreground">{enemy.initiative}</span>
                             </span>
                           )}
                           {enemy.sb != null && (
                             <span>
-                              SB <span className="font-bold text-foreground">{enemy.sb}</span>
+                              <StatAbbrWithTooltip statKey="sb" className="text-muted-foreground">SB</StatAbbrWithTooltip>{" "}
+                              <span className="font-bold text-foreground">{enemy.sb}</span>
                             </span>
                           )}
                           {enemy.toughness != null && (
                             <span>
-                              Wt <span className="font-bold text-foreground">{enemy.toughness}</span>
+                              <StatAbbrWithTooltip statKey="wt" className="text-muted-foreground">Wt</StatAbbrWithTooltip>{" "}
+                              <span className="font-bold text-foreground">{enemy.toughness}</span>
                             </span>
                           )}
                           {[enemy.k, enemy.odp, enemy.zr, enemy.int, enemy.sw, enemy.ogd].some((x) => x != null) && (
                             <span className="w-full text-[9px] opacity-90">
-                              {[
-                                enemy.k != null && `K ${enemy.k}`,
-                                enemy.odp != null && `Odp ${enemy.odp}`,
-                                enemy.zr != null && `Zr ${enemy.zr}`,
-                                enemy.int != null && `Int ${enemy.int}`,
-                                enemy.sw != null && `SW ${enemy.sw}`,
-                                enemy.ogd != null && `Ogd ${enemy.ogd}`,
-                              ]
-                                .filter(Boolean)
-                                .join(" · ")}
+                              {intersperseStatNodes([
+                                enemy.k != null && (
+                                  <span key="k">
+                                    <StatAbbrWithTooltip statKey="k" className="text-muted-foreground">K</StatAbbrWithTooltip>{" "}
+                                    <span className="font-bold text-foreground">{enemy.k}</span>
+                                  </span>
+                                ),
+                                enemy.odp != null && (
+                                  <span key="odp">
+                                    <StatAbbrWithTooltip statKey="odp" className="text-muted-foreground">Odp</StatAbbrWithTooltip>{" "}
+                                    <span className="font-bold text-foreground">{enemy.odp}</span>
+                                  </span>
+                                ),
+                                enemy.zr != null && (
+                                  <span key="zr">
+                                    <StatAbbrWithTooltip statKey="zr" className="text-muted-foreground">Zr</StatAbbrWithTooltip>{" "}
+                                    <span className="font-bold text-foreground">{enemy.zr}</span>
+                                  </span>
+                                ),
+                                enemy.int != null && (
+                                  <span key="int">
+                                    <StatAbbrWithTooltip statKey="int" className="text-muted-foreground">Int</StatAbbrWithTooltip>{" "}
+                                    <span className="font-bold text-foreground">{enemy.int}</span>
+                                  </span>
+                                ),
+                                enemy.sw != null && (
+                                  <span key="sw">
+                                    <StatAbbrWithTooltip statKey="sw" className="text-muted-foreground">SW</StatAbbrWithTooltip>{" "}
+                                    <span className="font-bold text-foreground">{enemy.sw}</span>
+                                  </span>
+                                ),
+                                enemy.ogd != null && (
+                                  <span key="ogd">
+                                    <StatAbbrWithTooltip statKey="ogd" className="text-muted-foreground">Ogd</StatAbbrWithTooltip>{" "}
+                                    <span className="font-bold text-foreground">{enemy.ogd}</span>
+                                  </span>
+                                ),
+                              ])}
                             </span>
                           )}
                           {[enemy.mag, enemy.sz, enemy.s, enemy.wt, enemy.a, enemy.po, enemy.pp].some((x) => x != null) && (
                             <span className="w-full text-[9px] opacity-90">
-                              {[
-                                enemy.mag != null && `Mag ${enemy.mag}`,
-                                enemy.sz != null && `Sz ${enemy.sz}`,
-                                enemy.s != null && `S ${enemy.s}`,
-                                enemy.wt != null && `Wt ${enemy.wt}`,
-                                enemy.a != null && `A ${enemy.a}`,
-                                enemy.po != null && `PO ${enemy.po}`,
-                                enemy.pp != null && `PP ${enemy.pp}`,
-                              ]
-                                .filter(Boolean)
-                                .join(" · ")}
+                              {intersperseStatNodes([
+                                enemy.mag != null && (
+                                  <span key="mag">
+                                    <StatAbbrWithTooltip statKey="mag" className="text-muted-foreground">Mag</StatAbbrWithTooltip>{" "}
+                                    <span className="font-bold text-foreground">{enemy.mag}</span>
+                                  </span>
+                                ),
+                                enemy.sz != null && (
+                                  <span key="sz">
+                                    <StatAbbrWithTooltip statKey="sz" className="text-muted-foreground">Sz</StatAbbrWithTooltip>{" "}
+                                    <span className="font-bold text-foreground">{enemy.sz}</span>
+                                  </span>
+                                ),
+                                enemy.s != null && (
+                                  <span key="s">
+                                    <StatAbbrWithTooltip statKey="s" className="text-muted-foreground">S</StatAbbrWithTooltip>{" "}
+                                    <span className="font-bold text-foreground">{enemy.s}</span>
+                                  </span>
+                                ),
+                                enemy.wt != null && (
+                                  <span key="wt">
+                                    <StatAbbrWithTooltip statKey="wt2" className="text-muted-foreground">Wt</StatAbbrWithTooltip>{" "}
+                                    <span className="font-bold text-foreground">{enemy.wt}</span>
+                                  </span>
+                                ),
+                                enemy.a != null && (
+                                  <span key="a">
+                                    <StatAbbrWithTooltip statKey="a" className="text-muted-foreground">A</StatAbbrWithTooltip>{" "}
+                                    <span className="font-bold text-foreground">{enemy.a}</span>
+                                  </span>
+                                ),
+                                enemy.po != null && (
+                                  <span key="po">
+                                    <StatAbbrWithTooltip statKey="po" className="text-muted-foreground">PO</StatAbbrWithTooltip>{" "}
+                                    <span className="font-bold text-foreground">{enemy.po}</span>
+                                  </span>
+                                ),
+                                enemy.pp != null && (
+                                  <span key="pp">
+                                    <StatAbbrWithTooltip statKey="pp" className="text-muted-foreground">PP</StatAbbrWithTooltip>{" "}
+                                    <span className="font-bold text-foreground">{enemy.pp}</span>
+                                  </span>
+                                ),
+                              ])}
                             </span>
                           )}
                         </div>
