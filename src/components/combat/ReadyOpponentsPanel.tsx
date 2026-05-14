@@ -1,16 +1,19 @@
-import { useState, type ReactNode } from "react";
+import { useState, useId, type ReactNode } from "react";
 import { Plus, Trash2, Edit2, Check, X, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import type { GmEnemy } from "@/lib/gmEnemy";
 import { gmEnemyToCombatant } from "@/lib/gmEnemy";
 import type { Combatant } from "@/context/AppContext";
 import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { NumberInput } from "@/components/ui/number-input";
 import type { GameStatKey } from "@/lib/gameStatGlossary";
+import { getStatFullName, getStatGlossaryEntry } from "@/lib/gameStatGlossary";
 import { StatAbbrWithTooltip } from "@/components/game/StatAbbrWithTooltip";
+import { CombatStatCell, NARROW_NUM } from "@/components/game/CombatStatCell";
 
 function intersperseStatNodes(nodes: (ReactNode | false | null | undefined)[]): ReactNode[] {
   const list = nodes.filter(Boolean) as ReactNode[];
@@ -27,33 +30,20 @@ const emptyOptionalEnemy = (): GmEnemy => ({
 });
 
 function OptionalStat({
-  label,
   statKey,
   value,
   onChange,
 }: {
-  label: string;
-  statKey?: GameStatKey;
+  statKey: GameStatKey;
   value: number | undefined;
   onChange: (v: number | undefined) => void;
 }) {
   const display = value === undefined || Number.isNaN(value) ? "" : String(value);
-  const labelNode = statKey ? (
-    <StatAbbrWithTooltip statKey={statKey} className="text-[9px] text-muted-foreground">
-      {label}
-    </StatAbbrWithTooltip>
-  ) : (
-    <StatAbbrWithTooltip abbr={label} className="text-[9px] text-muted-foreground">
-      {label}
-    </StatAbbrWithTooltip>
-  );
   return (
-    <div>
-      <div className="text-[9px] text-muted-foreground">{labelNode}</div>
+    <CombatStatCell statKey={statKey}>
       <Input
-        className="h-7 text-xs text-center"
+        className={NARROW_NUM}
         inputMode="numeric"
-        placeholder="—"
         value={display}
         onChange={(e) => {
           const t = e.target.value.trim();
@@ -65,7 +55,7 @@ function OptionalStat({
           onChange(Number.isFinite(n) ? n : undefined);
         }}
       />
-    </div>
+    </CombatStatCell>
   );
 }
 
@@ -76,80 +66,96 @@ function EnemyFormFields({
   d: GmEnemy;
   setD: (fn: (prev: GmEnemy) => GmEnemy) => void;
 }) {
+  const formUid = useId();
   const patch = (p: Partial<GmEnemy>) => setD((prev) => ({ ...prev, ...p }));
   return (
-    <div className="space-y-2">
-      <Input value={d.name} onChange={(e) => patch({ name: e.target.value })} className="h-7 text-xs" placeholder="Nazwa *" />
-      <div className="grid grid-cols-3 gap-1.5">
-        <div>
-          <label className="text-[9px] text-muted-foreground">
-            <StatAbbrWithTooltip statKey="ww">WW</StatAbbrWithTooltip> *
-          </label>
-          <NumberInput value={d.ww} onChange={(v) => patch({ ww: v })} className="h-7 text-xs text-center" />
-        </div>
-        <div>
-          <label className="text-[9px] text-muted-foreground">
-            <StatAbbrWithTooltip statKey="pż">PŻ</StatAbbrWithTooltip> (akt.) *
-          </label>
-          <NumberInput value={d.hp} onChange={(v) => patch({ hp: v })} className="h-7 text-xs text-center" />
-        </div>
-        <div>
-          <label className="text-[9px] text-muted-foreground">
-            <StatAbbrWithTooltip statKey="pż">PŻ</StatAbbrWithTooltip> max
-          </label>
+    <div className="space-y-1.5">
+      <div>
+        <label htmlFor={`enemy-name-${formUid}`} className="mb-px block text-[10px] leading-tight text-muted-foreground">
+          Nazwa<span className="text-destructive"> *</span>
+        </label>
+        <Input
+          id={`enemy-name-${formUid}`}
+          value={d.name}
+          onChange={(e) => patch({ name: e.target.value })}
+          className="h-7 w-full text-xs"
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 sm:grid-cols-3 md:grid-cols-4">
+        <CombatStatCell statKey="ww" required>
+          <NumberInput value={d.ww} onChange={(v) => patch({ ww: v })} className={NARROW_NUM} />
+        </CombatStatCell>
+        <CombatStatCell label={`${getStatFullName("pż")} — bieżące`} required>
+          <NumberInput value={d.hp} onChange={(v) => patch({ hp: v })} className={NARROW_NUM} />
+        </CombatStatCell>
+        <CombatStatCell
+          label={`${getStatFullName("pż")} — maksimum`}
+          tooltip="Opcjonalnie. Puste pole — jak bieżące punkty żywotności."
+        >
           <Input
-            className="h-7 text-xs text-center"
+            className={NARROW_NUM}
             inputMode="numeric"
-            placeholder="jak akt"
             value={d.hpMax === undefined ? "" : String(d.hpMax)}
             onChange={(e) => {
               const t = e.target.value.trim();
               patch({ hpMax: t === "" ? undefined : parseInt(t, 10) || undefined });
             }}
           />
-        </div>
+        </CombatStatCell>
+        <CombatStatCell statKey="pnc" required>
+          <NumberInput value={d.armor} onChange={(v) => patch({ armor: v })} className={NARROW_NUM} />
+        </CombatStatCell>
+        <CombatStatCell statKey="wtSoak" required>
+          <NumberInput value={d.toughness ?? 3} onChange={(v) => patch({ toughness: v })} className={NARROW_NUM} />
+        </CombatStatCell>
+        <OptionalStat statKey="inic" value={d.initiative} onChange={(v) => patch({ initiative: v })} />
+        <OptionalStat statKey="us" value={d.us} onChange={(v) => patch({ us: v })} />
+        <OptionalStat statKey="sb" value={d.sb} onChange={(v) => patch({ sb: v })} />
       </div>
-      <div className="grid grid-cols-3 gap-1.5">
-        <div>
-          <label className="text-[9px] text-muted-foreground">
-            <StatAbbrWithTooltip statKey="pnc">Pancerz</StatAbbrWithTooltip> *
-          </label>
-          <NumberInput value={d.armor} onChange={(v) => patch({ armor: v })} className="h-7 text-xs text-center" />
-        </div>
-        <OptionalStat label="Inicjatywa" statKey="inic" value={d.initiative} onChange={(v) => patch({ initiative: v })} />
-        <OptionalStat label="US" statKey="us" value={d.us} onChange={(v) => patch({ us: v })} />
-      </div>
-      <div className="grid grid-cols-4 gap-1.5">
-        <OptionalStat label="SB" statKey="sb" value={d.sb} onChange={(v) => patch({ sb: v })} />
-        <OptionalStat label="Wt" statKey="wt" value={d.toughness} onChange={(v) => patch({ toughness: v })} />
-        <OptionalStat label="K" statKey="k" value={d.k} onChange={(v) => patch({ k: v })} />
-        <OptionalStat label="Odp" statKey="odp" value={d.odp} onChange={(v) => patch({ odp: v })} />
-      </div>
-      <div className="grid grid-cols-4 gap-1.5">
-        <OptionalStat label="Zr" statKey="zr" value={d.zr} onChange={(v) => patch({ zr: v })} />
-        <OptionalStat label="Int" statKey="int" value={d.int} onChange={(v) => patch({ int: v })} />
-        <OptionalStat label="SW" statKey="sw" value={d.sw} onChange={(v) => patch({ sw: v })} />
-        <OptionalStat label="Ogd" statKey="ogd" value={d.ogd} onChange={(v) => patch({ ogd: v })} />
-      </div>
-      <div className="grid grid-cols-4 gap-1.5">
-        <OptionalStat label="Mag" statKey="mag" value={d.mag} onChange={(v) => patch({ mag: v })} />
-        <OptionalStat label="Sz" statKey="sz" value={d.sz} onChange={(v) => patch({ sz: v })} />
-        <OptionalStat label="S" statKey="s" value={d.s} onChange={(v) => patch({ s: v })} />
-        <OptionalStat label="Wt (2)" statKey="wt2" value={d.wt} onChange={(v) => patch({ wt: v })} />
-      </div>
-      <div className="grid grid-cols-3 gap-1.5">
-        <OptionalStat label="A" statKey="a" value={d.a} onChange={(v) => patch({ a: v })} />
-        <OptionalStat label="PO" statKey="po" value={d.po} onChange={(v) => patch({ po: v })} />
-        <OptionalStat label="PP" statKey="pp" value={d.pp} onChange={(v) => patch({ pp: v })} />
-      </div>
-      <Input value={d.weapon} onChange={(e) => patch({ weapon: e.target.value })} className="h-7 text-xs" placeholder="Broń / oręż" />
+
       <div>
-        <label className="text-[9px] text-muted-foreground mb-0.5 block">Opis (opcjonalnie)</label>
+        <label htmlFor={`enemy-weapon-${formUid}`} className="mb-px block text-[10px] leading-tight text-muted-foreground">
+          Broń / oręż
+        </label>
+        <Input
+          id={`enemy-weapon-${formUid}`}
+          value={d.weapon}
+          onChange={(e) => patch({ weapon: e.target.value })}
+          className="h-7 w-full text-xs"
+        />
+      </div>
+
+      <Separator className="my-0" />
+
+      <div>
+        <div className="mb-1 text-[10px] leading-tight text-muted-foreground">Cechy z karty (opcjonalnie)</div>
+        <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 sm:grid-cols-3 md:grid-cols-4">
+          <OptionalStat statKey="k" value={d.k} onChange={(v) => patch({ k: v })} />
+          <OptionalStat statKey="odp" value={d.odp} onChange={(v) => patch({ odp: v })} />
+          <OptionalStat statKey="zr" value={d.zr} onChange={(v) => patch({ zr: v })} />
+          <OptionalStat statKey="int" value={d.int} onChange={(v) => patch({ int: v })} />
+          <OptionalStat statKey="sw" value={d.sw} onChange={(v) => patch({ sw: v })} />
+          <OptionalStat statKey="ogd" value={d.ogd} onChange={(v) => patch({ ogd: v })} />
+          <OptionalStat statKey="mag" value={d.mag} onChange={(v) => patch({ mag: v })} />
+          <OptionalStat statKey="sz" value={d.sz} onChange={(v) => patch({ sz: v })} />
+          <OptionalStat statKey="s" value={d.s} onChange={(v) => patch({ s: v })} />
+          <OptionalStat statKey="wt2" value={d.wt} onChange={(v) => patch({ wt: v })} />
+          <OptionalStat statKey="a" value={d.a} onChange={(v) => patch({ a: v })} />
+          <OptionalStat statKey="po" value={d.po} onChange={(v) => patch({ po: v })} />
+          <OptionalStat statKey="pp" value={d.pp} onChange={(v) => patch({ pp: v })} />
+        </div>
+      </div>
+
+      <div>
+        <label htmlFor={`enemy-desc-${formUid}`} className="mb-px block text-[10px] leading-tight text-muted-foreground">
+          Opis (opcjonalnie)
+        </label>
         <Textarea
+          id={`enemy-desc-${formUid}`}
           value={d.description ?? ""}
           onChange={(e) => patch({ description: e.target.value || undefined })}
-          className="min-h-[72px] text-xs"
-          placeholder="Umiejętności, zasady specjalne, notatki MG…"
+          className="min-h-[52px] w-full text-xs"
         />
       </div>
     </div>
@@ -211,7 +217,7 @@ export function ReadyOpponentsPanel({
 
       {adding && (
         <Card className="border-primary/30">
-          <CardContent className="p-3 space-y-2">
+          <CardContent className="space-y-1.5 p-2.5">
             <EnemyFormFields d={newEnemy} setD={(fn) => setNewEnemy(fn)} />
             <div className="flex gap-1.5">
               <Button size="sm" className="h-7 text-xs flex-1" onClick={addEnemy}>
@@ -233,9 +239,9 @@ export function ReadyOpponentsPanel({
 
           return (
             <Card key={enemy.id} className="border-border/80">
-              <CardContent className="p-3">
+              <CardContent className="p-2.5">
                 {isEditing ? (
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <EnemyFormFields d={d} setD={(fn) => setEditDraft((prev) => (prev ? fn(prev) : prev))} />
                     <div className="flex gap-1.5">
                       <Button size="sm" className="h-7 text-xs flex-1 gap-1" onClick={saveEdit}>
@@ -305,7 +311,7 @@ export function ReadyOpponentsPanel({
                           )}
                           {enemy.toughness != null && (
                             <span>
-                              <StatAbbrWithTooltip statKey="wt" className="text-muted-foreground">Wt</StatAbbrWithTooltip>{" "}
+                              <StatAbbrWithTooltip statKey="wtSoak" className="text-muted-foreground">{getStatGlossaryEntry("wtSoak").abbr}</StatAbbrWithTooltip>{" "}
                               <span className="font-bold text-foreground">{enemy.toughness}</span>
                             </span>
                           )}
@@ -374,7 +380,7 @@ export function ReadyOpponentsPanel({
                                 ),
                                 enemy.wt != null && (
                                   <span key="wt">
-                                    <StatAbbrWithTooltip statKey="wt2" className="text-muted-foreground">Wt</StatAbbrWithTooltip>{" "}
+                                    <StatAbbrWithTooltip statKey="wt2" className="text-muted-foreground">{getStatGlossaryEntry("wt2").abbr}</StatAbbrWithTooltip>{" "}
                                     <span className="font-bold text-foreground">{enemy.wt}</span>
                                   </span>
                                 ),

@@ -9,7 +9,8 @@ export type GameStatExtraKey =
   | "pnc"
   | "pż"
   | "wt2"
-  | "zywShort";
+  | "zywShort"
+  | "wtSoak";
 
 export type GameStatKey = SheetStatMainKey | SheetStatSecondaryKey | GameStatExtraKey;
 
@@ -37,10 +38,11 @@ const G: Record<GameStatKey, StatGlossaryEntry> = {
   pp: { abbr: "PP", fullName: "Punkty pancerza" },
   sb: { abbr: "SB", fullName: "Siła bojowa" },
   inic: { abbr: "Inicjatywa", fullName: "Inicjatywa" },
-  pnc: { abbr: "Pnc", fullName: "Pancerz (ochrona przed obrażeniami)" },
+  pnc: { abbr: "Pnc", fullName: "Pancerz — ochrona (wartość odejmowana od obrażeń)" },
   pż: { abbr: "PŻ", fullName: "Punkty żywotności" },
   wt2: { abbr: "Wt (2)", fullName: "Wytrzymałość (cecha drugorzędna z karty)" },
   zywShort: { abbr: "Żyw.", fullName: "Żywotność" },
+  wtSoak: { abbr: "Wyt. w.", fullName: "Wytrzymałość — bonus redukcji obrażeń w walce" },
 };
 
 const MAIN_ORDER: SheetStatMainKey[] = ["ww", "us", "k", "odp", "zr", "int", "sw", "ogd"];
@@ -98,7 +100,7 @@ const ABBR_ALIASES: Record<string, GameStatKey> = {
   pz: "pż",
   "wt (2)": "wt2",
   "żyw.": "zywShort",
-  "wt celu": "wt",
+  "wt celu": "wtSoak",
 };
 
 export function getStatTooltipByAbbr(display: string): string | undefined {

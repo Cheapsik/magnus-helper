@@ -4,11 +4,12 @@ import { Swords, Timer as TimerIcon, Volume2, User, MapPin } from "lucide-react"
 import { useApp } from "@/context/AppContext";
 import { useAmbient } from "@/context/AmbientContext";
 import { useScene } from "@/context/SceneContext";
+import { cn } from "@/lib/utils";
 
-function hpColor(pct: number): string {
-  if (pct > 60) return "#4A7C59";
-  if (pct >= 30) return "#A0892A";
-  return "#8A1C1C";
+function hpTextClass(pct: number): string {
+  if (pct > 60) return "text-success";
+  if (pct >= 30) return "text-primary";
+  return "text-destructive";
 }
 
 interface TimerLite { id: string; label: string; mode: "stopwatch" | "countdown"; countdownSet: number; }
@@ -55,7 +56,7 @@ export default function StatusBar() {
 
   return (
     <div
-      className="fixed bottom-16 left-0 right-0 z-[100] flex shrink-0 items-center justify-center border-t border-[#2A2621] bg-[#0A0908] px-3 text-[10px] tracking-[0.08em] text-[#9CA3AF] md:relative md:bottom-auto md:left-auto md:right-auto md:z-auto"
+      className="fixed bottom-16 left-0 right-0 z-[100] flex shrink-0 items-center justify-center border-t border-border bg-card/95 px-3 text-[10px] tracking-[0.08em] text-muted-foreground backdrop-blur-md md:relative md:bottom-auto md:left-auto md:right-auto md:z-auto md:backdrop-blur-none"
       style={{ height: 28 }}
     >
       <div className="hidden md:flex items-center w-full max-w-6xl mx-auto justify-center">
@@ -89,7 +90,7 @@ export default function StatusBar() {
         {hasCharacter ? (
           <span className="flex items-center gap-1.5">
             <User className="h-3 w-3" /> {character.name.toUpperCase()} ·{" "}
-            <span style={{ color: hpColor(hpPct), fontWeight: 700 }}>
+            <span className={cn("font-bold", hpTextClass(hpPct))}>
               {hpCur}/{hpMax}
             </span>{" "}
             ŻYW
@@ -125,7 +126,7 @@ export default function StatusBar() {
       {/* Mobile compact */}
       <div className="md:hidden flex items-center gap-2 w-full justify-center">
         {hasCharacter && (
-          <span style={{ color: hpColor(hpPct), fontWeight: 700 }}>{hpCur}/{hpMax}</span>
+          <span className={cn("font-bold tabular-nums", hpTextClass(hpPct))}>{hpCur}/{hpMax}</span>
         )}
         {combatActive && <>{sep}<span>R{combatRound}</span></>}
         {firstTimer && <>{sep}<TimerIcon className="h-3 w-3 inline" /></>}
