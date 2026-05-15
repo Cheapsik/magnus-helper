@@ -51,7 +51,7 @@ export interface DiceRoll {
     { label: "2k10+3", count: 2, sides: 10, modifier: 3 },
   ];
   
-  export const DICE_TYPES = [3, 4, 6, 8, 10, 12, 20, 100];
+  export const DICE_TYPES = [4, 6, 8, 10, 12, 20, 100];
   
   export const DIFFICULTY_PRESETS = [
     { label: "Very Easy", labelPl: "Bardzo łatwy", modifier: 30 },

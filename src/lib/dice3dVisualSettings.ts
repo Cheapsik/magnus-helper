@@ -3,7 +3,9 @@
 export const DICE_3D_VISUAL_STORAGE_KEY = "magnus-dice-3d-visual";
 
 /** Klucze tekstur kostek — tylko wybrane (reszta plików w `textures/` zostaje w paczce, nie w UI). */
-export const DICE_3D_TEXTURE_KEYS = ["", "wood", "marble", "metal", "fire", "dragon"] as const;
+export const DICE_3D_TEXTURE_KEYS = ["", "wood", "marble", "metal", "fire", "dragon", "uwu"] as const;
+
+export const DICE_3D_UWU_TEXTURE_KEY = "uwu" as const satisfies Dice3DThemeTexture;
 
 export type Dice3DThemeTexture = (typeof DICE_3D_TEXTURE_KEYS)[number];
 
@@ -32,6 +34,7 @@ export const DICE_3D_TEXTURE_OPTIONS: { value: Dice3DThemeTexture; label: string
   { value: "metal", label: "Metal" },
   { value: "fire", label: "Ogień" },
   { value: "dragon", label: "Smok" },
+  { value: DICE_3D_UWU_TEXTURE_KEY, label: "UwU" },
 ];
 
 export const DICE_3D_MATERIAL_OPTIONS: { value: Dice3DThemeMaterial; label: string }[] = [
@@ -102,9 +105,37 @@ const TEXTURE_COLOR_PRESETS: Record<
   wood: { foreground: "#2a1810", background: "#b8956a" },
   marble: { foreground: "#1c1c1c", background: "#e6e2d8" },
   metal: { foreground: "#0f1419", background: "#a8b4c0" },
-  fire: { foreground: "#ffd6a0", background: "#4a1810" },
+  // Ogień: ciemna podkładka + source-over (patrz MAGNUS_DICE_CUSTOM_TEXTURES) — multiply + brąz zabija obraz
+  fire: { foreground: "#fff8e8", background: "#0a0404" },
   dragon: { foreground: "#d8e8c8", background: "#1e2a1c" },
+  uwu: { foreground: "#5c2848", background: "#f5b8d8" },
 };
+
+/** Nadpisania tekstur — ścieżki względem `public/assets/dice-box/`. */
+export const MAGNUS_DICE_CUSTOM_TEXTURES: Record<
+  string,
+  { name: string; composite: string; source: string; source_bump?: string }
+> = {
+  fire: {
+    name: "Ogień",
+    /** Nakładka 1:1 jak w pliku — multiply + ciemne tło zabija obraz. */
+    composite: "source-over",
+    source: "textures/fire.webp",
+  },
+  [DICE_3D_UWU_TEXTURE_KEY]: {
+    name: "UwU",
+    composite: "multiply",
+    source: "textures/pink.webp",
+    source_bump: "textures/pink.webp",
+  },
+};
+
+/** Klucz tekstury przekazywany do dice-box-threejs (`getTexture`). */
+export function resolveDiceLibraryTextureKey(texture: Dice3DThemeTexture): string {
+  if (texture === "") return "none";
+  if (texture === DICE_3D_UWU_TEXTURE_KEY) return DICE_3D_UWU_TEXTURE_KEY;
+  return texture;
+}
 
 /** Colorset przekazywany do `theme_customColorset` — zgodny z API dice-box-threejs. */
 export function buildThemeCustomColorset(config: Dice3DVisualConfig): {
@@ -115,7 +146,7 @@ export function buildThemeCustomColorset(config: Dice3DVisualConfig): {
   texture: string;
   material: string;
 } {
-  const textureKey = config.themeTexture === "" ? "none" : config.themeTexture;
+  const textureKey = resolveDiceLibraryTextureKey(config.themeTexture);
   const colors = TEXTURE_COLOR_PRESETS[config.themeTexture];
   const material = mapDiceMaterialToLibrary(config.themeMaterial);
 

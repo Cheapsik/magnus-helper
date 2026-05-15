@@ -81,7 +81,7 @@ function useRollingAnimation(duration = 800) {
 }
 
 const PRIMARY_DICE_SIDES = [4, 6, 8, 12, 20, 100] as const;
-const ALL_DICE_SIDES = [3, 4, 6, 8, 10, 12, 20, 100] as const;
+const ALL_DICE_SIDES = [4, 6, 8, 10, 12, 20, 100] as const;
 
 export default function DicePage() {
   const { rollHistory, addRoll, clearRollHistory } = useApp();

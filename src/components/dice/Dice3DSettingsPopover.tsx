@@ -12,10 +12,12 @@ import {
 import { Switch } from "@/components/ui/switch";
 import {
   DEFAULT_DICE_3D_VISUAL,
+  DICE_3D_UWU_TEXTURE_KEY,
   type Dice3DVisualConfig,
   DICE_3D_MATERIAL_OPTIONS,
   DICE_3D_TEXTURE_OPTIONS,
 } from "@/lib/dice3dVisualSettings";
+import { cn } from "@/lib/utils";
 
 export interface Dice3DSettingsPopoverProps {
   value: Dice3DVisualConfig;
@@ -65,15 +67,32 @@ export function Dice3DSettingsPopover({ value, onChange, disabled, triggerClassN
             onValueChange={(v) => patch({ themeTexture: (v === "__none__" ? "" : v) as Dice3DVisualConfig["themeTexture"] })}
             disabled={disabled}
           >
-            <SelectTrigger className="h-9 text-xs">
+            <SelectTrigger
+              className={cn(
+                "h-9 text-xs",
+                value.themeTexture === DICE_3D_UWU_TEXTURE_KEY &&
+                  "border-pink-300/70 bg-pink-100/55 hover:bg-pink-50/90 dark:border-pink-500/40 dark:bg-pink-950/35 dark:hover:bg-pink-900/55",
+              )}
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="z-[100] max-h-64">
-              {DICE_3D_TEXTURE_OPTIONS.map((o) => (
-                <SelectItem key={o.value || "__none__"} value={o.value === "" ? "__none__" : o.value} className="text-xs">
-                  {o.label}
-                </SelectItem>
-              ))}
+              {DICE_3D_TEXTURE_OPTIONS.map((o) => {
+                const isUwU = o.value === DICE_3D_UWU_TEXTURE_KEY;
+                return (
+                  <SelectItem
+                    key={o.value || "__none__"}
+                    value={o.value === "" ? "__none__" : o.value}
+                    className={cn(
+                      "text-xs",
+                      isUwU &&
+                        "bg-pink-100/90 text-pink-950 focus:bg-pink-50 focus:text-pink-950 data-[highlighted]:bg-pink-50 data-[highlighted]:text-pink-950 dark:bg-pink-950/45 dark:text-pink-100 dark:focus:bg-pink-900/65 dark:focus:text-pink-50 dark:data-[highlighted]:bg-pink-900/65 dark:data-[highlighted]:text-pink-50",
+                    )}
+                  >
+                    {o.label}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
