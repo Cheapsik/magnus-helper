@@ -12,6 +12,7 @@ import DiceBox from "@3d-dice/dice-box-threejs";
 import { X } from "lucide-react";
 import {
   buildThemeCustomColorset,
+  MAGNUS_DICE_CUSTOM_TEXTURES,
   mapDiceMaterialToLibrary,
   type Dice3DThemeMaterial,
   type Dice3DVisualConfig,
@@ -59,6 +60,21 @@ function flatRollValuesFromDetail(detail: unknown): number[] {
   };
   if (!Array.isArray(d.sets)) return [];
   return d.sets.flatMap((s) => (Array.isArray(s.rolls) ? s.rolls.map((r) => Number(r.value)) : []));
+}
+
+/** Lokalne pliki z `public/assets/dice-box/textures/` (np. własny fire.webp, easter egg UwU). */
+function registerCustomDiceTextures(box: DiceBoxInstance) {
+  const diceColors = box.DiceColors as DiceBoxInstance["DiceColors"] & {
+    getTexture: (key: unknown) => unknown;
+  };
+  const originalGetTexture = diceColors.getTexture.bind(diceColors);
+
+  diceColors.getTexture = (key: unknown) => {
+    if (typeof key === "string" && key in MAGNUS_DICE_CUSTOM_TEXTURES) {
+      return { ...MAGNUS_DICE_CUSTOM_TEXTURES[key] };
+    }
+    return originalGetTexture(key);
+  };
 }
 
 /** Biblioteka ustawia envMapIntensity=0 — przywracamy odbicia wg materiału. */
@@ -224,6 +240,7 @@ const DiceBox3D = forwardRef<DiceBox3DHandle, DiceBox3DProps>(function DiceBox3D
             return;
           }
 
+          registerCustomDiceTextures(box);
           await box.initialize();
           if (cancelled) {
             disposeDiceBox(box);

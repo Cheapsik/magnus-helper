@@ -1,10 +1,4 @@
-/** Notacja i adnotacja dla @3d-dice/dice-box-threejs (wizualnie d6 przy d3, d100+d10 przy d%). */
-
-function pickD6ShowingD3(value1to3: number): number {
-  const lo = 2 * value1to3 - 1;
-  const hi = 2 * value1to3;
-  return Math.random() < 0.5 ? lo : hi;
-}
+/** Notacja i adnotacja dla @3d-dice/dice-box-threejs (d100+d10 przy d%). */
 
 /** Wartości ścianek dla wymuszenia wyniku 1–100 (para d100 + d10 w bibliotece). */
 export function percentileDiePairForRoll(roll: number): [tens: number, ones: number] {
@@ -22,14 +16,6 @@ export function buildDiceBoxRollNotation(
 ): { notation: string; annotation?: string } {
   if (results.length !== count) {
     throw new Error("buildDiceBoxRollNotation: results length must match count");
-  }
-
-  if (sides === 3) {
-    const d6 = results.map(pickD6ShowingD3);
-    return {
-      notation: `${count}d6@${d6.join(",")}`,
-      annotation: `Pokazuję k6 — wynik k3: ${results.join(", ")}`,
-    };
   }
 
   if (sides === 100) {
