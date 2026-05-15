@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { MentionTextarea } from "@/components/mention/MentionTextarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AbilitiesReference } from "@/components/kodeks/AbilitiesReference";
 
 type CheatSheetView = {
   id: string;
@@ -200,11 +201,7 @@ export default function CheatSheetsPage() {
         </TabsContent>
 
         <TabsContent value="zdolnosci" className="mt-0">
-          <Card>
-            <CardContent className="p-6 text-center text-muted-foreground text-sm">
-              Sekcja zdolności — wkrótce.
-            </CardContent>
-          </Card>
+          <AbilitiesReference />
         </TabsContent>
       </Tabs>
     </div>
