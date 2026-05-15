@@ -26,7 +26,7 @@ const clampSidebarWidth = (w: number) =>
 
 const NAV_TABS = [
   { path: "/", label: "Start", icon: Home },
-  { path: "/dice", label: "Kości", icon: Dice5 },
+  { path: "/dice", label: "Rzut kośćmi", icon: Dice5 },
   { path: "/tests", label: "Testy", icon: Target },
   { path: "/codex", label: "Kodeks", icon: BookOpen },
 ];
@@ -36,7 +36,7 @@ const SIDEBAR_GROUPS: { label: string; items: { path: string; label: string; ico
     label: "Główne",
     items: [
       { path: "/", label: "Start", icon: Home },
-      { path: "/dice", label: "Kości", icon: Dice5 },
+      { path: "/dice", label: "Rzut kośćmi", icon: Dice5 },
       { path: "/tests", label: "Testy", icon: Target },
       { path: "/codex", label: "Kodeks", icon: BookOpen },
     ],
@@ -164,6 +164,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   const isMoreActive = visibleMore.some((l) => isActive(l.path));
   const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
+  const isDicePage = location.pathname === "/dice";
 
   return (
     <div className="h-screen flex overflow-hidden">
@@ -339,8 +340,20 @@ export default function Layout({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto w-full min-w-0">
-          <div className="w-full max-w-none min-w-0 px-3 md:px-4 py-4 pb-20 md:pb-4">
+        <main
+          className={cn(
+            "w-full min-w-0 flex-1",
+            isDicePage ? "flex min-h-0 flex-col overflow-hidden" : "overflow-y-auto",
+          )}
+        >
+          <div
+            className={cn(
+              "w-full max-w-none min-w-0",
+              isDicePage
+                ? "flex min-h-0 flex-1 flex-col overflow-hidden p-0 pb-20 md:pb-0"
+                : "px-3 md:px-4 py-4 pb-20 md:pb-4",
+            )}
+          >
             {children}
           </div>
         </main>
