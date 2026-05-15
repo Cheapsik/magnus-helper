@@ -127,9 +127,6 @@ export default function DicePage() {
       setLastResult(roll);
       addRoll(roll);
       showResultImmediate(total);
-      const mod = pending.modifier;
-      const modStr = mod === 0 ? "" : mod > 0 ? ` + ${mod}` : ` − ${Math.abs(mod)}`;
-      toast(`Wynik: ${total}${modStr}`, { duration: 2200 });
     },
     [addRoll, showResultImmediate],
   );

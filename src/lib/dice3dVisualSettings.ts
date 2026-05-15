@@ -86,3 +86,45 @@ export function saveDice3DVisualSettings(config: Dice3DVisualConfig): void {
 export function dice3DVisualConfigKey(c: Dice3DVisualConfig): string {
   return [c.themeTexture, c.themeMaterial, c.sounds ? "1" : "0", c.shadows ? "1" : "0"].join("|");
 }
+
+/** Materiały obsługiwane przez dice-box-threejs (bp). „plastic” = mat „none”. */
+export function mapDiceMaterialToLibrary(material: Dice3DThemeMaterial): "none" | "glass" | "wood" | "metal" {
+  if (material === "plastic") return "none";
+  if (material === "glass" || material === "wood" || material === "metal") return material;
+  return "none";
+}
+
+const TEXTURE_COLOR_PRESETS: Record<
+  Dice3DThemeTexture,
+  { foreground: string; background: string }
+> = {
+  "": { foreground: "#1a1208", background: "#d4c5a9" },
+  wood: { foreground: "#2a1810", background: "#b8956a" },
+  marble: { foreground: "#1c1c1c", background: "#e6e2d8" },
+  metal: { foreground: "#0f1419", background: "#a8b4c0" },
+  fire: { foreground: "#ffd6a0", background: "#4a1810" },
+  dragon: { foreground: "#d8e8c8", background: "#1e2a1c" },
+};
+
+/** Colorset przekazywany do `theme_customColorset` — zgodny z API dice-box-threejs. */
+export function buildThemeCustomColorset(config: Dice3DVisualConfig): {
+  name: string;
+  foreground: string;
+  background: string;
+  outline: string;
+  texture: string;
+  material: string;
+} {
+  const textureKey = config.themeTexture === "" ? "none" : config.themeTexture;
+  const colors = TEXTURE_COLOR_PRESETS[config.themeTexture];
+  const material = mapDiceMaterialToLibrary(config.themeMaterial);
+
+  return {
+    name: `magnus-${textureKey}-${material}`,
+    foreground: colors.foreground,
+    background: colors.background,
+    outline: "none",
+    texture: textureKey,
+    material,
+  };
+}
