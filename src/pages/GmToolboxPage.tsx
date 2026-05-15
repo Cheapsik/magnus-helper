@@ -658,7 +658,7 @@ export default function GmToolboxPage() {
           <Button variant="outline" className="justify-start gap-2 h-auto py-3" asChild>
             <Link to="/codex">
               <BookOpen className="h-4 w-4 shrink-0" />
-              Kodeks
+              Baza wiedzy
             </Link>
           </Button>
         </div>

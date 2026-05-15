@@ -40,7 +40,7 @@ const ROUTES = [
   { path: "/", label: "Start", icon: Home },
   { path: "/dice", label: "Rzut kośćmi", icon: Dice5 },
   { path: "/tests", label: "Testy", icon: Target },
-  { path: "/codex", label: "Kodeks", icon: BookOpen },
+  { path: "/codex", label: "Baza wiedzy", icon: BookOpen },
   { path: "/combat", label: "Tracker walki", icon: Swords },
   { path: "/scena", label: "Scena", icon: MapPin },
   { path: "/quests", label: "Wątki", icon: Network },

@@ -294,7 +294,6 @@ export default function DicePage() {
         {/* Panel konfiguracji — na mobile pod stołem, przewijany; na desktopie lewa kolumna */}
         <aside className="order-2 flex max-h-[min(48dvh,24rem)] w-full shrink-0 flex-col overflow-y-auto border-t border-border/60 bg-card/35 p-4 pb-5 safe-area-pb lg:order-1 lg:max-h-none lg:h-full lg:min-h-0 lg:max-w-[300px] lg:border-b-0 lg:border-r lg:border-t-0 lg:pb-4">
           <div className="border-b border-border/50 pb-3 mb-3 lg:mb-4">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Kości</p>
             <h1 className="font-app-brand mt-0.5 text-base font-bold tracking-tight sm:text-lg">Rzut kośćmi</h1>
           </div>
 
