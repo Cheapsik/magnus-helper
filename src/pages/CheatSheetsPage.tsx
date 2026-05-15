@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 import { MentionTextarea } from "@/components/mention/MentionTextarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type CheatSheetView = {
   id: string;
@@ -22,6 +23,13 @@ type CheatSheetView = {
   content: string;
   isCustom?: boolean;
 };
+
+function splitCodexContent(content: string): { firstLine: string; rest: string } {
+  if (!content.trim()) return { firstLine: "", rest: "" };
+  const newlineIdx = content.indexOf("\n");
+  if (newlineIdx === -1) return { firstLine: content, rest: "" };
+  return { firstLine: content.slice(0, newlineIdx), rest: content.slice(newlineIdx + 1) };
+}
 
 export default function CheatSheetsPage() {
   const { pinnedSheets, togglePinSheet, codexEntries, setCodexEntries } = useApp();
@@ -107,15 +115,32 @@ export default function CheatSheetsPage() {
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <h1 className="font-app-brand text-lg font-bold">Kodeks</h1>
-        <Button size="sm" className="text-xs gap-1 h-7" onClick={() => setAdding(true)}>
-          <Plus className="h-3 w-3" /> Dodaj wpis
-        </Button>
-      </div>
+      <h1 className="font-app-brand text-lg font-bold">Baza wiedzy</h1>
 
-      {/* Add form */}
-      {adding && (
+      <Tabs defaultValue="kodeks" className="space-y-4">
+        <TabsList className="flex h-9 w-full items-stretch gap-0.5 rounded-lg bg-muted p-0.5">
+          <TabsTrigger
+            value="kodeks"
+            className="flex-1 basis-0 min-w-0 rounded-md px-2 py-0 text-sm font-medium shadow-none data-[state=active]:shadow-sm"
+          >
+            Kodeks
+          </TabsTrigger>
+          <TabsTrigger
+            value="zdolnosci"
+            className="flex-1 basis-0 min-w-0 rounded-md px-2 py-0 text-sm font-medium shadow-none data-[state=active]:shadow-sm"
+          >
+            Zdolności
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="kodeks" className="mt-0 space-y-4">
+            <div className="flex justify-end">
+              <Button size="sm" className="h-7 gap-1 text-xs" onClick={() => setAdding(true)}>
+                <Plus className="h-3 w-3" /> Dodaj wpis
+              </Button>
+            </div>
+
+            {adding && (
         <Card className="border-primary/30">
           <CardContent className="p-3 space-y-2">
             <h3 className="text-xs font-semibold">Nowy wpis</h3>
@@ -136,34 +161,33 @@ export default function CheatSheetsPage() {
         <Input placeholder="Szukaj zasad…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
       </div>
 
-      {/* Categories */}
       <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
         {allCategories.map((cat) => (
-          <Button key={cat} size="sm" variant={activeCategory === cat ? "default" : "outline"} className="text-xs shrink-0" onClick={() => setActiveCategory(cat)}>
+          <Button key={cat} size="sm" variant={activeCategory === cat ? "default" : "outline"} className="shrink-0 text-xs" onClick={() => setActiveCategory(cat)}>
             {cat}
           </Button>
         ))}
       </div>
 
-      {/* Pinned */}
-      {pinned.length > 0 && (
-        <section>
-          <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">
-            <Pin className="h-3 w-3 inline mr-1" />Przypięte
-          </label>
+            {pinned.length > 0 && (
+              <section className="space-y-2">
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <Pin className="mr-1 inline h-3 w-3" />Przypięte
+                </label>
           <SheetAccordion sheets={pinned} pinnedSheets={pinnedSheets} onTogglePin={togglePinSheet}
             editingId={editingId} editTitle={editTitle} editContent={editContent} editCategory={editCategory}
             setEditTitle={setEditTitle} setEditContent={setEditContent} setEditCategory={setEditCategory}
             onStartEdit={startEdit} onSaveEdit={saveEdit} onCancelEdit={() => setEditingId(null)}
-            deleteConfirm={deleteConfirm} setDeleteConfirm={setDeleteConfirm} onDelete={deleteEntry} />
-        </section>
-      )}
+                  deleteConfirm={deleteConfirm} setDeleteConfirm={setDeleteConfirm} onDelete={deleteEntry} />
+              </section>
+            )}
 
-      {/* All */}
-      <section>
-        {pinned.length > 0 && (
-          <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Wszystkie karty</label>
-        )}
+            <section className="space-y-2">
+              {pinned.length > 0 && (
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Wszystkie karty
+                </label>
+              )}
         {unpinned.length === 0 && pinned.length === 0 && (
           <Card><CardContent className="p-6 text-center text-muted-foreground text-sm">Brak kart pasujących do wyszukiwania.</CardContent></Card>
         )}
@@ -171,8 +195,115 @@ export default function CheatSheetsPage() {
           editingId={editingId} editTitle={editTitle} editContent={editContent} editCategory={editCategory}
           setEditTitle={setEditTitle} setEditContent={setEditContent} setEditCategory={setEditCategory}
           onStartEdit={startEdit} onSaveEdit={saveEdit} onCancelEdit={() => setEditingId(null)}
-          deleteConfirm={deleteConfirm} setDeleteConfirm={setDeleteConfirm} onDelete={deleteEntry} />
-      </section>
+                deleteConfirm={deleteConfirm} setDeleteConfirm={setDeleteConfirm} onDelete={deleteEntry} />
+            </section>
+        </TabsContent>
+
+        <TabsContent value="zdolnosci" className="mt-0">
+          <Card>
+            <CardContent className="p-6 text-center text-muted-foreground text-sm">
+              Sekcja zdolności — wkrótce.
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+const CODEX_CARD_ROW = "min-h-[4.75rem]";
+const CODEX_INLINE_EXPAND_THRESHOLD = 120;
+
+function CodexCardActions({
+  sheetId,
+  isPinned,
+  variant,
+  className,
+  deleteConfirm,
+  onStartEdit,
+  onDelete,
+  onCancelDelete,
+  onConfirmDelete,
+  onTogglePin,
+}: {
+  sheetId: string;
+  isPinned: boolean;
+  variant: "footer" | "strip";
+  className?: string;
+  deleteConfirm: string | null;
+  onStartEdit: () => void;
+  onDelete: () => void;
+  onCancelDelete: () => void;
+  onConfirmDelete: () => void;
+  onTogglePin: () => void;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex items-center",
+        variant === "footer"
+          ? "justify-end gap-2 border-t border-border/50 bg-muted/25 px-3 py-2"
+          : "shrink-0 gap-0.5 self-stretch border-l border-border/50 bg-muted/10 px-1",
+        className,
+      )}
+      onClick={(e) => e.stopPropagation()}
+      role="toolbar"
+      aria-label="Akcje wpisu"
+    >
+      <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground" onClick={onStartEdit} aria-label="Edytuj">
+        <Edit2 className="h-3.5 w-3.5" />
+      </Button>
+      {deleteConfirm === sheetId ? (
+        <>
+          <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={onConfirmDelete} aria-label="Potwierdź usunięcie">
+            <Check className="h-3.5 w-3.5" />
+          </Button>
+          <Button type="button" size="icon" variant="ghost" className="h-8 w-8" onClick={onCancelDelete} aria-label="Anuluj">
+            <X className="h-3.5 w-3.5" />
+          </Button>
+        </>
+      ) : (
+        <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={onDelete} aria-label="Usuń">
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
+      )}
+      <Button
+        type="button"
+        size="icon"
+        variant={isPinned ? "secondary" : "ghost"}
+        className="h-8 w-8"
+        onClick={onTogglePin}
+        aria-label={isPinned ? "Odepnij" : "Przypnij"}
+      >
+        {isPinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
+      </Button>
+    </div>
+  );
+}
+
+function CodexCardPreview({
+  title,
+  category,
+  firstLine,
+  isPinned,
+}: {
+  title: string;
+  category: string;
+  firstLine: string;
+  isPinned: boolean;
+}) {
+  return (
+    <div className="flex min-w-0 flex-1 flex-col justify-center py-3 pl-4 pr-2">
+      <div className="flex min-h-5 w-full items-center gap-2">
+        <span className="min-w-0 flex-1 truncate text-sm font-semibold leading-none">{title}</span>
+        <span className="shrink-0 rounded-full border border-border/60 bg-muted/40 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+          {category}
+        </span>
+        {isPinned && <Pin className="h-3 w-3 shrink-0 text-primary" aria-hidden />}
+      </div>
+      <p className={cn("mt-1.5 line-clamp-1 text-sm leading-5 text-muted-foreground", !firstLine && "opacity-0")}>
+        {firstLine || "\u00a0"}
+      </p>
     </div>
   );
 }
@@ -194,65 +325,64 @@ function SheetAccordion({
   deleteConfirm: string | null; setDeleteConfirm: (id: string | null) => void; onDelete: (id: string) => void;
 }) {
   return (
-    <Accordion type="multiple" className="space-y-1.5">
+    <Accordion type="multiple" className="space-y-2">
       {sheets.map((sheet) => {
         const isEditing = editingId === sheet.id;
+        const { firstLine, rest } = splitCodexContent(sheet.content);
+        const hasMultiLineContent = rest.trim().length > 0;
+        const hasLongSingleLineContent = !hasMultiLineContent && firstLine.trim().length > CODEX_INLINE_EXPAND_THRESHOLD;
+        const isExpandable = hasMultiLineContent || hasLongSingleLineContent;
+        const expandedContent = hasMultiLineContent ? rest : sheet.content;
+        const isPinned = pinnedSheets.includes(sheet.id);
+        const actionProps = {
+          sheetId: sheet.id,
+          isPinned,
+          deleteConfirm,
+          onStartEdit: () => onStartEdit(sheet),
+          onDelete: () => setDeleteConfirm(sheet.id),
+          onCancelDelete: () => setDeleteConfirm(null),
+          onConfirmDelete: () => onDelete(sheet.id),
+          onTogglePin: () => onTogglePin(sheet.id),
+        };
+
         return (
-          <AccordionItem key={sheet.id} value={sheet.id} className="border rounded-lg bg-card px-3">
+          <AccordionItem
+            key={sheet.id}
+            value={sheet.id}
+            className="flex flex-col overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm transition-colors hover:border-border data-[state=open]:border-primary/25 border-b-0"
+          >
             {isEditing ? (
-              <div className="py-3 space-y-2">
+              <div className="space-y-2 p-4">
                 <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="h-8 text-xs" placeholder="Tytuł" />
                 <Input value={editCategory} onChange={(e) => setEditCategory(e.target.value)} className="h-8 text-xs" placeholder="Kategoria" />
-                <MentionTextarea value={editContent} onChange={setEditContent} className="min-h-[120px] text-xs" placeholder="Treść…" />
+                <MentionTextarea value={editContent} onChange={setEditContent} className="min-h-[100px] text-xs" placeholder="Treść…" />
                 <div className="flex gap-1.5">
-                  <Button size="sm" className="h-7 text-xs flex-1 gap-1" onClick={onSaveEdit}><Check className="h-3 w-3" />Zapisz</Button>
+                  <Button size="sm" className="h-7 flex-1 gap-1 text-xs" onClick={onSaveEdit}><Check className="h-3 w-3" />Zapisz</Button>
                   <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={onCancelEdit}>Anuluj</Button>
                 </div>
               </div>
             ) : (
               <>
-                <AccordionTrigger className="flex-1 text-sm font-medium py-3 hover:no-underline w-full">
-                  <div className="flex items-center gap-2 text-left">
-                    <span>{sheet.title}</span>
-                    <span className="text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded">{sheet.category}</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground pb-3 whitespace-pre-line leading-relaxed">
-                  {sheet.content}
-                </AccordionContent>
-                {/* Action buttons at the bottom for better mobile accessibility */}
-                <div className="flex items-center justify-end gap-1 pb-3 pt-1 border-t border-border/30 mt-2">
-                  <button onClick={(e) => { e.stopPropagation(); onStartEdit(sheet); }}
-                    className="p-2 text-muted-foreground hover:text-primary transition-colors"
-                    aria-label="Edytuj">
-                    <Edit2 className="h-4 w-4" />
-                  </button>
-                  {deleteConfirm === sheet.id ? (
-                    <div className="flex gap-0.5">
-                      <button onClick={(e) => { e.stopPropagation(); onDelete(sheet.id); }}
-                        className="p-2 text-destructive hover:text-destructive/80 transition-colors"
-                        aria-label="Potwierdź usunięcie">
-                        <Check className="h-4 w-4" />
-                      </button>
-                      <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(null); }}
-                        className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-                        aria-label="Anuluj">
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(sheet.id); }}
-                      className="p-2 text-muted-foreground hover:text-destructive transition-colors"
-                      aria-label="Usuń">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                <div className={cn("flex min-w-0 items-stretch", CODEX_CARD_ROW)}>
+                  <CodexCardPreview title={sheet.title} category={sheet.category} firstLine={firstLine} isPinned={isPinned} />
+                  <CodexCardActions variant="strip" {...actionProps} className="hidden md:flex" />
+                  {isExpandable && (
+                    <AccordionTrigger
+                      className="flex h-full w-10 shrink-0 flex-none items-center justify-center self-stretch border-l border-border/50 bg-muted/10 py-0 hover:bg-muted/20 hover:no-underline [&>svg]:h-4 [&>svg]:w-4 [&>svg]:shrink-0 [&>svg]:text-muted-foreground"
+                      aria-label="Rozwiń wpis"
+                    >
+                      <span className="sr-only">Rozwiń wpis</span>
+                    </AccordionTrigger>
                   )}
-                  <button onClick={(e) => { e.stopPropagation(); onTogglePin(sheet.id); }}
-                    className="p-2 text-muted-foreground hover:text-primary transition-colors"
-                    aria-label={pinnedSheets.includes(sheet.id) ? "Odepnij" : "Przypnij"}>
-                    {pinnedSheets.includes(sheet.id) ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
-                  </button>
                 </div>
+                {isExpandable && (
+                  <AccordionContent className="border-t border-border/40 bg-muted/10 pb-0">
+                    <div className="px-4 py-3 text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
+                      {expandedContent}
+                    </div>
+                  </AccordionContent>
+                )}
+                <CodexCardActions variant="footer" {...actionProps} className="md:hidden" />
               </>
             )}
           </AccordionItem>

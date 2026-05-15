@@ -28,7 +28,7 @@ const NAV_TABS = [
   { path: "/", label: "Start", icon: Home },
   { path: "/dice", label: "Rzut kośćmi", icon: Dice5 },
   { path: "/tests", label: "Testy", icon: Target },
-  { path: "/codex", label: "Kodeks", icon: BookOpen },
+  { path: "/codex", label: "Baza wiedzy", icon: BookOpen },
 ];
 
 const SIDEBAR_GROUPS: { label: string; items: { path: string; label: string; icon: LucideIcon }[] }[] = [
@@ -38,7 +38,7 @@ const SIDEBAR_GROUPS: { label: string; items: { path: string; label: string; ico
       { path: "/", label: "Start", icon: Home },
       { path: "/dice", label: "Rzut kośćmi", icon: Dice5 },
       { path: "/tests", label: "Testy", icon: Target },
-      { path: "/codex", label: "Kodeks", icon: BookOpen },
+      { path: "/codex", label: "Baza wiedzy", icon: BookOpen },
     ],
   },
   {
