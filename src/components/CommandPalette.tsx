@@ -38,7 +38,7 @@ export function useCommandPalette() {
 
 const ROUTES = [
   { path: "/", label: "Start", icon: Home },
-  { path: "/dice", label: "Kości", icon: Dice5 },
+  { path: "/dice", label: "Rzut kośćmi", icon: Dice5 },
   { path: "/tests", label: "Testy", icon: Target },
   { path: "/codex", label: "Kodeks", icon: BookOpen },
   { path: "/combat", label: "Tracker walki", icon: Swords },
