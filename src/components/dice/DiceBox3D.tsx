@@ -10,7 +10,12 @@ import {
 } from "react";
 import DiceBox from "@3d-dice/dice-box-threejs";
 import { X } from "lucide-react";
-import type { Dice3DVisualConfig } from "@/lib/dice3dVisualSettings";
+import {
+  buildThemeCustomColorset,
+  mapDiceMaterialToLibrary,
+  type Dice3DThemeMaterial,
+  type Dice3DVisualConfig,
+} from "@/lib/dice3dVisualSettings";
 import { Button } from "@/components/ui/button";
 
 export interface DiceBox3DProps {
@@ -54,6 +59,49 @@ function flatRollValuesFromDetail(detail: unknown): number[] {
   };
   if (!Array.isArray(d.sets)) return [];
   return d.sets.flatMap((s) => (Array.isArray(s.rolls) ? s.rolls.map((r) => Number(r.value)) : []));
+}
+
+/** Biblioteka ustawia envMapIntensity=0 — przywracamy odbicia wg materiału. */
+function patchDiceFactoryMaterials(box: DiceBoxInstance, material: Dice3DThemeMaterial) {
+  const factory = box.DiceFactory as DiceBoxInstance["DiceFactory"] & {
+    __magnusMaterialPatch?: boolean;
+    createMaterials: (...args: unknown[]) => unknown[];
+  };
+  if (factory.__magnusMaterialPatch) return;
+  factory.__magnusMaterialPatch = true;
+
+  const libMaterial = mapDiceMaterialToLibrary(material);
+  const envMapIntensity =
+    libMaterial === "metal" ? 0.85 : libMaterial === "glass" ? 0.55 : libMaterial === "wood" ? 0.22 : 0;
+
+  const original = factory.createMaterials.bind(factory);
+  factory.createMaterials = (...args: unknown[]) => {
+    const materials = original(...args) as Array<{
+      isMeshStandardMaterial?: boolean;
+      envMapIntensity?: number;
+      roughness?: number;
+      metalness?: number;
+    }>;
+
+    for (const mat of materials) {
+      if (!mat?.isMeshStandardMaterial) continue;
+      mat.envMapIntensity = envMapIntensity;
+      if (libMaterial === "metal") {
+        mat.roughness = 0.35;
+        mat.metalness = 0.78;
+      } else if (libMaterial === "glass") {
+        mat.roughness = 0.08;
+        mat.metalness = 0.04;
+      } else if (libMaterial === "wood") {
+        mat.roughness = 0.9;
+        mat.metalness = 0;
+      } else {
+        mat.roughness = 0.65;
+        mat.metalness = 0;
+      }
+    }
+    return materials;
+  };
 }
 
 function disposeDiceBox(box: DiceBoxInstance | null) {
@@ -149,8 +197,7 @@ const DiceBox3D = forwardRef<DiceBox3DHandle, DiceBox3DProps>(function DiceBox3D
 
       void (async () => {
         try {
-          const tex = visualConfig.themeTexture;
-          const textureForCustom = tex === "" ? "none" : tex;
+          const customColorset = buildThemeCustomColorset(visualConfig);
           const box = new DiceBox(`#${containerId}`, {
             assetPath,
             sounds: visualConfig.sounds,
@@ -160,17 +207,10 @@ const DiceBox3D = forwardRef<DiceBox3DHandle, DiceBox3DProps>(function DiceBox3D
             light_intensity: 1,
             gravity_multiplier: 400,
             baseScale: mobile ? 70 : 100,
-            theme_customColorset: {
-              name: "magnus",
-              foreground: "#1a1208",
-              background: "#d4c5a9",
-              outline: "none",
-              texture: textureForCustom,
-              material: visualConfig.themeMaterial,
-            },
+            theme_customColorset: customColorset,
             theme_colorset: "white",
-            theme_texture: tex,
-            theme_material: visualConfig.themeMaterial,
+            theme_texture: "",
+            theme_material: customColorset.material,
             onRollComplete: (detail: unknown) => {
               const fromPhysics = flatRollValuesFromDetail(detail);
               const magnus = magnusResultsRef.current;
@@ -196,6 +236,7 @@ const DiceBox3D = forwardRef<DiceBox3DHandle, DiceBox3DProps>(function DiceBox3D
           const renderer = box.renderer as { domElement: HTMLCanvasElement };
           renderer.domElement.style.backgroundColor = "transparent";
 
+          patchDiceFactoryMaterials(box, visualConfig.themeMaterial);
           boxRef.current = box;
           setReady(true);
           setInitError(null);
