@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Dice5, Plus, Minus, Trash2, Zap, Box } from "lucide-react";
+import { Dice5, Plus, Minus, Trash2, Zap, Box, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { useApp } from "@/context/AppContext";
 import { rollDice, formatDice, DEFAULT_PRESETS } from "@/lib/dice";
@@ -15,6 +15,10 @@ import DiceBox3D, { type DiceBox3DHandle } from "@/components/dice/DiceBox3D";
 import { Dice3DSettingsPopover } from "@/components/dice/Dice3DSettingsPopover";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { NumberInput } from "@/components/ui/number-input";
+
+const DICE_COUNT_MIN = 1;
+const DICE_COUNT_MAX = 20;
 
 function useRollingAnimation(duration = 800) {
   const [isRolling, setIsRolling] = useState(false);
@@ -323,48 +327,88 @@ export default function DicePage() {
             </div>
           </div>
 
-          <div className="mb-3 grid grid-cols-2 gap-2 sm:gap-2.5 lg:mb-4">
-            <div className="rounded-lg border border-border/60 bg-background/40 p-2.5">
-              <label className="text-[10px] text-muted-foreground mb-1.5 block font-medium uppercase tracking-wide">Ilość</label>
-              <div className="flex items-center justify-between gap-1">
+          <div className="mb-3 flex flex-col gap-2.5 lg:mb-4">
+            <div className="rounded-lg border border-border/60 bg-background/40 p-3">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <label className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Ilość</label>
                 <Button
-                  size="icon"
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 gap-1 px-2 text-[10px] text-muted-foreground touch-manipulation"
+                  onClick={() => setCount(DICE_COUNT_MIN)}
+                  title="Wyzeruj do 1 kości"
+                  aria-label="Wyzeruj ilość do 1"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                  Reset
+                </Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
                   variant="secondary"
-                  className="h-9 w-9 shrink-0 touch-manipulation sm:h-8 sm:w-8"
-                  onClick={() => setCount(Math.max(1, count - 1))}
+                  className="h-9 w-14 shrink-0 touch-manipulation px-0 sm:h-8"
+                  onClick={() => setCount(Math.max(DICE_COUNT_MIN, count - 1))}
+                  aria-label="Zmniejsz ilość"
                 >
                   <Minus className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                 </Button>
-                <span className="text-lg font-bold tabular-nums w-8 text-center">{count}</span>
+                <NumberInput
+                  value={count}
+                  onChange={(v) => setCount(Math.max(DICE_COUNT_MIN, Math.min(DICE_COUNT_MAX, v)))}
+                  min={DICE_COUNT_MIN}
+                  max={DICE_COUNT_MAX}
+                  className="h-8 min-w-[3.25rem] flex-1 px-2 text-center text-base font-bold tabular-nums sm:h-8"
+                />
                 <Button
-                  size="icon"
+                  type="button"
                   variant="secondary"
-                  className="h-9 w-9 shrink-0 touch-manipulation sm:h-8 sm:w-8"
-                  onClick={() => setCount(Math.min(20, count + 1))}
+                  className="h-9 w-14 shrink-0 touch-manipulation px-0 sm:h-8"
+                  onClick={() => setCount(Math.min(DICE_COUNT_MAX, count + 1))}
+                  aria-label="Zwiększ ilość"
                 >
                   <Plus className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                 </Button>
               </div>
             </div>
-            <div className="rounded-lg border border-border/60 bg-background/40 p-2.5">
-              <label className="text-[10px] text-muted-foreground mb-1.5 block font-medium uppercase tracking-wide">Modyfikator</label>
-              <div className="flex items-center justify-between gap-1">
+            <div className="rounded-lg border border-border/60 bg-background/40 p-3">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <label className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Modyfikator</label>
                 <Button
-                  size="icon"
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 gap-1 px-2 text-[10px] text-muted-foreground touch-manipulation"
+                  onClick={() => setModifier(0)}
+                  title="Wyzeruj do 0"
+                  aria-label="Wyzeruj modyfikator do 0"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                  Reset
+                </Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
                   variant="secondary"
-                  className="h-9 w-9 shrink-0 touch-manipulation sm:h-8 sm:w-8"
+                  className="h-9 w-14 shrink-0 touch-manipulation px-0 sm:h-8"
                   onClick={() => setModifier(modifier - 1)}
+                  aria-label="Zmniejsz modyfikator"
                 >
                   <Minus className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                 </Button>
-                <span className="text-lg font-bold tabular-nums w-8 text-center">
-                  {modifier >= 0 ? `+${modifier}` : modifier}
-                </span>
+                <NumberInput
+                  value={modifier}
+                  onChange={setModifier}
+                  className="h-8 min-w-[3.25rem] flex-1 px-2 text-center text-base font-bold tabular-nums sm:h-8"
+                />
                 <Button
-                  size="icon"
+                  type="button"
                   variant="secondary"
-                  className="h-9 w-9 shrink-0 touch-manipulation sm:h-8 sm:w-8"
+                  className="h-9 w-14 shrink-0 touch-manipulation px-0 sm:h-8"
                   onClick={() => setModifier(modifier + 1)}
+                  aria-label="Zwiększ modyfikator"
                 >
                   <Plus className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                 </Button>
