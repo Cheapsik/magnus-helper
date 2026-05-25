@@ -19,6 +19,8 @@ import { NumberInput } from "@/components/ui/number-input";
 
 const DICE_COUNT_MIN = 1;
 const DICE_COUNT_MAX = 20;
+const DICE_MODIFIER_MIN = -99;
+const DICE_MODIFIER_MAX = 99;
 
 function useRollingAnimation(duration = 800) {
   const [isRolling, setIsRolling] = useState(false);
@@ -393,21 +395,25 @@ export default function DicePage() {
                   type="button"
                   variant="secondary"
                   className="h-9 w-14 shrink-0 touch-manipulation px-0 sm:h-8"
-                  onClick={() => setModifier(modifier - 1)}
+                  onClick={() => setModifier(Math.max(DICE_MODIFIER_MIN, modifier - 1))}
                   aria-label="Zmniejsz modyfikator"
                 >
                   <Minus className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                 </Button>
                 <NumberInput
                   value={modifier}
-                  onChange={setModifier}
+                  onChange={(v) =>
+                    setModifier(Math.max(DICE_MODIFIER_MIN, Math.min(DICE_MODIFIER_MAX, v)))
+                  }
+                  min={DICE_MODIFIER_MIN}
+                  max={DICE_MODIFIER_MAX}
                   className="h-8 min-w-[3.25rem] flex-1 px-2 text-center text-base font-bold tabular-nums sm:h-8"
                 />
                 <Button
                   type="button"
                   variant="secondary"
                   className="h-9 w-14 shrink-0 touch-manipulation px-0 sm:h-8"
-                  onClick={() => setModifier(modifier + 1)}
+                  onClick={() => setModifier(Math.min(DICE_MODIFIER_MAX, modifier + 1))}
                   aria-label="Zwiększ modyfikator"
                 >
                   <Plus className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
