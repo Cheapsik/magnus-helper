@@ -16,10 +16,19 @@
   <meta name="twitter:title" content="Magnus Helper — Pomocnik RPG">
   <meta property="og:description" content="Magnus Helper — osobisty pomocnik do sesji RPG. Kości, testy, kodeks zasad, tracker walki i więcej.">
   <meta name="twitter:description" content="Magnus Helper — osobisty pomocnik do sesji RPG. Kości, testy, kodeks zasad, tracker walki i więcej.">
- <!-- TODO: Change the image to the correct image -->
   <meta property="og:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/a79c70bf-1a83-4ec0-9146-b91ab0a5f190?Expires=1774859856&amp;GoogleAccessId=go-api-on-aws%40gpt-engineer-390607.iam.gserviceaccount.com&amp;Signature=Oq66niDtVlihMXdQO2NMH%2FQSJf7uu9D85iNgNQxmmCspiguIXd998SMI2v20w1LUmZpN%2F8GHWFBRQlusPm2aT4%2FQGCRAwds7xaRV6hAxYJWp3%2B%2BxTHoI0HkUtF1BwU25tuVFcZRSrwKq%2BOPsJy1GQYwz05G9HQt7iQ2s3ogEGGylzCJ0CHhUEBnO2wkoPalt3HEmt%2BR1uVXVoW0MhrU3YWEMgtiw33pMhOimxIg%2B5IDhPYZoWBXLTFxX4D%2BQDW7IIgjqrAXWiyA0XPjTR6hi1ky1PpTih8hmb57gD3%2BwAeNPOJ08MWY5RVTmfcdrcRP2APS%2BS1Coa5fMgItKUZQ%2Blw%3D%3D">
   <meta name="twitter:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/a79c70bf-1a83-4ec0-9146-b91ab0a5f190?Expires=1774859856&amp;GoogleAccessId=go-api-on-aws%40gpt-engineer-390607.iam.gserviceaccount.com&amp;Signature=Oq66niDtVlihMXdQO2NMH%2FQSJf7uu9D85iNgNQxmmCspiguIXd998SMI2v20w1LUmZpN%2F8GHWFBRQlusPm2aT4%2FQGCRAwds7xaRV6hAxYJWp3%2B%2BxTHoI0HkUtF1BwU25tuVFcZRSrwKq%2BOPsJy1GQYwz05G9HQt7iQ2s3ogEGGylzCJ0CHhUEBnO2wkoPalt3HEmt%2BR1uVXVoW0MhrU3YWEMgtiw33pMhOimxIg%2B5IDhPYZoWBXLTFxX4D%2BQDW7IIgjqrAXWiyA0XPjTR6hi1ky1PpTih8hmb57gD3%2BwAeNPOJ08MWY5RVTmfcdrcRP2APS%2BS1Coa5fMgItKUZQ%2Blw%3D%3D">
   <meta name="twitter:card" content="summary_large_image">
+  <script>
+    (function(l) {
+      if (l.search[1] === '/') {
+        var decoded = l.search.slice(1).split('&').map(function(s) {
+          return s.replace(/~and~/g, '&')
+        }).join('?');
+        window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
+      }
+    }(window.location))
+  </script>
 </head>
   <body>
     <div id="root"></div>
