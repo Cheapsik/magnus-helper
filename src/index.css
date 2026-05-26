@@ -765,3 +765,11 @@
     max-height: 160px;
   }
 }
+
+/* ── Auth page (login) ── */
+.auth-page {
+  --auth-gold: #c5a059;
+  --auth-gold-hover: #b8924f;
+  --auth-card: rgba(22, 22, 26, 0.88);
+  --auth-input: rgba(0, 0, 0, 0.45);
+}
