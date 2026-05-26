@@ -3,9 +3,10 @@ import { Link, useLocation } from "react-router-dom";
 import {
   Home, Dice5, Target, BookOpen, MoreHorizontal, Search,
   Swords, User, BarChart3, Activity, Package, StickyNote, Wrench, Users, Gem, Timer, MessageSquare, Music, Network, ScrollText,
-  Drama, KeyRound, MapPin, Settings as SettingsIcon,
+  Drama, KeyRound, MapPin, Settings as SettingsIcon, LogOut,
   type LucideIcon,
 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import { useScene } from "@/context/SceneContext";
 import { useCommandPalette } from "@/context/CommandPaletteContext";
 import { cn } from "@/lib/utils";
@@ -83,6 +84,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const palette = useCommandPalette();
   const { mode, setMode } = useMode();
   const { activeScene } = useScene();
+  const { signOut } = useAuth();
 
   const [storedWidth, setStoredWidth] = useLocalStorage<number>(
     SIDEBAR_WIDTH_STORAGE_KEY,
@@ -308,6 +310,19 @@ export default function Layout({ children }: { children: ReactNode }) {
                 </TooltipTrigger>
                 <TooltipContent>Ustawienia</TooltipContent>
               </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={() => void signOut()}
+                    className="p-2 text-destructive hover:text-destructive/80 transition-colors"
+                    aria-label="Wyloguj się"
+                  >
+                    <LogOut className="h-[18px] w-[18px]" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Wyloguj się</TooltipContent>
+              </Tooltip>
             </div>
           </div>
         </header>
@@ -336,6 +351,19 @@ export default function Layout({ children }: { children: ReactNode }) {
                 </Link>
               </TooltipTrigger>
               <TooltipContent>Ustawienia</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => void signOut()}
+                  className="p-2 text-destructive hover:text-destructive/80 transition-colors"
+                  aria-label="Wyloguj się"
+                >
+                  <LogOut className="h-[18px] w-[18px]" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Wyloguj się</TooltipContent>
             </Tooltip>
           </div>
         </header>

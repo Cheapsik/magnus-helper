@@ -1,5 +1,5 @@
 import { ThemeProvider } from "next-themes";
-import { HashRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
@@ -9,7 +9,9 @@ import { SceneProvider } from "@/context/SceneContext";
 import { DrawerProvider } from "@/context/DrawerContext";
 import { CommandPaletteProvider } from "@/context/CommandPaletteContext";
 import { SettingsProvider } from "@/context/SettingsContext";
+import { AuthProvider } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
+import { AuthGuard } from "@/components/AuthGuard";
 import { GlobalDrawer } from "@/components/global-drawer/GlobalDrawer";
 import { CommandPalette } from "@/components/command-palette/CommandPalette";
 import Index from "@/pages/Index";
@@ -34,6 +36,43 @@ import QuestsPage from "@/pages/QuestsPage";
 import HeroesPage from "@/pages/HeroesPage";
 import ScenePage from "@/pages/ScenePage";
 import SettingsPage from "@/components/settings/SettingsPage";
+import AuthPage from "@/pages/AuthPage";
+import { getRouterBasename } from "@/lib/authUrls";
+
+function ProtectedApp() {
+  return (
+    <AuthGuard>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/dice" element={<DicePage />} />
+          <Route path="/tests" element={<TestsPage />} />
+          <Route path="/codex" element={<CheatSheetsPage />} />
+          <Route path="/scena" element={<ScenePage />} />
+          <Route path="/character" element={<CharacterPage />} />
+          <Route path="/combat" element={<CombatPage />} />
+          <Route path="/simulations" element={<SimulationsPage />} />
+          <Route path="/conditions" element={<ConditionsPage />} />
+          <Route path="/inventory" element={<InventoryPage />} />
+          <Route path="/loot" element={<LootGeneratorPage />} />
+          <Route path="/shop" element={<ShopPage />} />
+          <Route path="/notes" element={<SessionNotesPage />} />
+          <Route path="/gm-toolbox" element={<GmToolboxPage />} />
+          <Route path="/npcs" element={<NpcManagerPage />} />
+          <Route path="/heroes" element={<HeroesPage />} />
+          <Route path="/timers" element={<TimersPage />} />
+          <Route path="/rumors" element={<RumorsPage />} />
+          <Route path="/ambient" element={<AmbientPage />} />
+          <Route path="/quests" element={<QuestsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Layout>
+      <GlobalDrawer />
+      <CommandPalette />
+    </AuthGuard>
+  );
+}
 
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="rpg_theme">
@@ -46,36 +85,15 @@ const App = () => (
               <ModeProvider>
                 <DrawerProvider>
                   <CommandPaletteProvider>
-                    <HashRouter>
-                      <Layout>
+                    <BrowserRouter basename={getRouterBasename()}>
+                      <AuthProvider>
                         <Routes>
-                          <Route path="/" element={<Index />} />
-                          <Route path="/dice" element={<DicePage />} />
-                          <Route path="/tests" element={<TestsPage />} />
-                          <Route path="/codex" element={<CheatSheetsPage />} />
-                          <Route path="/scena" element={<ScenePage />} />
-                          <Route path="/character" element={<CharacterPage />} />
-                          <Route path="/combat" element={<CombatPage />} />
-                          <Route path="/simulations" element={<SimulationsPage />} />
-                          <Route path="/conditions" element={<ConditionsPage />} />
-                          <Route path="/inventory" element={<InventoryPage />} />
-                          <Route path="/loot" element={<LootGeneratorPage />} />
-                          <Route path="/shop" element={<ShopPage />} />
-                          <Route path="/notes" element={<SessionNotesPage />} />
-                          <Route path="/gm-toolbox" element={<GmToolboxPage />} />
-                          <Route path="/npcs" element={<NpcManagerPage />} />
-                          <Route path="/heroes" element={<HeroesPage />} />
-                          <Route path="/timers" element={<TimersPage />} />
-                          <Route path="/rumors" element={<RumorsPage />} />
-                          <Route path="/ambient" element={<AmbientPage />} />
-                          <Route path="/quests" element={<QuestsPage />} />
-                          <Route path="/settings" element={<SettingsPage />} />
-                          <Route path="*" element={<NotFound />} />
+                          <Route path="/auth" element={<AuthPage />} />
+                          <Route path="/reset-password" element={<AuthPage />} />
+                          <Route path="/*" element={<ProtectedApp />} />
                         </Routes>
-                      </Layout>
-                      <GlobalDrawer />
-                      <CommandPalette />
-                    </HashRouter>
+                      </AuthProvider>
+                    </BrowserRouter>
                   </CommandPaletteProvider>
                 </DrawerProvider>
               </ModeProvider>
