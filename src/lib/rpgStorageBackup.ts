@@ -1,4 +1,4 @@
-/** Szybki backup z nagłówka: `rpg_*` oraz `magnus_*` poza ustawieniami aplikacji. */
+
 const HEADER_BACKUP_EXCLUDE_MAGNUS = new Set(["magnus_settings"]);
 
 function shouldBackupStorageKey(key: string) {
@@ -7,7 +7,6 @@ function shouldBackupStorageKey(key: string) {
   return false;
 }
 
-/** Zbiera surowe wartości localStorage dla wszystkich obsługiwanych kluczy aplikacji. */
 export function collectRpgStorageSnapshot(): Record<string, string> {
   const out: Record<string, string> = {};
   try {
@@ -18,8 +17,7 @@ export function collectRpgStorageSnapshot(): Record<string, string> {
       if (value !== null) out[key] = value;
     }
   } catch {
-    // ignore
-  }
+      }
   return out;
 }
 
@@ -31,7 +29,6 @@ function localDateStamp(): string {
   return `${y}-${m}-${day}`;
 }
 
-/** Pobiera plik JSON (Blob + download). */
 export function exportRpgStorageToFile() {
   const data = collectRpgStorageSnapshot();
   const json = JSON.stringify(data, null, 2);
@@ -55,7 +52,6 @@ function valueToStorageString(raw: unknown): string | null {
   return null;
 }
 
-/** Zapisuje wpisy z kopii do localStorage (tylko znane klucze aplikacji). */
 export function applyRpgStorageImport(parsed: unknown): { ok: true; keysWritten: number } | { ok: false; error: string } {
   if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
     return { ok: false, error: "Plik musi zawierać obiekt JSON." };

@@ -191,9 +191,7 @@ export default function DicePage() {
 
   return (
     <div className="animate-fade-in flex h-full min-h-0 flex-1 flex-col overflow-hidden">
-      {/* Mobile: najpierw stół 3D (order-1), potem panel (order-2). Desktop: grid jak wcześniej. */}
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:grid lg:grid-cols-[minmax(0,300px)_minmax(0,1fr)] lg:grid-rows-1 lg:gap-0">
-        {/* Prawa kolumna — 3D, wynik, historia (na mobile na górze) */}
         <div className="order-1 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden lg:order-2 lg:h-full lg:min-h-0">
           {show3D ? (
             <div className="flex min-h-[min(36svh,260px)] flex-[1.2] flex-col lg:min-h-0 lg:flex-1">
@@ -227,7 +225,6 @@ export default function DicePage() {
             </Card>
           )}
 
-          {/* Karta wyniku */}
           {(lastResult || displayValue !== null) && (
             <Card className="shrink-0 overflow-hidden rounded-none border-x-0 border-b border-primary/30 border-t-0 bg-card/50">
               <CardContent className="px-4 py-3 sm:px-5 sm:py-4 md:px-6 md:py-5">
@@ -258,7 +255,6 @@ export default function DicePage() {
             </Card>
           )}
 
-          {/* Historia — na mobile mniejszy udział wysokości (basis-0 + max-h), na lg pełna elastyczność */}
           <div className="flex min-h-[5rem] max-h-[38dvh] flex-[0.85] flex-col overflow-hidden bg-card/30 basis-0 border-t border-border/40 lg:max-h-none lg:min-h-0 lg:flex-1 lg:border-t-0">
             <div className="flex shrink-0 items-center justify-between border-b border-border/60 px-3 py-2">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground sm:text-xs">
@@ -294,7 +290,6 @@ export default function DicePage() {
           </div>
         </div>
 
-        {/* Panel konfiguracji — na mobile pod stołem, przewijany; na desktopie lewa kolumna */}
         <aside className="order-2 flex max-h-[min(48dvh,24rem)] w-full shrink-0 flex-col overflow-y-auto border-t border-border/60 bg-card/35 p-4 pb-5 safe-area-pb lg:order-1 lg:max-h-none lg:h-full lg:min-h-0 lg:max-w-[300px] lg:border-b-0 lg:border-r lg:border-t-0 lg:pb-4">
           <div className="border-b border-border/50 pb-3 mb-3 lg:mb-4">
             <h1 className="font-app-brand mt-0.5 text-base font-bold tracking-tight sm:text-lg">Rzut kośćmi</h1>

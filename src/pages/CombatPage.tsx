@@ -1,8 +1,6 @@
-import { useState, useMemo, useEffect } from "react";
-import {
-  Plus, Trash2, Minus, Swords, RotateCcw, Crosshair, Edit2, Check, Copy,
-  ChevronDown, ChevronUp, Shield, Heart, Eye, EyeOff, Target, Zap, X, RotateCcw as Redo,
-} from "lucide-react";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { toast } from "sonner";
+import { Plus, Swords, Crosshair, Target, Zap, X, Flag, RotateCcw as Redo } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import type { Combatant } from "@/context/AppContext";
 import { useLocation } from "react-router-dom";
@@ -11,17 +9,50 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { NumberInput } from "@/components/ui/number-input";
 import { cn } from "@/lib/utils";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { ReadyOpponentsPanel } from "@/components/combat/ReadyOpponentsPanel";
+import { CombatMonstersMobileTab } from "@/components/combat/CombatMonstersPanel";
+import { FightTabsBar } from "@/components/combat/FightTabsBar";
+import { CombatPresetsMobileTab } from "@/components/combat/CombatPresetsPanel";
+import { CombatRosterMobileTab } from "@/components/combat/CombatRosterPanel";
+import { CombatViewModeNav, type CombatViewMode } from "@/components/combat/CombatViewModeNav";
+import { CombatTurnBar } from "@/components/combat/CombatTurnBar";
+import { CombatantCard } from "@/components/combat/CombatantCard";
+import { CombatSidePanel } from "@/components/combat/CombatSidePanel";
+import { gmEnemyToCombatant } from "@/lib/gmEnemy";
+import {
+  GM_ENEMY_DRAG,
+  ROSTER_HERO_DRAG,
+  ROSTER_NPC_DRAG,
+  isCombatRosterDragEvent,
+  isGmEnemyDragEvent,
+  isRosterHeroDragEvent,
+  isRosterNpcDragEvent,
+} from "@/lib/combatDrag";
+import {
+  HEROES_STORAGE_KEY,
+  heroRosterToCombatant,
+  reviveHeroRoster,
+  savedNpcToCombatant,
+  getHeroRosterDisplayName,
+  type HeroRosterEntry,
+} from "@/lib/combatRoster";
+import { getNpcDisplayName } from "@/components/character-sheet/npcAccessors";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useFinePointer } from "@/hooks/useFinePointer";
+import {
+  MAX_COMBAT_FIGHTS,
+  addPresetFromFight,
+  createEmptyFight,
+  removeFight,
+  renameFight,
+  setActiveFightId,
+  setFightStatus,
+} from "@/lib/combatSessions";
 import { StatAbbrWithTooltip } from "@/components/game/StatAbbrWithTooltip";
 import { CombatStatCell, NARROW_NUM } from "@/components/game/CombatStatCell";
-import { getStatFullName, getStatGlossaryEntry } from "@/lib/gameStatGlossary";
-
-const COMMON_STATUSES = ["Ogłuszony", "Powalony", "Krwawienie", "Zmęczony", "Przestraszony", "Oślepiony", "Oszołomiony", "Bezbronny", "Unieruchomiony", "Zatruty"];
+import { getStatFullName } from "@/lib/gameStatGlossary";
 
 const ATTACK_TYPES = [
   { id: "melee", label: "Wręcz", icon: Swords, stat: "ww" as const },
@@ -54,8 +85,6 @@ interface CombatResult {
   totalDamage?: number;
   finalDamage?: number;
 }
-
-/* ── Inline Combat Action Panel ── */
 
 function CombatActionPanel({
   attackerId,
@@ -160,7 +189,6 @@ function CombatActionPanel({
 
         {!result ? (
           <>
-            {/* Target selection */}
             <div>
               <label className="text-[10px] text-muted-foreground block mb-1">Cel</label>
               <select value={targetId} onChange={(e) => handleTargetChange(e.target.value)}
@@ -170,7 +198,6 @@ function CombatActionPanel({
               </select>
             </div>
 
-            {/* Attack type */}
             <div className="grid grid-cols-4 gap-1">
               {ATTACK_TYPES.map((t) => (
                 <Button key={t.id} size="sm" variant={attackType === t.id ? "default" : "secondary"}
@@ -181,7 +208,6 @@ function CombatActionPanel({
               ))}
             </div>
 
-            {/* Skill value */}
             <div className="flex items-center justify-between">
               <label className="text-xs text-muted-foreground">{attackDef.stat.toUpperCase()}</label>
               <div className="flex items-center gap-1.5">
@@ -195,7 +221,6 @@ function CombatActionPanel({
               </div>
             </div>
 
-            {/* Modifiers */}
             <div>
               <div className="flex flex-wrap gap-1">
                 {QUICK_MODIFIERS.map((m) => (
@@ -219,7 +244,6 @@ function CombatActionPanel({
               </div>
             </div>
 
-            {/* Weapon / toughness / armor */}
             <div className="grid grid-cols-3 gap-1.5">
               <div key="bron" className="text-center">
                 <div className="text-[9px] text-muted-foreground block mb-0.5">Broń</div>
@@ -256,7 +280,6 @@ function CombatActionPanel({
             </Button>
           </>
         ) : (
-          /* ── Result ── */
           <div className="space-y-2">
             <div className={cn("text-center p-3 rounded-md border-2",
               result.success ? "border-success bg-success/5" : "border-destructive bg-destructive/5"
@@ -309,8 +332,6 @@ function CombatActionPanel({
   );
 }
 
-/* ── Main Combat Page ── */
-
 export default function CombatPage() {
   const location = useLocation();
   const {
@@ -324,15 +345,19 @@ export default function CombatPage() {
     difficultyPresets,
     gmEnemies,
     setGmEnemies,
+    savedNpcs,
+    combatSessions,
+    setCombatSessions,
   } = useApp();
-  const [combatTab, setCombatTab] = useState<"walka" | "gotowi">("walka");
+  const [heroes] = useLocalStorage<HeroRosterEntry[]>(HEROES_STORAGE_KEY, []);
+  const heroRoster = useMemo(() => reviveHeroRoster(heroes), [heroes]);
+  const [combatTab, setCombatTab] = useState<CombatViewMode>("walka");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<Combatant | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showDead, setShowDead] = useState(true);
   const [actionAttackerId, setActionAttackerId] = useState<string | null>(null);
 
-  // New combatant form
   const [newName, setNewName] = useState("");
   const [newInit, setNewInit] = useState(30);
   const [newWw, setNewWw] = useState(30);
@@ -344,10 +369,38 @@ export default function CombatPage() {
   const [newIsEnemy, setNewIsEnemy] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
 
+  const finePointer = useFinePointer();
+  const [dragEnemyId, setDragEnemyId] = useState<string | null>(null);
+  const [dragNpcId, setDragNpcId] = useState<string | null>(null);
+  const [dragHeroId, setDragHeroId] = useState<string | null>(null);
+  const [fightDropActive, setFightDropActive] = useState(false);
+  const isDraggingRoster = Boolean(dragEnemyId || dragNpcId || dragHeroId);
+
+  const resetDragUi = useCallback(() => {
+    setDragEnemyId(null);
+    setDragNpcId(null);
+    setDragHeroId(null);
+    setFightDropActive(false);
+  }, []);
+
+  useEffect(() => {
+    if (!isDraggingRoster) return;
+    document.addEventListener("dragend", resetDragUi);
+    return () => document.removeEventListener("dragend", resetDragUi);
+  }, [isDraggingRoster, resetDragUi]);
+
   useEffect(() => {
     const tab = (location.state as { combatTab?: string } | null)?.combatTab;
     if (tab === "gotowi") setCombatTab("gotowi");
   }, [location.state]);
+
+  useEffect(() => {
+    setEditingId(null);
+    setEditDraft(null);
+    setExpandedId(null);
+    setActionAttackerId(null);
+    setShowAddForm(false);
+  }, [combatSessions.activeFightId]);
 
   const sorted = useMemo(() => [...combatants].sort((a, b) => b.initiative - a.initiative), [combatants]);
   const displayed = showDead ? sorted : sorted.filter((c) => c.hp.current > 0);
@@ -410,65 +463,87 @@ export default function CombatPage() {
     setEditingId(null); setEditDraft(null);
   };
 
-  const activeChar = sorted[combatTurn];
+  const activeFight = combatSessions.fights.find((f) => f.id === combatSessions.activeFightId);
+  const canAddFight = combatSessions.fights.length < MAX_COMBAT_FIGHTS;
 
-  return (
-    <div className="space-y-3 animate-fade-in">
-      <div className="space-y-2">
-        <h1 className="font-app-brand text-lg font-bold leading-tight">Tracker walki</h1>
-        <Tabs value={combatTab} onValueChange={(v) => setCombatTab(v as "walka" | "gotowi")}>
-          <TabsList className="flex h-9 w-full items-stretch gap-0.5 rounded-lg bg-muted p-0.5">
-            <TabsTrigger
-              value="walka"
-              className="flex-1 basis-0 min-w-0 rounded-md px-2 py-0 text-sm font-medium shadow-none data-[state=active]:shadow-sm"
-            >
-              Walka
-            </TabsTrigger>
-            <TabsTrigger
-              value="gotowi"
-              className="flex-1 basis-0 min-w-0 rounded-md px-2 py-0 text-sm font-medium shadow-none data-[state=active]:shadow-sm"
-            >
-              Gotowi przeciwnicy
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="walka" className="mt-3 space-y-3">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-muted-foreground">Aktywna walka</span>
-        <div className="flex items-center gap-1.5">
-          <Badge variant="outline" className="text-xs font-mono">Runda {combatRound}</Badge>
-          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setShowDead(!showDead)} title={showDead ? "Ukryj poległych" : "Pokaż poległych"}>
-            {showDead ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-          </Button>
-          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={resetCombat} title="Reset"><RotateCcw className="h-3.5 w-3.5" /></Button>
+  const handleNewFight = (presetId?: string) => {
+    const preset = presetId ? combatSessions.presets.find((p) => p.id === presetId) : undefined;
+    setCombatSessions((prev) => createEmptyFight(prev, preset));
+    setCombatTab("walka");
+    setEditingId(null);
+    setActionAttackerId(null);
+    setShowAddForm(false);
+  };
+
+  const handleFightDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    resetDragUi();
+    if (isGmEnemyDragEvent(e)) {
+      const enemyId = e.dataTransfer.getData(GM_ENEMY_DRAG);
+      const enemy = gmEnemies.find((x) => x.id === enemyId);
+      if (!enemy) return;
+      setCombatants((prev) => [...prev, gmEnemyToCombatant(enemy)]);
+      toast.success(`Dodano „${enemy.name.trim() || "Przeciwnik"}” do walki`);
+      return;
+    }
+    if (isRosterNpcDragEvent(e)) {
+      const npcId = e.dataTransfer.getData(ROSTER_NPC_DRAG);
+      const npc = savedNpcs.find((x) => x.id === npcId);
+      if (!npc) return;
+      setCombatants((prev) => [...prev, savedNpcToCombatant(npc)]);
+      toast.success(`Dodano „${getNpcDisplayName(npc)}” do walki`);
+      return;
+    }
+    if (isRosterHeroDragEvent(e)) {
+      const heroId = e.dataTransfer.getData(ROSTER_HERO_DRAG);
+      const hero = heroRoster.find((x) => x.id === heroId);
+      if (!hero) return;
+      setCombatants((prev) => [...prev, heroRosterToCombatant(hero)]);
+      toast.success(`Dodano „${getHeroRosterDisplayName(hero)}” do walki`);
+    }
+  };
+
+  const fightDropHandlers = finePointer
+    ? {
+        onDragOver: (e: React.DragEvent) => {
+          if (!isCombatRosterDragEvent(e)) return;
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "copy";
+          setFightDropActive(true);
+        },
+        onDragLeave: () => setFightDropActive(false),
+        onDrop: handleFightDrop,
+      }
+    : {};
+
+  const renderFightBody = () => (
+    <>
+      {activeFight?.status === "finished" && (
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+          <Flag className="h-3.5 w-3.5 shrink-0" />
+          <span>Ta walka jest zakończona. Wznów ją z menu zakładki (⋮).</span>
         </div>
-      </div>
-
-      {/* Turn controls */}
-      <div className="flex gap-2">
-        <Button size="sm" variant="outline" className="flex-1 gap-1" onClick={prevTurn} disabled={sorted.length === 0 || (combatRound === 1 && combatTurn === 0)}>
-          Poprzednia
-        </Button>
-        <Button className="flex-[2] gap-2" onClick={nextTurn} disabled={sorted.length === 0}>
-          <Swords className="h-4 w-4" /> Następna tura
-        </Button>
-      </div>
-
-      {/* Active character banner */}
-      {activeChar && !actionAttackerId && (
-        <Card className="border-primary bg-primary/5">
-          <CardContent className="p-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-primary animate-pulse" />
-              <span className="text-sm font-semibold">Tura: {activeChar.name}</span>
-            </div>
-            <Button size="sm" variant="default" className="h-7 text-xs gap-1" onClick={() => setActionAttackerId(activeChar.id)}>
-              <Crosshair className="h-3 w-3" /> Akcja
-            </Button>
-          </CardContent>
-        </Card>
       )}
 
-      {/* Inline Combat Action Panel */}
+      {isDraggingRoster && finePointer && (
+        <p className="rounded-md border border-primary/40 bg-primary/10 px-3 py-2 text-center text-xs font-medium text-primary">
+          Upuść kartę tutaj, aby dodać uczestnika do walki
+        </p>
+      )}
+
+      <CombatTurnBar
+        combatRound={combatRound}
+        combatTurn={combatTurn}
+        participantCount={sorted.length}
+        showDead={showDead}
+        onToggleShowDead={() => setShowDead(!showDead)}
+        onReset={resetCombat}
+        onPrevTurn={prevTurn}
+        onNextTurn={nextTurn}
+        prevDisabled={sorted.length === 0 || (combatRound === 1 && combatTurn === 0)}
+        nextDisabled={sorted.length === 0}
+      />
+
       {actionAttackerId && (
         <CombatActionPanel
           attackerId={actionAttackerId}
@@ -480,234 +555,67 @@ export default function CombatPage() {
         />
       )}
 
-      {/* Combatant list */}
-      <div className="space-y-2 min-h-[120px] p-1">
+      <div className="space-y-2 min-h-[80px]">
         {displayed.map((c) => {
           const realIndex = sorted.findIndex((s) => s.id === c.id);
-          const hpPercent = c.hp.max > 0 ? (c.hp.current / c.hp.max) * 100 : 0;
           const isActive = realIndex === combatTurn;
           const isEditing = editingId === c.id;
           const isExpanded = expandedId === c.id;
           const isDead = c.hp.current === 0;
-          const d = isEditing ? editDraft! : c;
 
           return (
-            <Card key={c.id} className={cn(
-              "transition-all",
-              isActive && "ring-2 ring-primary shadow-md shadow-primary/10",
-              isDead && "opacity-40"
-            )}>
-              <CardContent className="p-0">
-                {isEditing ? (
-                  <div className="space-y-1.5 p-2.5">
-                    <div className="flex flex-col gap-1 sm:flex-row sm:items-end">
-                      <div className="min-w-0 flex-1 space-y-px">
-                        <label htmlFor={`edit-name-${d.id}`} className="block text-[10px] leading-tight text-muted-foreground">
-                          Imię
-                        </label>
-                        <Input
-                          id={`edit-name-${d.id}`}
-                          value={d.name}
-                          onChange={(e) => setEditDraft({ ...d, name: e.target.value })}
-                          className="h-7 w-full text-xs"
-                        />
-                      </div>
-                      <div className="flex shrink-0 items-center gap-1">
-                        <Button size="sm" variant={!d.isEnemy ? "default" : "outline"} className="h-7 text-[10px] px-2" onClick={() => setEditDraft({ ...d, isEnemy: false })}>Sojusznik</Button>
-                        <Button size="sm" variant={d.isEnemy ? "destructive" : "outline"} className="h-7 text-[10px] px-2" onClick={() => setEditDraft({ ...d, isEnemy: true })}>Wróg</Button>
-                      </div>
-                    </div>
-                    <Separator className="my-0" />
-                    <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 sm:grid-cols-3 md:grid-cols-4">
-                      <CombatStatCell statKey="inic">
-                        <NumberInput value={d.initiative} onChange={(v) => setEditDraft({ ...d, initiative: v })} className={NARROW_NUM} />
-                      </CombatStatCell>
-                      <CombatStatCell statKey="ww">
-                        <NumberInput value={d.ww} onChange={(v) => setEditDraft({ ...d, ww: v })} className={NARROW_NUM} />
-                      </CombatStatCell>
-                      <CombatStatCell statKey="us">
-                        <NumberInput value={d.us} onChange={(v) => setEditDraft({ ...d, us: v })} className={NARROW_NUM} />
-                      </CombatStatCell>
-                      <CombatStatCell statKey="sb">
-                        <NumberInput value={d.sb} onChange={(v) => setEditDraft({ ...d, sb: v })} className={NARROW_NUM} />
-                      </CombatStatCell>
-                      <CombatStatCell label={`${getStatFullName("pż")} — bieżące`}>
-                        <NumberInput value={d.hp.current} onChange={(v) => setEditDraft({ ...d, hp: { ...d.hp, current: v } })} className={NARROW_NUM} />
-                      </CombatStatCell>
-                      <CombatStatCell label={`${getStatFullName("pż")} — maksimum`} tooltip="Maksymalna liczba punktów żywotności.">
-                        <NumberInput value={d.hp.max} onChange={(v) => setEditDraft({ ...d, hp: { ...d.hp, max: v } })} className={NARROW_NUM} />
-                      </CombatStatCell>
-                      <CombatStatCell statKey="pnc">
-                        <NumberInput value={d.armor} onChange={(v) => setEditDraft({ ...d, armor: v })} className={NARROW_NUM} />
-                      </CombatStatCell>
-                      <CombatStatCell statKey="wtSoak">
-                        <NumberInput value={d.toughness} onChange={(v) => setEditDraft({ ...d, toughness: v })} className={NARROW_NUM} />
-                      </CombatStatCell>
-                    </div>
-                    <div className="space-y-px">
-                      <label htmlFor={`edit-notes-${d.id}`} className="block text-[10px] leading-tight text-muted-foreground">
-                        Notatki
-                      </label>
-                      <Textarea id={`edit-notes-${d.id}`} value={d.notes} onChange={(e) => setEditDraft({ ...d, notes: e.target.value })} rows={2} className="min-h-[40px] w-full text-xs" />
-                    </div>
-                    <div className="flex gap-1.5">
-                      <Button size="sm" className="h-7 flex-1 gap-1 text-xs" onClick={saveEdit}><Check className="h-3 w-3" />Zapisz</Button>
-                      <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setEditingId(null); setEditDraft(null); }}>Anuluj</Button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    {/* Main row */}
-                    <div className="px-3 pt-2.5 pb-1">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 min-w-0">
-                          {isActive && <span className="h-2 w-2 rounded-full bg-primary animate-pulse shrink-0" />}
-                          <span className={cn("font-semibold text-sm truncate", c.isEnemy ? "text-destructive" : "text-foreground")}>{c.name}</span>
-                        </div>
-                        <div className="flex items-center gap-0.5 shrink-0">
-                          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setActionAttackerId(c.id)} title="Akcja bojowa">
-                            <Crosshair className="h-3 w-3" />
-                          </Button>
-                          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => startEdit(c)} title="Edytuj">
-                            <Edit2 className="h-3 w-3" />
-                          </Button>
-                          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => duplicateCombatant(c)} title="Duplikuj">
-                            <Copy className="h-3 w-3" />
-                          </Button>
-                          <Button size="icon" variant="ghost" className="h-6 w-6 text-muted-foreground" onClick={() => removeCombatant(c.id)}>
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Stats row */}
-                      <div className="flex items-center gap-3 mt-1 text-[11px]">
-                        <span className="text-muted-foreground">
-                          <StatAbbrWithTooltip statKey="inic" className="text-muted-foreground">Inic</StatAbbrWithTooltip>{" "}
-                          <span className="font-bold text-foreground">{c.initiative}</span>
-                        </span>
-                        <span className="text-muted-foreground">
-                          <StatAbbrWithTooltip statKey="ww" className="text-muted-foreground">WW</StatAbbrWithTooltip>{" "}
-                          <span className="font-bold text-foreground">{c.ww}</span>
-                        </span>
-                        <span className="text-muted-foreground">
-                          <StatAbbrWithTooltip statKey="us" className="text-muted-foreground">US</StatAbbrWithTooltip>{" "}
-                          <span className="font-bold text-foreground">{c.us}</span>
-                        </span>
-                        <span className="text-muted-foreground">
-                          <StatAbbrWithTooltip statKey="sb" className="text-muted-foreground">SB</StatAbbrWithTooltip>{" "}
-                          <span className="font-bold text-foreground">{c.sb}</span>
-                        </span>
-                        <span className="text-muted-foreground flex items-center gap-0.5">
-                          <StatAbbrWithTooltip statKey="pnc" className="flex items-center gap-0.5 text-muted-foreground">
-                            <Shield className="h-2.5 w-2.5" />
-                            <span className="font-bold text-foreground">{c.armor}</span>
-                          </StatAbbrWithTooltip>
-                        </span>
-                        <span className="text-muted-foreground">
-                          <StatAbbrWithTooltip statKey="wtSoak" className="text-muted-foreground">{getStatGlossaryEntry("wtSoak").abbr}</StatAbbrWithTooltip>{" "}
-                          <span className="font-bold text-foreground">{c.toughness}</span>
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* HP bar */}
-                    <div className="px-3 py-1.5">
-                      <div className="flex items-center gap-2">
-                        <Button size="icon" variant="secondary" className="h-6 w-6" onClick={() => adjustHp(c.id, -1)}><Minus className="h-3 w-3" /></Button>
-                        <div className="flex-1">
-                          <div className="h-2.5 bg-muted rounded-full overflow-hidden">
-                            <div className={cn("h-full rounded-full transition-all duration-300",
-                              hpPercent > 50 ? "bg-success" : hpPercent > 25 ? "bg-primary" : "bg-destructive"
-                            )} style={{ width: `${hpPercent}%` }} />
-                          </div>
-                        </div>
-                        <span className="text-xs font-bold min-w-[4.5ch] text-right flex items-center gap-0.5">
-                          <Heart className="h-3 w-3 text-destructive" />
-                          {c.hp.current}/{c.hp.max}
-                        </span>
-                        <Button size="icon" variant="secondary" className="h-6 w-6" onClick={() => adjustHp(c.id, 1)}><Plus className="h-3 w-3" /></Button>
-                      </div>
-                    </div>
-
-                    {/* Active statuses */}
-                    {c.statuses.length > 0 && (
-                      <div className="px-3 pb-1.5">
-                        <div className="flex flex-wrap gap-1">
-                          {c.statuses.map((s) => (
-                            <Badge key={s} variant="destructive" className="text-[9px] px-1.5 py-0 h-5 gap-0.5 cursor-pointer" onClick={() => toggleStatus(c.id, s)}>
-                              {s} ×
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Expand/collapse */}
-                    <button
-                      onClick={() => setExpandedId(isExpanded ? null : c.id)}
-                      className="w-full flex items-center justify-center py-1 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors border-t border-border/50"
-                    >
-                      {isExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                    </button>
-
-                    {/* Expanded section */}
-                    {isExpanded && (
-                      <div className="px-3 pb-3 space-y-2 border-t border-border/50 pt-2">
-                        <div className="flex gap-1.5">
-                          {[-5, -3, -1, 1, 3, 5].map((delta) => (
-                            <Button key={delta} size="sm" variant={delta < 0 ? "destructive" : "secondary"} className="flex-1 h-7 text-xs"
-                              onClick={() => adjustHp(c.id, delta)}>
-                              {delta > 0 ? `+${delta}` : delta}
-                            </Button>
-                          ))}
-                        </div>
-
-                        <div>
-                          <label className="text-[10px] text-muted-foreground font-medium block mb-1">Stany</label>
-                          <div className="flex flex-wrap gap-1">
-                            {COMMON_STATUSES.map((s) => (
-                              <button key={s} onClick={() => toggleStatus(c.id, s)} className={cn(
-                                "text-[10px] px-1.5 py-0.5 rounded border transition-colors",
-                                c.statuses.includes(s) ? "bg-destructive/20 text-destructive border-destructive/30" : "text-muted-foreground border-border hover:border-muted-foreground"
-                              )}>{s}</button>
-                            ))}
-                          </div>
-                        </div>
-
-                        {c.notes && (
-                          <div>
-                            <label className="text-[10px] text-muted-foreground font-medium block mb-0.5">Notatki</label>
-                            <p className="text-xs text-muted-foreground whitespace-pre-line">{c.notes}</p>
-                          </div>
-                        )}
-
-                        <Button size="sm" className="w-full gap-1.5 text-xs" onClick={() => setActionAttackerId(c.id)}>
-                          <Crosshair className="h-3 w-3" /> Rozwiąż akcję bojową
-                        </Button>
-                      </div>
-                    )}
-                  </>
-                )}
-              </CardContent>
-            </Card>
+            <CombatantCard
+              key={c.id}
+              combatant={c}
+              isActive={isActive}
+              isEditing={isEditing}
+              isExpanded={isExpanded}
+              isDead={isDead}
+              editDraft={editDraft}
+              onEditDraftChange={setEditDraft}
+              onSaveEdit={saveEdit}
+              onCancelEdit={() => {
+                setEditingId(null);
+                setEditDraft(null);
+              }}
+              onStartEdit={() => startEdit(c)}
+              onDuplicate={() => duplicateCombatant(c)}
+              onRemove={() => removeCombatant(c.id)}
+              onAction={() => setActionAttackerId(c.id)}
+              onToggleExpand={() => setExpandedId(isExpanded ? null : c.id)}
+              onAdjustHp={(delta) => adjustHp(c.id, delta)}
+              onToggleStatus={(status) => toggleStatus(c.id, status)}
+            />
           );
         })}
-      {sorted.length === 0 && (
-        <Card><CardContent className="p-6 text-center text-muted-foreground text-sm">Brak uczestników walki. Dodaj kogoś poniżej albo użyj „+ Do walki” w zakładce „Gotowi przeciwnicy”.</CardContent></Card>
-      )}
+        {sorted.length === 0 && (
+          <Card>
+            <CardContent className="p-6 text-center text-sm text-muted-foreground">
+              {finePointer
+                ? "Brak uczestników. Przeciągnij przeciwnika z prawej kolumny lub dodaj poniżej."
+                : "Brak uczestników. Dodaj poniżej lub użyj zakładki „Potwory”."}
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
-      {/* Add combatant */}
       {!showAddForm ? (
-        <Button variant="outline" className="w-full gap-2" onClick={() => setShowAddForm(true)}>
-          <Plus className="h-4 w-4" /> Dodaj uczestnika
-        </Button>
+        <button
+          type="button"
+          onClick={() => setShowAddForm(true)}
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:bg-muted/30 hover:text-foreground"
+        >
+          <Plus className="h-4 w-4" />
+          Dodaj uczestnika
+        </button>
       ) : (
         <Card>
           <CardContent className="space-y-2 p-2.5">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-sm font-semibold">Nowy uczestnik</h3>
-              <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => setShowAddForm(false)}>Anuluj</Button>
+              <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => setShowAddForm(false)}>
+                Anuluj
+              </Button>
             </div>
             <div className="space-y-px">
               <label htmlFor="new-combatant-name" className="block text-[10px] leading-tight text-muted-foreground">
@@ -722,7 +630,7 @@ export default function CombatPage() {
               />
             </div>
             <Separator className="my-0" />
-            <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 sm:grid-cols-3 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 sm:grid-cols-3">
               <CombatStatCell statKey="inic">
                 <NumberInput value={newInit} onChange={setNewInit} className={NARROW_NUM} />
               </CombatStatCell>
@@ -747,20 +655,124 @@ export default function CombatPage() {
             </div>
             <div className="flex items-center gap-3">
               <div className="flex gap-1.5">
-                <Button size="sm" variant={!newIsEnemy ? "default" : "outline"} className="text-xs h-7" onClick={() => setNewIsEnemy(false)}>Sojusznik</Button>
-                <Button size="sm" variant={newIsEnemy ? "destructive" : "outline"} className="text-xs h-7" onClick={() => setNewIsEnemy(true)}>Wróg</Button>
+                <Button size="sm" variant={!newIsEnemy ? "default" : "outline"} className="text-xs h-7" onClick={() => setNewIsEnemy(false)}>
+                  Sojusznik
+                </Button>
+                <Button size="sm" variant={newIsEnemy ? "destructive" : "outline"} className="text-xs h-7" onClick={() => setNewIsEnemy(true)}>
+                  Wróg
+                </Button>
               </div>
-              <Button size="sm" onClick={addCombatant} className="gap-1 text-xs h-7 ml-auto"><Plus className="h-3 w-3" />Dodaj</Button>
+              <Button size="sm" onClick={addCombatant} className="gap-1 text-xs h-7 ml-auto">
+                <Plus className="h-3 w-3" />
+                Dodaj
+              </Button>
             </div>
           </CardContent>
         </Card>
       )}
+    </>
+  );
+
+  return (
+    <div className="flex flex-col gap-4 animate-fade-in min-h-0">
+      <h1 className="font-app-brand text-lg font-bold leading-tight">Tracker walki</h1>
+
+      <FightTabsBar
+        fights={combatSessions.fights}
+        activeFightId={combatSessions.activeFightId}
+        presets={combatSessions.presets}
+        canAddFight={canAddFight}
+        onSelectFight={(id) => {
+          setCombatSessions((prev) => setActiveFightId(prev, id));
+          setActionAttackerId(null);
+          setEditingId(null);
+        }}
+        onRenameFight={(id, name) => setCombatSessions((prev) => renameFight(prev, id, name))}
+        onRemoveFight={(id) => {
+          setCombatSessions((prev) => removeFight(prev, id));
+          setActionAttackerId(null);
+        }}
+        onToggleFinished={(id) => {
+          const fight = combatSessions.fights.find((f) => f.id === id);
+          if (!fight) return;
+          setCombatSessions((prev) =>
+            setFightStatus(prev, id, fight.status === "finished" ? "active" : "finished"),
+          );
+        }}
+        onNewFight={handleNewFight}
+      />
+
+      <div className="hidden lg:flex lg:items-start lg:gap-4">
+        <div
+          className={cn(
+            "min-w-0 flex-1 space-y-3 rounded-lg border-2 border-transparent p-1 -m-1 transition-[border-color,background-color,box-shadow] duration-200",
+            fightDropActive && "border-primary/50 bg-primary/[0.06] shadow-md ring-1 ring-primary/20",
+          )}
+          {...fightDropHandlers}
+        >
+          {renderFightBody()}
+        </div>
+
+        <CombatSidePanel
+          className="w-72 xl:w-80 shrink-0 lg:sticky lg:top-4 lg:max-h-[calc(100dvh-11rem)]"
+          gmEnemies={gmEnemies}
+          setGmEnemies={setGmEnemies}
+          savedNpcs={savedNpcs}
+          heroes={heroRoster}
+          setCombatants={setCombatants}
+          presets={combatSessions.presets}
+          onSavePresets={(presets) => setCombatSessions((prev) => ({ ...prev, presets }))}
+          onSaveAsPresetFromFight={(name) => {
+            setCombatSessions((prev) => addPresetFromFight(prev, name, combatants));
+          }}
+          dragEnemyId={dragEnemyId}
+          dragNpcId={dragNpcId}
+          dragHeroId={dragHeroId}
+          onDragEnemyStart={setDragEnemyId}
+          onDragNpcStart={setDragNpcId}
+          onDragHeroStart={setDragHeroId}
+          onDragEnd={resetDragUi}
+        />
       </div>
-        </TabsContent>
-        <TabsContent value="gotowi" className="mt-3">
-          <ReadyOpponentsPanel gmEnemies={gmEnemies} setGmEnemies={setGmEnemies} setCombatants={setCombatants} />
-        </TabsContent>
-      </Tabs>
+
+      <div className="lg:hidden space-y-3">
+        <CombatViewModeNav value={combatTab} onChange={setCombatTab} />
+
+        {combatTab === "walka" && <div className="space-y-3">{renderFightBody()}</div>}
+
+        {combatTab === "gotowi" && (
+          <CombatMonstersMobileTab
+            gmEnemies={gmEnemies}
+            setGmEnemies={setGmEnemies}
+            setCombatants={setCombatants}
+            dragEnemyId={dragEnemyId}
+            onDragEnemyStart={setDragEnemyId}
+            onDragEnd={resetDragUi}
+          />
+        )}
+
+        {combatTab === "postacie" && (
+          <CombatRosterMobileTab
+            savedNpcs={savedNpcs}
+            heroes={heroRoster}
+            setCombatants={setCombatants}
+            dragNpcId={dragNpcId}
+            dragHeroId={dragHeroId}
+            onDragNpcStart={setDragNpcId}
+            onDragHeroStart={setDragHeroId}
+            onDragEnd={resetDragUi}
+          />
+        )}
+
+        {combatTab === "presety" && (
+          <CombatPresetsMobileTab
+            presets={combatSessions.presets}
+            onSavePresets={(presets) => setCombatSessions((prev) => ({ ...prev, presets }))}
+            onSaveAsPresetFromFight={(name) => {
+              setCombatSessions((prev) => addPresetFromFight(prev, name, combatants));
+            }}
+          />
+        )}
       </div>
     </div>
   );

@@ -1,10 +1,9 @@
-/** Vite base path without trailing slash (e.g. `/magnus-helper` or ``). */
+
 export function getRouterBasename(): string {
   const base = import.meta.env.BASE_URL;
   return base.endsWith("/") ? base.slice(0, -1) : base;
 }
 
-/** Absolute app URL for Supabase email/OAuth redirects. */
 export function getAppUrl(path = ""): string {
   const base = import.meta.env.BASE_URL;
   const baseWithSlash = base.endsWith("/") ? base : `${base}/`;

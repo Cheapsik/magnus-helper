@@ -33,8 +33,7 @@ export default function ConditionsPage() {
   const addCondition = (name: string, severity: ActiveCondition["severity"] = "medium") => {
     if (conditions.some((c) => c.name === name)) return;
     setConditions((prev) => [...prev, { id: crypto.randomUUID(), name, severity }]);
-    // Also add to character conditions if not present
-    if (!character.conditions.includes(name)) {
+        if (!character.conditions.includes(name)) {
       updateCharacter({ ...character, conditions: [...character.conditions, name] });
     }
   };
@@ -42,8 +41,7 @@ export default function ConditionsPage() {
   const removeCondition = (id: string) => {
     const cond = conditions.find((c) => c.id === id);
     setConditions((prev) => prev.filter((c) => c.id !== id));
-    // Also remove from character
-    if (cond) {
+        if (cond) {
       updateCharacter({ ...character, conditions: character.conditions.filter((c) => c !== cond.name) });
     }
   };

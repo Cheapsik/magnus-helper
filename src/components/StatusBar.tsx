@@ -45,8 +45,7 @@ export default function StatusBar() {
   const hpPct = hpMax > 0 ? (hpCur / hpMax) * 100 : 0;
   const hasCharacter = !!character?.name;
 
-  // First active countdown timer (display its set time as fallback)
-  const firstTimer = timers[0];
+    const firstTimer = timers[0];
 
   const sep = (
     <span className="opacity-30 mx-2 select-none">·</span>
@@ -123,7 +122,6 @@ export default function StatusBar() {
         })()}
       </div>
 
-      {/* Mobile compact */}
       <div className="md:hidden flex items-center gap-2 w-full justify-center">
         {hasCharacter && (
           <span className={cn("font-bold tabular-nums", hpTextClass(hpPct))}>{hpCur}/{hpMax}</span>
@@ -131,7 +129,6 @@ export default function StatusBar() {
         {combatActive && <>{sep}<span>R{combatRound}</span></>}
         {firstTimer && <>{sep}<TimerIcon className="h-3 w-3 inline" /></>}
       </div>
-      {/* hidden tick to silence lint */}
       <span className="hidden">{tick}</span>
     </div>
   );

@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 
 export type UseLocalStorageOptions<T> = {
-  /** Zamienia surowy wynik `JSON.parse` na typ T (np. migracja schematu). */
+
   revive?: (parsed: unknown) => T;
 };
 
@@ -28,7 +28,7 @@ export function useLocalStorage<T>(
         try {
           window.localStorage.setItem(key, JSON.stringify(next));
         } catch {
-          /* quota / private mode */
+
         }
         return next;
       });

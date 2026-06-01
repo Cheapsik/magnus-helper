@@ -1,4 +1,4 @@
-/** Stare klucze → kanoniczne `rpg_*`. Wywoływane przed pierwszym renderem. */
+
 const LEGACY_KEY_MIGRATIONS: readonly [from: string, to: string][] = [
   ["grim-rolls", "rpg_dice_rolls"],
   ["grim-tests", "rpg_test_results"],
@@ -25,13 +25,11 @@ function migratePair(from: string, to: string) {
     window.localStorage.setItem(to, value);
     window.localStorage.removeItem(from);
   } catch {
-    // ignore quota / private mode
-  }
+      }
 }
 
 import { migrateSavedNpcsStorage } from "@/components/character-sheet/migrateLegacyStorage";
 
-/** Przenosi dane ze starych kluczy do `rpg_*` oraz motyw z `theme` → `rpg_theme`. */
 export function migrateRpgStorageKeys() {
   if (typeof window === "undefined" || !window.localStorage) return;
 

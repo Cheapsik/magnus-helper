@@ -9,13 +9,6 @@ import {
   ThemeId,
 } from "@/types/settings";
 
-/* ─────────────────────────────────────────────────────────────
- * Hex / HSL helpers
- * Aplikacja stylowana jest przez zmienne shadcn (`--primary`,
- * `--background`, ...) w formacie "H S% L%" wstrzykiwane do
- * `hsl(var(--x))`. Motywy z spec są w HEX, więc tu jest mostek.
- * ────────────────────────────────────────────────────────────*/
-
 function hexToHsl(hex: string): { h: number; s: number; l: number } {
   const m = hex.trim().replace(/^#/, "");
   const full = m.length === 3 ? m.split("").map((c) => c + c).join("") : m;
@@ -46,7 +39,6 @@ function hslString(hex: string): string {
   return `${h} ${s}% ${l}%`;
 }
 
-/** Zmienne motywu mapowane na zmienne używane przez shadcn/tailwind. */
 function buildShadcnVars(theme: ThemeDefinition): Record<string, string> {
   const v = theme.vars;
   return {
@@ -88,10 +80,6 @@ function applyTheme(themeId: ThemeId) {
   root.dataset.theme = theme.id;
 }
 
-/* ─────────────────────────────────────────────────────────────
- * Storage helpers
- * ────────────────────────────────────────────────────────────*/
-
 const SETTINGS_KEYS_TO_PRESERVE = new Set<string>([SETTINGS_STORAGE_KEY]);
 const APP_DATA_PREFIXES = ["magnus_", "rpg_"] as const;
 
@@ -126,7 +114,7 @@ function saveSettings(s: AppSettings) {
   try {
     window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(s));
   } catch {
-    /* quota / private mode — ignorujemy */
+
   }
 }
 
@@ -137,10 +125,6 @@ function dateStamp(): string {
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
 }
-
-/* ─────────────────────────────────────────────────────────────
- * Context
- * ────────────────────────────────────────────────────────────*/
 
 interface SettingsContextValue {
   settings: AppSettings;
@@ -155,9 +139,7 @@ const SettingsContext = createContext<SettingsContextValue | null>(null);
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<AppSettings>(() => {
     const loaded = loadSettings();
-    // Aplikujemy motyw przed pierwszym renderem, żeby uniknąć "flashu"
-    // domyślnego motywu przy starcie aplikacji.
-    if (typeof document !== "undefined") {
+            if (typeof document !== "undefined") {
       applyTheme(loaded.theme);
     }
     return loaded;
@@ -167,8 +149,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     applyTheme(settings.theme);
   }, [settings.theme]);
 
-  // Synchronizacja zmian w innych kartach przeglądarki.
-  useEffect(() => {
+    useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key !== SETTINGS_STORAGE_KEY) return;
       setSettings(loadSettings());
@@ -243,15 +224,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       throw new Error("no_app_keys");
     }
 
-    // Czyścimy istniejące dane aplikacji (z wyjątkiem ustawień),
-    // a następnie nadpisujemy je z backupu.
-    for (const k of collectAppDataKeys()) {
-      try { window.localStorage.removeItem(k); } catch { /* noop */ }
+            for (const k of collectAppDataKeys()) {
+      try { window.localStorage.removeItem(k); } catch {}
     }
     for (const k of appKeys) {
       const raw = dataObj[k];
       const value = typeof raw === "string" ? raw : JSON.stringify(raw);
-      try { window.localStorage.setItem(k, value); } catch { /* quota */ }
+      try { window.localStorage.setItem(k, value); } catch {}
     }
     toast.success("Dane zaimportowane — przeładowuję…");
     window.setTimeout(() => window.location.reload(), 300);
@@ -259,7 +238,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   const resetData = useCallback(() => {
     for (const k of collectAppDataKeys()) {
-      try { window.localStorage.removeItem(k); } catch { /* noop */ }
+      try { window.localStorage.removeItem(k); } catch {}
     }
     window.setTimeout(() => window.location.reload(), 150);
   }, []);

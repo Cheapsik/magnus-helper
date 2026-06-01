@@ -160,7 +160,7 @@ export default function GmToolboxPage() {
         setNotesSaved(true);
         window.setTimeout(() => setNotesSaved(false), 2000);
       } catch {
-        /* ignore */
+        console.error("Failed to save session notes");
       }
     }, 3000);
     return () => {
@@ -343,7 +343,6 @@ export default function GmToolboxPage() {
         <p className="text-xs text-muted-foreground mt-1">Skróty, stan sesji i narzędzia MG w jednym miejscu.</p>
       </div>
 
-      {/* SEKCJA 1 */}
       <section className="space-y-3">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Szybkie akcje</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3">
@@ -386,11 +385,9 @@ export default function GmToolboxPage() {
         </div>
       </section>
 
-      {/* SEKCJA 2 */}
       <section className="space-y-3">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stan sesji</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-          {/* Walka */}
           <Card className="border-border/80">
             <CardHeader className="p-4 pb-2 space-y-0">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -424,7 +421,6 @@ export default function GmToolboxPage() {
             </CardContent>
           </Card>
 
-          {/* Ambient */}
           <Card className="border-border/80">
             <CardHeader className="p-4 pb-2 space-y-0">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -478,7 +474,6 @@ export default function GmToolboxPage() {
             </CardContent>
           </Card>
 
-          {/* Timery */}
           <Card className="border-border/80">
             <CardHeader className="p-4 pb-2 space-y-0">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -517,7 +512,6 @@ export default function GmToolboxPage() {
             </CardContent>
           </Card>
 
-          {/* Stany */}
           <Card className="border-border/80">
             <CardHeader className="p-4 pb-2 space-y-0">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -552,7 +546,6 @@ export default function GmToolboxPage() {
         </div>
       </section>
 
-      {/* SEKCJA 3 */}
       <section className="space-y-2">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Notatki MG (prywatne)</h2>
@@ -567,7 +560,6 @@ export default function GmToolboxPage() {
         <p className="text-[10px] text-muted-foreground">Autosave co ok. 3 s do pamięci przeglądarki.</p>
       </section>
 
-      {/* SEKCJA 4 */}
       <section>
         <div className="flex items-center justify-between mb-2">
           <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Poziomy trudności</label>
@@ -629,7 +621,6 @@ export default function GmToolboxPage() {
         </div>
       </section>
 
-      {/* SEKCJA 5 */}
       <section className="space-y-3">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Zarządzanie</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -664,7 +655,6 @@ export default function GmToolboxPage() {
         </div>
       </section>
 
-      {/* Dice modal */}
       <Dialog open={diceOpen} onOpenChange={setDiceOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
@@ -698,7 +688,6 @@ export default function GmToolboxPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Timer modal */}
       <Dialog open={timerModalOpen} onOpenChange={setTimerModalOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -761,7 +750,6 @@ export default function GmToolboxPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Quest modal */}
       <Dialog open={questModalOpen} onOpenChange={setQuestModalOpen}>
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>

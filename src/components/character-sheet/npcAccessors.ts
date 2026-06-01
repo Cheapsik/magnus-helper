@@ -1,6 +1,5 @@
 import type { CharacterSheetCore, SavedNpc, StatRow, StatRow2 } from "./types";
 
-/** Fragment karty (bohater / NPC) do liczenia statów trackera. */
 export type CombatStatsSheetSlice = Pick<CharacterSheetCore, "cechyGlowne" | "cechyDrugorzedne" | "punktyZbroi" | "bron">;
 
 export function statStringToNum(s: string): number {
@@ -24,9 +23,6 @@ function pickSecStr(sheet: CombatStatsSheetSlice, key: keyof StatRow2): string {
   return String(sheet.cechyDrugorzedne.p[key] ?? "");
 }
 
-/**
- * Statystyki do trackera z karty (bohater lub NPC) — wiersz „Aktualna” z fallbackiem na „Początkową”.
- */
 export function getCharacterSheetCombatStats(sheet: CombatStatsSheetSlice) {
   const ww = statStringToNum(pickMainStr(sheet, "ww"));
   const us = statStringToNum(pickMainStr(sheet, "us"));
@@ -49,7 +45,7 @@ export function getCharacterSheetCombatStats(sheet: CombatStatsSheetSlice) {
     ww,
     us,
     sb: Math.floor(k / 10),
-    /** Bieżące PŻ (do trackera) */
+
     hp: hpCurrent,
     hpMax,
     armor,
@@ -59,7 +55,6 @@ export function getCharacterSheetCombatStats(sheet: CombatStatsSheetSlice) {
   };
 }
 
-/** Statystyki do trackera walki z karty NPC — jak {@link getCharacterSheetCombatStats} + notatki z pola NPC. */
 export function getNpcCombatStats(n: SavedNpc) {
   const c = getCharacterSheetCombatStats(n);
   const notes = [n.cechyCharakteru, n.opisOgolny].filter(Boolean).join(" · ");

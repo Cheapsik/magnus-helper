@@ -33,11 +33,6 @@ export const DEFAULT_SETTINGS: AppSettings = {
 
 export const SETTINGS_STORAGE_KEY = "magnus_settings";
 
-/**
- * Definicja motywu — surowe wartości HEX (CSS variables w postaci, jakiej
- * oczekuje spec). Provider zadba o ich aplikację (w tym mapowanie na zmienne
- * shadcn HSL używane przez resztę aplikacji).
- */
 export interface ThemeDefinition {
   id: ThemeId;
   label: string;

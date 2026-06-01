@@ -25,12 +25,10 @@ interface SimResult {
   critSuccesses: number;
   critFailures: number;
   distribution: { range: string; count: number }[];
-  // Opposed
-  winsA?: number;
+    winsA?: number;
   winsB?: number;
   draws?: number;
-  // Combat
-  avgDamage?: number;
+    avgDamage?: number;
   avgRounds?: number;
 }
 
@@ -134,18 +132,15 @@ export default function SimulationsPage() {
   const [numRolls, setNumRolls] = useState(1000);
   const [results, setResults] = useState<SimResult[]>([]);
 
-  // Basic mode
-  const [target, setTarget] = useState(40);
+    const [target, setTarget] = useState(40);
   const [modifier, setModifier] = useState(0);
 
-  // Opposed mode
-  const [skillA, setSkillA] = useState(40);
+    const [skillA, setSkillA] = useState(40);
   const [skillB, setSkillB] = useState(35);
   const [modA, setModA] = useState(0);
   const [modB, setModB] = useState(0);
 
-  // Combat mode
-  const [atkWw, setAtkWw] = useState(character.stats.find((s) => s.abbr === "WW")?.value ?? 40);
+    const [atkWw, setAtkWw] = useState(character.stats.find((s) => s.abbr === "WW")?.value ?? 40);
   const [atkSb, setAtkSb] = useState(Math.floor((character.stats.find((s) => s.abbr === "S")?.value ?? 30) / 10));
   const [atkWeaponDmg, setAtkWeaponDmg] = useState(4);
   const [defWw, setDefWw] = useState(30);
@@ -171,7 +166,6 @@ export default function SimulationsPage() {
     <div className="space-y-4 animate-fade-in">
       <h1 className="font-app-brand text-lg font-bold">Symulacje</h1>
 
-      {/* Mode selector */}
       <div className="flex gap-1.5">
         <Button size="sm" variant={mode === "basic" ? "default" : "secondary"} className="flex-1 text-xs gap-1" onClick={() => setMode("basic")}>
           <BarChart3 className="h-3.5 w-3.5" /> Podstawowa
@@ -184,7 +178,6 @@ export default function SimulationsPage() {
         </Button>
       </div>
 
-      {/* Basic mode inputs */}
       {mode === "basic" && (
         <>
           <div className="grid grid-cols-3 gap-3">
@@ -201,7 +194,6 @@ export default function SimulationsPage() {
               <NumberInput value={numRolls} onChange={setNumRolls} min={1} max={100000} className="text-center font-bold h-11" />
             </div>
           </div>
-          {/* Difficulty presets */}
           <div className="flex flex-wrap gap-1">
             {DIFFICULTY_PRESETS.map((d) => (
               <Button key={d.label} size="sm" variant={modifier === d.modifier ? "default" : "outline"} className="text-[10px] px-2 h-6" onClick={() => setModifier(d.modifier)}>
@@ -218,7 +210,6 @@ export default function SimulationsPage() {
         </>
       )}
 
-      {/* Opposed mode inputs */}
       {mode === "opposed" && (
         <>
           <div className="grid grid-cols-2 gap-3">
@@ -244,7 +235,6 @@ export default function SimulationsPage() {
         </>
       )}
 
-      {/* Combat mode inputs */}
       {mode === "combat" && (
         <>
           <div className="grid grid-cols-2 gap-3">
@@ -302,7 +292,6 @@ export default function SimulationsPage() {
         Uruchom {numRolls.toLocaleString()} symulacji
       </Button>
 
-      {/* Results */}
       {latestResult && (
         <>
           {latestResult.mode === "basic" && (
@@ -363,7 +352,6 @@ export default function SimulationsPage() {
             </div>
           )}
 
-          {/* Distribution chart */}
           <Card>
             <CardContent className="p-4">
               <h3 className="text-sm font-semibold mb-3 flex items-center gap-1.5">
@@ -384,7 +372,6 @@ export default function SimulationsPage() {
         </>
       )}
 
-      {/* History */}
       {results.length > 1 && (
         <section>
           <div className="flex items-center justify-between mb-2">

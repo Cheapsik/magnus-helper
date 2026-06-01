@@ -1,4 +1,4 @@
-/** Append a quest from outside QuestsPage (e.g. GM dashboard). Writes `rpg_quests` in localStorage. */
+
 
 const STORAGE_QUESTS = "rpg_quests";
 const STORAGE_QUEST_LAYOUT = "rpg_quests_layout";
@@ -89,7 +89,7 @@ export function appendQuestToStorage(opts: {
       if (parsed?.quests && parsed?.order) state = parsed;
     }
   } catch {
-    /* keep empty */
+
   }
 
   if (!state.order) state.order = {};

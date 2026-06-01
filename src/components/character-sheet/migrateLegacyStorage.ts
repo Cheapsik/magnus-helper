@@ -1,7 +1,6 @@
 import { createEmptyNpc, newId } from "./factory";
 import type { SavedNpc, StatRow, StatRow2 } from "./types";
 
-/** Stary płaski zapis NPC (przed migracją do karty WFRP). */
 interface LegacyFlatNpc {
   id: string;
   name: string;
@@ -101,7 +100,6 @@ function legacyFlatToSaved(old: LegacyFlatNpc): SavedNpc {
   return n;
 }
 
-/** Normalizuje pojedynczy wpis (legacy flat → SavedNpc, uzupełnia brakujące pola). */
 export function normalizeSavedNpcEntry(item: unknown): SavedNpc | null {
   if (isLegacyFlatNpc(item)) {
     return legacyFlatToSaved(item);
@@ -160,7 +158,6 @@ export function normalizeSavedNpcArray(parsed: unknown): SavedNpc[] {
 
 const STORAGE_KEY = "rpg_saved_npcs";
 
-/** Wywołać przed pierwszym renderem (main.tsx) — przepisuje localStorage jeśli są legacy NPC. */
 export function migrateSavedNpcsStorage(): void {
   try {
     if (typeof window === "undefined" || !window.localStorage) return;
@@ -180,6 +177,5 @@ export function migrateSavedNpcsStorage(): void {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
     }
   } catch {
-    // ignore
-  }
+      }
 }

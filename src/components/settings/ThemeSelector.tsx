@@ -83,7 +83,6 @@ export default function ThemeSelector() {
                 "group relative flex min-w-[200px] max-w-full grow basis-[200px] cursor-pointer flex-col border-0 bg-transparent p-0 outline-none",
               )}
             >
-              {/* Ucho — jedna linia + ellipsis; tooltip tylko przy obcięciu */}
               <div
                 className={cn(
                   "z-[1] flex w-full min-w-0 items-start gap-1 rounded-t-sm border border-b-0 border-white/[0.07] bg-white/[0.025] px-2 py-1 transition-[background,border-color,color,box-shadow] duration-200 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)]",
@@ -106,7 +105,6 @@ export default function ThemeSelector() {
                 </div>
               </div>
 
-              {/* Ciało — jak v2: pełny gradient + opacity (0.45 / 0.68 / 0.85) */}
               <div
                 className={cn(
                   "relative overflow-hidden rounded-bl-md rounded-br-md rounded-tr-md rounded-tl-none border border-t-0 border-white/[0.05] transition-[box-shadow,transform] duration-200 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)]",

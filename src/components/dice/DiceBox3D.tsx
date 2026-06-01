@@ -43,10 +43,8 @@ function webglAvailable(): boolean {
   }
 }
 
-/** Stałe: widok 3D zawsze „Stół karczmy” (`theme_surface` w dice-box). */
 const DICE_BOX_THEME_SURFACE = "taverntable" as const;
 
-/** Tło CSS pod przezroczystym canvasem — tekstura stołu karczmy. */
 const TAVERN_TABLE_FLOOR = {
   textureUrl: (base: string) => `${base}assets/dice-box/textures/wood_table.jpg`,
   color: "#5c3f2a",
@@ -62,7 +60,6 @@ function flatRollValuesFromDetail(detail: unknown): number[] {
   return d.sets.flatMap((s) => (Array.isArray(s.rolls) ? s.rolls.map((r) => Number(r.value)) : []));
 }
 
-/** Lokalne pliki z `public/assets/dice-box/textures/` (np. własny fire.webp, easter egg UwU). */
 function registerCustomDiceTextures(box: DiceBoxInstance) {
   const diceColors = box.DiceColors as DiceBoxInstance["DiceColors"] & {
     getTexture: (key: unknown) => unknown;
@@ -77,7 +74,6 @@ function registerCustomDiceTextures(box: DiceBoxInstance) {
   };
 }
 
-/** Biblioteka ustawia envMapIntensity=0 — przywracamy odbicia wg materiału. */
 function patchDiceFactoryMaterials(box: DiceBoxInstance, material: Dice3DThemeMaterial) {
   const factory = box.DiceFactory as DiceBoxInstance["DiceFactory"] & {
     __magnusMaterialPatch?: boolean;
@@ -125,7 +121,7 @@ function disposeDiceBox(box: DiceBoxInstance | null) {
   try {
     box.clearDice?.();
   } catch {
-    /* ignore */
+
   }
   try {
     const r = box.renderer as { domElement?: HTMLCanvasElement; dispose?: () => void } | undefined;
@@ -134,7 +130,7 @@ function disposeDiceBox(box: DiceBoxInstance | null) {
     }
     r?.dispose?.();
   } catch {
-    /* ignore */
+
   }
 }
 
@@ -247,10 +243,7 @@ const DiceBox3D = forwardRef<DiceBox3DHandle, DiceBox3DProps>(function DiceBox3D
             return;
           }
 
-          // Renderer paczki tworzy canvas z alpha:true i setClearColor(0,0) — canvas jest
-          // przezroczysty. Tło CSS kontenera (kolor + tekstura) świeci przez WebGL.
-          // Ważne: NIE nadpisuj setClearColor nieprzezroczystą wartością — zasłoni teksturę.
-          const renderer = box.renderer as { domElement: HTMLCanvasElement };
+                                        const renderer = box.renderer as { domElement: HTMLCanvasElement };
           renderer.domElement.style.backgroundColor = "transparent";
 
           patchDiceFactoryMaterials(box, visualConfig.themeMaterial);

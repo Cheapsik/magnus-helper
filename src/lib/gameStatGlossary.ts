@@ -68,7 +68,6 @@ export function getStatFullName(key: GameStatKey): string {
   return G[key].fullName;
 }
 
-/** Normalizacja etykiet z UI (np. "WW *", "Odp") do dopasowania. */
 function normalizeAbbrLabel(raw: string): string {
   return raw.replace(/\s*\*+\s*$/, "").trim();
 }
@@ -111,7 +110,6 @@ export function getStatTooltipByAbbr(display: string): string | undefined {
   return undefined;
 }
 
-/** Dopasowanie po dokładnym skrócie jak w glossary (np. z `stat.abbr`). */
 export function getStatTooltipByExactAbbr(abbr: string): string | undefined {
   const trimmed = abbr.trim();
   for (const key of Object.keys(G) as GameStatKey[]) {

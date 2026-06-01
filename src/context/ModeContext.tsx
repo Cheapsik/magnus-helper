@@ -26,7 +26,6 @@ export function useMode() {
   return ctx;
 }
 
-/** Trasy widoczne w trybie gracza */
 export const PLAYER_PATHS = new Set<string>([
   "/", "/dice", "/tests", "/character", "/inventory", "/codex", "/notes",
 ]);

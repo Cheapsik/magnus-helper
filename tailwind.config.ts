@@ -64,7 +64,7 @@ export default {
         },
       },
       fontFamily: {
-        /** Tylko nazwa aplikacji (sidebar) oraz główne `<h1>` na podstronach — Google Fonts MedievalSharp */
+
         "app-brand": ['"MedievalSharp"', "cursive"],
       },
       borderRadius: {

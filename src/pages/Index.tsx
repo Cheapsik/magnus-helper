@@ -6,8 +6,6 @@ import { useScene } from "@/context/SceneContext";
 import { cn } from "@/lib/utils";
 import { StatAbbrWithTooltip, StatAbbrFromCharacterStat } from "@/components/game/StatAbbrWithTooltip";
 
-/* ── Reading external (non-context) data from localStorage ── */
-
 interface QuestLite { id: string; title: string; column: string; type: string; updatedAt: string; }
 interface TimerLite { id: string; label: string; mode: "stopwatch" | "countdown"; countdownSet: number; }
 
@@ -20,7 +18,6 @@ function readJson<T>(key: string, fallback: T): T {
   }
 }
 
-/* ── Health bar color ── */
 function hpColor(pct: number): string {
   if (pct > 60) return "#4A7C59";
   if (pct >= 30) return "#A0892A";
@@ -29,7 +26,6 @@ function hpColor(pct: number): string {
 
 interface LastRoll { type: string; result: number | string; label?: string; timestamp?: string; }
 
-/* ── Section header (small, muted, sans) ── */
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div className="text-[11px] font-sans uppercase tracking-[0.1em] text-muted-foreground/50 mb-2">
@@ -38,7 +34,6 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-/* ── Atmospheric empty state ── */
 function AtmosphericEmpty({
   icon: Icon,
   text,
@@ -78,7 +73,6 @@ export default function Index() {
     setLastRoll(readJson<LastRoll | null>("magnus_last_roll", null));
   }, []);
 
-  /* Derived values */
   const hpPct = character.wounds.max > 0 ? Math.round((character.wounds.current / character.wounds.max) * 100) : 0;
   const activeQuests = quests
     .filter((q) => q.column !== "zamkniete")
@@ -88,8 +82,7 @@ export default function Index() {
   const enemyCount = combatants.filter((c) => c.isEnemy && c.hp.current > 0).length;
   const combatActive = enemyCount > 0 && combatants.length > 1;
   const currentTurnName = combatActive ? combatants[combatTurn % combatants.length]?.name : null;
-  const inlineStats = character.stats.slice(0, 5); // WW, US, S, Wt, Zr
-
+  const inlineStats = character.stats.slice(0, 5);
   const QUICK_ROWS = [
     { path: "/dice", label: "Rzut kośćmi", icon: Dice5 },
     { path: "/tests", label: "Test procentowy", icon: Target },
@@ -112,10 +105,8 @@ export default function Index() {
 
   return (
     <div className="space-y-6">
-      {/* ─────── HERO ROW ─────── */}
       <section className="border border-border bg-card/40 panel-enter" style={stagger(0)}>
         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border">
-          {/* Left — Active character */}
           <div className="px-5 py-4">
             <div className="text-[10px] uppercase tracking-[0.18em] text-primary/70 mb-1">Aktywna postać</div>
             <Link to="/character" className="block group">
@@ -128,7 +119,6 @@ export default function Index() {
             </Link>
           </div>
 
-          {/* Middle — Vitals */}
           <div className="px-5 py-4">
             <div className="text-[10px] uppercase tracking-[0.18em] text-primary/70 mb-2">Witalność</div>
             <div className="space-y-2">
@@ -160,7 +150,6 @@ export default function Index() {
             </div>
           </div>
 
-          {/* Right — Session status */}
           <div className="px-5 py-4">
             <div className="text-[10px] uppercase tracking-[0.18em] text-primary/70 mb-2">Aktywna sesja</div>
             <div className="space-y-1.5 text-xs">
@@ -204,7 +193,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Last roll mini-panel */}
       {lastRoll ? (
         <section
           className="panel-enter border border-border bg-card/30 px-4 flex items-center gap-3"
@@ -231,10 +219,8 @@ export default function Index() {
         </section>
       )}
 
-      {/* ─────── DASHBOARD GRID ─────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
 
-        {/* Panel: Recent threads */}
         <section className="border border-border bg-card/30 p-5 panel-enter" style={stagger(2)}>
           <SectionLabel>Ostatnie wątki</SectionLabel>
           {recentQuests.length === 0 ? (
@@ -278,7 +264,6 @@ export default function Index() {
           )}
         </section>
 
-        {/* Panel: Quick rolls */}
         <section className="border border-border bg-card/30 p-5 panel-enter" style={stagger(3)}>
           <SectionLabel>Szybkie rzuty</SectionLabel>
           <ul className="divide-y divide-border/60">
@@ -297,7 +282,6 @@ export default function Index() {
           </ul>
         </section>
 
-        {/* Panel: Active character (rich) */}
         <section className="border border-border bg-card/30 p-5 panel-enter" style={stagger(4)}>
           <SectionLabel>Aktywna postać</SectionLabel>
           <Link to="/character" className="block group">
@@ -309,7 +293,6 @@ export default function Index() {
             </p>
           </Link>
 
-          {/* Big HP number */}
           <div className="flex items-baseline gap-2 mb-1">
             <span className="font-bold leading-none" style={{ fontSize: 22, color: hpColor(hpPct) }}>
               {character.wounds.current} / {character.wounds.max}
@@ -325,7 +308,6 @@ export default function Index() {
             />
           </div>
 
-          {/* Inline stat chips */}
           <div className="flex flex-wrap gap-1.5 mb-3">
             {inlineStats.map((s) => (
               <span
@@ -363,7 +345,6 @@ export default function Index() {
           </Link>
         </section>
 
-        {/* Panel: Session box (contextual) */}
         {(combatActive || timers.length > 0) ? (
           <section className="border border-border bg-card/30 p-5 md:col-span-2 xl:col-span-1 panel-enter" style={stagger(5)}>
             <SectionLabel>Skrzynka sesji</SectionLabel>

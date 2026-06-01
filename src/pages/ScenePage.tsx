@@ -196,7 +196,6 @@ export default function ScenePage() {
 
           <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
             <div className="space-y-5">
-            {/* Basics */}
             <div className="space-y-2">
               <label className="text-xs uppercase tracking-wider text-muted-foreground">Nazwa</label>
               <Input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="np. Karczma Pod Psem" />
@@ -204,7 +203,6 @@ export default function ScenePage() {
               <Textarea value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} placeholder="Krótki opis atmosfery lub kontekstu..." rows={2} />
             </div>
 
-            {/* Ambient */}
             <section className="space-y-2">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold flex items-center gap-2"><Music className="h-4 w-4" /> Ambient</h3>
@@ -236,7 +234,6 @@ export default function ScenePage() {
               </div>
             </section>
 
-            {/* NPCs */}
             <section className="space-y-2">
               <h3 className="text-sm font-semibold flex items-center gap-2"><Users className="h-4 w-4" /> NPC w scenie</h3>
               {savedNpcs.length === 0 ? <p className="text-xs text-muted-foreground italic">Brak zapisanych NPC.</p> : (
@@ -259,7 +256,6 @@ export default function ScenePage() {
               )}
             </section>
 
-            {/* Threads */}
             <section className="space-y-2">
               <h3 className="text-sm font-semibold flex items-center gap-2"><Network className="h-4 w-4" /> Wątki</h3>
               {quests.length === 0 ? <p className="text-xs text-muted-foreground italic">Brak wątków.</p> : (
@@ -275,7 +271,6 @@ export default function ScenePage() {
               )}
             </section>
 
-            {/* Quick actions */}
             <section className="space-y-2">
               <h3 className="text-sm font-semibold flex items-center gap-2"><Zap className="h-4 w-4" /> Szybkie akcje</h3>
               <div className="space-y-1">
@@ -378,7 +373,6 @@ function ActiveSceneView({ scene, onEdit, onDeactivate, ambient, savedNpcs, ques
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {/* Ambient panel */}
         <Card>
           <CardContent className="p-3 space-y-2">
             <h3 className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Music className="h-3.5 w-3.5" /> Ambient</h3>
@@ -402,7 +396,6 @@ function ActiveSceneView({ scene, onEdit, onDeactivate, ambient, savedNpcs, ques
           </CardContent>
         </Card>
 
-        {/* NPCs */}
         <Card>
           <CardContent className="p-3 space-y-1.5">
             <h3 className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> NPC</h3>
@@ -416,7 +409,6 @@ function ActiveSceneView({ scene, onEdit, onDeactivate, ambient, savedNpcs, ques
           </CardContent>
         </Card>
 
-        {/* Threads */}
         <Card>
           <CardContent className="p-3 space-y-1.5">
             <h3 className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Network className="h-3.5 w-3.5" /> Wątki</h3>
@@ -431,7 +423,6 @@ function ActiveSceneView({ scene, onEdit, onDeactivate, ambient, savedNpcs, ques
         </Card>
       </div>
 
-      {/* Quick actions */}
       {scene.quickActions.length > 0 && (
         <Card>
           <CardContent className="p-3">

@@ -46,17 +46,14 @@ export default function CheatSheetsPage() {
   const [newCategory, setNewCategory] = useState("Walka");
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-  // Merge built-in sheets with custom entries
-  const allSheets = useMemo(() => {
+    const allSheets = useMemo(() => {
     const builtIn = CHEAT_SHEETS.map((s) => ({ ...s, isCustom: false }));
-    // Override built-in with custom entries that share same id
-    const customIds = new Set(codexEntries.map((e) => e.id));
+        const customIds = new Set(codexEntries.map((e) => e.id));
     const merged = builtIn.map((s) => {
       const custom = codexEntries.find((e) => e.id === s.id);
       return custom ? { ...custom, isCustom: true } : s;
     });
-    // Add purely new custom entries
-    const purelyNew = codexEntries.filter((e) => !builtIn.some((b) => b.id === e.id));
+        const purelyNew = codexEntries.filter((e) => !builtIn.some((b) => b.id === e.id));
     return [...merged, ...purelyNew.map((e) => ({ ...e, isCustom: true }))];
   }, [codexEntries]);
 
@@ -110,8 +107,7 @@ export default function CheatSheetsPage() {
 
   const deleteEntry = (id: string) => {
     setCodexEntries((prev) => prev.filter((e) => e.id !== id));
-    // If it was a built-in override, just remove the custom version (built-in returns)
-    setDeleteConfirm(null);
+        setDeleteConfirm(null);
   };
 
   return (
@@ -156,7 +152,6 @@ export default function CheatSheetsPage() {
         </Card>
       )}
 
-      {/* Search */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input placeholder="Szukaj zasad…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />

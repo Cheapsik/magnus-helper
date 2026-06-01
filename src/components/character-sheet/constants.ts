@@ -1,7 +1,6 @@
 import type { StatRow, StatRow2 } from "./types";
 import { STAT_MAIN_COLUMNS, STAT_SECONDARY_COLUMNS } from "@/lib/gameStatGlossary";
 
-/** Kolumny cech — etykiety ze wspólnego słownika ([`gameStatGlossary`](@/lib/gameStatGlossary)). */
 export const STAT_MAIN: { key: keyof StatRow; label: string }[] = STAT_MAIN_COLUMNS;
 export const STAT_SECONDARY: { key: keyof StatRow2; label: string }[] = STAT_SECONDARY_COLUMNS;
 
@@ -28,7 +27,6 @@ export const DEFAULT_BASIC_SKILLS = [
   "Zastraszanie",
 ];
 
-/** Zestawienie akcji — treść jak na karcie PDF (tylko odczyt). */
 export const AKCJE_GRUPY: { naglowek: string; wiersze: [string, string][] }[] = [
   {
     naglowek: "Akcje podstawowe",
