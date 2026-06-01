@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { Plus, Swords, Crosshair, Target, Zap, X, Flag, RotateCcw as Redo } from "lucide-react";
+import { Plus, Swords, Crosshair, Target, Zap, X, Flag, Shield, RotateCcw as Redo } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import type { Combatant } from "@/context/AppContext";
 import { useLocation } from "react-router-dom";
