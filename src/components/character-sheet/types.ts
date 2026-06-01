@@ -1,4 +1,4 @@
-/** Wspólny model karty WFRP2 (PDF) — pola stringowe jak w formularzu. */
+
 
 export type StatRow = {
   ww: string;
@@ -69,7 +69,6 @@ export interface Wyposazenie {
   opis: string;
 }
 
-/** Rdzeń karty (bez id, bez pól specyficznych bohatera/NPC). */
 export interface CharacterSheetCore {
   daneOgolne: {
     imie: string;

@@ -393,7 +393,6 @@ export default function SessionNotesPage() {
     [sessionNotes],
   );
 
-  /** Usuwa wpis sesji z katalogu (notatki trzeba wcześniej przenieść / zmienić). */
   const removeSessionHard = useCallback((id: string) => {
     setNoteSessionCatalog((c) => {
       const nextSessions = c.sessions.filter((s) => s.id !== id);

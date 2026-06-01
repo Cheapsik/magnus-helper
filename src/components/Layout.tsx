@@ -94,7 +94,6 @@ export default function Layout({ children }: { children: ReactNode }) {
   const [isResizing, setIsResizing] = useState(false);
   const dragStateRef = useRef<{ startX: number; startWidth: number } | null>(null);
 
-  // Synchronizuj initial state, gdy zmieni się wartość z localStorage (np. inna karta)
   useEffect(() => {
     setSidebarWidth(clampSidebarWidth(storedWidth));
   }, [storedWidth]);
@@ -129,7 +128,6 @@ export default function Layout({ children }: { children: ReactNode }) {
     };
   }, [isResizing]);
 
-  // Zapisuj szerokość dopiero po zakończeniu dragowania, żeby nie spamować localStorage.
   useEffect(() => {
     if (isResizing) return;
     if (sidebarWidth === storedWidth) return;
@@ -170,18 +168,22 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="h-screen flex overflow-hidden">
-      {/* Desktop sidebar */}
       <aside
-        className="hidden md:flex flex-col shrink-0 border-r border-border bg-sidebar sticky top-0 h-screen"
+        className="hidden md:flex flex-col shrink-0 overflow-hidden border-r border-border bg-sidebar sticky top-0 h-screen"
         style={{ width: sidebarWidth }}
       >
-        <div className="flex flex-col h-full overflow-y-auto">
-        <Link to="/" className="flex items-center gap-2 px-5 h-14 border-b border-border min-w-0">
-          <Logo />
-          <span className="font-app-brand text-lg tracking-wide text-foreground truncate min-w-0">Magnus Helper</span>
+        <Link
+          to="/"
+          className="flex min-h-[4.75rem] shrink-0 items-center gap-3 border-b border-border px-5 py-3 min-w-0"
+        >
+          <Logo className="h-9 w-9" />
+          <span className="font-app-brand text-lg leading-tight tracking-wide text-foreground truncate min-w-0">
+            Magnus Helper
+          </span>
         </Link>
 
-        <nav className="flex-1 px-2 py-3 space-y-4 animate-fade-in" key={mode}>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <nav className="px-2 py-3 space-y-4 animate-fade-in" key={mode}>
           {visibleGroups.map((g) => (
             <div key={g.label}>
               <div className="px-3 mb-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/35 font-sans font-semibold">
@@ -216,9 +218,9 @@ export default function Layout({ children }: { children: ReactNode }) {
             </div>
           ))}
         </nav>
+        </div>
 
-        {/* Mode toggle */}
-        <div className="border-t border-border px-2 py-2">
+        <div className="shrink-0 border-t border-border px-2 py-2">
           <div className="grid grid-cols-2 gap-1 border border-border bg-background/40 p-1">
             <button
               onClick={() => setMode("player")}
@@ -242,9 +244,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             </button>
           </div>
         </div>
-        </div>
 
-        {/* Resize handle */}
         <div
           role="separator"
           aria-orientation="vertical"
@@ -277,7 +277,6 @@ export default function Layout({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden">
-        {/* Mobile header */}
         <header className="md:hidden shrink-0 border-b border-border bg-card/80 backdrop-blur-md">
           <div className="grid grid-cols-3 items-center h-12 px-2 gap-1">
             <div className="min-w-0" aria-hidden />
@@ -327,7 +326,6 @@ export default function Layout({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        {/* Desktop top bar (search) */}
         <header className="hidden md:flex shrink-0 h-14 border-b border-border bg-background/80 backdrop-blur-md items-center justify-between px-6 gap-3">
           <button
             onClick={palette.open}
@@ -388,7 +386,6 @@ export default function Layout({ children }: { children: ReactNode }) {
         <StatusBar />
       </div>
 
-      {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-md safe-area-pb">
         <div className="flex justify-around items-center h-16 max-w-lg mx-auto">
           {visibleTabs.map((tab) => (

@@ -7,17 +7,12 @@ interface NumberInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEleme
   allowEmpty?: boolean;
 }
 
-/**
- * Number input that allows clearing and retyping without the "stuck zero" problem.
- * Internally uses a string state so the user can freely type.
- */
 const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
   ({ className, value, onChange, min, max, allowEmpty, ...props }, ref) => {
     const [raw, setRaw] = React.useState(String(value));
     const prevValue = React.useRef(value);
 
-    // Sync from parent when value changes externally
-    React.useEffect(() => {
+        React.useEffect(() => {
       if (value !== prevValue.current) {
         setRaw(String(value));
         prevValue.current = value;
@@ -26,8 +21,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const text = e.target.value;
-      // Allow empty, minus sign, or valid number chars
-      if (text === "" || text === "-") {
+            if (text === "" || text === "-") {
         setRaw(text);
         return;
       }
@@ -48,8 +42,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         prevValue.current = fallback;
         onChange(fallback);
       } else {
-        // Re-clamp on blur
-        let num = Number(raw);
+                let num = Number(raw);
         if (min !== undefined) num = Math.max(Number(min), num);
         if (max !== undefined) num = Math.min(Number(max), num);
         setRaw(String(num));

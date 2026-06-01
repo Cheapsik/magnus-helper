@@ -38,7 +38,7 @@ export default function DataManager() {
     try {
       await importData(f);
     } catch {
-      /* toast obsłużony w contextcie */
+
     }
   };
 
@@ -89,7 +89,6 @@ export default function DataManager() {
         </button>
       </div>
 
-      {/* Import confirm */}
       <Dialog
         open={!!pendingImportFile}
         onOpenChange={(open) => {
@@ -112,7 +111,6 @@ export default function DataManager() {
         </DialogContent>
       </Dialog>
 
-      {/* Reset — krok 1 */}
       <Dialog
         open={resetStep === "confirm"}
         onOpenChange={(open) => {
@@ -146,7 +144,6 @@ export default function DataManager() {
         </DialogContent>
       </Dialog>
 
-      {/* Reset — krok 2 (wpisz RESET) */}
       <Dialog
         open={resetStep === "type-reset"}
         onOpenChange={(open) => {

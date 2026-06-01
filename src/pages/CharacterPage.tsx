@@ -88,7 +88,6 @@ export default function CharacterPage() {
         </div>
       </div>
 
-      {/* Name & career */}
       <Card>
         <CardContent className="p-4">
           {editing ? (
@@ -108,7 +107,6 @@ export default function CharacterPage() {
         </CardContent>
       </Card>
 
-      {/* Wounds */}
       <Card>
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-2">
@@ -144,7 +142,6 @@ export default function CharacterPage() {
         </CardContent>
       </Card>
 
-      {/* Stats */}
       <Card>
         <CardContent className="p-4">
           <h3 className="text-sm font-semibold mb-3">Cechy główne</h3>
@@ -171,7 +168,6 @@ export default function CharacterPage() {
         </CardContent>
       </Card>
 
-      {/* Conditions */}
       <Card>
         <CardContent className="p-4">
           <h3 className="text-sm font-semibold mb-2">Stany</h3>
@@ -190,7 +186,6 @@ export default function CharacterPage() {
         </CardContent>
       </Card>
 
-      {/* Weapons */}
       <Card>
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-2">
@@ -219,7 +214,6 @@ export default function CharacterPage() {
         </CardContent>
       </Card>
 
-      {/* Armor */}
       <Card>
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-2">
@@ -251,7 +245,6 @@ export default function CharacterPage() {
         </CardContent>
       </Card>
 
-      {/* Equipment */}
       <Card>
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-2">
@@ -275,7 +268,6 @@ export default function CharacterPage() {
               }} />
             </div>
           )}
-          {/* Inventory picker */}
           {showInventoryPicker && inventory.length > 0 && (
             <div className="mt-2 border rounded-md p-2 space-y-1 max-h-40 overflow-y-auto">
               <label className="text-[10px] text-muted-foreground font-medium">Kliknij aby dodać z ekwipunku:</label>
@@ -291,7 +283,6 @@ export default function CharacterPage() {
         </CardContent>
       </Card>
 
-      {/* Notes */}
       <Card>
         <CardContent className="p-4">
           <h3 className="text-sm font-semibold mb-2">Notatki sesyjne</h3>

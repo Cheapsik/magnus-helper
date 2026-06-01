@@ -1,4 +1,3 @@
-// Wyekstrahowane z zdolnosci.docx
 
 export type UmiejetnoscKodeks = { id: string; nazwa: string; typ: "podstawowa" | "zaawansowana" | ""; cecha: string; opis: string; pokrewne: string; };
 export type ZdolnoscKodeks = { id: string; nazwa: string; opis: string; };

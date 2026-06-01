@@ -13,8 +13,6 @@ import {
   dataToRuntime,
 } from "@/lib/rpgTimersStorage";
 
-/* ── Audio (lazy AudioContext; resume na mobile) ── */
-
 let beepCtx: AudioContext | null = null;
 
 async function playBeep() {
@@ -40,13 +38,9 @@ async function playBeep() {
     beep(0.3);
     beep(0.6);
   } catch {
-    /* ignore */
+
   }
 }
-
-/* ── Helpers ── */
-
-/* ── Timer Card ── */
 
 function TimerCard({
   timer,
@@ -64,8 +58,7 @@ function TimerCard({
   const [ssDraft, setSsDraft] = useState(timer.countdownSet % 60);
   const alertedRef = useRef(false);
 
-  // Sync drafts when timer externally changes
-  useEffect(() => {
+    useEffect(() => {
     setLabelDraft(timer.label);
   }, [timer.label]);
 
@@ -75,13 +68,11 @@ function TimerCard({
     setSsDraft(timer.countdownSet % 60);
   }, [timer.countdownSet]);
 
-  // Reset alerted flag when timer resets
-  useEffect(() => {
+    useEffect(() => {
     if (!timer.finished) alertedRef.current = false;
   }, [timer.finished]);
 
-  // Countdown finished alert
-  useEffect(() => {
+    useEffect(() => {
     if (timer.finished && !alertedRef.current) {
       alertedRef.current = true;
       const name = timer.label || "Timer";
@@ -165,7 +156,6 @@ function TimerCard({
   return (
     <Card className="relative">
       <CardContent className="p-4 space-y-3">
-        {/* Label */}
         {editingLabel ? (
           <Input
             autoFocus
@@ -185,7 +175,6 @@ function TimerCard({
           </button>
         )}
 
-        {/* Mode toggle */}
         <div className="flex rounded-lg border border-border overflow-hidden">
           <button
             onClick={() => toggleMode("stopwatch")}
@@ -213,7 +202,6 @@ function TimerCard({
           </button>
         </div>
 
-        {/* Display */}
         <div
           className={cn(
             "text-center font-mono text-4xl font-bold py-4 select-none",
@@ -224,7 +212,6 @@ function TimerCard({
           {formatTimerMs(timer.displayMs)}
         </div>
 
-        {/* Countdown set inputs */}
         {showCountdownInputs && (
           <div className="flex items-center justify-center gap-1">
             <Input
@@ -270,7 +257,6 @@ function TimerCard({
           </div>
         )}
 
-        {/* Controls */}
         <div className="flex gap-2">
           {timer.running ? (
             <Button onClick={pause} variant="secondary" className="flex-1 min-h-[44px]">
@@ -301,8 +287,6 @@ function TimerCard({
   );
 }
 
-/* ── Page ── */
-
 export default function TimersPage() {
   const [timers, setTimers] = useState<TimerRuntime[]>(() =>
     loadTimersFromStorage().map(dataToRuntime)
@@ -310,13 +294,11 @@ export default function TimersPage() {
   const timersRef = useRef(timers);
   timersRef.current = timers;
 
-  // Persist on config change
-  useEffect(() => {
+    useEffect(() => {
     saveTimersToStorage(timers);
   }, [timers]);
 
-  // Tick loop
-  useEffect(() => {
+    useEffect(() => {
     let raf: number;
     const tick = () => {
       const now = Date.now();
@@ -332,8 +314,7 @@ export default function TimersPage() {
             return updated;
           }
 
-          // countdown
-          const totalMs = t.countdownSet * 1000;
+                    const totalMs = t.countdownSet * 1000;
           const remaining = totalMs - elapsed;
           if (remaining <= 0) {
             changed = true;

@@ -4,7 +4,7 @@ export interface CheatSheet {
     category: string;
     content: string;
   }
-  
+
   export const CATEGORIES = [
     "Wszystkie",
     "Testy",
@@ -15,7 +15,7 @@ export interface CheatSheet {
     "Akcje",
     "Modyfikatory",
   ];
-  
+
   export const CHEAT_SHEETS: CheatSheet[] = [
     {
       id: "percentile-tests",

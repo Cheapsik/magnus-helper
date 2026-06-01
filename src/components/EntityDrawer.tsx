@@ -67,8 +67,6 @@ export function useEntityDrawer() {
   return c;
 }
 
-/* ── Internal data lookups ── */
-
 function useMonsterById(id: string | null) {
   const [store] = useLocalStorage<{ potwory: DrawerMonster[] }>("rpg_bestiary", { potwory: [] });
   return useMemo(() => (id ? store.potwory.find((m) => m.id === id) ?? null : null), [store, id]);
@@ -78,8 +76,6 @@ function useHeroById(id: string | null) {
   const [store] = useLocalStorage<{ heroes: DrawerHero[] }>("rpg_heroes", { heroes: [] });
   return useMemo(() => (id ? store.heroes.find((h) => h.id === id) ?? null : null), [store, id]);
 }
-
-/* ── Per-kind body renderers ── */
 
 function MonsterBody({ id, onClose }: { id: string; onClose: () => void }) {
   const m = useMonsterById(id);
@@ -304,7 +300,6 @@ function GenericBody({ kind, id, onClose }: { kind: EntityKind; id: string; onCl
   );
 }
 
-/* ── Provider ── */
 
 export function EntityDrawerProvider({ children }: { children: ReactNode }) {
   const [ref, setRef] = useState<EntityRef | null>(null);

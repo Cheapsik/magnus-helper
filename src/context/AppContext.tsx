@@ -1,5 +1,12 @@
-import { createContext, useContext, useMemo, ReactNode } from "react";
+import { createContext, useContext, useMemo, useCallback, ReactNode } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import {
+  getActiveFight,
+  readCombatSessionsFromStorage,
+  reviveCombatSessions,
+  updateActiveFight,
+  type CombatSessionsState,
+} from "@/lib/combatSessions";
 import { initLootStorage } from "@/lib/lootDb";
 import type { LootDbItem } from "@/lib/lootDb";
 import type { DiceRoll, TestResult } from "@/lib/dice";
@@ -169,6 +176,8 @@ interface AppContextType {
   updateCharacter: (data: CharacterData) => void;
   pinnedSheets: string[];
   togglePinSheet: (id: string) => void;
+  combatSessions: CombatSessionsState;
+  setCombatSessions: (fn: CombatSessionsState | ((prev: CombatSessionsState) => CombatSessionsState)) => void;
   combatants: Combatant[];
   setCombatants: (fn: Combatant[] | ((prev: Combatant[]) => Combatant[])) => void;
   combatRound: number;
@@ -181,7 +190,6 @@ interface AppContextType {
   setInventory: (fn: InventoryItem[] | ((prev: InventoryItem[]) => InventoryItem[])) => void;
   sessionNotes: SessionNote[];
   setSessionNotes: (fn: SessionNote[] | ((prev: SessionNote[]) => SessionNote[])) => void;
-  /** Lista nazwanych sesji + aktualnie wybrana (notatki, filtry). */
   noteSessionCatalog: NoteSessionCatalog;
   setNoteSessionCatalog: (fn: NoteSessionCatalog | ((prev: NoteSessionCatalog) => NoteSessionCatalog)) => void;
   gmEnemies: GmEnemy[];
@@ -207,10 +215,67 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [testHistory, setTestHistory] = useLocalStorage<TestResult[]>("rpg_test_results", []);
   const [character, setCharacter] = useLocalStorage<CharacterData>("rpg_character", DEFAULT_CHARACTER);
   const [pinnedSheets, setPinnedSheets] = useLocalStorage<string[]>("rpg_codex_pins", []);
-  const [combatants, setCombatants] = useLocalStorage<Combatant[]>("rpg_combatants", DEFAULT_COMBATANTS);
-  const [combatRound, setCombatRound] = useLocalStorage<number>("rpg_combat_round", 1);
-  const [combatTurn, setCombatTurn] = useLocalStorage<number>("rpg_combat_turn", 0);
-  const [conditions, setConditions] = useLocalStorage<ActiveCondition[]>("rpg_conditions", []);
+  const combatSessionsInitial = useMemo(() => readCombatSessionsFromStorage(DEFAULT_COMBATANTS), []);
+  const [combatSessions, setCombatSessions] = useLocalStorage<CombatSessionsState>(
+    "rpg_combat_sessions",
+    combatSessionsInitial,
+    { revive: reviveCombatSessions },
+  );
+
+  const activeFight = useMemo(() => getActiveFight(combatSessions), [combatSessions]);
+
+  const combatants = activeFight.combatants;
+  const combatRound = activeFight.combatRound;
+  const combatTurn = activeFight.combatTurn;
+  const conditions = activeFight.conditions;
+
+  const setCombatants = useCallback(
+    (fn: Combatant[] | ((prev: Combatant[]) => Combatant[])) => {
+      setCombatSessions((prev) =>
+        updateActiveFight(prev, (fight) => ({
+          ...fight,
+          combatants: typeof fn === "function" ? fn(fight.combatants) : fn,
+        })),
+      );
+    },
+    [setCombatSessions],
+  );
+
+  const setCombatRound = useCallback(
+    (fn: number | ((prev: number) => number)) => {
+      setCombatSessions((prev) =>
+        updateActiveFight(prev, (fight) => ({
+          ...fight,
+          combatRound: typeof fn === "function" ? fn(fight.combatRound) : fn,
+        })),
+      );
+    },
+    [setCombatSessions],
+  );
+
+  const setCombatTurn = useCallback(
+    (fn: number | ((prev: number) => number)) => {
+      setCombatSessions((prev) =>
+        updateActiveFight(prev, (fight) => ({
+          ...fight,
+          combatTurn: typeof fn === "function" ? fn(fight.combatTurn) : fn,
+        })),
+      );
+    },
+    [setCombatSessions],
+  );
+
+  const setConditions = useCallback(
+    (fn: ActiveCondition[] | ((prev: ActiveCondition[]) => ActiveCondition[])) => {
+      setCombatSessions((prev) =>
+        updateActiveFight(prev, (fight) => ({
+          ...fight,
+          conditions: typeof fn === "function" ? fn(fight.conditions) : fn,
+        })),
+      );
+    },
+    [setCombatSessions],
+  );
   const [inventory, setInventory] = useLocalStorage<InventoryItem[]>("rpg_inventory", DEFAULT_INVENTORY);
   const [sessionNotes, setSessionNotes] = useLocalStorage<SessionNote[]>("rpg_session_notes", DEFAULT_NOTES, {
     revive: migrateSessionNotesFromUnknown,
@@ -246,6 +311,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       testHistory, addTestResult, clearTestHistory,
       character, updateCharacter,
       pinnedSheets, togglePinSheet,
+      combatSessions, setCombatSessions,
       combatants, setCombatants, combatRound, setCombatRound, combatTurn, setCombatTurn,
       conditions, setConditions,
       inventory, setInventory,

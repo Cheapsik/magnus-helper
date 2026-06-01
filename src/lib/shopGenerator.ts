@@ -46,7 +46,6 @@ function wealthAdjustedRanks(ranks: LootRank[], wealth: ShopWealthLevel): LootRa
   return normalizeWeights(adjusted);
 }
 
-/** Sąsiedztwo: najpierw w dół, potem w górę, max 3 indeksy rang */
 function rankIndicesToTry(pickedIndex: number, rankCount: number): number[] {
   const out: number[] = [];
   const seen = new Set<number>();
@@ -89,7 +88,6 @@ function priceLabelToTier(
   return "silver";
 }
 
-/** Cena przedmiotu w „miedzi” (mk) wg przelicznika sklepu */
 export function itemPriceToCopper(price: number, itemCurrency: string, cfg: ShopCurrencyConfig): number {
   if (!Number.isFinite(price) || price <= 0) return 0;
   const g = Math.max(1, cfg.silverPerGold);
@@ -181,7 +179,6 @@ export function generateShopAssortment(input: GenerateShopInput): { lines: ShopS
   return { lines };
 }
 
-/** Cena dla ręcznego dodania: jak przy generacji (los z bazy lub z zakresu rangi) */
 export function rollPriceForManualItem(
   item: LootDbItem,
   ranks: LootRank[],

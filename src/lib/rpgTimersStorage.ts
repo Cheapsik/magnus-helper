@@ -1,4 +1,4 @@
-/** Shared timer persistence + helpers for Timers page and GM dashboard widget. */
+
 
 export interface TimerData {
   id: string;
@@ -61,11 +61,10 @@ export function saveTimersToStorage(timers: TimerRuntime[]): void {
       ),
     );
   } catch {
-    /* ignore */
+
   }
 }
 
-/** Restore runtime; folds wall-clock gap when `running` + `startedAt` were persisted. */
 export function dataToRuntime(d: TimerData): TimerRuntime {
   const accumulatedMs = typeof d.accumulatedMs === "number" ? d.accumulatedMs : 0;
   const startedAt = d.startedAt ?? null;
@@ -123,10 +122,6 @@ export function dataToRuntime(d: TimerData): TimerRuntime {
   };
 }
 
-/**
- * GM dashboard “Tick”: advance countdown by ~10 s of in-world time (or add elapsed on stopwatch).
- * Works for running and paused timers.
- */
 export function applyTimerGmTick(t: TimerRuntime, deltaMs = 10_000): TimerRuntime {
   if (t.finished) return t;
 

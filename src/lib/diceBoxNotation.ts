@@ -1,6 +1,5 @@
-/** Notacja i adnotacja dla @3d-dice/dice-box-threejs (d100+d10 przy d%). */
 
-/** Wartości ścianek dla wymuszenia wyniku 1–100 (para d100 + d10 w bibliotece). */
+
 export function percentileDiePairForRoll(roll: number): [tens: number, ones: number] {
   if (roll === 100) return [0, 0];
   const tens = Math.floor((roll - 1) / 10) * 10;

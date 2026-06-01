@@ -1,6 +1,5 @@
 import type { SessionNote, SessionNoteScope, NamedNoteSession, NoteSessionCatalog } from "@/lib/sessionNoteModel";
 
-/** Kanoniczne ID kategorii (domyślne + migracja ze starych zapisów). */
 export const DEFAULT_NOTE_CATEGORY_IDS = ["general", "npc", "location", "objective", "clue"] as const;
 
 export const NOTE_CATEGORY_LABELS: Record<string, string> = {
@@ -30,8 +29,7 @@ function readRawNotesFromStorage(): unknown[] {
       if (Array.isArray(n)) return n;
     }
   } catch {
-    // ignore
-  }
+      }
   return [];
 }
 
@@ -39,7 +37,6 @@ function legacySessionId(n: number): string {
   return `legacy-${n}`;
 }
 
-/** Z surowego wiersza notatki: numer sesji (stary model) lub undefined. */
 function rawSessionNumber(row: unknown): number | undefined {
   if (!row || typeof row !== "object") return undefined;
   const sn = (row as Record<string, unknown>).sessionNumber;
@@ -47,7 +44,6 @@ function rawSessionNumber(row: unknown): number | undefined {
   return undefined;
 }
 
-/** Normalizuje pojedynczą notatkę (w tym migracja `sessionNumber` → `sessionId`). */
 export function normalizeSessionNote(row: unknown): SessionNote {
   if (!row || typeof row !== "object") {
     return {
@@ -97,10 +93,6 @@ export function normalizeSessionNote(row: unknown): SessionNote {
   };
 }
 
-/**
- * Odczyt z localStorage: tablica, lub `{ notes, version }`.
- * Stare wpisy bez `scope` → `global`.
- */
 export function migrateSessionNotesFromUnknown(parsed: unknown): SessionNote[] {
   let rawList: unknown[] | null = null;
   if (Array.isArray(parsed)) rawList = parsed;
@@ -112,7 +104,6 @@ export function migrateSessionNotesFromUnknown(parsed: unknown): SessionNote[] {
   return rawList.map(normalizeSessionNote);
 }
 
-/** Domyślny katalog (SSR / brak danych). */
 export const EMPTY_NOTE_SESSION_CATALOG: NoteSessionCatalog = {
   sessions: [{ id: "ns-default-1", name: "Sesja 1" }],
   activeSessionId: "ns-default-1",
@@ -141,7 +132,6 @@ function mergeSessionsWithNotes(sessions: NamedNoteSession[], notes: SessionNote
   return list;
 }
 
-/** Pierwszy odczyt katalogu (z dysku lub bootstrap / migracja). */
 export function readNoteSessionCatalogFromStorage(): NoteSessionCatalog {
   if (typeof window === "undefined") return EMPTY_NOTE_SESSION_CATALOG;
   try {
@@ -153,7 +143,6 @@ export function readNoteSessionCatalogFromStorage(): NoteSessionCatalog {
   }
 }
 
-/** Katalog sesji + aktywna sesja; migracja ze starego `rpg_notes_active_session` (liczba). */
 export function reviveNoteSessionCatalog(parsed: unknown): NoteSessionCatalog {
   if (typeof window === "undefined") return EMPTY_NOTE_SESSION_CATALOG;
 
@@ -176,8 +165,7 @@ export function reviveNoteSessionCatalog(parsed: unknown): NoteSessionCatalog {
         try {
           window.localStorage.setItem("rpg_notes_session_catalog", JSON.stringify({ sessions, activeSessionId }));
         } catch {
-          // ignore
-        }
+                  }
       }
       return { sessions, activeSessionId };
     }
@@ -203,8 +191,7 @@ export function reviveNoteSessionCatalog(parsed: unknown): NoteSessionCatalog {
       if (typeof n === "number" && Number.isFinite(n) && n >= 1) oldActiveNum = Math.floor(n);
     }
   } catch {
-    // ignore
-  }
+      }
 
   const maxFromNotes = nums.size ? Math.max(...nums) : 0;
   const maxN = Math.max(maxFromNotes, oldActiveNum, 1);
@@ -221,8 +208,7 @@ export function reviveNoteSessionCatalog(parsed: unknown): NoteSessionCatalog {
   try {
     window.localStorage.removeItem("rpg_notes_active_session");
   } catch {
-    // ignore
-  }
+      }
 
   const notes = migrateSessionNotesFromUnknown(JSON.parse(window.localStorage.getItem("rpg_session_notes") || "null"));
   const mergedSessions = mergeSessionsWithNotes(sessions, notes);
@@ -235,8 +221,7 @@ export function reviveNoteSessionCatalog(parsed: unknown): NoteSessionCatalog {
       JSON.stringify({ sessions: finalSessions, activeSessionId: finalActive }),
     );
   } catch {
-    // ignore
-  }
+      }
 
   return { sessions: finalSessions, activeSessionId: finalActive };
 }

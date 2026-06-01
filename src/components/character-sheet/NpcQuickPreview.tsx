@@ -1,6 +1,6 @@
 import type { SavedNpc } from "./types";
 import { STAT_MAIN } from "./constants";
-/** Podgląd NPC w sheetach (Quests, Notatki) — zgodny z modelem karty WFRP. */
+
 export function NpcQuickPreview({ npc }: { npc: SavedNpc }) {
   const p = npc.cechyGlowne.p;
   return (

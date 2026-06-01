@@ -23,7 +23,7 @@ export interface Dice3DSettingsPopoverProps {
   value: Dice3DVisualConfig;
   onChange: (next: Dice3DVisualConfig) => void;
   disabled?: boolean;
-  /** Klasy triggera (np. rozmiar na mobile). */
+
   triggerClassName?: string;
 }
 

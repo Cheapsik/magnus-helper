@@ -1,8 +1,7 @@
-/** Ustawienia wizualne rzutów 3D (dice-box-threejs) — persystencja + walidacja. */
+
 
 export const DICE_3D_VISUAL_STORAGE_KEY = "magnus-dice-3d-visual";
 
-/** Klucze tekstur kostek — tylko wybrane (reszta plików w `textures/` zostaje w paczce, nie w UI). */
 export const DICE_3D_TEXTURE_KEYS = ["", "wood", "marble", "metal", "fire", "dragon", "uwu"] as const;
 
 export const DICE_3D_UWU_TEXTURE_KEY = "uwu" as const satisfies Dice3DThemeTexture;
@@ -13,7 +12,7 @@ export const DICE_3D_MATERIAL_KEYS = ["none", "glass", "wood", "metal", "plastic
 export type Dice3DThemeMaterial = (typeof DICE_3D_MATERIAL_KEYS)[number];
 
 export interface Dice3DVisualConfig {
-  /** Pusty string = brak nakładki tekstury (jak domyślna paczka). */
+
   themeTexture: Dice3DThemeTexture;
   themeMaterial: Dice3DThemeMaterial;
   sounds: boolean;
@@ -81,16 +80,14 @@ export function saveDice3DVisualSettings(config: Dice3DVisualConfig): void {
   try {
     localStorage.setItem(DICE_3D_VISUAL_STORAGE_KEY, JSON.stringify(config));
   } catch {
-    /* quota / private mode */
+
   }
 }
 
-/** Krótki klucz do `key` na komponencie 3D (reinicjalizacja). */
 export function dice3DVisualConfigKey(c: Dice3DVisualConfig): string {
   return [c.themeTexture, c.themeMaterial, c.sounds ? "1" : "0", c.shadows ? "1" : "0"].join("|");
 }
 
-/** Materiały obsługiwane przez dice-box-threejs (bp). „plastic” = mat „none”. */
 export function mapDiceMaterialToLibrary(material: Dice3DThemeMaterial): "none" | "glass" | "wood" | "metal" {
   if (material === "plastic") return "none";
   if (material === "glass" || material === "wood" || material === "metal") return material;
@@ -105,20 +102,18 @@ const TEXTURE_COLOR_PRESETS: Record<
   wood: { foreground: "#2a1810", background: "#b8956a" },
   marble: { foreground: "#1c1c1c", background: "#e6e2d8" },
   metal: { foreground: "#0f1419", background: "#a8b4c0" },
-  // Ogień: ciemna podkładka + source-over (patrz MAGNUS_DICE_CUSTOM_TEXTURES) — multiply + brąz zabija obraz
-  fire: { foreground: "#fff8e8", background: "#0a0404" },
+    fire: { foreground: "#fff8e8", background: "#0a0404" },
   dragon: { foreground: "#d8e8c8", background: "#1e2a1c" },
   uwu: { foreground: "#5c2848", background: "#f5b8d8" },
 };
 
-/** Nadpisania tekstur — ścieżki względem `public/assets/dice-box/`. */
 export const MAGNUS_DICE_CUSTOM_TEXTURES: Record<
   string,
   { name: string; composite: string; source: string; source_bump?: string }
 > = {
   fire: {
     name: "Ogień",
-    /** Nakładka 1:1 jak w pliku — multiply + ciemne tło zabija obraz. */
+
     composite: "source-over",
     source: "textures/fire.webp",
   },
@@ -130,14 +125,12 @@ export const MAGNUS_DICE_CUSTOM_TEXTURES: Record<
   },
 };
 
-/** Klucz tekstury przekazywany do dice-box-threejs (`getTexture`). */
 export function resolveDiceLibraryTextureKey(texture: Dice3DThemeTexture): string {
   if (texture === "") return "none";
   if (texture === DICE_3D_UWU_TEXTURE_KEY) return DICE_3D_UWU_TEXTURE_KEY;
   return texture;
 }
 
-/** Colorset przekazywany do `theme_customColorset` — zgodny z API dice-box-threejs. */
 export function buildThemeCustomColorset(config: Dice3DVisualConfig): {
   name: string;
   foreground: string;

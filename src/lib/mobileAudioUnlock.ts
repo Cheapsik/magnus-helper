@@ -1,4 +1,4 @@
-/** Jednorazowe odblokowanie audio na iOS / Android (wywołaj synchronicznie z handlera gestu). */
+
 let didUnlock = false;
 
 export function unlockMobileAudio(): void {
@@ -17,10 +17,10 @@ export function unlockMobileAudio(): void {
       src.start(0);
       src.stop(0.001);
     } catch {
-      /* ignore */
+
     }
     void ctx.close();
   } catch {
-    /* ignore */
+
   }
 }

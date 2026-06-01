@@ -9,8 +9,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/* ── Types ── */
-
 interface RumorSegment {
   id: string;
   name: string;
@@ -29,8 +27,6 @@ interface RumorsConfig {
   templates: RumorTemplate[];
   activeTemplateId: string | null;
 }
-
-/* ── Defaults ── */
 
 const uid = () => crypto.randomUUID();
 
@@ -63,8 +59,6 @@ const DEFAULT_CONFIG: RumorsConfig = {
   activeTemplateId: "t1",
 };
 
-/* ── Persistence ── */
-
 const STORAGE_KEY = "rpg_rumors_config";
 
 function loadConfig(): RumorsConfig {
@@ -81,13 +75,9 @@ function saveConfig(cfg: RumorsConfig) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
 }
 
-/* ── Helpers ── */
-
 function pickRandom<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
-
-/* ── Components ── */
 
 function SegmentEditor({
   segment,
@@ -133,7 +123,6 @@ function SegmentEditor({
 
   return (
     <div className="border border-border rounded-lg overflow-hidden">
-      {/* Header */}
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-3 py-2 bg-muted/50 hover:bg-muted transition-colors min-h-[44px]"
@@ -187,7 +176,6 @@ function SegmentEditor({
         </div>
       </button>
 
-      {/* Body */}
       <div
         className={cn(
           "overflow-hidden transition-all duration-200",
@@ -301,9 +289,7 @@ function TemplateEditor({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Scrollable editor area */}
       <div className="flex-1 overflow-y-auto space-y-4 pb-4">
-        {/* Name */}
         <div>
           {editingName ? (
             <Input
@@ -324,7 +310,6 @@ function TemplateEditor({
           )}
         </div>
 
-        {/* Prefix */}
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Prefiks zdania</label>
           <Input
@@ -335,7 +320,6 @@ function TemplateEditor({
           />
         </div>
 
-        {/* Segments */}
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-muted-foreground">Segmenty</h3>
           {template.segments.map((seg, i) => (
@@ -355,7 +339,6 @@ function TemplateEditor({
         </div>
       </div>
 
-      {/* Generator – sticky bottom */}
       <div className="border-t border-border pt-4 space-y-3 bg-background sticky bottom-0">
         <Textarea
           readOnly
@@ -381,7 +364,6 @@ function TemplateEditor({
           </Button>
         </div>
 
-        {/* History */}
         {template.history && template.history.length > 0 && (
           <div>
             <button
@@ -421,8 +403,6 @@ function TemplateEditor({
     </div>
   );
 }
-
-/* ── Page ── */
 
 export default function RumorsPage() {
   const [config, setConfig] = useState<RumorsConfig>(loadConfig);
@@ -473,7 +453,6 @@ export default function RumorsPage() {
     }));
   }, []);
 
-  /* ── Template List Panel ── */
   const templateList = (
     <div className="space-y-2">
       {config.templates.map((t) => (
@@ -507,7 +486,6 @@ export default function RumorsPage() {
     </div>
   );
 
-  /* ── Desktop ── */
   const desktopLayout = (
     <div className="hidden md:grid grid-cols-[30%_1fr] gap-4 h-[calc(100vh-8rem)]">
       <div className="overflow-y-auto pr-2 pl-1">
@@ -524,7 +502,6 @@ export default function RumorsPage() {
     </div>
   );
 
-  /* ── Mobile ── */
   const mobileLayout = (
     <div className="md:hidden">
       {mobileView === "list" ? (

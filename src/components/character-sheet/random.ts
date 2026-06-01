@@ -105,7 +105,6 @@ function tripleStatRow2(row: StatRow2): { p: StatRow2; s: StatRow2; a: StatRow2 
   return { p: { ...row }, s: { ...row }, a: { ...row } };
 }
 
-/** Losowy NPC (bez id) — pełna karta wg planu. */
 export function generateRandomNpcSheet(): Omit<SavedNpc, "id"> {
   const base = createEmptyNpc();
   const name = pick(NPC_NAMES);

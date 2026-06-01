@@ -162,8 +162,7 @@ export function AmbientProvider({ children }: { children: ReactNode }) {
   const volumesRef = useRef(volumes);
   useEffect(() => { volumesRef.current = volumes; }, [volumes]);
 
-  // Persistent hidden YT container mounted once in document.body — survives navigation
-  useEffect(() => {
+    useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
     const div = document.createElement("div");
@@ -186,13 +185,13 @@ export function AmbientProvider({ children }: { children: ReactNode }) {
     const a = audioRefs.current[id];
     if (a) a.volume = Math.max(0, Math.min(1, actual0to100 / 100));
     const yt = ytPlayerRefs.current[id];
-    if (yt) try { yt.setVolume?.(Math.max(0, Math.min(100, actual0to100))); } catch { /* ignore */ }
+    if (yt) try { yt.setVolume?.(Math.max(0, Math.min(100, actual0to100))); } catch {}
   };
   const getActualVolume = (id: string): number => {
     const a = audioRefs.current[id];
     if (a) return a.volume * 100;
     const yt = ytPlayerRefs.current[id];
-    if (yt) try { return yt.getVolume?.() ?? 0; } catch { /* ignore */ }
+    if (yt) try { return yt.getVolume?.() ?? 0; } catch {}
     return 0;
   };
   const logicalToActual = (logical: number) => logical * (masterRef.current / 100);
@@ -203,7 +202,7 @@ export function AmbientProvider({ children }: { children: ReactNode }) {
     if (audio) { audio.pause(); audio.currentTime = 0; delete audioRefs.current[id]; }
     const yt = ytPlayerRefs.current[id];
     if (yt) {
-      try { yt.stopVideo?.(); yt.destroy?.(); } catch { /* ignore */ }
+      try { yt.stopVideo?.(); yt.destroy?.(); } catch {}
       delete ytPlayerRefs.current[id];
       document.getElementById(`yt-player-${id}`)?.remove();
     }
@@ -233,10 +232,10 @@ export function AmbientProvider({ children }: { children: ReactNode }) {
           playerVars,
           events: {
             onReady: (e: { target: { setVolume: (v: number) => void; playVideo: () => void; getVolume: () => number } }) => {
-              try { e.target.setVolume(0); } catch { /* ignore */ }
+              try { e.target.setVolume(0); } catch {}
               setPlaying((p) => ({ ...p, [sound.id]: true }));
               fadeTo(
-                { get: () => { try { return e.target.getVolume(); } catch { return 0; } }, set: (v) => { try { e.target.setVolume(v); } catch { /* ignore */ } } },
+                { get: () => { try { return e.target.getVolume(); } catch { return 0; } }, set: (v) => { try { e.target.setVolume(v); } catch {} } },
                 targetActual, FADE_IN_MS,
               );
             },
@@ -287,7 +286,7 @@ export function AmbientProvider({ children }: { children: ReactNode }) {
         const audio = audioRefs.current[id];
         if (audio) audio.pause();
         const yt = ytPlayerRefs.current[id];
-        if (yt) try { yt.pauseVideo?.(); } catch { /* ignore */ }
+        if (yt) try { yt.pauseVideo?.(); } catch {}
         setPlaying((p) => ({ ...p, [id]: false }));
         setPaused((p) => ({ ...p, [id]: true }));
         setFading((f) => ({ ...f, [id]: false }));
@@ -306,9 +305,9 @@ export function AmbientProvider({ children }: { children: ReactNode }) {
     }
     const yt = ytPlayerRefs.current[id];
     if (yt) {
-      try { yt.setVolume?.(0); yt.playVideo?.(); } catch { /* ignore */ }
+      try { yt.setVolume?.(0); yt.playVideo?.(); } catch {}
       fadeTo(
-        { get: () => { try { return yt.getVolume?.() ?? 0; } catch { return 0; } }, set: (v) => { try { yt.setVolume?.(v); } catch { /* ignore */ } } },
+        { get: () => { try { return yt.getVolume?.() ?? 0; } catch { return 0; } }, set: (v) => { try { yt.setVolume?.(v); } catch {} } },
         targetActual, FADE_IN_MS,
       );
     }
@@ -366,15 +365,13 @@ export function AmbientProvider({ children }: { children: ReactNode }) {
     [config.sounds, playing],
   );
 
-  // Persist active loop tracks
   useEffect(() => {
     try {
       const data = playingLayers.map((s) => ({ trackId: s.id, volume: volumes[s.id] ?? s.volume }));
       localStorage.setItem("rpg_ambient_session", JSON.stringify(data));
-    } catch { /* ignore */ }
+    } catch {}
   }, [playingLayers, volumes]);
 
-  // Restore loop tracks on startup
   const restored = useRef(false);
   useEffect(() => {
     if (restored.current) return;
@@ -390,8 +387,8 @@ export function AmbientProvider({ children }: { children: ReactNode }) {
         if (typeof volume === "number") setVolumes((v) => ({ ...v, [trackId]: volume }));
         setTimeout(() => playSound(sound), 50);
       });
-    } catch { /* ignore */ }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    } catch {}
+        // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config.sounds.length]);
 
   return (

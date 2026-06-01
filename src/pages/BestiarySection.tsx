@@ -24,8 +24,6 @@ import { STAT_MAIN_COLUMNS, STAT_SECONDARY_COLUMNS } from "@/lib/gameStatGlossar
 import type { GameStatKey } from "@/lib/gameStatGlossary";
 import { StatAbbrWithTooltip } from "@/components/game/StatAbbrWithTooltip";
 
-/* ── Types ── */
-
 interface MonsterAttack {
   id: string;
   nazwa: string;
@@ -59,8 +57,6 @@ interface BestiaryStore {
 }
 
 const MONSTER_TYPES = ["Zwierz", "Nieumarły", "Demon", "Człowiek", "Stwór", "Zielonoskóry", "Inny"];
-
-/* ── Default monsters ── */
 
 const blankPrimary = () => ({ ww: 25, us: 25, k: 3, odp: 25, zr: 25, int: 20, sw: 20, ogd: 15 });
 const blankSecondary = () => ({ a: 1, zyw: 8, s: 3, wt: 3, sz: 4, mag: 0, po: 0, pp: 0 });
@@ -142,8 +138,6 @@ const DEFAULT_BESTIARY: BestiaryStore = {
   ],
 };
 
-/* ── Helpers ── */
-
 const emptyMonster = (): Monster => ({
   id: crypto.randomUUID(),
   nazwa: "",
@@ -157,8 +151,6 @@ const emptyMonster = (): Monster => ({
   xp: 0,
   lup: [],
 });
-
-/* ── Add-to-combat popover ── */
 
 function AddToCombatDialog({
   monster, open, onClose,
@@ -176,8 +168,7 @@ function AddToCombatDialog({
   if (!monster) return null;
 
   const confirm = () => {
-    const sb = Math.floor(monster.cechyGlowne.k); // K is already SB-like in WFRP2; K = Krzepa (uses K bonus). We use K directly as SB bonus for damage simplicity.
-    const newCombatants = Array.from({ length: count }).map((_, i) => ({
+    const sb = Math.floor(monster.cechyGlowne.k);     const newCombatants = Array.from({ length: count }).map((_, i) => ({
       id: crypto.randomUUID(),
       name: count === 1 ? monster.nazwa : `${monster.nazwa} #${i + 1}`,
       initiative: 0,
@@ -230,8 +221,6 @@ function AddToCombatDialog({
     </Dialog>
   );
 }
-
-/* ── Edit modal ── */
 
 function MonsterModal({
   open, onClose, initial, onSave, lootItems,
@@ -318,7 +307,6 @@ function MonsterModal({
         </DialogHeader>
 
         <div className="space-y-5 py-2">
-          {/* PODSTAWOWE */}
           <section className="space-y-2">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Podstawowe</h3>
             <Input value={draft.nazwa} onChange={(e) => setDraft({ ...draft, nazwa: e.target.value })}
@@ -332,7 +320,6 @@ function MonsterModal({
             </div>
             <Textarea value={draft.opis} onChange={(e) => setDraft({ ...draft, opis: e.target.value })}
               placeholder="Opis / notatki MG (taktyka, zachowanie, fabuła)" className="min-h-[70px] text-sm" />
-            {/* Tags */}
             <div>
               <label className="text-[11px] text-muted-foreground flex items-center gap-1 mb-1">
                 <TagIcon className="h-3 w-3" /> Tagi
@@ -354,7 +341,6 @@ function MonsterModal({
             </div>
           </section>
 
-          {/* CECHY GŁÓWNE */}
           <section className="space-y-2">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cechy główne</h3>
             <div className="grid grid-cols-4 gap-1.5">
@@ -370,7 +356,6 @@ function MonsterModal({
             </div>
           </section>
 
-          {/* CECHY DRUGORZĘDNE */}
           <section className="space-y-2">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cechy drugorzędne</h3>
             <div className="grid grid-cols-4 gap-1.5">
@@ -386,7 +371,6 @@ function MonsterModal({
             </div>
           </section>
 
-          {/* ATAKI */}
           <section className="space-y-2">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Broń i ataki</h3>
@@ -410,7 +394,6 @@ function MonsterModal({
             ))}
           </section>
 
-          {/* ZDOLNOŚCI */}
           <section className="space-y-2">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Zdolności specjalne</h3>
@@ -432,7 +415,6 @@ function MonsterModal({
             ))}
           </section>
 
-          {/* NAGRODY */}
           <section className="space-y-2">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nagrody</h3>
             <div className="grid grid-cols-[auto_1fr] items-center gap-2">
@@ -504,8 +486,6 @@ function Check() {
   return <span className="text-primary text-xs font-bold">✓</span>;
 }
 
-/* ── Main section ── */
-
 export default function BestiarySection() {
   const { lootItems } = useApp();
   const [store, setStore] = useLocalStorage<BestiaryStore>("rpg_bestiary", DEFAULT_BESTIARY);
@@ -516,11 +496,9 @@ export default function BestiarySection() {
   const [modalOpen, setModalOpen] = useState(false);
   const [combatTarget, setCombatTarget] = useState<Monster | null>(null);
 
-  // Combat tracker availability check (it always exists via AppContext, but per spec we read raw key)
-  const combatAvailable = useMemo(() => {
+    const combatAvailable = useMemo(() => {
     try {
-      // AppContext always seeds it; treat presence of the localStorage key OR provider as available
-      return window.localStorage.getItem("magnus-combatants") !== null || true;
+            return window.localStorage.getItem("magnus-combatants") !== null || true;
     } catch {
       return false;
     }
@@ -564,7 +542,6 @@ export default function BestiarySection() {
 
   return (
     <div className="space-y-4">
-      {/* Toolbar — search + filter on left, "+ Nowy" top-right */}
       <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
         <div className="relative flex-1">
           <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -586,7 +563,6 @@ export default function BestiarySection() {
         {filtered.length} / {store.potwory.length} potworów
       </p>
 
-      {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
         {filtered.map((m) => (
           <BestiaryCard
@@ -613,8 +589,6 @@ export default function BestiarySection() {
     </div>
   );
 }
-
-/* ── Card with serif title, click opens drawer ── */
 
 function BestiaryCard({
   monster: m, onEdit, onDelete, combatAvailable, onSendToCombat,

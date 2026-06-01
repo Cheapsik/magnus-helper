@@ -1,11 +1,10 @@
 import type { Combatant } from "@/context/AppContext";
 
-/** Gotowy przeciwnik (preset MG) — rozszerzalny schemat. */
 export interface GmEnemy {
   id: string;
   name: string;
   ww: number;
-  /** Bieżące PŻ; max = hpMax ?? hp (kompatybilność wsteczna). */
+
   hp: number;
   hpMax?: number;
   armor: number;
@@ -59,7 +58,6 @@ function optNum(v: unknown): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
-/** Migracja wpisów z localStorage po rozszerzeniu schematu. */
 export function reviveGmEnemies(parsed: unknown): GmEnemy[] {
   if (!Array.isArray(parsed)) return [];
   return parsed.map((raw) => {

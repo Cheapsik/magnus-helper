@@ -13,8 +13,6 @@ import type { StatRow, StatRow2 } from "@/components/character-sheet/types";
 import { STAT_MAIN, STAT_SECONDARY } from "@/components/character-sheet/constants";
 import { StatTable } from "@/components/character-sheet/sub/StatTable";
 
-/* ──────────────────────── Typy ──────────────────────── */
-
 interface Bron { id: string; nazwa: string; obc: string; kategoria: string; sila: string; zasieg: string; przeladowanie: string; cechy: string; }
 interface PancerzProsty { id: string; typ: string; pz: string; }
 interface PancerzZlozony { id: string; typ: string; obc: string; lokacja: string; pz: string; }
@@ -40,8 +38,6 @@ interface Hero {
   pieniadze: { zk: string; s: string; p: string; };
   wyposazenie: Wyposazenie[];
 }
-
-/* ──────────────────────── Stałe ──────────────────────── */
 
 const DEFAULT_BASIC_SKILLS = [
   "Charakteryzacja", "Dowodzenie", "Hazard", "Jeździectwo", "Mocna głowa",
@@ -205,8 +201,6 @@ export default function HeroesPage() {
   );
 }
 
-/* ──────────────────────── Karta bohatera ──────────────────────── */
-
 function HeroSheet({
   hero,
   onBack,
@@ -222,10 +216,8 @@ function HeroSheet({
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFirstRender = useRef(true);
 
-  // Sync if external hero changes (id switch)
   useEffect(() => { setDraft(hero); }, [hero.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Debounced save
   useEffect(() => {
     if (isFirstRender.current) { isFirstRender.current = false; return; }
     if (saveTimer.current) clearTimeout(saveTimer.current);
@@ -237,7 +229,6 @@ function HeroSheet({
 
   return (
     <div className="paper-sheet animate-fade-in">
-      {/* Top bar */}
       <div className="paper-topbar flex flex-wrap items-center gap-2">
         <button type="button" onClick={onBack} className="paper-back-btn min-h-[44px]">
           <ArrowLeft className="h-4 w-4" /> Wróć do listy
@@ -249,7 +240,6 @@ function HeroSheet({
       </div>
 
       <div className="paper-grid">
-        {/* 1. BOHATER */}
         <Section title="BOHATER">
           <PaperField label="Imię" value={draft.daneOgolne.imie} onChange={(v) => update("daneOgolne", { ...draft.daneOgolne, imie: v })} />
           <PaperField label="Rasa" value={draft.daneOgolne.rasa} onChange={(v) => update("daneOgolne", { ...draft.daneOgolne, rasa: v })} />
@@ -257,7 +247,6 @@ function HeroSheet({
           <PaperField label="Poprzednia profesja" value={draft.daneOgolne.poprzedniaProfesja} onChange={(v) => update("daneOgolne", { ...draft.daneOgolne, poprzedniaProfesja: v })} />
         </Section>
 
-        {/* 2. OPIS */}
         <Section title="OPIS BOHATERA">
           <div className="paper-field-grid">
             <PaperField label="Wiek" value={draft.opis.wiek} onChange={(v) => update("opis", { ...draft.opis, wiek: v })} />
@@ -273,7 +262,6 @@ function HeroSheet({
           </div>
         </Section>
 
-        {/* 3. CECHY GŁÓWNE */}
         <Section title="CECHY GŁÓWNE" wide>
           <StatTable
             cols={STAT_MAIN}
@@ -284,7 +272,6 @@ function HeroSheet({
           />
         </Section>
 
-        {/* 4. CECHY DRUGORZĘDNE */}
         <Section title="CECHY DRUGORZĘDNE" wide>
           <StatTable
             cols={STAT_SECONDARY}
@@ -295,7 +282,6 @@ function HeroSheet({
           />
         </Section>
 
-        {/* 5. XP / RUCH / PUNKTY ZBROI */}
         <Section title="DOŚWIADCZENIE · RUCH · PUNKTY ZBROI" wide>
           <div className="paper-three-col">
             <div className="paper-subbox">
@@ -319,7 +305,6 @@ function HeroSheet({
           </div>
         </Section>
 
-        {/* 6. BROŃ */}
         <Section title="BROŃ" wide>
           <DynTable
             headers={["Nazwa", "Obc.", "Kategoria", "Siła broni", "Zasięg", "Przeład.", "Cechy oręża"]}
@@ -331,7 +316,6 @@ function HeroSheet({
           />
         </Section>
 
-        {/* 7. PANCERZ */}
         <Section title="PANCERZ" wide>
           <h4 className="paper-subhead">Opancerzenie proste</h4>
           <DynTable
@@ -353,7 +337,6 @@ function HeroSheet({
           />
         </Section>
 
-        {/* 8. UMIEJĘTNOŚCI */}
         <Section title="UMIEJĘTNOŚCI" wide>
           <div className="paper-skills-grid">
             <div>
@@ -375,7 +358,6 @@ function HeroSheet({
           </div>
         </Section>
 
-        {/* 9. ZDOLNOŚCI */}
         <Section title="ZDOLNOŚCI" wide>
           <DynTable
             headers={["Zdolność", "Opis"]}
@@ -387,7 +369,6 @@ function HeroSheet({
           />
         </Section>
 
-        {/* 10. PIENIĄDZE I WYPOSAŻENIE */}
         <Section title="PIENIĄDZE I WYPOSAŻENIE" wide>
           <div className="paper-money">
             <PaperField label="Złote korony (zk)" value={draft.pieniadze.zk} onChange={(v) => update("pieniadze", { ...draft.pieniadze, zk: v })} numeric />
@@ -408,8 +389,6 @@ function HeroSheet({
     </div>
   );
 }
-
-/* ──────────────────────── Komponenty pomocnicze ──────────────────────── */
 
 function Section({ title, children, wide }: { title: string; children: React.ReactNode; wide?: boolean }) {
   return (
@@ -568,8 +547,6 @@ function SkillsTable({
   );
 }
 
-/* ──────────────────────── Body silhouette (Punkty zbroi) ──────────────────────── */
-
 function BodyArmor({
   values,
   onChange,
@@ -602,16 +579,11 @@ function BodyArmor({
     <div className="armor-diagram">
       <div className="armor-figure" aria-hidden="true">
         <svg viewBox="0 0 100 200" preserveAspectRatio="xMidYMid meet">
-          {/* Głowa */}
           <circle cx="50" cy="20" r="13" fill="none" stroke="#1a1a1a" strokeWidth="1.5" />
-          {/* Szyja */}
           <line x1="50" y1="33" x2="50" y2="40" stroke="#1a1a1a" strokeWidth="1.5" />
-          {/* Tułów */}
           <path d="M30 42 L70 42 L66 110 L34 110 Z" fill="none" stroke="#1a1a1a" strokeWidth="1.5" />
-          {/* Ręce */}
           <path d="M30 44 L18 90 L22 120 L28 120 L26 92 L34 60" fill="none" stroke="#1a1a1a" strokeWidth="1.5" />
           <path d="M70 44 L82 90 L78 120 L72 120 L74 92 L66 60" fill="none" stroke="#1a1a1a" strokeWidth="1.5" />
-          {/* Nogi */}
           <path d="M36 110 L32 185 L42 185 L46 110" fill="none" stroke="#1a1a1a" strokeWidth="1.5" />
           <path d="M64 110 L68 185 L58 185 L54 110" fill="none" stroke="#1a1a1a" strokeWidth="1.5" />
         </svg>

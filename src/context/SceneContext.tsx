@@ -79,7 +79,7 @@ export function SceneProvider({ children }: { children: ReactNode }) {
         });
       }, 900);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scenes, setScenes, ambient.config.sounds, ambient.playing]);
 
   const deactivateScene = useCallback(() => {
@@ -93,7 +93,7 @@ export function SceneProvider({ children }: { children: ReactNode }) {
         }
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scenes, setScenes]);
 
   return (

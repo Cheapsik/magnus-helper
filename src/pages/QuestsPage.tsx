@@ -36,8 +36,6 @@ import { toast } from "sonner";
 import { getNpcDisplayName, NpcQuickPreview } from "@/components/character-sheet";
 import { MentionTextarea } from "@/components/mention/MentionTextarea";
 
-/* ────────────────────────────────────────────── Layout config (types + columns) */
-
 const STORAGE_QUEST_LAYOUT = "rpg_quests_layout";
 const STORAGE_QUESTS = "rpg_quests";
 const STORAGE_CARD_COLLAPSED = "rpg_quests_card_collapsed";
@@ -53,7 +51,7 @@ interface QuestColumnConfig {
   id: string;
   label: string;
   emoji: string;
-  /** Hex color e.g. #ef4444 — drives header + column tint */
+
   color: string;
 }
 
@@ -79,8 +77,6 @@ const DEFAULT_QUEST_LAYOUT: QuestsLayoutConfig = {
     { id: "zamkniete", label: "Zamknięte", emoji: "📁", color: "#6b7280" },
   ],
 };
-
-/* ────────────────────────────────────────────── Quest state */
 
 interface Quest {
   id: string;
@@ -182,7 +178,7 @@ const defaultColById = Object.fromEntries(DEFAULT_QUEST_LAYOUT.columns.map((c) =
   string,
   QuestColumnConfig
 >;
-/** Legacy column id from older installs */
+
 const LEGACY_COL_FALLBACK: Record<string, Pick<QuestColumnConfig, "label" | "color" | "emoji">> = {
   gorace: { label: "Gorące", emoji: "🔥", color: "#ef4444" },
 };
@@ -252,8 +248,6 @@ function loadNormalizedLayoutFromStorage(): QuestsLayoutConfig {
   }
 }
 
-/* ────────────────────────────────────────────── Column chrome (color-mix) */
-
 function columnChromeStyles(hex: string): CSSProperties {
   const c = ensureHexColor(hex, "#6b7280");
   return {
@@ -272,8 +266,6 @@ function columnHeaderStyles(hex: string): CSSProperties {
   };
 }
 
-/* ────────────────────────────────────────────── Fine pointer */
-
 function useFinePointer() {
   const [fine, setFine] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(hover: hover) and (pointer: fine)").matches,
@@ -286,8 +278,6 @@ function useFinePointer() {
   }, []);
   return fine;
 }
-
-/* ────────────────────────────────────────────── Corner ribbon (type accent) */
 
 function TypeCornerRibbon({ color }: { color: string }) {
   return (
@@ -302,8 +292,6 @@ function TypeCornerRibbon({ color }: { color: string }) {
     </div>
   );
 }
-
-/* ────────────────────────────────────────────── Quest Card */
 
 interface QuestCardProps {
   quest: Quest;
@@ -419,7 +407,6 @@ function QuestCard({
       <TypeCornerRibbon color={accent} />
 
       <CardContent className="relative z-[3] space-y-2 p-3">
-        {/* Header — title row; collapse overlaps corner ribbon */}
         <div className="relative min-h-[2rem] pr-1 pt-0.5">
           {bodyCollapsed ? (
             <div className="pr-10">
@@ -700,8 +687,6 @@ function QuestCard({
   );
 }
 
-/* ────────────────────────────────────────────── Slug ids */
-
 function uniqueSlug(baseRaw: string, existing: Set<string>): string {
   const base =
     baseRaw
@@ -734,8 +719,6 @@ function validateLayoutDraft(d: QuestsLayoutConfig): string | null {
   return null;
 }
 
-/* ────────────────────────────────────────────── Page */
-
 export default function QuestsPage() {
   const { savedNpcs } = useApp();
   const finePointer = useFinePointer();
@@ -767,7 +750,7 @@ export default function QuestsPage() {
     try {
       window.localStorage.setItem(STORAGE_QUESTS, JSON.stringify(state));
     } catch {
-      /* ignore quota / private mode */
+
     }
   }, [state]);
 
@@ -943,8 +926,6 @@ export default function QuestsPage() {
     },
     [setCardCollapsedMap],
   );
-
-  /* ── Config: types / columns ── */
 
   const typeUsage = useMemo(() => {
     const m: Record<string, number> = {};
@@ -1163,7 +1144,6 @@ export default function QuestsPage() {
         </div>
       )}
 
-      {/* Layout config */}
       <Dialog
         open={configOpen}
         onOpenChange={(open) => {
@@ -1338,7 +1318,6 @@ export default function QuestsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Create modal */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -1421,7 +1400,6 @@ export default function QuestsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* NPC drawer */}
       <Sheet open={!!openNpcId} onOpenChange={(v) => !v && setOpenNpcId(null)}>
         <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
           <SheetHeader>
