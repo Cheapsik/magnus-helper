@@ -38,6 +38,7 @@ import ScenePage from "@/pages/ScenePage";
 import SettingsPage from "@/components/settings/SettingsPage";
 import AuthPage from "@/pages/AuthPage";
 import { getRouterBasename } from "@/lib/authUrls";
+import RelationsMapPage from "./pages/RelationsMapPage";
 
 function ProtectedApp() {
   return (
@@ -57,6 +58,7 @@ function ProtectedApp() {
           <Route path="/loot" element={<LootGeneratorPage />} />
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/notes" element={<SessionNotesPage />} />
+          <Route path="/relations" element={<RelationsMapPage />} />
           <Route path="/gm-toolbox" element={<GmToolboxPage />} />
           <Route path="/npcs" element={<NpcManagerPage />} />
           <Route path="/heroes" element={<HeroesPage />} />

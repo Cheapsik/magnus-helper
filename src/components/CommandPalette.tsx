@@ -8,6 +8,7 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 import {
   Home, Dice5, Target, BookOpen, Swords, User, Activity, Package, StickyNote, Wrench,
   Users, Gem, Timer, MessageSquare, Music, Network, ScrollText, Skull, BarChart3, MapPin,
+  Waypoints,
 } from "lucide-react";
 import { useEntityDrawer } from "./EntityDrawer";
 import type { SavedNpc } from "@/context/AppContext";
@@ -56,6 +57,7 @@ const ROUTES = [
   { path: "/rumors", label: "Plotki", icon: MessageSquare },
   { path: "/ambient", label: "Ambient", icon: Music },
   { path: "/gm-toolbox", label: "Skrzynka MG", icon: Wrench },
+  { path: "/relations", label: "Mapa relacji", icon: Waypoints },
 ];
 
 function getSavedNpcName(npc: SavedNpc) {

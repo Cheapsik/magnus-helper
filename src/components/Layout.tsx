@@ -5,6 +5,7 @@ import {
   Swords, User, BarChart3, Activity, Package, StickyNote, Wrench, Users, Gem, Timer, MessageSquare, Music, Network, ScrollText,
   Drama, KeyRound, MapPin, Settings as SettingsIcon, LogOut,
   type LucideIcon,
+  Waypoints,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useScene } from "@/context/SceneContext";
@@ -66,6 +67,7 @@ const SIDEBAR_GROUPS: { label: string; items: { path: string; label: string; ico
     label: "MG",
     items: [
       { path: "/gm-toolbox", label: "Skrzynka MG", icon: Wrench },
+      { path: "/relations", label: "Mapa relacji", icon: Waypoints },
       { path: "/loot", label: "Generator łupu", icon: Gem },
       { path: "/rumors", label: "Plotki", icon: MessageSquare },
       { path: "/ambient", label: "Ambient", icon: Music },
