@@ -5,13 +5,14 @@ import { useApp } from "@/context/AppContext";
 import { useScene } from "@/context/SceneContext";
 import { cn } from "@/lib/utils";
 import { StatAbbrWithTooltip, StatAbbrFromCharacterStat } from "@/components/game/StatAbbrWithTooltip";
+import { getStorageKey } from "@/lib/campaignStorage";
 
 interface QuestLite { id: string; title: string; column: string; type: string; updatedAt: string; }
 interface TimerLite { id: string; label: string; mode: "stopwatch" | "countdown"; countdownSet: number; }
 
 function readJson<T>(key: string, fallback: T): T {
   try {
-    const raw = localStorage.getItem(key);
+    const raw = localStorage.getItem(getStorageKey(key));
     return raw ? (JSON.parse(raw) as T) : fallback;
   } catch {
     return fallback;

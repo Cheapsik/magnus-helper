@@ -35,6 +35,7 @@ import { EmojiPickerButton } from "@/components/emoji/EmojiPickerButton";
 import { toast } from "sonner";
 import { getNpcDisplayName, NpcQuickPreview } from "@/components/character-sheet";
 import { MentionTextarea } from "@/components/mention/MentionTextarea";
+import { getStorageKey } from "@/lib/campaignStorage";
 
 const STORAGE_QUEST_LAYOUT = "rpg_quests_layout";
 const STORAGE_QUESTS = "rpg_quests";
@@ -163,7 +164,7 @@ function repairQuestsState(raw: QuestsState, layout: QuestsLayoutConfig): Quests
 
 function readQuestsStateFromStorage(layout: QuestsLayoutConfig): QuestsState | null {
   try {
-    const item = window.localStorage.getItem(STORAGE_QUESTS);
+    const item = window.localStorage.getItem(getStorageKey(STORAGE_QUESTS));
     if (!item) return null;
     const parsed = JSON.parse(item) as QuestsState;
     if (!parsed?.quests || !parsed?.order) return null;
@@ -239,7 +240,7 @@ function normalizeQuestsLayout(raw: QuestsLayoutConfig): QuestsLayoutConfig {
 
 function loadNormalizedLayoutFromStorage(): QuestsLayoutConfig {
   try {
-    const item = window.localStorage.getItem(STORAGE_QUEST_LAYOUT);
+    const item = window.localStorage.getItem(getStorageKey(STORAGE_QUEST_LAYOUT));
     if (!item) return normalizeQuestsLayout(DEFAULT_QUEST_LAYOUT);
     const parsed = JSON.parse(item) as QuestsLayoutConfig;
     return normalizeQuestsLayout(parsed);
@@ -748,7 +749,7 @@ export default function QuestsPage() {
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(STORAGE_QUESTS, JSON.stringify(state));
+      window.localStorage.setItem(getStorageKey(STORAGE_QUESTS), JSON.stringify(state));
     } catch {
 
     }

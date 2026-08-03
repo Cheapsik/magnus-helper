@@ -9,6 +9,7 @@ import { SceneProvider } from "@/context/SceneContext";
 import { DrawerProvider } from "@/context/DrawerContext";
 import { CommandPaletteProvider } from "@/context/CommandPaletteContext";
 import { SettingsProvider } from "@/context/SettingsContext";
+import { CampaignProvider } from "@/context/CampaignContext";
 import { AuthProvider } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
 import { AuthGuard } from "@/components/AuthGuard";
@@ -81,27 +82,29 @@ const App = () => (
     <SettingsProvider>
       <TooltipProvider>
         <Toaster />
-        <AppProvider>
-          <AmbientProvider>
-            <SceneProvider>
-              <ModeProvider>
-                <DrawerProvider>
-                  <CommandPaletteProvider>
-                    <BrowserRouter basename={getRouterBasename()}>
-                      <AuthProvider>
-                        <Routes>
-                          <Route path="/auth" element={<AuthPage />} />
-                          <Route path="/reset-password" element={<AuthPage />} />
-                          <Route path="/*" element={<ProtectedApp />} />
-                        </Routes>
-                      </AuthProvider>
-                    </BrowserRouter>
-                  </CommandPaletteProvider>
-                </DrawerProvider>
-              </ModeProvider>
-            </SceneProvider>
-          </AmbientProvider>
-        </AppProvider>
+        <CampaignProvider>
+          <AppProvider>
+            <AmbientProvider>
+              <SceneProvider>
+                <ModeProvider>
+                  <DrawerProvider>
+                    <CommandPaletteProvider>
+                      <BrowserRouter basename={getRouterBasename()}>
+                        <AuthProvider>
+                          <Routes>
+                            <Route path="/auth" element={<AuthPage />} />
+                            <Route path="/reset-password" element={<AuthPage />} />
+                            <Route path="/*" element={<ProtectedApp />} />
+                          </Routes>
+                        </AuthProvider>
+                      </BrowserRouter>
+                    </CommandPaletteProvider>
+                  </DrawerProvider>
+                </ModeProvider>
+              </SceneProvider>
+            </AmbientProvider>
+          </AppProvider>
+        </CampaignProvider>
       </TooltipProvider>
     </SettingsProvider>
   </ThemeProvider>

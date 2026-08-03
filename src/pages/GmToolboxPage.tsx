@@ -44,6 +44,7 @@ import type { DiceRoll } from "@/lib/dice";
 import { formatTimerMs } from "@/lib/rpgTimersStorage";
 import { appendQuestToStorage, type QuestLayoutRaw } from "@/lib/gmAppendQuest";
 import { useGmTimersMirror } from "@/hooks/useGmTimersMirror";
+import { getStorageKey } from "@/lib/campaignStorage";
 
 const SESSION_NOTES_KEY = "mg_session_notes";
 
@@ -144,7 +145,7 @@ export default function GmToolboxPage() {
 
   const [sessionNotes, setSessionNotes] = useState(() => {
     try {
-      return localStorage.getItem(SESSION_NOTES_KEY) ?? "";
+      return localStorage.getItem(getStorageKey(SESSION_NOTES_KEY)) ?? "";
     } catch {
       return "";
     }
@@ -156,7 +157,7 @@ export default function GmToolboxPage() {
     if (notesDebounce.current) clearTimeout(notesDebounce.current);
     notesDebounce.current = setTimeout(() => {
       try {
-        localStorage.setItem(SESSION_NOTES_KEY, sessionNotes);
+        localStorage.setItem(getStorageKey(SESSION_NOTES_KEY), sessionNotes);
         setNotesSaved(true);
         window.setTimeout(() => setNotesSaved(false), 2000);
       } catch {
@@ -216,7 +217,7 @@ export default function GmToolboxPage() {
   const openQuestModal = () => {
     let layout: QuestLayoutRaw = {};
     try {
-      const raw = localStorage.getItem("rpg_quests_layout");
+      const raw = localStorage.getItem(getStorageKey("rpg_quests_layout"));
       if (raw) layout = JSON.parse(raw) as QuestLayoutRaw;
     } catch {
       layout = {};

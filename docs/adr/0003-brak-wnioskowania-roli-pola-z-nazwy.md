@@ -1,0 +1,3 @@
+# Znaczenie pola karty nadaje wyłącznie MG — brak wnioskowania po nazwie
+
+Karty są w pełni definiowane przez MG w ramach kampanii, z dowolnymi nazwami sekcji i pól. Zdecydowano, że Magnus nigdy nie próbuje odgadywać znaczenia (roli) pola na podstawie jego nazwy — np. pole nazwane przez MG "Silność" nie jest automatycznie traktowane jako odpowiednik jakiejkolwiek cechy znanej Magnusowi. Zamiast tego MG opcjonalnie i świadomie przypisuje polu rolę wykorzystywaną przez wspólne narzędzia Magnusa (np. zdrowie, inicjatywa, wartość testowa); pola bez przypisanej roli pozostają pełnoprawną częścią karty. Decyzja ta chroni neutralność narzędzia wobec komercyjnych systemów RPG i zapobiega ukrytym założeniom o cudzej mechanice wynikającym z dopasowywania nazw.

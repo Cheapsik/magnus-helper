@@ -1,4 +1,5 @@
 import type { DrawerEntityType } from "@/context/DrawerContext";
+import { getStorageKey } from "@/lib/campaignStorage";
 
 export interface SearchResultItem {
   id: string;
@@ -20,7 +21,7 @@ export interface SearchGroup {
 function parseJson<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
   try {
-    const raw = window.localStorage.getItem(key);
+    const raw = window.localStorage.getItem(getStorageKey(key));
     if (!raw) return fallback;
     return JSON.parse(raw) as T;
   } catch {

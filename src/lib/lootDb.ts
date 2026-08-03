@@ -1,3 +1,5 @@
+import { getStorageKey } from "@/lib/campaignStorage";
+
 const RPG_ITEMS_KEY = "rpg_items_db";
 const RPG_LOOT_KEY = "rpg_loot_config";
 
@@ -79,7 +81,7 @@ export function normalizeLootDbItem(raw: unknown, defaultCurrency: string): Loot
 function migrateLegacyLootItemsIfNeeded(): void {
   let raw: string | null;
   try {
-    raw = localStorage.getItem(RPG_LOOT_KEY);
+    raw = localStorage.getItem(getStorageKey(RPG_LOOT_KEY));
   } catch {
     return;
   }
@@ -103,7 +105,7 @@ function migrateLegacyLootItemsIfNeeded(): void {
 
   let existing: LootDbItem[] = [];
   try {
-    const itemsRaw = localStorage.getItem(RPG_ITEMS_KEY);
+    const itemsRaw = localStorage.getItem(getStorageKey(RPG_ITEMS_KEY));
     if (itemsRaw) {
       const parsed = JSON.parse(itemsRaw) as unknown[];
       if (Array.isArray(parsed)) {
@@ -130,14 +132,14 @@ function migrateLegacyLootItemsIfNeeded(): void {
   }
 
   try {
-    localStorage.setItem(RPG_ITEMS_KEY, JSON.stringify(existing));
+    localStorage.setItem(getStorageKey(RPG_ITEMS_KEY), JSON.stringify(existing));
   } catch {
     void 0;
   }
 
   const { items: _removed, ...rest } = loot;
   try {
-    localStorage.setItem(RPG_LOOT_KEY, JSON.stringify(rest));
+    localStorage.setItem(getStorageKey(RPG_LOOT_KEY), JSON.stringify(rest));
   } catch {
     void 0;
   }
@@ -146,7 +148,7 @@ function migrateLegacyLootItemsIfNeeded(): void {
 function migrateItemsDbPolishKeysIfNeeded(): void {
   let raw: string | null;
   try {
-    raw = localStorage.getItem(RPG_ITEMS_KEY);
+    raw = localStorage.getItem(getStorageKey(RPG_ITEMS_KEY));
   } catch {
     return;
   }
@@ -176,7 +178,7 @@ function migrateItemsDbPolishKeysIfNeeded(): void {
     };
   }).filter((x) => x.id && x.name);
   try {
-    localStorage.setItem(RPG_ITEMS_KEY, JSON.stringify(converted));
+    localStorage.setItem(getStorageKey(RPG_ITEMS_KEY), JSON.stringify(converted));
   } catch {
     void 0;
   }
@@ -185,7 +187,7 @@ function migrateItemsDbPolishKeysIfNeeded(): void {
 function migrateLootConfigCurrencyKey(): void {
   let raw: string | null;
   try {
-    raw = localStorage.getItem(RPG_LOOT_KEY);
+    raw = localStorage.getItem(getStorageKey(RPG_LOOT_KEY));
   } catch {
     return;
   }
@@ -195,7 +197,7 @@ function migrateLootConfigCurrencyKey(): void {
     if (typeof o["itemWaluta"] === "string" && typeof o.itemCurrency !== "string") {
       o.itemCurrency = o["itemWaluta"];
       delete o["itemWaluta"];
-      localStorage.setItem(RPG_LOOT_KEY, JSON.stringify(o));
+      localStorage.setItem(getStorageKey(RPG_LOOT_KEY), JSON.stringify(o));
     }
   } catch {
     void 0;
@@ -205,7 +207,7 @@ function migrateLootConfigCurrencyKey(): void {
 function seedDefaultLootItemsIfEmpty(): void {
   let raw: string | null;
   try {
-    raw = localStorage.getItem(RPG_ITEMS_KEY);
+    raw = localStorage.getItem(getStorageKey(RPG_ITEMS_KEY));
   } catch {
     return;
   }
@@ -220,7 +222,7 @@ function seedDefaultLootItemsIfEmpty(): void {
   }
   if (items.length > 0) return;
   try {
-    localStorage.setItem(RPG_ITEMS_KEY, JSON.stringify(DEFAULT_LOOT_DB_ITEMS));
+    localStorage.setItem(getStorageKey(RPG_ITEMS_KEY), JSON.stringify(DEFAULT_LOOT_DB_ITEMS));
   } catch {
     void 0;
   }
