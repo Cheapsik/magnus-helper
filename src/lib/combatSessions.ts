@@ -1,4 +1,5 @@
 import type { ActiveCondition, Combatant } from "@/context/AppContext";
+import { getStorageKey } from "@/lib/campaignStorage";
 
 export const COMBAT_SESSIONS_STORAGE_KEY = "rpg_combat_sessions";
 export const MAX_COMBAT_FIGHTS = 6;
@@ -121,16 +122,16 @@ function normalizePreset(raw: unknown): CombatPreset | null {
 function migrateFromLegacyStorage(): CombatSessionsState | null {
   if (typeof window === "undefined") return null;
   const hasLegacy =
-    window.localStorage.getItem(LEGACY_COMBATANTS_KEY) !== null ||
-    window.localStorage.getItem(LEGACY_ROUND_KEY) !== null ||
-    window.localStorage.getItem(LEGACY_TURN_KEY) !== null;
+    window.localStorage.getItem(getStorageKey(LEGACY_COMBATANTS_KEY)) !== null ||
+    window.localStorage.getItem(getStorageKey(LEGACY_ROUND_KEY)) !== null ||
+    window.localStorage.getItem(getStorageKey(LEGACY_TURN_KEY)) !== null;
 
   if (!hasLegacy) return null;
 
-  const combatants = normalizeCombatantList(readLegacyJson(LEGACY_COMBATANTS_KEY, []));
-  const combatRound = Math.max(1, readLegacyJson(LEGACY_ROUND_KEY, 1));
-  const combatTurn = Math.max(0, readLegacyJson(LEGACY_TURN_KEY, 0));
-  const conditions = normalizeConditions(readLegacyJson(LEGACY_CONDITIONS_KEY, []));
+  const combatants = normalizeCombatantList(readLegacyJson(getStorageKey(LEGACY_COMBATANTS_KEY), []));
+  const combatRound = Math.max(1, readLegacyJson(getStorageKey(LEGACY_ROUND_KEY), 1));
+  const combatTurn = Math.max(0, readLegacyJson(getStorageKey(LEGACY_TURN_KEY), 0));
+  const conditions = normalizeConditions(readLegacyJson(getStorageKey(LEGACY_CONDITIONS_KEY), []));
 
   const fightId = crypto.randomUUID();
   return {
@@ -182,7 +183,7 @@ export function readCombatSessionsFromStorage(
 ): CombatSessionsState {
   if (typeof window === "undefined") return createDefaultSessions(fallbackCombatants);
   try {
-    const item = window.localStorage.getItem(COMBAT_SESSIONS_STORAGE_KEY);
+    const item = window.localStorage.getItem(getStorageKey(COMBAT_SESSIONS_STORAGE_KEY));
     if (item) return reviveCombatSessions(JSON.parse(item));
   } catch {
   }

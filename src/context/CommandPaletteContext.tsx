@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { DrawerEntityType } from "@/context/DrawerContext";
+import { getStorageKey } from "@/lib/campaignStorage";
 
 const RECENT_ITEMS_KEY = "rpg_recent_items";
 const MAX_RECENT_ITEMS = 10;
@@ -26,7 +27,7 @@ function readRecentItems(): RecentItem[] {
     return [];
   }
   try {
-    const raw = window.localStorage.getItem(RECENT_ITEMS_KEY);
+    const raw = window.localStorage.getItem(getStorageKey(RECENT_ITEMS_KEY));
     if (!raw) {
       return [];
     }
@@ -60,7 +61,7 @@ export function CommandPaletteProvider({ children }: { children: ReactNode }) {
       const withoutDuplicate = prev.filter((entry) => !(entry.id === item.id && entry.type === item.type));
       const next = [{ ...item, updatedAt: now }, ...withoutDuplicate].slice(0, MAX_RECENT_ITEMS);
       if (typeof window !== "undefined") {
-        window.localStorage.setItem(RECENT_ITEMS_KEY, JSON.stringify(next));
+        window.localStorage.setItem(getStorageKey(RECENT_ITEMS_KEY), JSON.stringify(next));
       }
       return next;
     });

@@ -8,6 +8,7 @@ import {
   Copy, Check, Dice5, Pencil,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getStorageKey } from "@/lib/campaignStorage";
 
 interface RumorSegment {
   id: string;
@@ -63,7 +64,7 @@ const STORAGE_KEY = "rpg_rumors_config";
 
 function loadConfig(): RumorsConfig {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(getStorageKey(STORAGE_KEY));
     if (raw) return JSON.parse(raw);
   } catch {
     return DEFAULT_CONFIG;
@@ -72,7 +73,7 @@ function loadConfig(): RumorsConfig {
 }
 
 function saveConfig(cfg: RumorsConfig) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+  localStorage.setItem(getStorageKey(STORAGE_KEY), JSON.stringify(cfg));
 }
 
 function pickRandom<T>(arr: T[]): T {

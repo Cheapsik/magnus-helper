@@ -1,5 +1,6 @@
 import { Settings as SettingsIcon } from "lucide-react";
 import ThemeSelector from "./ThemeSelector";
+import CampaignManager from "./CampaignManager";
 import DataManager from "./DataManager";
 
 export default function SettingsPage() {
@@ -10,6 +11,8 @@ export default function SettingsPage() {
         <h1 className="font-app-brand text-2xl tracking-wide text-foreground">Ustawienia</h1>
       </header>
 
+      <CampaignManager />
+      <div className="h-px bg-border" />
       <ThemeSelector />
       <div className="h-px bg-border" />
       <DataManager />

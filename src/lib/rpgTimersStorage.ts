@@ -1,4 +1,4 @@
-
+import { getStorageKey } from "@/lib/campaignStorage";
 
 export interface TimerData {
   id: string;
@@ -33,7 +33,7 @@ export function formatTimerMs(ms: number): string {
 
 export function loadTimersFromStorage(): TimerData[] {
   try {
-    const raw = localStorage.getItem(RPG_TIMERS_STORAGE_KEY);
+    const raw = localStorage.getItem(getStorageKey(RPG_TIMERS_STORAGE_KEY));
     if (!raw) return [];
     const parsed = JSON.parse(raw) as TimerData[];
     return Array.isArray(parsed) ? parsed : [];
@@ -45,7 +45,7 @@ export function loadTimersFromStorage(): TimerData[] {
 export function saveTimersToStorage(timers: TimerRuntime[]): void {
   try {
     localStorage.setItem(
-      RPG_TIMERS_STORAGE_KEY,
+      getStorageKey(RPG_TIMERS_STORAGE_KEY),
       JSON.stringify(
         timers.map((t) => ({
           id: t.id,

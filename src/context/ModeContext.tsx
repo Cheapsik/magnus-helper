@@ -12,7 +12,7 @@ interface ModeContextType {
 const ModeContext = createContext<ModeContextType | null>(null);
 
 export function ModeProvider({ children }: { children: ReactNode }) {
-  const [mode, setMode] = useLocalStorage<AppMode>("rpg_mode", "gm");
+  const [mode, setMode] = useLocalStorage<AppMode>("rpg_mode", "gm", { global: true });
   return (
     <ModeContext.Provider value={{ mode, setMode, toggle: () => setMode(mode === "gm" ? "player" : "gm") }}>
       {children}

@@ -8,6 +8,7 @@ import {
   ThemeDefinition,
   ThemeId,
 } from "@/types/settings";
+import { isNamespacedKey } from "@/lib/campaignStorage";
 
 function hexToHsl(hex: string): { h: number; s: number; l: number } {
   const m = hex.trim().replace(/^#/, "");
@@ -85,7 +86,8 @@ const APP_DATA_PREFIXES = ["magnus_", "rpg_"] as const;
 
 function isAppDataKey(key: string): boolean {
   if (SETTINGS_KEYS_TO_PRESERVE.has(key)) return false;
-  return APP_DATA_PREFIXES.some((p) => key.startsWith(p));
+  // isNamespacedKey covers all per-campaign keys (Decyzja 2: pełna izolacja).
+  return isNamespacedKey(key) || APP_DATA_PREFIXES.some((p) => key.startsWith(p));
 }
 
 function collectAppDataKeys(): string[] {

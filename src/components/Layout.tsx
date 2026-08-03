@@ -16,6 +16,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useMode, isVisibleInMode } from "@/context/ModeContext";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import StatusBar from "@/components/StatusBar";
+import CampaignSwitcher from "@/components/CampaignSwitcher";
 import Logo from "./Logo";
 
 const SIDEBAR_MIN_WIDTH = 200;
@@ -91,6 +92,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const [storedWidth, setStoredWidth] = useLocalStorage<number>(
     SIDEBAR_WIDTH_STORAGE_KEY,
     SIDEBAR_DEFAULT_WIDTH,
+    { global: true },
   );
   const [sidebarWidth, setSidebarWidth] = useState<number>(() => clampSidebarWidth(storedWidth));
   const [isResizing, setIsResizing] = useState(false);
@@ -299,6 +301,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               >
                 <Search className="h-4 w-4" />
               </button>
+              <CampaignSwitcher className="!px-2" />
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
@@ -340,6 +343,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             </kbd>
           </button>
           <div className="flex items-center gap-2">
+            <CampaignSwitcher />
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link

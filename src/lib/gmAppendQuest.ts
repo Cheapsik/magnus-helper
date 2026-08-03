@@ -1,4 +1,4 @@
-
+import { getStorageKey } from "@/lib/campaignStorage";
 
 const STORAGE_QUESTS = "rpg_quests";
 const STORAGE_QUEST_LAYOUT = "rpg_quests_layout";
@@ -42,7 +42,7 @@ interface QuestsState {
 
 function readLayout(): QuestLayoutRaw {
   try {
-    const raw = localStorage.getItem(STORAGE_QUEST_LAYOUT);
+    const raw = localStorage.getItem(getStorageKey(STORAGE_QUEST_LAYOUT));
     if (!raw) return {};
     return JSON.parse(raw) as QuestLayoutRaw;
   } catch {
@@ -83,7 +83,7 @@ export function appendQuestToStorage(opts: {
 
   let state: QuestsState = { quests: [], order: {} };
   try {
-    const raw = localStorage.getItem(STORAGE_QUESTS);
+    const raw = localStorage.getItem(getStorageKey(STORAGE_QUESTS));
     if (raw) {
       const parsed = JSON.parse(raw) as QuestsState;
       if (parsed?.quests && parsed?.order) state = parsed;
@@ -118,7 +118,7 @@ export function appendQuestToStorage(opts: {
   state.order[columnId] = [...(state.order[columnId] ?? []), id];
 
   try {
-    localStorage.setItem(STORAGE_QUESTS, JSON.stringify(state));
+    localStorage.setItem(getStorageKey(STORAGE_QUESTS), JSON.stringify(state));
   } catch {
     return { ok: false, error: "Nie udało się zapisać" };
   }

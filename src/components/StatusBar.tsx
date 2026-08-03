@@ -5,6 +5,8 @@ import { useApp } from "@/context/AppContext";
 import { useAmbient } from "@/context/AmbientContext";
 import { useScene } from "@/context/SceneContext";
 import { cn } from "@/lib/utils";
+import { getStorageKey } from "@/lib/campaignStorage";
+import { RPG_TIMERS_STORAGE_KEY } from "@/lib/rpgTimersStorage";
 
 function hpTextClass(pct: number): string {
   if (pct > 60) return "text-success";
@@ -25,7 +27,7 @@ export default function StatusBar() {
   useEffect(() => {
     const load = () => {
       try {
-        const raw = localStorage.getItem("rpg_timers");
+        const raw = localStorage.getItem(getStorageKey(RPG_TIMERS_STORAGE_KEY));
         setTimers(raw ? JSON.parse(raw) : []);
       } catch { setTimers([]); }
     };

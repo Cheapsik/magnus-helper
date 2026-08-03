@@ -13,6 +13,7 @@ import { useScene, type Scene, type QuickAction } from "@/context/SceneContext";
 import { useAmbient } from "@/context/AmbientContext";
 import { useApp, type SavedNpc } from "@/context/AppContext";
 import { rollDie } from "@/lib/dice";
+import { getStorageKey } from "@/lib/campaignStorage";
 import { cn } from "@/lib/utils";
 
 interface QuestLite { id: string; title: string; column: string; }
@@ -56,7 +57,7 @@ export default function ScenePage() {
   const [quests, setQuests] = useState<QuestLite[]>([]);
   useEffect(() => {
     try {
-      const raw = localStorage.getItem("rpg_quests");
+      const raw = localStorage.getItem(getStorageKey("rpg_quests"));
       if (raw) {
         const data = JSON.parse(raw) as { quests?: StoredQuest[] };
         setQuests((data.quests || []).map((q) => ({ id: String(q.id ?? ""), title: String(q.title ?? ""), column: String(q.column ?? "") })));
@@ -140,7 +141,7 @@ export default function ScenePage() {
       setQuickResult(`🎲 k100 → ${r}`);
     } else if (action.type === "plotki") {
       try {
-        const raw = localStorage.getItem("rpg_rumors");
+        const raw = localStorage.getItem(getStorageKey("rpg_rumors"));
         const list = raw ? (JSON.parse(raw) as StoredRumor[]) : [];
         if (list.length) {
           const pick = list[Math.floor(Math.random() * list.length)];
