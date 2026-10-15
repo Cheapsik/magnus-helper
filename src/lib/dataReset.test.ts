@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { DATA_VERSION, DATA_VERSION_KEY, ensureInitialCampaign, resetDataFromPreviousVersions } from "./dataReset";
-import { readCampaignsRegistry, getStorageKey } from "./campaignStorage";
-import { CAMPAIGN_SYSTEM_KEY } from "./cardStore";
+import { DATA_VERSION, DATA_VERSION_KEY, resetDataFromPreviousVersions } from "./dataReset";
+import { createCampaign, readCampaignsRegistry } from "./campaignStorage";
 
 describe("resetDataFromPreviousVersions", () => {
   beforeEach(() => window.localStorage.clear());
@@ -36,22 +35,17 @@ describe("resetDataFromPreviousVersions", () => {
   });
 });
 
-describe("ensureInitialCampaign", () => {
+describe("data version and the first campaign", () => {
   beforeEach(() => window.localStorage.clear());
 
-  it("gives a fresh install one active campaign started from the neutral template", () => {
-    ensureInitialCampaign();
+  it("survives creating the first campaign, so the next boot does not wipe it", () => {
+    resetDataFromPreviousVersions();
+    window.localStorage.setItem("rpg_notes_session_catalog", "[]");
 
-    const registry = readCampaignsRegistry();
-    expect(registry.campaigns).toHaveLength(1);
-    expect(registry.activeCampaignId).toBe(registry.campaigns[0].id);
-    const system = JSON.parse(window.localStorage.getItem(getStorageKey(CAMPAIGN_SYSTEM_KEY))!);
-    expect(system.cards.hero.sections.length).toBeGreaterThan(0);
-  });
+    createCampaign("Pierwsza");
 
-  it("leaves existing campaigns alone", () => {
-    ensureInitialCampaign();
-    ensureInitialCampaign();
+    expect(window.localStorage.getItem(DATA_VERSION_KEY)).toBe(String(DATA_VERSION));
+    expect(resetDataFromPreviousVersions()).toBe(false);
     expect(readCampaignsRegistry().campaigns).toHaveLength(1);
   });
 });

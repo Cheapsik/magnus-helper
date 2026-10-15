@@ -11,31 +11,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { NewCampaignDialog } from "@/components/campaign/NewCampaignDialog";
 
 /** Header switcher — Decyzja 1: przełącznik po prawej, obok ustawień, ze skrótem tworzenia. */
 export default function CampaignSwitcher({ className }: { className?: string }) {
-  const { campaigns, activeCampaign, createCampaign, switchCampaign } = useCampaigns();
+  const { campaigns, activeCampaign, switchCampaign } = useCampaigns();
   const [creating, setCreating] = useState(false);
-  const [name, setName] = useState("");
 
   const visibleCampaigns = campaigns.filter((c) => !c.archivedAt);
-
-  const submitCreate = () => {
-    const trimmed = name.trim();
-    if (!trimmed) return;
-    createCampaign(trimmed);
-    setName("");
-    setCreating(false);
-  };
 
   return (
     <>
@@ -86,30 +69,7 @@ export default function CampaignSwitcher({ className }: { className?: string }) 
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Dialog open={creating} onOpenChange={setCreating}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Nowa kampania</DialogTitle>
-          </DialogHeader>
-          <Input
-            autoFocus
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Nazwa kampanii"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") submitCreate();
-            }}
-          />
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setCreating(false)}>
-              Anuluj
-            </Button>
-            <Button onClick={submitCreate} disabled={!name.trim()}>
-              Utwórz
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <NewCampaignDialog open={creating} onOpenChange={setCreating} />
     </>
   );
 }
