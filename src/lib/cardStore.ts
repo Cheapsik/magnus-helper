@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { getStorageKey } from "@/lib/campaignStorage";
 import { type Card, type CardKind, type CardTypeDef, cardSubtitle, cardTitle } from "@/lib/cardSchema";
@@ -64,6 +65,12 @@ export function toCardSummaries(cards: Card[], cardType: CardTypeDef): CardSumma
     name: cardTitle(card),
     subtitle: cardSubtitle(cardType, card),
   }));
+}
+
+export function useCardSummaries(kind: CardKind): CardSummary[] {
+  const cardType = useCardType(kind);
+  const [cards] = useCards(kind);
+  return useMemo(() => toCardSummaries(cards, cardType), [cards, cardType]);
 }
 
 export function readCardSummaries(kind: CardKind): CardSummary[] {

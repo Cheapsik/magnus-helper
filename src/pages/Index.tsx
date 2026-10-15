@@ -41,7 +41,7 @@ export default function Index() {
     .sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""));
   const recentQuests = activeQuests.slice(0, 3);
   const hotCount = activeQuests.filter((q) => q.column === "gorace").length;
-  const enemyCount = combatants.filter((c) => c.isEnemy && c.hp.current > 0).length;
+  const enemyCount = combatants.filter((c) => c.isEnemy && c.resource.current > 0).length;
   const combatActive = enemyCount > 0 && combatants.length > 1;
   const currentTurnName = combatActive ? combatants[combatTurn % combatants.length]?.name : null;
   const QUICK_ROWS = [

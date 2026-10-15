@@ -19,6 +19,19 @@ export const CARD_KIND_LABELS: Record<CardKind, string> = {
   monster: "Potwór",
 };
 
+export const CARD_KIND_PLURAL: Record<CardKind, string> = {
+  hero: "Bohaterowie",
+  npc: "NPC",
+  monster: "Potwory",
+};
+
+/** Where each card kind's list lives; `?id=` opens one card. */
+export const CARD_KIND_ROUTES: Record<CardKind, string> = {
+  hero: "/heroes",
+  npc: "/npcs",
+  monster: "/monsters",
+};
+
 /** Where the card generator draws a value from when a card is rolled. */
 export type RandomRule =
   | { kind: "range"; min: number; max: number }
@@ -156,6 +169,8 @@ export type Card = {
   portrait: string;
   notes: string;
   values: CardValues;
+  /** Optional folder on the card list. */
+  groupId?: string;
 };
 
 export function newId(): string {

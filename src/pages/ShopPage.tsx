@@ -15,18 +15,15 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useApp } from "@/context/AppContext";
-import type { LootRank } from "@/context/AppContext";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useCampaignSystem } from "@/lib/cardStore";
+import { formatMoney } from "@/lib/currency";
+import { MoneyInput } from "@/components/money/MoneyInput";
 import { cn } from "@/lib/utils";
-import {
-  generateShopAssortment,
-  rollPriceForManualItem,
-  formatPriceInGold,
-} from "@/lib/shopGenerator";
+import { generateShopAssortment, rollPriceForManualItem } from "@/lib/shopGenerator";
 import type { ShopConfigStored, ShopSnapshot, ShopStockLine, ShopTypeEntry } from "@/lib/shopTypes";
-import { normalizeShopConfig } from "@/lib/shopTypes";
-import type { LootDbItem } from "@/lib/lootDb";
+import { DEFAULT_PRICE_RANGE, normalizeShopConfig } from "@/lib/shopTypes";
+import { type LootDbItem, type LootRank, useLootConfig, useLootItems } from "@/lib/lootDb";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -42,7 +39,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { NumberInput } from "@/components/ui/number-input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -76,7 +72,10 @@ function rankBadgeClass(rankName: string, rankNames: string[]): string {
 }
 
 export default function ShopPage() {
-  const { lootItems, lootConfig } = useApp();
+  const [lootItems] = useLootItems();
+  const [lootConfig] = useLootConfig();
+  const [system] = useCampaignSystem();
+  const currency = system.currency;
   const [shopRaw, setShopRaw] = useLocalStorage<ShopConfigStored | null>("rpg_shop_config", null);
   const [history, setHistory] = useLocalStorage<ShopSnapshot[]>("rpg_shop_history", []);
 
@@ -118,9 +117,9 @@ export default function ShopPage() {
   const [saveNameDraft, setSaveNameDraft] = useState("");
 
   const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
-  const [priceDraft, setPriceDraft] = useState("");
+  const [priceDraft, setPriceDraft] = useState(0);
 
-  const totalCopper = useMemo(() => stockLines.reduce((s, l) => s + l.priceCopper, 0), [stockLines]);
+  const totalPrice = useMemo(() => stockLines.reduce((s, l) => s + l.price, 0), [stockLines]);
 
   const handleGenerate = () => {
     const res = generateShopAssortment({
@@ -177,12 +176,12 @@ export default function ShopPage() {
 
   const startEditPrice = (line: ShopStockLine) => {
     setEditingPriceId(line.lineId);
-    setPriceDraft(String(line.priceCopper));
+    setPriceDraft(line.price);
   };
 
   const commitPrice = (lineId: string) => {
-    const v = Math.max(0, Math.round(Number(priceDraft) || 0));
-    setStockLines((prev) => prev.map((l) => (l.lineId === lineId ? { ...l, priceCopper: v } : l)));
+    const v = Math.max(0, Math.round(priceDraft));
+    setStockLines((prev) => prev.map((l) => (l.lineId === lineId ? { ...l, price: v } : l)));
     setEditingPriceId(null);
   };
 
@@ -191,7 +190,7 @@ export default function ShopPage() {
   };
 
   const addManualItem = (item: LootDbItem) => {
-    const priceCopper = rollPriceForManualItem(item, lootConfig.ranks, shopConfig);
+    const price = rollPriceForManualItem(item, lootConfig.ranks, shopConfig);
     setStockLines((prev) => [
       ...prev,
       {
@@ -201,7 +200,7 @@ export default function ShopPage() {
         type: item.type,
         rankName: item.rankName,
         description: item.description,
-        priceCopper,
+        price,
       },
     ]);
     setManualOpen(false);
@@ -349,123 +348,43 @@ export default function ShopPage() {
         </div>
 
         <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">Waluta (nazwy jednostek)</Label>
-          <div className="grid grid-cols-3 gap-2">
-            <div>
-              <span className="text-[10px] text-muted-foreground">Złoto</span>
-              <Input
-                className="min-h-[--h-control] mt-0.5"
-                value={shopConfig.currency.goldLabel}
-                onChange={(e) =>
-                  updateConfig((c) => ({
-                    ...c,
-                    currency: { ...c.currency, goldLabel: e.target.value },
-                  }))
-                }
-              />
-            </div>
-            <div>
-              <span className="text-[10px] text-muted-foreground">Srebro</span>
-              <Input
-                className="min-h-[--h-control] mt-0.5"
-                value={shopConfig.currency.silverLabel}
-                onChange={(e) =>
-                  updateConfig((c) => ({
-                    ...c,
-                    currency: { ...c.currency, silverLabel: e.target.value },
-                  }))
-                }
-              />
-            </div>
-            <div>
-              <span className="text-[10px] text-muted-foreground">Miedź</span>
-              <Input
-                className="min-h-[--h-control] mt-0.5"
-                value={shopConfig.currency.copperLabel}
-                onChange={(e) =>
-                  updateConfig((c) => ({
-                    ...c,
-                    currency: { ...c.currency, copperLabel: e.target.value },
-                  }))
-                }
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <Label className="text-[10px] text-muted-foreground">1 zł = ? sz</Label>
-              <NumberInput
-                className="min-h-[--h-control] mt-0.5"
-                value={shopConfig.currency.silverPerGold}
-                onChange={(v) =>
-                  updateConfig((c) => ({
-                    ...c,
-                    currency: { ...c.currency, silverPerGold: Math.max(1, v) },
-                  }))
-                }
-                min={1}
-              />
-            </div>
-            <div>
-              <Label className="text-[10px] text-muted-foreground">1 sz = ? mk</Label>
-              <NumberInput
-                className="min-h-[--h-control] mt-0.5"
-                value={shopConfig.currency.copperPerSilver}
-                onChange={(v) =>
-                  updateConfig((c) => ({
-                    ...c,
-                    currency: { ...c.currency, copperPerSilver: Math.max(1, v) },
-                  }))
-                }
-                min={1}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">Zakres cen per ranga (mk)</Label>
+          <Label className="text-xs text-muted-foreground">Zakres cen per ranga</Label>
           <p className="text-[11px] text-muted-foreground leading-snug">
-            Jeśli przedmiot ma cenę bazową &gt; 0, losowane jest 0,8–1,2× wartości (w mk). Przy cenie 0 używany jest zakres poniżej.
+            Jeśli przedmiot ma cenę bazową, losowane jest 0,8–1,2× tej ceny. Przedmiot bez ceny dostaje cenę z zakresu jego rangi.
+            Kwoty w walucie kampanii
+            {currency.length === 0 ? (
+              <>
+                {" "}
+                (
+                <Link to="/settings?tab=waluta" className="text-primary underline underline-offset-2">
+                  nie ustawiono
+                </Link>
+                )
+              </>
+            ) : null}
+            .
           </p>
           <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
             {lootConfig.ranks.map((r: LootRank) => {
-              const range = shopConfig.rankPriceRanges[r.id] ?? { min: 5, max: 30 };
+              const range = shopConfig.rankPriceRanges[r.id] ?? DEFAULT_PRICE_RANGE;
+              const setRange = (patch: Partial<typeof range>) =>
+                updateConfig((c) => ({
+                  ...c,
+                  rankPriceRanges: { ...c.rankPriceRanges, [r.id]: { ...(c.rankPriceRanges[r.id] ?? DEFAULT_PRICE_RANGE), ...patch } },
+                }));
               return (
-                <div key={r.id} className="flex flex-wrap items-center gap-2 text-xs">
-                  <span className="w-24 shrink-0 font-medium truncate" title={r.name}>
+                <div key={r.id} className="space-y-1 rounded-md border border-border/60 p-2 text-xs">
+                  <div className="font-medium truncate" title={r.name}>
                     {r.name}
-                  </span>
-                  <span className="text-muted-foreground">min</span>
-                  <NumberInput
-                    className="h-9 w-20"
-                    value={range.min}
-                    onChange={(v) =>
-                      updateConfig((c) => {
-                        const cur = c.rankPriceRanges[r.id] ?? { min: 5, max: 30 };
-                        return {
-                          ...c,
-                          rankPriceRanges: { ...c.rankPriceRanges, [r.id]: { ...cur, min: v } },
-                        };
-                      })
-                    }
-                    min={0}
-                  />
-                  <span className="text-muted-foreground">max</span>
-                  <NumberInput
-                    className="h-9 w-20"
-                    value={range.max}
-                    onChange={(v) =>
-                      updateConfig((c) => {
-                        const cur = c.rankPriceRanges[r.id] ?? { min: 5, max: 30 };
-                        return {
-                          ...c,
-                          rankPriceRanges: { ...c.rankPriceRanges, [r.id]: { ...cur, max: v } },
-                        };
-                      })
-                    }
-                    min={0}
-                  />
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="w-6 text-muted-foreground">od</span>
+                    <MoneyInput value={range.min} onChange={(v) => setRange({ min: v })} currency={currency} inputClassName="h-8" />
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="w-6 text-muted-foreground">do</span>
+                    <MoneyInput value={range.max} onChange={(v) => setRange({ max: v })} currency={currency} inputClassName="h-8" />
+                  </div>
                 </div>
               );
             })}
@@ -588,28 +507,20 @@ export default function ShopPage() {
               </TableCell>
               <TableCell>
                 {editingPriceId === line.lineId ? (
-                  <div className="flex items-center gap-1">
-                    <Input
-                      className="h-9 w-24"
-                      type="number"
-                      min={0}
-                      value={priceDraft}
-                      onChange={(e) => setPriceDraft(e.target.value)}
-                      onBlur={() => commitPrice(line.lineId)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") commitPrice(line.lineId);
-                        if (e.key === "Escape") setEditingPriceId(null);
-                      }}
-                      autoFocus
-                    />
+                  <div
+                    className="flex items-center gap-1"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") commitPrice(line.lineId);
+                      if (e.key === "Escape") setEditingPriceId(null);
+                    }}
+                  >
+                    <MoneyInput value={priceDraft} onChange={setPriceDraft} currency={currency} inputClassName="h-9" />
                     <Button type="button" size="icon" variant="ghost" className="min-h-[--h-control] min-w-[--h-control]" onClick={() => commitPrice(line.lineId)}>
                       <Check className="h-4 w-4" />
                     </Button>
                   </div>
                 ) : (
-                  <span className="font-semibold tabular-nums">
-                    {line.priceCopper} {shopConfig.currency.copperLabel}
-                  </span>
+                  <span className="font-semibold tabular-nums whitespace-nowrap">{formatMoney(line.price, currency)}</span>
                 )}
               </TableCell>
               <TableCell className="max-w-[200px] text-xs text-muted-foreground truncate" title={line.description}>
@@ -660,14 +571,8 @@ export default function ShopPage() {
             <div className="text-sm flex flex-wrap gap-x-3 gap-y-1">
               <span className="text-muted-foreground">{line.type}</span>
               {editingPriceId === line.lineId ? (
-                <div className="flex items-center gap-1 flex-1">
-                  <Input
-                    type="number"
-                    min={0}
-                    className="h-[--h-control] max-w-[120px]"
-                    value={priceDraft}
-                    onChange={(e) => setPriceDraft(e.target.value)}
-                  />
+                <div className="flex flex-wrap items-center gap-1 flex-1">
+                  <MoneyInput value={priceDraft} onChange={setPriceDraft} currency={currency} inputClassName="h-[--h-control]" />
                   <Button type="button" size="icon" variant="secondary" className="min-h-[--h-control] min-w-[--h-control]" onClick={() => commitPrice(line.lineId)}>
                     <Check className="h-4 w-4" />
                   </Button>
@@ -676,9 +581,7 @@ export default function ShopPage() {
                   </Button>
                 </div>
               ) : (
-                <span className="font-semibold text-primary">
-                  {line.priceCopper} {shopConfig.currency.copperLabel}
-                </span>
+                <span className="font-semibold text-primary">{formatMoney(line.price, currency)}</span>
               )}
             </div>
             {line.description ? <p className="text-xs text-muted-foreground">{line.description}</p> : null}
@@ -724,7 +627,7 @@ export default function ShopPage() {
       </Button>
       <p className="text-sm font-medium text-center sm:text-right">
         Łączna wartość asortymentu:{" "}
-        <span className="text-primary tabular-nums">{formatPriceInGold(totalCopper, shopConfig.currency)}</span>
+        <span className="text-primary tabular-nums">{formatMoney(totalPrice, currency)}</span>
       </p>
     </div>
   );
@@ -738,7 +641,7 @@ export default function ShopPage() {
           <AlertTitle>Baza przedmiotów jest pusta</AlertTitle>
           <AlertDescription>
             Dodaj przedmioty w zakładce{" "}
-            <Link to="/inventory?tab=items" className="font-medium text-primary underline underline-offset-2">
+            <Link to="/loot?tab=items" className="font-medium text-primary underline underline-offset-2">
               Przedmioty
             </Link>
             .
@@ -888,7 +791,7 @@ export default function ShopPage() {
           </DialogHeader>
           <Input
             className="min-h-[--h-control]"
-            placeholder="np. Zbrojownia w Westfall — sesja 3"
+            placeholder="np. Kram przy rynku — sesja 3"
             value={saveNameDraft}
             onChange={(e) => setSaveNameDraft(e.target.value)}
           />

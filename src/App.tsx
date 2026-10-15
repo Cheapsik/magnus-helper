@@ -24,7 +24,6 @@ import CombatPage from "@/pages/CombatPage";
 import ConditionsPage from "@/pages/ConditionsPage";
 import SessionNotesPage from "@/pages/SessionNotesPage";
 import GmToolboxPage from "@/pages/GmToolboxPage";
-import NpcManagerPage from "@/pages/NpcManagerPage";
 import InventoryPage from "@/pages/InventoryPage";
 import LootGeneratorPage from "@/pages/LootGeneratorPage";
 import TimersPage from "@/pages/TimersPage";
@@ -33,7 +32,7 @@ import NotFound from "@/pages/NotFound";
 import ShopPage from "@/pages/ShopPage";
 import AmbientPage from "@/pages/AmbientPage";
 import QuestsPage from "@/pages/QuestsPage";
-import HeroesPage from "@/pages/HeroesPage";
+import CardsPage from "@/pages/CardsPage";
 import ScenePage from "@/pages/ScenePage";
 import SettingsPage from "@/components/settings/SettingsPage";
 import AuthPage from "@/pages/AuthPage";
@@ -69,8 +68,9 @@ function CampaignGate() {
           <Route path="/notes" element={<SessionNotesPage />} />
           <Route path="/relations" element={<RelationsMapPage />} />
           <Route path="/gm-toolbox" element={<GmToolboxPage />} />
-          <Route path="/npcs" element={<NpcManagerPage />} />
-          <Route path="/heroes" element={<HeroesPage />} />
+          <Route path="/heroes" element={<CardsPage key="hero" kind="hero" />} />
+          <Route path="/npcs" element={<CardsPage key="npc" kind="npc" />} />
+          <Route path="/monsters" element={<CardsPage key="monster" kind="monster" />} />
           <Route path="/timers" element={<TimersPage />} />
           <Route path="/rumors" element={<RumorsPage />} />
           <Route path="/ambient" element={<AmbientPage />} />

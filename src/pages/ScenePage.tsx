@@ -11,7 +11,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Checkbox } from "@/components/ui/checkbox";
 import { useScene, type Scene, type QuickAction } from "@/context/SceneContext";
 import { useAmbient } from "@/context/AmbientContext";
-import { useApp, type SavedNpc } from "@/context/AppContext";
+import { CARD_KIND_ROUTES } from "@/lib/cardSchema";
+import { type CardSummary, useCardSummaries } from "@/lib/cardStore";
 import { rollDie } from "@/lib/dice";
 import { readJson } from "@/lib/storage";
 import { cn } from "@/lib/utils";
@@ -52,7 +53,7 @@ const EMPTY_DRAFT: DraftScene = {
 export default function ScenePage() {
   const { scenes, activeScene, createScene, updateScene, deleteScene, activateScene, deactivateScene } = useScene();
   const ambient = useAmbient();
-  const { savedNpcs } = useApp();
+  const npcSummaries = useCardSummaries("npc");
 
   const [quests, setQuests] = useState<QuestLite[]>([]);
   useEffect(() => {
@@ -152,7 +153,7 @@ export default function ScenePage() {
     }
   };
 
-  if (activeScene) return <ActiveSceneView scene={activeScene} onEdit={() => openEdit(activeScene)} onDeactivate={deactivateScene} ambient={ambient} savedNpcs={savedNpcs} quests={quests} runQuickAction={runQuickAction} quickResult={quickResult} clearQuick={() => setQuickResult(null)} />;
+  if (activeScene) return <ActiveSceneView scene={activeScene} onEdit={() => openEdit(activeScene)} onDeactivate={deactivateScene} ambient={ambient} npcSummaries={npcSummaries} quests={quests} runQuickAction={runQuickAction} quickResult={quickResult} clearQuick={() => setQuickResult(null)} />;
 
   return (
     <div className="space-y-4 animate-fade-in">
@@ -232,12 +233,12 @@ export default function ScenePage() {
 
             <section className="space-y-2">
               <h3 className="text-sm font-semibold flex items-center gap-2"><Users className="h-4 w-4" /> NPC w scenie</h3>
-              {savedNpcs.length === 0 ? <p className="text-xs text-muted-foreground italic">Brak zapisanych NPC.</p> : (
+              {npcSummaries.length === 0 ? <p className="text-xs text-muted-foreground italic">Brak NPC w kampanii.</p> : (
                 <div className="space-y-1 max-h-56 overflow-y-auto">
-                  {savedNpcs.map((n) => (
+                  {npcSummaries.map((n) => (
                     <label key={n.id} className="flex items-center gap-2 text-sm cursor-pointer border border-border bg-card/40 px-2 py-1.5">
                       <Checkbox checked={draft.linkedNpcIds.includes(n.id)} onCheckedChange={() => toggleNpc(n.id)} />
-                      <span className="flex-1 truncate">{n.name} {n.occupation && <span className="text-muted-foreground text-xs">· {n.occupation}</span>}</span>
+                      <span className="flex-1 truncate">{n.name} {n.subtitle && <span className="text-muted-foreground text-xs">· {n.subtitle}</span>}</span>
                     </label>
                   ))}
                 </div>
@@ -245,7 +246,7 @@ export default function ScenePage() {
               {draft.linkedNpcIds.length > 0 && (
                 <div className="flex flex-wrap gap-1 pt-1">
                   {draft.linkedNpcIds.map((id) => {
-                    const n = savedNpcs.find((x) => x.id === id);
+                    const n = npcSummaries.find((x) => x.id === id);
                     return n ? <span key={id} className="text-[10px] px-1.5 py-0.5 border border-primary/40 text-primary">{n.name}</span> : null;
                   })}
                 </div>
@@ -343,15 +344,15 @@ interface ActiveSceneViewProps {
   onEdit: () => void;
   onDeactivate: () => void;
   ambient: ReturnType<typeof useAmbient>;
-  savedNpcs: SavedNpc[];
+  npcSummaries: CardSummary[];
   quests: QuestLite[];
   runQuickAction: (action: QuickAction) => void;
   quickResult: string | null;
   clearQuick: () => void;
 }
 
-function ActiveSceneView({ scene, onEdit, onDeactivate, ambient, savedNpcs, quests, runQuickAction, quickResult, clearQuick }: ActiveSceneViewProps) {
-  const npcs = scene.linkedNpcIds.map((id) => savedNpcs.find((n) => n.id === id)).filter((npc): npc is SavedNpc => Boolean(npc));
+function ActiveSceneView({ scene, onEdit, onDeactivate, ambient, npcSummaries, quests, runQuickAction, quickResult, clearQuick }: ActiveSceneViewProps) {
+  const npcs = scene.linkedNpcIds.map((id) => npcSummaries.find((n) => n.id === id)).filter((npc): npc is CardSummary => Boolean(npc));
   const threads = scene.linkedThreadIds.map((id) => quests.find((q) => q.id === id)).filter((quest): quest is QuestLite => Boolean(quest));
   return (
     <div className="space-y-4 animate-fade-in">
@@ -396,9 +397,9 @@ function ActiveSceneView({ scene, onEdit, onDeactivate, ambient, savedNpcs, ques
             <h3 className="field-label flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> NPC</h3>
             {npcs.length === 0 && <p className="text-xs text-muted-foreground italic">Brak NPC</p>}
             {npcs.map((n) => (
-              <Link key={n.id} to="/npcs" className="block px-2 py-1.5 border border-border/60 hover:border-primary/50 transition-colors">
+              <Link key={n.id} to={`${CARD_KIND_ROUTES.npc}?id=${encodeURIComponent(n.id)}`} className="block px-2 py-1.5 border border-border/60 hover:border-primary/50 transition-colors">
                 <div className="text-sm">{n.name}</div>
-                {n.occupation && <div className="text-[10px] text-muted-foreground">{n.occupation}</div>}
+                {n.subtitle && <div className="text-[10px] text-muted-foreground">{n.subtitle}</div>}
               </Link>
             ))}
           </CardContent>

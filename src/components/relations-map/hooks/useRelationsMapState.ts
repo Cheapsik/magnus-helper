@@ -1,6 +1,5 @@
 import { useMemo } from "react";
-import type { SavedNpc } from "@/components/character-sheet/types";
-import { getNpcDisplayName } from "@/components/character-sheet/npcAccessors";
+import { type Card, type CardTypeDef, cardSubtitle, cardTitle } from "@/lib/cardSchema";
 import type {
   EntityLookupEntry,
   FilterState,
@@ -22,17 +21,18 @@ function getHeroSubtitle(h: StoredHero): string {
   return h.subtitle;
 }
 
-export function buildLookup(savedNpcs: SavedNpc[], heroes: StoredHero[]) {
+export function buildLookup(npcs: Card[], npcCardType: CardTypeDef, heroes: StoredHero[]) {
   const m = new Map<string, EntityLookupEntry>();
-  savedNpcs.forEach((n) =>
+  npcs.forEach((n) => {
+    const subtitle = cardSubtitle(npcCardType, n);
     m.set(n.id, {
-      name: getNpcDisplayName(n),
-      subtitle: n.daneOgolne.obecnaProfesja || n.cechyCharakteru || "",
-      description: n.opisOgolny || n.notatkiMG || "",
+      name: cardTitle(n),
+      subtitle,
+      description: n.notes || "",
       kind: "npc",
-      aliases: [n.daneOgolne.obecnaProfesja, n.cechyCharakteru].filter(Boolean),
-    })
-  );
+      aliases: [subtitle].filter(Boolean),
+    });
+  });
   heroes.forEach((h) =>
     m.set(h.id, {
       name: getHeroDisplayName(h),
@@ -143,17 +143,18 @@ function filterNode(
 }
 
 export function buildSidebarEntries(
-  savedNpcs: SavedNpc[],
+  npcs: Card[],
+  npcCardType: CardTypeDef,
   heroes: StoredHero[],
   search: string
 ): SidebarEntry[] {
   const list: SidebarEntry[] = [];
-  savedNpcs.forEach((n) =>
+  npcs.forEach((n) =>
     list.push({
       id: n.id,
       kind: "npc",
-      name: getNpcDisplayName(n),
-      desc: n.opisOgolny || n.notatkiMG || n.daneOgolne.obecnaProfesja || "",
+      name: cardTitle(n),
+      desc: cardSubtitle(npcCardType, n) || n.notes || "",
     })
   );
   heroes.forEach((h) =>

@@ -1,14 +1,6 @@
-import type { LootRank } from "@/context/AppContext";
+import type { LootRank } from "@/lib/lootDb";
 
 export type ShopWealthLevel = "poor" | "average" | "rich";
-
-export interface ShopCurrencyConfig {
-  goldLabel: string;
-  silverLabel: string;
-  copperLabel: string;
-  silverPerGold: number;
-  copperPerSilver: number;
-}
 
 export interface ShopTypeEntry {
   id: string;
@@ -20,7 +12,7 @@ export interface ShopConfigStored {
   shopTypes: ShopTypeEntry[];
   wealthLevel: ShopWealthLevel;
   itemCount: number;
-  currency: ShopCurrencyConfig;
+  /** Per rank id, in the campaign's smallest denomination. */
   rankPriceRanges: Record<string, { min: number; max: number }>;
   selectedShopTypeId: string | null;
 }
@@ -32,7 +24,8 @@ export interface ShopStockLine {
   type: string;
   rankName: string;
   description: string;
-  priceCopper: number;
+  /** In the campaign's smallest denomination. */
+  price: number;
 }
 
 export interface ShopSnapshot {
@@ -43,38 +36,26 @@ export interface ShopSnapshot {
   lines: ShopStockLine[];
 }
 
-const DEFAULT_CURRENCY: ShopCurrencyConfig = {
-  goldLabel: "zł",
-  silverLabel: "sz",
-  copperLabel: "mk",
-  silverPerGold: 10,
-  copperPerSilver: 10,
-};
-
 const DEFAULT_SHOP_TYPES: ShopTypeEntry[] = [
-  { id: "st-armory", name: "Zbrojownia", preferredTypes: ["broń", "zbroja"] },
-  { id: "st-apothecary", name: "Apteka / Zielarz", preferredTypes: ["mikstura"] },
+  { id: "st-weapons", name: "Broń", preferredTypes: ["broń"] },
+  { id: "st-clothes", name: "Odzież", preferredTypes: ["odzież"] },
+  { id: "st-gear", name: "Wyposażenie", preferredTypes: ["wyposażenie", "drobiazg"] },
   { id: "st-market", name: "Targowisko", preferredTypes: [] },
-  { id: "st-tavern", name: "Karczma", preferredTypes: ["mikstura", "gadżet"] },
-  { id: "st-general", name: "Sklep ogólny", preferredTypes: [] },
 ];
 
-export function defaultPriceRangeForRankName(rankName: string): { min: number; max: number } {
-  const m: Record<string, { min: number; max: number }> = {
-    Zniszczony: { min: 1, max: 5 },
-    Pospolity: { min: 5, max: 30 },
-    Rzadki: { min: 30, max: 150 },
-    Ciekawy: { min: 100, max: 400 },
-    Wyjątkowy: { min: 300, max: 1000 },
-  };
-  return m[rankName] ?? { min: 5, max: 30 };
+export const DEFAULT_PRICE_RANGE = { min: 5, max: 30 };
+
+/** Until the GM sets them, each rank starts four times pricier than the one before it. */
+function defaultPriceRangeForRankIndex(index: number): { min: number; max: number } {
+  const scale = 4 ** Math.min(index, 6);
+  return { min: DEFAULT_PRICE_RANGE.min * scale, max: DEFAULT_PRICE_RANGE.max * scale };
 }
 
 function buildDefaultRankRanges(ranks: LootRank[]): Record<string, { min: number; max: number }> {
   const out: Record<string, { min: number; max: number }> = {};
-  for (const r of ranks) {
-    out[r.id] = defaultPriceRangeForRankName(r.name);
-  }
+  ranks.forEach((r, index) => {
+    out[r.id] = defaultPriceRangeForRankIndex(index);
+  });
   return out;
 }
 
@@ -82,7 +63,6 @@ export const DEFAULT_SHOP_CONFIG_BASE: Omit<ShopConfigStored, "rankPriceRanges" 
   shopTypes: DEFAULT_SHOP_TYPES,
   wealthLevel: "average",
   itemCount: 8,
-  currency: DEFAULT_CURRENCY,
 };
 
 export function normalizeShopConfig(raw: unknown, ranks: LootRank[]): ShopConfigStored {
@@ -124,22 +104,6 @@ export function normalizeShopConfig(raw: unknown, ranks: LootRank[]): ShopConfig
   let itemCount = typeof o.itemCount === "number" && Number.isFinite(o.itemCount) ? Math.round(o.itemCount) : 8;
   itemCount = Math.min(20, Math.max(1, itemCount));
 
-  let currency: ShopCurrencyConfig = { ...DEFAULT_CURRENCY };
-  if (o.currency && typeof o.currency === "object") {
-    const c = o.currency as Record<string, unknown>;
-    currency = {
-      goldLabel: typeof c.goldLabel === "string" && c.goldLabel ? c.goldLabel : DEFAULT_CURRENCY.goldLabel,
-      silverLabel: typeof c.silverLabel === "string" && c.silverLabel ? c.silverLabel : DEFAULT_CURRENCY.silverLabel,
-      copperLabel: typeof c.copperLabel === "string" && c.copperLabel ? c.copperLabel : DEFAULT_CURRENCY.copperLabel,
-      silverPerGold:
-        typeof c.silverPerGold === "number" && c.silverPerGold > 0 ? c.silverPerGold : DEFAULT_CURRENCY.silverPerGold,
-      copperPerSilver:
-        typeof c.copperPerSilver === "number" && c.copperPerSilver > 0
-          ? c.copperPerSilver
-          : DEFAULT_CURRENCY.copperPerSilver,
-    };
-  }
-
   const rankPriceRanges: Record<string, { min: number; max: number }> = { ...defaultRanges };
   if (o.rankPriceRanges && typeof o.rankPriceRanges === "object") {
     const rr = o.rankPriceRanges as Record<string, unknown>;
@@ -164,7 +128,6 @@ export function normalizeShopConfig(raw: unknown, ranks: LootRank[]): ShopConfig
     shopTypes,
     wealthLevel,
     itemCount,
-    currency,
     rankPriceRanges,
     selectedShopTypeId,
   };

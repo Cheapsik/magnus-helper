@@ -1,9 +1,11 @@
 import { useMemo, useState, useId } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Plus, Trash2, Edit2, Check, Dice5, Pencil, Package, Sword, Shield, Flame, Coins, Minus, X } from "lucide-react";
 import { useApp } from "@/context/AppContext";
-import type { LootRank } from "@/context/AppContext";
-import type { LootDbItem } from "@/lib/lootDb";
+import { type LootDbItem, type LootRank, NO_COINS, useLootConfig, useLootItems } from "@/lib/lootDb";
+import { useCampaignSystem } from "@/lib/cardStore";
+import { formatMoney } from "@/lib/currency";
+import { MoneyInput } from "@/components/money/MoneyInput";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -89,9 +91,8 @@ function pluralItemLabel(n: number): string {
 
 interface GeneratedLoot {
   items: LootDbItem[];
-  gold: number;
-  silver: number;
-  copper: number;
+  /** In the smallest denomination. */
+  coins: number;
 }
 
 type ItemFormState = {
@@ -124,8 +125,12 @@ export default function LootGeneratorPage() {
       ? (tabFromUrl as (typeof VALID_TABS)[number])
       : "generate";
 
-  const { lootConfig, setLootConfig, lootItems, setLootItems, inventory, setInventory } = useApp();
-  const defaultCurrency = lootConfig.itemCurrency ?? "sz";
+  const { inventory, setInventory } = useApp();
+  const [lootConfig, setLootConfig] = useLootConfig();
+  const [lootItems, setLootItems] = useLootItems();
+  const [system] = useCampaignSystem();
+  const currency = system.currency;
+  const priceLabel = (price: number) => (price > 0 ? formatMoney(price, currency) : "—");
   const [tab, setTab] = useState<"generate" | "ranks" | "items" | "carry">(initialTab);
   const [result, setResult] = useState<GeneratedLoot | null>(null);
 
@@ -181,12 +186,13 @@ export default function LootGeneratorPage() {
         attempts++;
       }
     }
-    setResult({
-      items,
-      gold: randRange(lootConfig.coinRanges.gold.min, lootConfig.coinRanges.gold.max),
-      silver: randRange(lootConfig.coinRanges.silver.min, lootConfig.coinRanges.silver.max),
-      copper: randRange(lootConfig.coinRanges.copper.min, lootConfig.coinRanges.copper.max),
-    });
+    const coins = currency.reduce((sum, denomination) => {
+      const range = lootConfig.coinRanges[denomination.id] ?? NO_COINS;
+      const low = Math.min(range.min, range.max);
+      const high = Math.max(range.min, range.max);
+      return sum + randRange(low, high) * denomination.rate;
+    }, 0);
+    setResult({ items, coins });
   };
 
   const updateRank = (id: string, patch: Partial<LootRank>) => {
@@ -253,7 +259,6 @@ export default function LootGeneratorPage() {
                 rankName,
                 price: Math.max(0, itemForm.price),
                 description: itemForm.description.trim(),
-                currency: i.currency || defaultCurrency,
               }
             : i,
         ),
@@ -266,7 +271,6 @@ export default function LootGeneratorPage() {
         rankName,
         price: Math.max(0, itemForm.price),
         description: itemForm.description.trim(),
-        currency: defaultCurrency,
       };
       setLootItems((prev) => [...prev, newItem]);
     }
@@ -348,37 +352,52 @@ export default function LootGeneratorPage() {
               </div>
 
               <label className="text-xs text-muted-foreground font-medium">Monety (zakresy)</label>
-              <div className="grid grid-cols-3 gap-1.5">
-                {(["gold", "silver", "copper"] as const).map((coin) => (
-                  <div key={coin}>
-                    <label className="text-[9px] text-muted-foreground">
-                      {coin === "gold" ? "Złoto" : coin === "silver" ? "Szylingi" : "Pensy"}
-                    </label>
-                    <div className="flex gap-0.5">
-                      <NumberInput
-                        value={lootConfig.coinRanges[coin].min}
-                        onChange={(v) =>
-                          setLootConfig((p) => ({
-                            ...p,
-                            coinRanges: { ...p.coinRanges, [coin]: { ...p.coinRanges[coin], min: v } },
-                          }))
-                        }
-                        className="h-7 text-[10px] text-center"
-                      />
-                      <NumberInput
-                        value={lootConfig.coinRanges[coin].max}
-                        onChange={(v) =>
-                          setLootConfig((p) => ({
-                            ...p,
-                            coinRanges: { ...p.coinRanges, [coin]: { ...p.coinRanges[coin], max: v } },
-                          }))
-                        }
-                        className="h-7 text-[10px] text-center"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {currency.length === 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  Kampania nie ma waluty, więc łup nie zawiera monet.{" "}
+                  <Link to="/settings?tab=waluta" className="font-medium text-primary underline underline-offset-2">
+                    Ustaw walutę kampanii
+                  </Link>
+                  .
+                </p>
+              ) : (
+                <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+                  {currency.map((denomination) => {
+                    const range = lootConfig.coinRanges[denomination.id] ?? NO_COINS;
+                    const setRange = (patch: Partial<typeof range>) =>
+                      setLootConfig((p) => ({
+                        ...p,
+                        coinRanges: {
+                          ...p.coinRanges,
+                          [denomination.id]: { ...(p.coinRanges[denomination.id] ?? NO_COINS), ...patch },
+                        },
+                      }));
+                    return (
+                      <div key={denomination.id}>
+                        <label className="text-[9px] text-muted-foreground">
+                          {denomination.name} ({denomination.short})
+                        </label>
+                        <div className="flex gap-0.5">
+                          <NumberInput
+                            value={range.min}
+                            min={0}
+                            onChange={(v) => setRange({ min: v })}
+                            className="h-7 text-[10px] text-center"
+                            aria-label={`${denomination.name}: od`}
+                          />
+                          <NumberInput
+                            value={range.max}
+                            min={0}
+                            onChange={(v) => setRange({ max: v })}
+                            className="h-7 text-[10px] text-center"
+                            aria-label={`${denomination.name}: do`}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -409,7 +428,7 @@ export default function LootGeneratorPage() {
                           </div>
                           {item.description ? <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p> : null}
                           <p className="text-[10px] text-muted-foreground mt-1">
-                            Wartość: {item.price} {item.currency ?? defaultCurrency}
+                            Wartość: {priceLabel(item.price)}
                           </p>
                         </div>
                       </div>
@@ -418,10 +437,12 @@ export default function LootGeneratorPage() {
                 )}
 
                 <div className="flex gap-3 text-xs pt-1 border-t border-border/50">
-                  {result.gold > 0 && <span className="text-yellow-500 font-semibold">{result.gold} zł</span>}
-                  {result.silver > 0 && <span className="text-slate-400 font-semibold">{result.silver} sz</span>}
-                  {result.copper > 0 && <span className="text-orange-600 font-semibold">{result.copper} pn</span>}
-                  {result.gold === 0 && result.silver === 0 && result.copper === 0 && (
+                  {result.coins > 0 ? (
+                    <span className="flex items-center gap-1 font-semibold text-primary">
+                      <Coins className="h-3.5 w-3.5" />
+                      {formatMoney(result.coins, currency)}
+                    </span>
+                  ) : (
                     <span className="text-muted-foreground">Brak monet</span>
                   )}
                 </div>
@@ -613,7 +634,7 @@ export default function LootGeneratorPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right align-top py-3 whitespace-nowrap">
-                      {item.price} {item.currency || defaultCurrency}
+                      {priceLabel(item.price)}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm align-top py-3 max-w-[280px]">
                       {item.description ? shorten(item.description, 60) : "—"}
@@ -669,9 +690,7 @@ export default function LootGeneratorPage() {
                   <p className="text-xs text-muted-foreground">
                     <span>{item.type}</span>
                     <span className="mx-1.5">|</span>
-                    <span>
-                      {item.price} {item.currency || defaultCurrency}
-                    </span>
+                    <span>{priceLabel(item.price)}</span>
                   </p>
                   {item.description.trim() ? (
                     <p className="text-xs text-muted-foreground line-clamp-2">{item.description}</p>
@@ -744,13 +763,12 @@ export default function LootGeneratorPage() {
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="f-price">Cena</Label>
-                  <NumberInput
+                  <MoneyInput
                     id="f-price"
                     value={itemForm.price}
                     onChange={(v) => setItemForm((f) => ({ ...f, price: v }))}
-                    min={0}
-                    className="min-h-[--h-control] text-center"
-                    placeholder="0"
+                    currency={currency}
+                    inputClassName="min-h-[--h-control]"
                   />
                 </div>
                 <div className="space-y-1">
