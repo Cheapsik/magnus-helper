@@ -10,8 +10,8 @@ import {
   type FieldDef,
   type FieldValue,
   type TableValue,
-  defaultValueForField,
 } from "@/lib/cardSchema";
+import { coerceValue } from "@/lib/structureOps";
 import { DiceInput } from "@/components/card/DiceInput";
 
 /**
@@ -208,7 +208,7 @@ export function FieldRenderer({
   readOnly?: boolean;
   hideLabel?: boolean;
 }) {
-  const current = value ?? defaultValueForField(field);
+  const current = coerceValue(field, value);
 
   switch (field.type) {
     case "table":

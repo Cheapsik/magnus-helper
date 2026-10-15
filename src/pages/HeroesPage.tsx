@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { ArrowLeft, Plus, ScrollText, Swords, Trash2 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
@@ -77,7 +78,14 @@ export default function HeroesPage() {
       {heroes.length === 0 ? (
         <div className="border-2 border-dashed border-border rounded-lg p-10 text-center text-muted-foreground">
           <ScrollText className="h-10 w-10 mx-auto mb-3 opacity-60" />
-          <p className="text-sm">Brak postaci. Kliknij „Dodaj Bohatera", aby utworzyć nową kartę.</p>
+          <p className="text-sm">Brak bohaterów. Kliknij „Dodaj bohatera”, aby utworzyć kartę.</p>
+          <p className="mt-1 text-xs">
+            Układ karty zmienisz w{" "}
+            <Link to="/settings?tab=karty" className="underline hover:text-foreground">
+              Systemie kampanii
+            </Link>
+            .
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

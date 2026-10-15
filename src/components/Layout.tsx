@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import {
   Home, Dice5, Target, BookOpen, MoreHorizontal, Search,
   Swords, Activity, Package, StickyNote, Wrench, Users, Gem, Timer, MessageSquare, Music, Network, ScrollText,
-  MapPin, Settings as SettingsIcon, LogOut,
+  MapPin, SlidersHorizontal, Settings as SettingsIcon, LogOut,
   type LucideIcon,
   Waypoints,
 } from "lucide-react";
@@ -72,6 +72,7 @@ const SIDEBAR_GROUPS: { label: string; items: { path: string; label: string; ico
     label: "MG",
     items: [
       { path: "/gm-toolbox", label: "Skrzynka MG", icon: Wrench },
+      { path: "/settings?tab=karty", label: "System kampanii", icon: SlidersHorizontal },
       { path: "/relations", label: "Mapa relacji", icon: Waypoints },
       { path: "/loot", label: "Generator łupu", icon: Gem },
       { path: "/rumors", label: "Plotki", icon: MessageSquare },
@@ -160,8 +161,11 @@ export default function Layout({ children }: { children: ReactNode }) {
   const resetSidebarWidth = () => setSidebarWidth(SIDEBAR_DEFAULT_WIDTH);
 
 
-  const isActive = (path: string) =>
-    path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
+  const isActive = (path: string) => {
+    const [pathname, query] = path.split("?");
+    if (query) return location.pathname === pathname && location.search === `?${query}`;
+    return pathname === "/" ? location.pathname === "/" : location.pathname.startsWith(pathname);
+  };
 
   const isMoreActive = MORE_LINKS.some((l) => isActive(l.path));
   const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
