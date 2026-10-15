@@ -9,13 +9,18 @@ import {
   setActiveCampaignId as setActiveCampaignIdInStorage,
   unarchiveCampaign as unarchiveCampaignInStorage,
 } from "@/lib/campaignStorage";
+import { initializeCampaignSystem } from "@/lib/cardStore";
+import type { StartingPoint } from "@/lib/systemTemplates";
 
 interface CampaignContextValue {
   campaigns: Campaign[];
   activeCampaignId: string | null;
   activeCampaign: Campaign | null;
-  /** Creates a campaign. Does not switch to it — see Decyzja 1. */
-  createCampaign: (name: string) => Campaign;
+  /**
+   * Creates a campaign with its system copied from the starting point
+   * (neutral template by default). Does not switch to it — see Decyzja 1.
+   */
+  createCampaign: (name: string, start?: StartingPoint) => Campaign;
   renameCampaign: (campaignId: string, name: string) => void;
   archiveCampaign: (campaignId: string) => void;
   unarchiveCampaign: (campaignId: string) => void;
@@ -38,8 +43,9 @@ export function CampaignProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(() => setRegistry(readCampaignsRegistry()), []);
 
   const createCampaign = useCallback(
-    (name: string) => {
+    (name: string, start: StartingPoint = "template") => {
       const campaign = createCampaignInStorage(name);
+      initializeCampaignSystem(campaign.id, start);
       refresh();
       return campaign;
     },

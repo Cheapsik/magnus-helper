@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { DrawerEntityType } from "@/context/DrawerContext";
-import { getStorageKey } from "@/lib/campaignStorage";
+import { readJson, writeJson } from "@/lib/storage";
 
 const RECENT_ITEMS_KEY = "rpg_recent_items";
 const MAX_RECENT_ITEMS = 10;
@@ -26,22 +26,14 @@ function readRecentItems(): RecentItem[] {
   if (typeof window === "undefined") {
     return [];
   }
-  try {
-    const raw = window.localStorage.getItem(getStorageKey(RECENT_ITEMS_KEY));
-    if (!raw) {
-      return [];
-    }
-    const parsed = JSON.parse(raw) as RecentItem[];
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-    return parsed
-      .filter((item) => item && typeof item.id === "string" && typeof item.name === "string" && typeof item.type === "string")
-      .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))
-      .slice(0, MAX_RECENT_ITEMS);
-  } catch {
+  const parsed = readJson<RecentItem[]>(RECENT_ITEMS_KEY, []);
+  if (!Array.isArray(parsed)) {
     return [];
   }
+  return parsed
+    .filter((item) => item && typeof item.id === "string" && typeof item.name === "string" && typeof item.type === "string")
+    .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))
+    .slice(0, MAX_RECENT_ITEMS);
 }
 
 export function CommandPaletteProvider({ children }: { children: ReactNode }) {
@@ -61,7 +53,7 @@ export function CommandPaletteProvider({ children }: { children: ReactNode }) {
       const withoutDuplicate = prev.filter((entry) => !(entry.id === item.id && entry.type === item.type));
       const next = [{ ...item, updatedAt: now }, ...withoutDuplicate].slice(0, MAX_RECENT_ITEMS);
       if (typeof window !== "undefined") {
-        window.localStorage.setItem(getStorageKey(RECENT_ITEMS_KEY), JSON.stringify(next));
+        writeJson(RECENT_ITEMS_KEY, next);
       }
       return next;
     });

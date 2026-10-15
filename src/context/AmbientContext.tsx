@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, ReactNode } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { getStorageKey } from "@/lib/campaignStorage";
+import { readJson, writeJson } from "@/lib/storage";
 
 export interface SoundItem {
   id: string;
@@ -367,10 +367,8 @@ export function AmbientProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    try {
-      const data = playingLayers.map((s) => ({ trackId: s.id, volume: volumes[s.id] ?? s.volume }));
-      localStorage.setItem(getStorageKey("rpg_ambient_session"), JSON.stringify(data));
-    } catch {}
+    const data = playingLayers.map((s) => ({ trackId: s.id, volume: volumes[s.id] ?? s.volume }));
+    writeJson("rpg_ambient_session", data);
   }, [playingLayers, volumes]);
 
   const restored = useRef(false);
@@ -379,9 +377,7 @@ export function AmbientProvider({ children }: { children: ReactNode }) {
     if (!config.sounds.length) return;
     restored.current = true;
     try {
-      const raw = localStorage.getItem(getStorageKey("rpg_ambient_session"));
-      if (!raw) return;
-      const saved: { trackId: string; volume?: number }[] = JSON.parse(raw);
+      const saved = readJson<{ trackId: string; volume?: number }[]>("rpg_ambient_session", []);
       saved.forEach(({ trackId, volume }) => {
         const sound = config.sounds.find((s) => s.id === trackId);
         if (!sound || sound.type !== "loop") return;

@@ -10,8 +10,6 @@ import {
 import { initLootStorage } from "@/lib/lootDb";
 import type { LootDbItem } from "@/lib/lootDb";
 import type { DiceRoll, TestResult } from "@/lib/dice";
-import type { CharacterData } from "@/data/character";
-import { DEFAULT_CHARACTER } from "@/data/character";
 import type { SessionNote, NoteSessionCatalog } from "@/lib/sessionNoteModel";
 import {
   migrateSessionNotesFromUnknown,
@@ -37,6 +35,12 @@ export interface Combatant {
   hp: { current: number; max: number };
   armor: number;
   toughness: number;
+  /**
+   * Stats declared by the card's combat-resource roles. Present on combatants
+   * built from cards; older combatants fall back to the fixed fields above,
+   * which disappear once every source goes through roles.
+   */
+  stats?: { label: string; value: number }[];
   statuses: string[];
   notes: string;
   isEnemy: boolean;
@@ -98,45 +102,17 @@ export interface CodexEntry {
   content: string;
 }
 
-const DEFAULT_COMBATANTS: Combatant[] = [
-  { id: "c1", name: "Aldric (Gracz)", initiative: 42, ww: 42, us: 35, sb: 3, hp: { current: 11, max: 14 }, armor: 1, toughness: 4, statuses: [], notes: "", isEnemy: false },
-  { id: "c2", name: "Goblin Łucznik", initiative: 35, ww: 25, us: 30, sb: 2, hp: { current: 6, max: 6 }, armor: 0, toughness: 3, statuses: [], notes: "Ma krótki łuk", isEnemy: true },
-  { id: "c3", name: "Goblin Wojownik", initiative: 28, ww: 30, us: 20, sb: 3, hp: { current: 8, max: 8 }, armor: 0, toughness: 3, statuses: [], notes: "", isEnemy: true },
-];
+/**
+ * A fresh campaign starts empty — every creature, note and item below belongs
+ * to the GM's own setting, not to Magnus.
+ */
+const DEFAULT_COMBATANTS: Combatant[] = [];
 
-const DEFAULT_ENEMIES: GmEnemy[] = [
-  { id: "e1", name: "Goblin", ww: 25, hp: 6, armor: 0, weapon: "Zardzewiały tasak (SB+2)" },
-  { id: "e2", name: "Ork", ww: 35, hp: 12, armor: 1, weapon: "Choppa (SB+4)" },
-  { id: "e3", name: "Szkielet", ww: 25, hp: 5, armor: 0, weapon: "Stary miecz (SB+3)" },
-  { id: "e4", name: "Bandyta", ww: 30, hp: 10, armor: 1, weapon: "Miecz (SB+4)" },
-  { id: "e5", name: "Wilk", ww: 35, hp: 8, armor: 0, weapon: "Kły (SB+2)" },
-  { id: "e6", name: "Ghul", ww: 30, hp: 12, armor: 0, weapon: "Pazury (SB+3), Zatruty" },
-];
+const DEFAULT_ENEMIES: GmEnemy[] = [];
 
-const DEFAULT_NOTES: SessionNote[] = [
-  { id: "n1", text: "Podróż do Ubersreiku z drużyną", category: "general", timestamp: Date.now(), scope: "global", pinned: false },
-  { id: "n2", text: "Heinz — kupiec, jestem mu winien przysługę", category: "npc", timestamp: Date.now(), scope: "global", pinned: false },
-  { id: "n3", text: "Nie ufam elfowi w drużynie", category: "general", timestamp: Date.now(), scope: "global", pinned: false },
-  { id: "n4", text: "Uzupełnić zapasy w następnym mieście", category: "objective", timestamp: Date.now(), scope: "global", pinned: false },
-  { id: "n5", text: "Ubersreik — cel podróży", category: "location", timestamp: Date.now(), scope: "global", pinned: false },
-];
+const DEFAULT_NOTES: SessionNote[] = [];
 
-const DEFAULT_INVENTORY: InventoryItem[] = [
-  { id: "i1", name: "Miecz", category: "weapons", quantity: 1 },
-  { id: "i2", name: "Sztylet", category: "weapons", quantity: 1 },
-  { id: "i3", name: "Łuk krótki", category: "weapons", quantity: 1 },
-  { id: "i4", name: "Strzały", category: "weapons", quantity: 20, maxQuantity: 20 },
-  { id: "i5", name: "Skórzany kaftan", category: "armor", quantity: 1 },
-  { id: "i6", name: "Kolczy czepiec", category: "armor", quantity: 1 },
-  { id: "i7", name: "Okład leczniczy", category: "consumables", quantity: 2 },
-  { id: "i8", name: "Racje żywnościowe", category: "consumables", quantity: 3 },
-  { id: "i9", name: "Lina (10m)", category: "gear", quantity: 1 },
-  { id: "i10", name: "Latarnia", category: "gear", quantity: 1 },
-  { id: "i11", name: "Krzesiwo", category: "gear", quantity: 1 },
-  { id: "i12", name: "Złote korony", category: "coins", quantity: 0 },
-  { id: "i13", name: "Srebrne szylingi", category: "coins", quantity: 12 },
-  { id: "i14", name: "Miedziane pensy", category: "coins", quantity: 8 },
-];
+const DEFAULT_INVENTORY: InventoryItem[] = [];
 
 const DEFAULT_DIFFICULTY_PRESETS: DifficultyPreset[] = [
   { label: "Very Easy", labelPl: "Bardzo łatwy", modifier: 30 },
@@ -172,8 +148,6 @@ interface AppContextType {
   testHistory: TestResult[];
   addTestResult: (result: TestResult) => void;
   clearTestHistory: () => void;
-  character: CharacterData;
-  updateCharacter: (data: CharacterData) => void;
   pinnedSheets: string[];
   togglePinSheet: (id: string) => void;
   combatSessions: CombatSessionsState;
@@ -213,7 +187,6 @@ const AppContext = createContext<AppContextType | null>(null);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [rollHistory, setRollHistory] = useLocalStorage<DiceRoll[]>("rpg_dice_rolls", []);
   const [testHistory, setTestHistory] = useLocalStorage<TestResult[]>("rpg_test_results", []);
-  const [character, setCharacter] = useLocalStorage<CharacterData>("rpg_character", DEFAULT_CHARACTER);
   const [pinnedSheets, setPinnedSheets] = useLocalStorage<string[]>("rpg_codex_pins", []);
   const combatSessionsInitial = useMemo(() => readCombatSessionsFromStorage(DEFAULT_COMBATANTS), []);
   const [combatSessions, setCombatSessions] = useLocalStorage<CombatSessionsState>(
@@ -302,14 +275,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const clearRollHistory = () => setRollHistory([]);
   const addTestResult = (result: TestResult) => setTestHistory((prev) => [result, ...prev].slice(0, 50));
   const clearTestHistory = () => setTestHistory([]);
-  const updateCharacter = (data: CharacterData) => setCharacter(data);
   const togglePinSheet = (id: string) => setPinnedSheets((prev) => prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]);
 
   return (
     <AppContext.Provider value={{
       rollHistory, addRoll, clearRollHistory,
       testHistory, addTestResult, clearTestHistory,
-      character, updateCharacter,
       pinnedSheets, togglePinSheet,
       combatSessions, setCombatSessions,
       combatants, setCombatants, combatRound, setCombatRound, combatTurn, setCombatTurn,

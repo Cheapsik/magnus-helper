@@ -106,7 +106,7 @@ function AuthField({
           required
           minLength={minLength}
           className={cn(
-            "h-9 w-full rounded-md border border-white/15 bg-black/45 py-2 text-sm text-white sm:h-11 sm:rounded-lg",
+            "h-9 w-full rounded-md border border-white/15 bg-black/45 py-2 text-sm text-white sm:h-[--h-control] sm:rounded-lg",
             "placeholder:text-white/35 focus:border-[#c5a059]/60 focus:outline-none focus:ring-1 focus:ring-[#c5a059]/40",
             showToggle ? "pl-10 pr-10" : "pl-10 pr-3",
           )}
@@ -210,7 +210,7 @@ function GoldButton({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "flex h-9 w-full items-center justify-center gap-1 rounded-md text-sm font-semibold text-white transition-colors sm:h-11 sm:rounded-lg",
+        "flex h-9 w-full items-center justify-center gap-1 rounded-md text-sm font-semibold text-white transition-colors sm:h-[--h-control] sm:rounded-lg",
         "bg-[#c5a059] hover:bg-[#b8924f] disabled:pointer-events-none disabled:opacity-50",
       )}
     >
@@ -225,7 +225,7 @@ function AuthDivider() {
       <div className="absolute inset-0 flex items-center">
         <div className="w-full border-t border-white/15" />
       </div>
-      <div className="relative flex justify-center text-xs uppercase tracking-wider">
+      <div className="relative flex justify-center text-[length:--fs-meta]">
         <span className="bg-[rgba(22,22,26,0.88)] px-3 text-white/40">LUB</span>
       </div>
     </div>
@@ -239,7 +239,7 @@ function GoogleButton({ onClick, disabled, label }: { onClick: () => void; disab
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "flex h-9 w-full items-center justify-center gap-2 rounded-md border border-white/15 sm:h-11 sm:gap-3 sm:rounded-lg",
+        "flex h-9 w-full items-center justify-center gap-2 rounded-md border border-white/15 sm:h-[--h-control] sm:gap-3 sm:rounded-lg",
         "bg-black/45 text-sm font-medium text-white transition-colors hover:bg-black/60",
         "disabled:pointer-events-none disabled:opacity-50",
       )}

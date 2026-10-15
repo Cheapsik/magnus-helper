@@ -35,7 +35,7 @@ import { EmojiPickerButton } from "@/components/emoji/EmojiPickerButton";
 import { toast } from "sonner";
 import { getNpcDisplayName, NpcQuickPreview } from "@/components/character-sheet";
 import { MentionTextarea } from "@/components/mention/MentionTextarea";
-import { getStorageKey } from "@/lib/campaignStorage";
+import { readJson, writeJson } from "@/lib/storage";
 
 const STORAGE_QUEST_LAYOUT = "rpg_quests_layout";
 const STORAGE_QUESTS = "rpg_quests";
@@ -164,9 +164,7 @@ function repairQuestsState(raw: QuestsState, layout: QuestsLayoutConfig): Quests
 
 function readQuestsStateFromStorage(layout: QuestsLayoutConfig): QuestsState | null {
   try {
-    const item = window.localStorage.getItem(getStorageKey(STORAGE_QUESTS));
-    if (!item) return null;
-    const parsed = JSON.parse(item) as QuestsState;
+    const parsed = readJson<QuestsState | null>(STORAGE_QUESTS, null);
     if (!parsed?.quests || !parsed?.order) return null;
     return repairQuestsState(parsed, layout);
   } catch {
@@ -240,9 +238,8 @@ function normalizeQuestsLayout(raw: QuestsLayoutConfig): QuestsLayoutConfig {
 
 function loadNormalizedLayoutFromStorage(): QuestsLayoutConfig {
   try {
-    const item = window.localStorage.getItem(getStorageKey(STORAGE_QUEST_LAYOUT));
-    if (!item) return normalizeQuestsLayout(DEFAULT_QUEST_LAYOUT);
-    const parsed = JSON.parse(item) as QuestsLayoutConfig;
+    const parsed = readJson<QuestsLayoutConfig | null>(STORAGE_QUEST_LAYOUT, null);
+    if (!parsed) return normalizeQuestsLayout(DEFAULT_QUEST_LAYOUT);
     return normalizeQuestsLayout(parsed);
   } catch {
     return normalizeQuestsLayout(DEFAULT_QUEST_LAYOUT);
@@ -748,11 +745,7 @@ export default function QuestsPage() {
   }, [layout]);
 
   useEffect(() => {
-    try {
-      window.localStorage.setItem(getStorageKey(STORAGE_QUESTS), JSON.stringify(state));
-    } catch {
-
-    }
+    writeJson(STORAGE_QUESTS, state);
   }, [state]);
 
   const typeMap = useMemo(() => Object.fromEntries(layout.types.map((t) => [t.id, t])) as Record<string, QuestTypeConfig>, [layout.types]);
@@ -1069,7 +1062,6 @@ export default function QuestsPage() {
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <h1 className="font-app-brand text-xl font-bold text-foreground">Wątki</h1>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           <Button
@@ -1161,7 +1153,7 @@ export default function QuestsPage() {
             <div className="space-y-6 text-sm">
               <section className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Typy wątków</h3>
+                  <h3 className="field-label">Typy wątków</h3>
                   <Button type="button" size="sm" variant="secondary" onClick={addTypeToDraft}>
                     Dodaj typ
                   </Button>
@@ -1232,7 +1224,7 @@ export default function QuestsPage() {
 
               <section className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Kolumny</h3>
+                  <h3 className="field-label">Kolumny</h3>
                   <Button type="button" size="sm" variant="secondary" onClick={addColumnToDraft}>
                     Dodaj kolumnę
                   </Button>

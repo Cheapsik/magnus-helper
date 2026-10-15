@@ -1,73 +1,46 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { readStorageValue, writeStorageValue } from "@/components/global-drawer/drawerStorage";
-
-const HERO_LIST_KEY = "rpg_characters";
-const HERO_SINGLE_KEY = "rpg_character";
-
-interface HeroSummary {
-  id: string;
-  name: string;
-  race?: string;
-  profession?: string;
-  stats?: Array<{ label: string; value: number }>;
-}
+import { useCardType, useCards } from "@/lib/cardStore";
+import { cardSubtitle, getCardCombatStats } from "@/lib/cardSchema";
 
 interface HeroDrawerViewProps {
   id: string;
 }
 
 export function HeroDrawerView({ id }: HeroDrawerViewProps) {
-  const [hero, setHero] = useState<HeroSummary | null>(null);
+  const cardType = useCardType("hero");
+  const [heroes, setHeroes] = useCards("hero");
 
-  useEffect(() => {
-    const list = readStorageValue<HeroSummary[]>(HERO_LIST_KEY, []);
-    const byList = list.find((entry) => entry.id === id);
-    if (byList) {
-      setHero(byList);
-      return;
-    }
-    const single = readStorageValue<Record<string, unknown>>(HERO_SINGLE_KEY, {});
-    if (single && typeof single.name === "string") {
-      setHero({
-        id: id || "single",
-        name: String(single.name ?? ""),
-        race: String(single.race ?? ""),
-        profession: String(single.career ?? ""),
-        stats: Array.isArray(single.stats) ? (single.stats as Array<{ label: string; value: number }>) : [],
-      });
-    } else {
-      setHero(null);
-    }
-  }, [id]);
-
-  const updateHeroName = (name: string) => {
-    if (!hero) return;
-    setHero({ ...hero, name });
-    const list = readStorageValue<HeroSummary[]>(HERO_LIST_KEY, []);
-    if (list.some((entry) => entry.id === id)) {
-      const existing = readStorageValue<HeroSummary[]>(HERO_LIST_KEY, []);
-      const updated = existing.map((item) => (item.id === id ? { ...item, name } : item));
-      writeStorageValue(HERO_LIST_KEY, updated);
-      return;
-    }
-    const single = readStorageValue<Record<string, unknown>>(HERO_SINGLE_KEY, {});
-    writeStorageValue(HERO_SINGLE_KEY, { ...single, name });
-  };
+  const hero = useMemo(() => heroes.find((entry) => entry.id === id) ?? null, [heroes, id]);
 
   if (!hero) {
     return <p className="text-sm text-muted-foreground">Nie znaleziono bohatera.</p>;
   }
 
+  const subtitle = cardSubtitle(cardType, hero);
+  const combat = getCardCombatStats(cardType, hero.values);
+
+  const renameHero = (next: string) => {
+    setHeroes((prev) => prev.map((entry) => (entry.id === id ? { ...entry, name: next } : entry)));
+  };
+
   return (
     <div className="space-y-3">
-      <Input value={hero.name} onChange={(e) => updateHeroName(e.target.value)} placeholder="Imie" />
+      <Input
+        value={hero.name}
+        onChange={(e) => renameHero(e.target.value)}
+        placeholder="Nazwa"
+      />
       <div className="rounded-lg border p-3 text-sm">
-        <p className="font-medium">{hero.race || "Rasa: -"}</p>
-        <p className="text-muted-foreground">{hero.profession || "Profesja: -"}</p>
+        <p className="font-medium">{subtitle || "Brak opisu"}</p>
+        {combat.resource && (
+          <p className="text-muted-foreground">
+            {combat.resource.current} / {combat.resource.max}
+          </p>
+        )}
         <div className="mt-2 grid grid-cols-2 gap-1 text-xs">
-          {(hero.stats ?? []).slice(0, 8).map((stat) => (
+          {combat.stats.slice(0, 8).map((stat) => (
             <span key={stat.label} className="rounded bg-muted px-2 py-1">
               {stat.label}: {stat.value}
             </span>
@@ -75,7 +48,7 @@ export function HeroDrawerView({ id }: HeroDrawerViewProps) {
         </div>
       </div>
       <Button type="button" variant="outline" className="w-full" disabled>
-        Otworz pelna karte (w kolejnym kroku)
+        Otwórz pełną kartę (w kolejnym kroku)
       </Button>
     </div>
   );

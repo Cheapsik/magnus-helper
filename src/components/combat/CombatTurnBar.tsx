@@ -48,7 +48,7 @@ export function CombatTurnBar({
 
       <div className="flex min-w-0 flex-1 items-center justify-center gap-2 border-x border-border/60 px-2">
         <div className="flex items-baseline gap-1.5 whitespace-nowrap">
-          <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Runda</span>
+          <span className="field-label">Runda</span>
           <span className="font-mono text-xl font-bold leading-none text-primary">{combatRound}</span>
           <span className="text-xs text-muted-foreground">· tura {turnLabel}</span>
         </div>

@@ -1,40 +1,94 @@
 # Magnus Helper
 
-Neutralne narzędzie dla Mistrza Gry (MG) do prowadzenia kampanii RPG, niezależne od konkretnego komercyjnego systemu mechaniki.
+Neutralne narzędzie dla Mistrza Gry (MG) do prowadzenia kampanii RPG w dowolnym systemie mechaniki. Magnus nie zna żadnych cech, wzorów ani nazw z konkretnych systemów — wszystko, co mechaniczne, definiuje MG w ramach kampanii.
 
-## Language
+## Kampania i jej system
 
 **Kampania**:
-Nadrzędny kontener całej pracy MG nad jedną rozgrywką. Jedno konto MG może mieć wiele kampanii. Wszystkie dane robocze MG (bohaterowie, NPC, walka, notatki, questy, sceny, ambient, timery, relacje, generatory, presety) są w pełni izolowane per kampania — nic nie jest współdzielone między kampaniami. Kampania sama definiuje swoje mechanizmy: strukturę kart (bohatera, NPC, opcjonalnie przeciwnika) oraz opcjonalne role pól wykorzystywane przez wspólne narzędzia Magnusa. Nie ma osobnego, nazwanego bytu reprezentującego te zasady — to kampania jako całość niesie tę definicję. Przy tworzeniu kampanii MG jednorazowo wybiera punkt startowy (neutralny szablon startowy albo pusta struktura) — kampanii nie da się później przełączyć na inny szablon startowy ani zresetować do innego wariantu. Po utworzeniu struktura staje się własną, niezależną konfiguracją tej kampanii i MG może ją swobodnie edytować przez cały czas jej trwania (nazwy, sekcje, pola, struktura list wpisów, role pól) — edycje, które usuwałyby dane z istniejących kart, wymagają jasnego ostrzeżenia i świadomego potwierdzenia MG przed zatwierdzeniem. Magnus nie dostarcza gotowych, nazwanych profili konkretnych komercyjnych systemów RPG, ich treści ani lore.
-_Avoid_: Sesja (sesja to pojedyncze spotkanie przy stole, nie kontener na dane), Świat, Projekt, Profil zasad, System RPG, Ruleset.
+Nadrzędny, w pełni odizolowany kontener całej pracy MG nad jedną rozgrywką (karty, walka, notatki, questy, sceny, ambient, timery, relacje, generatory, presety). Jedno konto MG może mieć wiele kampanii, każdą w innym systemie.
+_Avoid_: Sesja (to pojedyncze spotkanie przy stole), Świat, Projekt.
+
+**System kampanii**:
+Całość definicji mechaniki należących do jednej kampanii: struktury kart, rodzaje testów, rodzaje ataku, stany, waluta i generator. Nie jest osobnym bytem współdzielonym między kampaniami — każda kampania ma własny i edytuje go przez cały czas jej trwania.
+_Avoid_: Profil zasad, Ruleset, System RPG, Szablon (szablon to tylko punkt startowy).
+
+**Punkt startowy**:
+Jednorazowy wybór przy tworzeniu kampanii: neutralny szablon startowy albo pusta struktura. Po utworzeniu system kampanii jest jej własną kopią, niepowiązaną z punktem startowym.
+
+**Neutralny szablon startowy**:
+Punkt startowy dostarczany przez Magnusa, zawierający wyłącznie ogólne, niekojarzące się z żadnym systemem elementy (np. cechy Siła, Zręczność, Wytrzymałość, Inteligencja oraz zdrowie, inicjatywę i ochronę).
+_Avoid_: Preset systemu, Domyślny system.
+
+## Karty
 
 **Karta**:
-Zestaw sekcji i pól zdefiniowany przez kampanię, opisujący bohatera, NPC lub potwora w tej kampanii. Cała struktura karty — sekcje, pola, ich nazwy i układ — jest definiowana przez MG w ramach kampanii, nie narzucona przez Magnusa. Bohater, NPC i potwór to trzy osobne typy kart, każdy z własną, niezależną strukturą (np. potwór może mieć uproszczoną strukturę, szybszą do wypełnienia niż pełnoprawny NPC z historią i osobowością).
-_Avoid_: Arkusz postaci (sugeruje gotowy, narzucony układ), Statblock, Przeciwnik (używamy "Potwór").
+Opis jednego bohatera, NPC albo potwora w kampanii: stały rdzeń karty plus sekcje i pola zdefiniowane przez MG dla danego typu karty.
+_Avoid_: Arkusz postaci, Statblock, Postać (jako osobny byt).
+
+**Typ karty**:
+Jeden z trzech rodzajów kart — **bohater**, **NPC**, **potwór** — z których każdy ma własną, niezależnie edytowalną strukturę. Struktura NPC powstaje jako kopia struktury bohatera z sekcją notatek MG, a struktura potwora jako jej uproszczona wersja; potem każda żyje własnym życiem.
+_Avoid_: Przeciwnik, Wróg (używamy "Potwór").
+
+**Rdzeń karty**:
+Pola, które ma każda karta niezależnie od systemu kampanii: nazwa, portret i notatki. MG nie może ich usunąć.
 
 **Sekcja karty**:
-Nazwana przez MG grupa pól na karcie (np. cechy, umiejętności, zdolności, zasoby, ekwipunek, notatki). MG dowolnie dodaje, usuwa i układa sekcje w ramach struktury kampanii.
+Nazwana przez MG grupa pól na karcie (np. cechy, umiejętności, zasoby, ekwipunek).
 
 **Pole karty**:
-Pojedyncza wartość na karcie, zdefiniowana i nazwana przez MG w ramach sekcji. Nazwa pola należy wyłącznie do MG i sama w sobie nie niesie dla Magnusa żadnego znaczenia.
+Pojedyncza wartość na karcie, zdefiniowana i nazwana przez MG w ramach sekcji. Nazwa pola nie niesie dla Magnusa żadnego znaczenia.
 
-**Rola pola**:
-Opcjonalne, świadome oznaczenie pola karty jako wykorzystywanego przez wspólne narzędzia Magnusa. Role nie ograniczają tego, jakie pola MG może tworzyć — to wyłącznie dodatkowe, opcjonalne powiązania nad dowolną strukturą karty. Rolę nadaje wyłącznie MG — Magnus nigdy nie odgaduje roli pola na podstawie jego nazwy. Pole bez przypisanej roli pozostaje pełnoprawną częścią karty. Zamknięty zestaw ról w MVP: **domyślna inicjatywa** (co najwyżej jedno pole na kartę, opcjonalna), **główny zasób** aktualny/maksymalny (co najwyżej jedno pole na kartę, opcjonalny, pokazywany jako podstawowy pasek stanu w trackerze), **zasób dodatkowy istotny w walce** (dowolna liczba pól, pokazywane pomocniczo), oraz **dostępność do testów** (dowolna liczba pól liczbowych, każde niezależnie oznaczalne jako źródło prostego testu).
-_Avoid_: Mapowanie pola, Tag pola.
-
-**Uczestnik walki**:
-Udział konkretnej karty w konkretnej walce prowadzonej w trackerze. Niesie dane właściwe tej walce — kolejność (domyślnie z pola oznaczonego rolą inicjatywy, zawsze ręcznie nadpisywalna), statusy i notatkę — niezależnie od struktury karty źródłowej. Statusy i notatka uczestnika walki nie są polami karty i nie wymagają żadnej konfiguracji w strukturze kampanii.
-_Avoid_: Kombatant (zbyt techniczne), Token.
+**Ukryte pole**:
+Pole usunięte przez MG ze struktury, którego wartości na istniejących kartach zostają zachowane i które można przywrócić.
+_Avoid_: Skasowane pole.
 
 **Lista wpisów**:
-Typ pola sekcji, dla którego MG definiuje strukturę pojedynczego wpisu (własny zestaw pól), a następnie dodaje, edytuje, usuwa i porządkuje dowolną liczbę wpisów tej struktury na karcie (np. umiejętności, broń, ekwipunek, zaklęcia, statusy).
-_Avoid_: Tabela, Repeater (zbyt techniczne).
+Pole, dla którego MG definiuje strukturę pojedynczego wpisu, a na karcie dodaje dowolną liczbę wpisów (np. umiejętności, broń, ekwipunek, zaklęcia).
+_Avoid_: Tabela, Repeater.
+
+**Notacja kości**:
+Wartość pola zapisana jako wyrażenie rzutu (np. „1k8+2”), którą można rzucić bezpośrednio z karty.
+
+**Tor punktów**:
+Pole przedstawiane jako szereg kropek lub kratek do zaznaczania (np. poczytalność, stres, rany).
+
+**Reguła losowania**:
+Część definicji pola w strukturze karty — zakres liczb albo lista wartości — z której generator wypełnia pole przy losowaniu karty.
+
+**Rola pola**:
+Świadome oznaczenie przez MG pola karty jako wykorzystywanego przez wspólne narzędzia Magnusa. Magnus nigdy nie odgaduje roli po nazwie pola. Role: **inicjatywa** (co najwyżej jedna), **zasób główny** aktualny/maksymalny (co najwyżej jeden), **zasób dodatkowy**, **obrona** (dowolna liczba, każda nazwana, np. KP, Unik) i **redukcja obrażeń**.
+_Avoid_: Mapowanie pola, Tag pola.
+
+## Testy i walka
+
+**Rodzaj testu**:
+Nazwany przez MG sposób rozstrzygania rzutu w kampanii: tryb (pod wartość, nad wartość/vs stopień trudności, pula kości, przedziały wyników), kość, drabina trudności, margines, krytyki oraz pola karty, z których wolno go wykonać. Kampania może mieć dowolną liczbę rodzajów testów.
+_Avoid_: Profil testu, Mechanika.
+
+**Drabina trudności**:
+Lista nazwanych modyfikatorów trudności należąca do rodzaju testu.
+
+**Rodzaj ataku**:
+Nazwany przez MG sposób prowadzenia ataku: który rodzaj testu i które pole atakującego, sposób rozstrzygnięcia trafienia, obrażenia, redukcja i opcjonalne lokacje trafień. Każdy krok może być wyłączony albo ręczny.
+
+**Rozstrzygnięcie trafienia**:
+Część rodzaju ataku określająca, z czym porównuje się rzut atakującego: z jego własną wartością, z polem obrony celu, z przeciwstawnym testem celu (z zasadą remisu) albo ręcznie przez MG.
+
+**Lokacja trafienia**:
+Opcjonalna tabela przedziałów rzutu wskazująca trafioną część celu, z opcjonalną redukcją obrażeń osobno dla każdej lokacji.
 
 **Tracker walki**:
-Generyczne wspólne narzędzie do prowadzenia stanu walki — uczestnicy, kolejność, tury, rundy, statusy, notatki. Korzysta wyłącznie z pól, które MG oznaczył odpowiednią rolą w strukturze swojej kampanii; bez skonfigurowanej roli działa w trybie ręcznym. Nie rozstrzyga automatycznie trafień, obrażeń ani efektów specjalnych.
+Wspólne narzędzie prowadzenia walki — uczestnicy, kolejność, tury, rundy, statusy, notatki — korzystające z ról pól i rodzajów ataku kampanii. Bez skonfigurowanych ról i rodzajów ataku działa w trybie ręcznym.
 
-## Stan implementacji
+**Uczestnik walki**:
+Udział konkretnej karty w konkretnej walce: kolejność, statusy i notatka właściwe tej walce, niezależne od struktury karty.
+_Avoid_: Kombatant, Token.
 
-Zaimplementowany fundament (Decyzje 1, 2, 7): rejestr kampanii, pełna izolacja danych w localStorage (namespacing per kampania), automatyczna jednorazowa migracja istniejących danych do domyślnej kampanii „Moja kampania”, przełącznik kampanii w headerze oraz pełny konfigurator (tworzenie, zmiana nazwy, archiwizacja, usuwanie) w Ustawieniach.
+## Listy kampanii
 
-Świadomie odłożone na kolejny etap: kreator własnej struktury kart (Decyzje 3–4, 9), role pól i ich integracja z trackerem walki/testami (Decyzja 5–6, 10). Dziś każda kampania startuje z pełną kopią dzisiejszej, zaszytej na sztywno struktury WFRP-podobnej — nie ma jeszcze możliwości jej edycji ani tworzenia od pustej struktury.
+**Stan**:
+Nazwany przez MG efekt nakładany na uczestnika walki lub kartę (np. ogłuszony, krwawienie). Lista stanów należy do kampanii.
+_Avoid_: Status (w UI dopuszczalne), Kondycja.
+
+**Waluta kampanii**:
+Zdefiniowane przez MG nominały i ich przeliczniki, wspólne dla łupu, sklepu i majątku na kartach.

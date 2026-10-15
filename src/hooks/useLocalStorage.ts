@@ -1,46 +1,59 @@
-import { useState, useCallback } from "react";
-import { getStorageKey } from "@/lib/campaignStorage";
+import { useCallback, useRef, useSyncExternalStore } from "react";
+import {
+  getSnapshot,
+  resolveStorageKey,
+  subscribe,
+  writeJson,
+  type StorageOptions,
+} from "@/lib/storage";
 
-export type UseLocalStorageOptions<T> = {
-  revive?: (parsed: unknown) => T;
-  /**
-   * Set for device/UI-level preferences (theme, sidebar width, Gracz/MG mode...)
-   * that are shared across all campaigns instead of being isolated per campaign.
-   */
-  global?: boolean;
-};
+export type UseLocalStorageOptions<T> = StorageOptions<T>;
 
+/**
+ * Campaign-scoped persistent state.
+ *
+ * Every instance pointing at the same key shares one value: writes from
+ * another component, from imperative code in `@/lib/storage`, or from another
+ * browser tab all land here.
+ *
+ * `initialValue` is only a fallback for a key that has never been written; the
+ * first instance to read a missing key decides what the others see.
+ */
 export function useLocalStorage<T>(
   key: string,
   initialValue: T,
   options?: UseLocalStorageOptions<T>,
 ): [T, (value: T | ((prev: T) => T)) => void] {
-  const storageKey = options?.global ? key : getStorageKey(key);
+  // Call sites pass these inline, so their identity changes every render —
+  // keep them in a ref and key the memos off the resolved storage key instead.
+  const latest = useRef({ initialValue, options });
+  latest.current = { initialValue, options };
 
-  const [storedValue, setStoredValue] = useState<T>(() => {
-    try {
-      const item = window.localStorage.getItem(storageKey);
-      if (!item) return initialValue;
-      const parsed = JSON.parse(item);
-      return options?.revive ? options.revive(parsed) : (parsed as T);
-    } catch {
-      return initialValue;
-    }
-  });
+  const storageKey = resolveStorageKey(key, options);
+
+  const subscribeToKey = useCallback(
+    (listener: () => void) => subscribe(key, listener, latest.current.options),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [storageKey],
+  );
+
+  const read = useCallback(
+    () => getSnapshot(key, latest.current.initialValue, latest.current.options),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [storageKey],
+  );
+
+  const storedValue = useSyncExternalStore(subscribeToKey, read, read);
 
   const setValue = useCallback(
     (value: T | ((prev: T) => T)) => {
-      setStoredValue((prev) => {
-        const next = value instanceof Function ? value(prev) : value;
-        try {
-          window.localStorage.setItem(storageKey, JSON.stringify(next));
-        } catch {
-
-        }
-        return next;
-      });
+      const { initialValue: fallback, options: opts } = latest.current;
+      const prev = getSnapshot(key, fallback, opts);
+      const next = value instanceof Function ? value(prev) : value;
+      writeJson(key, next, opts);
     },
-    [storageKey]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [storageKey],
   );
 
   return [storedValue, setValue];

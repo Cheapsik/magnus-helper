@@ -147,24 +147,35 @@ export function CombatantStatLine({ c }: { c: Combatant }) {
         </StatAbbrWithTooltip>{" "}
         <span className="font-bold text-foreground">{c.initiative}</span>
       </span>
-      <span>
-        <StatAbbrWithTooltip statKey="ww" className="text-muted-foreground">
-          WW
-        </StatAbbrWithTooltip>{" "}
-        <span className="font-bold text-foreground">{c.ww}</span>
-      </span>
-      <span>
-        <StatAbbrWithTooltip statKey="us" className="text-muted-foreground">
-          US
-        </StatAbbrWithTooltip>{" "}
-        <span className="font-bold text-foreground">{c.us}</span>
-      </span>
-      <span>
-        <StatAbbrWithTooltip statKey="sb" className="text-muted-foreground">
-          SB
-        </StatAbbrWithTooltip>{" "}
-        <span className="font-bold text-foreground">{c.sb}</span>
-      </span>
+      {c.stats ? (
+        c.stats.map((stat) => (
+          <span key={stat.label}>
+            <span className="text-muted-foreground">{stat.label}</span>{" "}
+            <span className="font-bold text-foreground">{stat.value}</span>
+          </span>
+        ))
+      ) : (
+        <>
+          <span>
+            <StatAbbrWithTooltip statKey="ww" className="text-muted-foreground">
+              WW
+            </StatAbbrWithTooltip>{" "}
+            <span className="font-bold text-foreground">{c.ww}</span>
+          </span>
+          <span>
+            <StatAbbrWithTooltip statKey="us" className="text-muted-foreground">
+              US
+            </StatAbbrWithTooltip>{" "}
+            <span className="font-bold text-foreground">{c.us}</span>
+          </span>
+          <span>
+            <StatAbbrWithTooltip statKey="sb" className="text-muted-foreground">
+              SB
+            </StatAbbrWithTooltip>{" "}
+            <span className="font-bold text-foreground">{c.sb}</span>
+          </span>
+        </>
+      )}
       <span>
         <StatAbbrWithTooltip statKey="pż" className="text-muted-foreground">
           PŻ
@@ -173,18 +184,22 @@ export function CombatantStatLine({ c }: { c: Combatant }) {
           {c.hp.current}/{c.hp.max}
         </span>
       </span>
-      <span className="flex items-center gap-0.5">
-        <StatAbbrWithTooltip statKey="pnc" className="flex items-center gap-0.5 text-muted-foreground">
-          <Shield className="h-2.5 w-2.5" />
-          <span className="font-bold text-foreground">{c.armor}</span>
-        </StatAbbrWithTooltip>
-      </span>
-      <span>
-        <StatAbbrWithTooltip statKey="wtSoak" className="text-muted-foreground">
-          {getStatGlossaryEntry("wtSoak").abbr}
-        </StatAbbrWithTooltip>{" "}
-        <span className="font-bold text-foreground">{c.toughness}</span>
-      </span>
+      {!c.stats && (
+        <>
+          <span className="flex items-center gap-0.5">
+            <StatAbbrWithTooltip statKey="pnc" className="flex items-center gap-0.5 text-muted-foreground">
+              <Shield className="h-2.5 w-2.5" />
+              <span className="font-bold text-foreground">{c.armor}</span>
+            </StatAbbrWithTooltip>
+          </span>
+          <span>
+            <StatAbbrWithTooltip statKey="wtSoak" className="text-muted-foreground">
+              {getStatGlossaryEntry("wtSoak").abbr}
+            </StatAbbrWithTooltip>{" "}
+            <span className="font-bold text-foreground">{c.toughness}</span>
+          </span>
+        </>
+      )}
     </div>
   );
 }

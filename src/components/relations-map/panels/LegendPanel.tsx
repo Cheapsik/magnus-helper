@@ -5,7 +5,7 @@ export function LegendPanel({ embedded }: { embedded?: boolean }) {
   return (
     <div className={embedded ? "" : "border-t border-border px-3 py-3 shrink-0 bg-card/20"}>
       {!embedded && (
-        <div className="text-[10px] uppercase tracking-wider text-primary mb-2">Legenda</div>
+        <div className="field-label mb-1.5 text-primary">Legenda</div>
       )}
       <div className="grid grid-cols-2 gap-x-2 gap-y-1 mb-2">
         {LEGEND_TYPES.map((t) => (

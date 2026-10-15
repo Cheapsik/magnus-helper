@@ -27,23 +27,16 @@ const SEVERITY_STYLES = {
 };
 
 export default function ConditionsPage() {
-  const { conditions, setConditions, character, updateCharacter } = useApp();
+  const { conditions, setConditions } = useApp();
   const [customName, setCustomName] = useState("");
 
   const addCondition = (name: string, severity: ActiveCondition["severity"] = "medium") => {
     if (conditions.some((c) => c.name === name)) return;
     setConditions((prev) => [...prev, { id: crypto.randomUUID(), name, severity }]);
-        if (!character.conditions.includes(name)) {
-      updateCharacter({ ...character, conditions: [...character.conditions, name] });
-    }
   };
 
   const removeCondition = (id: string) => {
-    const cond = conditions.find((c) => c.id === id);
     setConditions((prev) => prev.filter((c) => c.id !== id));
-        if (cond) {
-      updateCharacter({ ...character, conditions: character.conditions.filter((c) => c !== cond.name) });
-    }
   };
 
   const updateRounds = (id: string, delta: number) =>
@@ -58,10 +51,9 @@ export default function ConditionsPage() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <h1 className="font-app-brand text-lg font-bold">Stany i efekty</h1>
 
       <section>
-        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">
+        <label className="field-label mb-1.5 block">
           Aktywne ({conditions.length})
         </label>
         {conditions.length === 0 ? (
@@ -96,7 +88,7 @@ export default function ConditionsPage() {
       </section>
 
       <section>
-        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Szybkie dodawanie</label>
+        <label className="field-label mb-1.5 block">Szybkie dodawanie</label>
         <div className="flex flex-wrap gap-1.5">
           {COMMON_CONDITIONS.map((c) => {
             const active = conditions.some((a) => a.name === c.name);
@@ -111,7 +103,7 @@ export default function ConditionsPage() {
       </section>
 
       <section>
-        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Własny stan</label>
+        <label className="field-label mb-1.5 block">Własny stan</label>
         <div className="flex gap-2">
           <input type="text" value={customName} onChange={(e) => setCustomName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleCustomAdd()}
             placeholder="Nazwa stanu…" className="flex-1 h-9 px-3 text-sm rounded-md border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring" />

@@ -468,7 +468,6 @@ export default function SessionNotesPage() {
   return (
     <div className="space-y-3 animate-fade-in pb-8">
       <div className="flex items-center justify-between gap-2">
-        <h1 className="font-app-brand text-base font-semibold tracking-tight">Notatki</h1>
         <div className="flex items-center gap-1">
           <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => setSettingsOpen(true)} aria-label="Szablony, kategorie i sesje">
             <Settings2 className="h-4 w-4" />
@@ -796,7 +795,7 @@ export default function SessionNotesPage() {
               id="new-session-name"
               value={newSessionName}
               onChange={(e) => setNewSessionName(e.target.value)}
-              placeholder="np. Sesja 12 — Zjazd w Ubersreiku"
+              placeholder="np. Sesja 12 — powrót do stolicy"
               className="h-9 text-sm"
               autoFocus
               onKeyDown={(e) => {

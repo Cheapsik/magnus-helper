@@ -273,7 +273,7 @@ export default function ShopPage() {
               value={shopConfig.selectedShopTypeId ?? ""}
               onValueChange={(v) => updateConfig((c) => ({ ...c, selectedShopTypeId: v }))}
             >
-              <SelectTrigger className="min-h-11 flex-1">
+              <SelectTrigger className="min-h-[--h-control] flex-1">
                 <SelectValue placeholder="Wybierz typ" />
               </SelectTrigger>
               <SelectContent>
@@ -287,7 +287,7 @@ export default function ShopPage() {
             <Button
               type="button"
               variant="outline"
-              className="min-h-11 shrink-0 gap-1"
+              className="min-h-[--h-control] shrink-0 gap-1"
               onClick={() => {
                 setDraftType(null);
                 setTypesModalOpen(true);
@@ -321,7 +321,7 @@ export default function ShopPage() {
               <label
                 key={o.id}
                 className={cn(
-                  "flex items-center gap-3 rounded-md border px-3 py-2 cursor-pointer min-h-11",
+                  "flex items-center gap-3 rounded-md border px-3 py-2 cursor-pointer min-h-[--h-control]",
                   shopConfig.wealthLevel === o.id ? "border-primary bg-primary/5" : "border-border",
                 )}
               >
@@ -354,7 +354,7 @@ export default function ShopPage() {
             <div>
               <span className="text-[10px] text-muted-foreground">Złoto</span>
               <Input
-                className="min-h-11 mt-0.5"
+                className="min-h-[--h-control] mt-0.5"
                 value={shopConfig.currency.goldLabel}
                 onChange={(e) =>
                   updateConfig((c) => ({
@@ -367,7 +367,7 @@ export default function ShopPage() {
             <div>
               <span className="text-[10px] text-muted-foreground">Srebro</span>
               <Input
-                className="min-h-11 mt-0.5"
+                className="min-h-[--h-control] mt-0.5"
                 value={shopConfig.currency.silverLabel}
                 onChange={(e) =>
                   updateConfig((c) => ({
@@ -380,7 +380,7 @@ export default function ShopPage() {
             <div>
               <span className="text-[10px] text-muted-foreground">Miedź</span>
               <Input
-                className="min-h-11 mt-0.5"
+                className="min-h-[--h-control] mt-0.5"
                 value={shopConfig.currency.copperLabel}
                 onChange={(e) =>
                   updateConfig((c) => ({
@@ -395,7 +395,7 @@ export default function ShopPage() {
             <div>
               <Label className="text-[10px] text-muted-foreground">1 zł = ? sz</Label>
               <NumberInput
-                className="min-h-11 mt-0.5"
+                className="min-h-[--h-control] mt-0.5"
                 value={shopConfig.currency.silverPerGold}
                 onChange={(v) =>
                   updateConfig((c) => ({
@@ -409,7 +409,7 @@ export default function ShopPage() {
             <div>
               <Label className="text-[10px] text-muted-foreground">1 sz = ? mk</Label>
               <NumberInput
-                className="min-h-11 mt-0.5"
+                className="min-h-[--h-control] mt-0.5"
                 value={shopConfig.currency.copperPerSilver}
                 onChange={(v) =>
                   updateConfig((c) => ({
@@ -481,7 +481,7 @@ export default function ShopPage() {
         <CollapsibleTrigger asChild>
           <button
             type="button"
-            className="flex w-full items-center justify-between gap-2 p-3 md:p-4 text-left min-h-11 hover:bg-muted/40 rounded-t-lg"
+            className="flex w-full items-center justify-between gap-2 p-3 md:p-4 text-left min-h-[--h-control] hover:bg-muted/40 rounded-t-lg"
           >
             <span className="text-sm font-semibold">Historia sklepów</span>
             <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform", historyOpen && "rotate-180")} />
@@ -508,7 +508,7 @@ export default function ShopPage() {
                       type="button"
                       variant="secondary"
                       size="sm"
-                      className="min-h-11 gap-1"
+                      className="min-h-[--h-control] gap-1"
                       onClick={() => loadSnapshot(snap)}
                     >
                       <FolderOpen className="h-4 w-4" />
@@ -518,7 +518,7 @@ export default function ShopPage() {
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="min-h-11 gap-1 text-destructive"
+                      className="min-h-[--h-control] gap-1 text-destructive"
                       onClick={() => deleteSnapshot(snap.id)}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -540,7 +540,7 @@ export default function ShopPage() {
         placeholder="Nazwa sklepu..."
         value={shopTitle}
         onChange={(e) => setShopTitle(e.target.value)}
-        className="min-h-11 text-base"
+        className="min-h-[--h-control] text-base"
       />
       <div className="flex flex-col sm:flex-row gap-2">
         <Button type="button" className="min-h-12 flex-1 gap-2 text-base font-semibold" onClick={handleGenerate}>
@@ -602,7 +602,7 @@ export default function ShopPage() {
                       }}
                       autoFocus
                     />
-                    <Button type="button" size="icon" variant="ghost" className="min-h-11 min-w-11" onClick={() => commitPrice(line.lineId)}>
+                    <Button type="button" size="icon" variant="ghost" className="min-h-[--h-control] min-w-[--h-control]" onClick={() => commitPrice(line.lineId)}>
                       <Check className="h-4 w-4" />
                     </Button>
                   </div>
@@ -621,7 +621,7 @@ export default function ShopPage() {
                     type="button"
                     size="icon"
                     variant="ghost"
-                    className="min-h-11 min-w-11"
+                    className="min-h-[--h-control] min-w-[--h-control]"
                     aria-label="Edytuj cenę"
                     onClick={() => startEditPrice(line)}
                   >
@@ -631,7 +631,7 @@ export default function ShopPage() {
                     type="button"
                     size="icon"
                     variant="ghost"
-                    className="min-h-11 min-w-11 text-destructive"
+                    className="min-h-[--h-control] min-w-[--h-control] text-destructive"
                     aria-label="Usuń"
                     onClick={() => removeLine(line.lineId)}
                   >
@@ -664,14 +664,14 @@ export default function ShopPage() {
                   <Input
                     type="number"
                     min={0}
-                    className="h-11 max-w-[120px]"
+                    className="h-[--h-control] max-w-[120px]"
                     value={priceDraft}
                     onChange={(e) => setPriceDraft(e.target.value)}
                   />
-                  <Button type="button" size="icon" variant="secondary" className="min-h-11 min-w-11" onClick={() => commitPrice(line.lineId)}>
+                  <Button type="button" size="icon" variant="secondary" className="min-h-[--h-control] min-w-[--h-control]" onClick={() => commitPrice(line.lineId)}>
                     <Check className="h-4 w-4" />
                   </Button>
-                  <Button type="button" size="icon" variant="ghost" className="min-h-11 min-w-11" onClick={() => setEditingPriceId(null)}>
+                  <Button type="button" size="icon" variant="ghost" className="min-h-[--h-control] min-w-[--h-control]" onClick={() => setEditingPriceId(null)}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
@@ -683,14 +683,14 @@ export default function ShopPage() {
             </div>
             {line.description ? <p className="text-xs text-muted-foreground">{line.description}</p> : null}
             <div className="flex gap-2 pt-1">
-              <Button type="button" variant="outline" className="min-h-11 flex-1 gap-1" onClick={() => startEditPrice(line)}>
+              <Button type="button" variant="outline" className="min-h-[--h-control] flex-1 gap-1" onClick={() => startEditPrice(line)}>
                 <Pencil className="h-4 w-4" />
                 Edytuj cenę
               </Button>
               <Button
                 type="button"
                 variant="outline"
-                className="min-h-11 flex-1 gap-1 text-destructive"
+                className="min-h-[--h-control] flex-1 gap-1 text-destructive"
                 onClick={() => removeLine(line.lineId)}
               >
                 <Trash2 className="h-4 w-4" />
@@ -718,7 +718,7 @@ export default function ShopPage() {
 
   const assortmentFooter = (
     <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between pt-2">
-      <Button type="button" variant="outline" className="min-h-11 gap-2 w-full sm:w-auto" onClick={() => setManualOpen(true)}>
+      <Button type="button" variant="outline" className="min-h-[--h-control] gap-2 w-full sm:w-auto" onClick={() => setManualOpen(true)}>
         <Plus className="h-4 w-4" />
         Dodaj ręcznie
       </Button>
@@ -731,10 +731,6 @@ export default function ShopPage() {
 
   return (
     <div className="space-y-4 animate-fade-in max-w-6xl mx-auto">
-      <h1 className="font-app-brand text-lg font-bold flex items-center gap-2">
-        <Store className="h-5 w-5 shrink-0" />
-        Sklep
-      </h1>
 
       {lootItems.length === 0 ? (
         <Alert>
@@ -785,14 +781,14 @@ export default function ShopPage() {
                     </div>
                   </div>
                   <div className="flex gap-2 shrink-0">
-                    <Button type="button" size="sm" variant="secondary" className="min-h-11" onClick={() => openEditTypeDraft(t)}>
+                    <Button type="button" size="sm" variant="secondary" className="min-h-[--h-control]" onClick={() => openEditTypeDraft(t)}>
                       Edytuj
                     </Button>
                     <Button
                       type="button"
                       size="sm"
                       variant="outline"
-                      className="min-h-11 text-destructive"
+                      className="min-h-[--h-control] text-destructive"
                       onClick={() => deleteType(t.id)}
                       disabled={shopConfig.shopTypes.length <= 1}
                     >
@@ -803,7 +799,7 @@ export default function ShopPage() {
               ))}
             </div>
           </ScrollArea>
-          <Button type="button" variant="outline" className="min-h-11 gap-1" onClick={openNewTypeDraft}>
+          <Button type="button" variant="outline" className="min-h-[--h-control] gap-1" onClick={openNewTypeDraft}>
             <Plus className="h-4 w-4" />
             Dodaj typ sklepu
           </Button>
@@ -812,7 +808,7 @@ export default function ShopPage() {
             <div className="space-y-3 rounded-lg border border-primary/30 bg-muted/20 p-3">
               <div className="space-y-1">
                 <Label className="text-xs">Nazwa</Label>
-                <Input className="min-h-11" value={draftType.name} onChange={(e) => setDraftType({ ...draftType, name: e.target.value })} />
+                <Input className="min-h-[--h-control]" value={draftType.name} onChange={(e) => setDraftType({ ...draftType, name: e.target.value })} />
               </div>
               <div className="space-y-2">
                 <Label className="text-xs">Preferowane typy (puste = wszystkie)</Label>
@@ -822,7 +818,7 @@ export default function ShopPage() {
                       <p className="text-xs text-muted-foreground">Brak typów w bazie — dodaj przedmioty.</p>
                     ) : (
                       uniqueTypes.map((tp) => (
-                        <label key={tp} className="flex items-center gap-2 text-sm min-h-11">
+                        <label key={tp} className="flex items-center gap-2 text-sm min-h-[--h-control]">
                           <Checkbox
                             checked={draftType.preferredTypes.includes(tp)}
                             onCheckedChange={(ch) => togglePreferredOnDraft(tp, ch === true)}
@@ -835,10 +831,10 @@ export default function ShopPage() {
                 </ScrollArea>
               </div>
               <div className="flex gap-2">
-                <Button type="button" className="min-h-11 flex-1" onClick={saveDraftType}>
+                <Button type="button" className="min-h-[--h-control] flex-1" onClick={saveDraftType}>
                   Zapisz typ
                 </Button>
-                <Button type="button" variant="ghost" className="min-h-11" onClick={() => setDraftType(null)}>
+                <Button type="button" variant="ghost" className="min-h-[--h-control]" onClick={() => setDraftType(null)}>
                   Anuluj
                 </Button>
               </div>
@@ -846,7 +842,7 @@ export default function ShopPage() {
           ) : null}
 
           <DialogFooter>
-            <Button type="button" variant="secondary" className="min-h-11" onClick={() => setTypesModalOpen(false)}>
+            <Button type="button" variant="secondary" className="min-h-[--h-control]" onClick={() => setTypesModalOpen(false)}>
               Zamknij
             </Button>
           </DialogFooter>
@@ -860,7 +856,7 @@ export default function ShopPage() {
           </DialogHeader>
           <Input
             placeholder="Szukaj..."
-            className="min-h-11"
+            className="min-h-[--h-control]"
             value={manualSearch}
             onChange={(e) => setManualSearch(e.target.value)}
           />
@@ -870,7 +866,7 @@ export default function ShopPage() {
                 <button
                   key={it.id}
                   type="button"
-                  className="w-full text-left rounded-md px-3 py-2 min-h-11 hover:bg-accent text-sm"
+                  className="w-full text-left rounded-md px-3 py-2 min-h-[--h-control] hover:bg-accent text-sm"
                   onClick={() => addManualItem(it)}
                 >
                   <span className="font-medium">{it.name}</span>
@@ -891,18 +887,18 @@ export default function ShopPage() {
             <DialogTitle>Nazwa snapshotu</DialogTitle>
           </DialogHeader>
           <Input
-            className="min-h-11"
+            className="min-h-[--h-control]"
             placeholder="np. Zbrojownia w Westfall — sesja 3"
             value={saveNameDraft}
             onChange={(e) => setSaveNameDraft(e.target.value)}
           />
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button type="button" variant="ghost" className="min-h-11" onClick={() => setSaveDialogOpen(false)}>
+            <Button type="button" variant="ghost" className="min-h-[--h-control]" onClick={() => setSaveDialogOpen(false)}>
               Anuluj
             </Button>
             <Button
               type="button"
-              className="min-h-11"
+              className="min-h-[--h-control]"
               onClick={() => {
                 const n = saveNameDraft.trim();
                 if (!n) {

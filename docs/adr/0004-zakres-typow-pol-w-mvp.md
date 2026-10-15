@@ -1,3 +1,7 @@
+---
+status: amended by ADR-0007
+---
+
 # Zakres typów pól karty w MVP
 
 Ustalono zamknięty zestaw typów pól dostępnych przy budowie struktury kart kampanii w MVP: liczba, tekst krótki, tekst długi/notatka, wartość aktualna/maksymalna, checkbox, wybór jednej opcji z listy zdefiniowanej przez MG, wybór wielu opcji/tagi oraz lista wpisów (z własną, definiowaną przez MG strukturą pojedynczego wpisu — np. umiejętności, broń, ekwipunek, zaklęcia, statusy). Lista wpisów jest częścią MVP, nie funkcją odłożoną, bo bez niej nie da się wiernie odwzorować typowych elementów kart RPG.

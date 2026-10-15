@@ -25,7 +25,6 @@ const GLOBAL_KEYS = new Set<string>([
   "magnus_settings",
   "rpg_theme",
   "magnus_sidebar_width",
-  "rpg_mode",
   "magnus-dice-3d-visual",
 ]);
 

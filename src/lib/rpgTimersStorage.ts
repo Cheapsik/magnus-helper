@@ -1,4 +1,4 @@
-import { getStorageKey } from "@/lib/campaignStorage";
+import { readJson, writeJson } from "@/lib/storage";
 
 export interface TimerData {
   id: string;
@@ -32,37 +32,25 @@ export function formatTimerMs(ms: number): string {
 }
 
 export function loadTimersFromStorage(): TimerData[] {
-  try {
-    const raw = localStorage.getItem(getStorageKey(RPG_TIMERS_STORAGE_KEY));
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as TimerData[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  const parsed = readJson<TimerData[]>(RPG_TIMERS_STORAGE_KEY, []);
+  return Array.isArray(parsed) ? parsed : [];
 }
 
 export function saveTimersToStorage(timers: TimerRuntime[]): void {
-  try {
-    localStorage.setItem(
-      getStorageKey(RPG_TIMERS_STORAGE_KEY),
-      JSON.stringify(
-        timers.map((t) => ({
-          id: t.id,
-          label: t.label,
-          mode: t.mode,
-          countdownSet: t.countdownSet,
-          running: t.running,
-          displayMs: t.displayMs,
-          startedAt: t.startedAt,
-          accumulatedMs: t.accumulatedMs,
-          finished: t.finished,
-        })),
-      ),
-    );
-  } catch {
-
-  }
+  writeJson(
+    RPG_TIMERS_STORAGE_KEY,
+    timers.map((t) => ({
+      id: t.id,
+      label: t.label,
+      mode: t.mode,
+      countdownSet: t.countdownSet,
+      running: t.running,
+      displayMs: t.displayMs,
+      startedAt: t.startedAt,
+      accumulatedMs: t.accumulatedMs,
+      finished: t.finished,
+    })),
+  );
 }
 
 export function dataToRuntime(d: TimerData): TimerRuntime {

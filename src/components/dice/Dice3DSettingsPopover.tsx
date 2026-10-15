@@ -39,7 +39,7 @@ export function Dice3DSettingsPopover({ value, onChange, disabled, triggerClassN
           type="button"
           variant="outline"
           size="icon"
-          className={triggerClassName ?? "h-10 w-10 shrink-0 md:h-11 md:w-11"}
+          className={triggerClassName ?? "h-10 w-10 shrink-0 md:h-[--h-control] md:w-[--h-control]"}
           disabled={disabled}
           aria-label="Ustawienia widoku 3D"
         >

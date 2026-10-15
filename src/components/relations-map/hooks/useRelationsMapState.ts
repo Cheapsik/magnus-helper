@@ -15,11 +15,11 @@ import { normalize } from "../utils";
 import { getSessionName } from "../storage";
 
 function getHeroDisplayName(h: StoredHero): string {
-  return h.daneOgolne.imie.trim() || "(bez imienia)";
+  return h.name || "(bez imienia)";
 }
 
 function getHeroSubtitle(h: StoredHero): string {
-  return [h.daneOgolne.rasa, h.daneOgolne.obecnaProfesja].filter(Boolean).join(" • ");
+  return h.subtitle;
 }
 
 export function buildLookup(savedNpcs: SavedNpc[], heroes: StoredHero[]) {
@@ -39,7 +39,7 @@ export function buildLookup(savedNpcs: SavedNpc[], heroes: StoredHero[]) {
       subtitle: getHeroSubtitle(h),
       description: getHeroSubtitle(h),
       kind: "hero",
-      aliases: [h.daneOgolne.rasa, h.daneOgolne.obecnaProfesja].filter(Boolean),
+      aliases: [h.subtitle].filter(Boolean),
     })
   );
   return m;

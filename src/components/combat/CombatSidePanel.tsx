@@ -11,7 +11,7 @@ import { CombatPresetsPanel } from "@/components/combat/CombatPresetsPanel";
 import { CombatMonstersPanel } from "@/components/combat/CombatMonstersPanel";
 import { CombatRosterPanel } from "@/components/combat/CombatRosterPanel";
 import type { SavedNpc } from "@/components/character-sheet/types";
-import type { HeroRosterEntry } from "@/lib/combatRoster";
+import type { Card, CardTypeDef } from "@/lib/cardSchema";
 
 type SideTab = "gotowi" | "presety" | "postacie";
 
@@ -19,7 +19,8 @@ interface CombatSidePanelProps {
   gmEnemies: GmEnemy[];
   setGmEnemies: (fn: GmEnemy[] | ((prev: GmEnemy[]) => GmEnemy[])) => void;
   savedNpcs: SavedNpc[];
-  heroes: HeroRosterEntry[];
+  heroes: Card[];
+  heroCardType: CardTypeDef;
   setCombatants: (fn: Combatant[] | ((prev: Combatant[]) => Combatant[])) => void;
   presets: CombatPreset[];
   onSavePresets: (presets: CombatPreset[]) => void;
@@ -39,6 +40,7 @@ export function CombatSidePanel({
   setGmEnemies,
   savedNpcs,
   heroes,
+  heroCardType,
   setCombatants,
   presets,
   onSavePresets,
@@ -92,6 +94,7 @@ export function CombatSidePanel({
           <CombatRosterPanel
             savedNpcs={savedNpcs}
             heroes={heroes}
+            heroCardType={heroCardType}
             setCombatants={setCombatants}
             dragNpcId={dragNpcId}
             dragHeroId={dragHeroId}

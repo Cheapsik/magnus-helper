@@ -66,7 +66,7 @@ export function DynTable<T extends { id: string }>({
           ))}
         </tbody>
       </table>
-      <button type="button" onClick={addRow} className="paper-add-btn min-h-[44px]">
+      <button type="button" onClick={addRow} className="paper-add-btn">
         {addLabel}
       </button>
     </div>

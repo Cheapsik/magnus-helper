@@ -304,7 +304,6 @@ export default function LootGeneratorPage() {
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center justify-between gap-2">
-        <h1 className="font-app-brand text-lg font-bold text-foreground truncate leading-tight min-w-0">Ekwipunek i generator łupu</h1>
       </div>
 
       <div className="flex flex-wrap gap-1.5">
@@ -390,7 +389,7 @@ export default function LootGeneratorPage() {
           {result && (
             <Card className="border-primary/30 animate-fade-in">
               <CardContent className="p-3 space-y-2">
-                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Wylosowany łup</div>
+                <div className="field-label">Wylosowany łup</div>
 
                 {result.items.length === 0 ? (
                   <p className="text-sm text-muted-foreground">Brak przedmiotów (pula pusta?)</p>
@@ -427,7 +426,7 @@ export default function LootGeneratorPage() {
                   )}
                 </div>
 
-                <Button onClick={generateLoot} variant="secondary" className="w-full text-xs min-h-11 gap-1">
+                <Button onClick={generateLoot} variant="secondary" className="w-full text-xs min-h-[--h-control] gap-1">
                   <Dice5 className="h-3 w-3" /> Generuj ponownie
                 </Button>
               </CardContent>
@@ -445,7 +444,7 @@ export default function LootGeneratorPage() {
                 {totalChance.toFixed(1)}%
               </span>
             </div>
-            <Button size="sm" className="text-xs gap-1 min-h-11 shrink-0" onClick={() => setAddingRank(true)}>
+            <Button size="sm" className="text-xs gap-1 min-h-[--h-control] shrink-0" onClick={() => setAddingRank(true)}>
               <Plus className="h-3 w-3" />
               Dodaj rangę
             </Button>
@@ -464,10 +463,10 @@ export default function LootGeneratorPage() {
                   <NumberInput value={newRank.chance} onChange={(v) => setNewRank({ ...newRank, chance: v })} className="h-8 text-xs text-center" />
                 </div>
                 <div className="flex gap-1.5">
-                  <Button size="sm" className="h-11 text-xs flex-1" onClick={addRank}>
+                  <Button size="sm" className="h-[--h-control] text-xs flex-1" onClick={addRank}>
                     Dodaj
                   </Button>
-                  <Button size="sm" variant="ghost" className="h-11 text-xs" onClick={() => setAddingRank(false)}>
+                  <Button size="sm" variant="ghost" className="h-[--h-control] text-xs" onClick={() => setAddingRank(false)}>
                     Anuluj
                   </Button>
                 </div>
@@ -485,15 +484,15 @@ export default function LootGeneratorPage() {
                       <Input
                         value={rank.name}
                         onChange={(e) => updateRank(rank.id, { name: e.target.value })}
-                        className="h-11 text-xs flex-1"
+                        className="h-[--h-control] text-xs flex-1"
                       />
                       <NumberInput
                         value={rank.chance}
                         onChange={(v) => updateRank(rank.id, { chance: v })}
-                        className="h-11 text-xs w-20 text-center"
+                        className="h-[--h-control] text-xs w-20 text-center"
                       />
                       <span className="text-[10px] text-muted-foreground">%</span>
-                      <Button size="icon" variant="ghost" className="min-h-11 min-w-11 shrink-0" onClick={() => setEditingRankId(null)}>
+                      <Button size="icon" variant="ghost" className="min-h-[--h-control] min-w-[--h-control] shrink-0" onClick={() => setEditingRankId(null)}>
                         <Check className="h-3 w-3" />
                       </Button>
                     </>
@@ -501,13 +500,13 @@ export default function LootGeneratorPage() {
                     <>
                       <span className="text-sm font-medium flex-1 min-w-0">{rank.name}</span>
                       <span className="text-xs text-muted-foreground shrink-0">{rank.chance}%</span>
-                      <Button size="icon" variant="ghost" className="min-h-11 min-w-11 shrink-0" onClick={() => setEditingRankId(rank.id)}>
+                      <Button size="icon" variant="ghost" className="min-h-[--h-control] min-w-[--h-control] shrink-0" onClick={() => setEditingRankId(rank.id)}>
                         <Edit2 className="h-3 w-3" />
                       </Button>
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="min-h-11 min-w-11 shrink-0 text-muted-foreground"
+                        className="min-h-[--h-control] min-w-[--h-control] shrink-0 text-muted-foreground"
                         onClick={() => deleteRank(rank.id)}
                       >
                         <Trash2 className="h-3 w-3" />
@@ -539,14 +538,14 @@ export default function LootGeneratorPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Nazwa lub opis…"
-                className="min-h-11"
+                className="min-h-[--h-control]"
               />
             </div>
             <div className="grid grid-cols-2 gap-2 md:flex md:gap-2">
               <div className="space-y-1 min-w-0 md:w-[140px]">
                 <Label className="text-xs text-muted-foreground">Typ</Label>
                 <Select value={filterType} onValueChange={setFilterType}>
-                  <SelectTrigger className="min-h-11">
+                  <SelectTrigger className="min-h-[--h-control]">
                     <SelectValue placeholder="Typ" />
                   </SelectTrigger>
                   <SelectContent>
@@ -562,7 +561,7 @@ export default function LootGeneratorPage() {
               <div className="space-y-1 min-w-0 md:w-[160px]">
                 <Label className="text-xs text-muted-foreground">Ranga</Label>
                 <Select value={filterRankName} onValueChange={setFilterRankName}>
-                  <SelectTrigger className="min-h-11">
+                  <SelectTrigger className="min-h-[--h-control]">
                     <SelectValue placeholder="Ranga" />
                   </SelectTrigger>
                   <SelectContent>
@@ -580,7 +579,7 @@ export default function LootGeneratorPage() {
               type="button"
               onClick={openAddItem}
               disabled={rankNames.length === 0}
-              className="min-h-11 gap-1.5 w-full md:w-auto shrink-0"
+              className="min-h-[--h-control] gap-1.5 w-full md:w-auto shrink-0"
             >
               <Plus className="h-4 w-4" />
               Dodaj przedmiot
@@ -625,7 +624,7 @@ export default function LootGeneratorPage() {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="min-h-11 min-w-11"
+                          className="min-h-[--h-control] min-w-[--h-control]"
                           aria-label={`Edytuj ${item.name}`}
                           onClick={() => openEditItem(item)}
                         >
@@ -635,7 +634,7 @@ export default function LootGeneratorPage() {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="min-h-11 min-w-11 text-destructive hover:text-destructive"
+                          className="min-h-[--h-control] min-w-[--h-control] text-destructive hover:text-destructive"
                           aria-label={`Usuń ${item.name}`}
                           onClick={() => setDeleteTarget(item)}
                         >
@@ -678,13 +677,13 @@ export default function LootGeneratorPage() {
                     <p className="text-xs text-muted-foreground line-clamp-2">{item.description}</p>
                   ) : null}
                   <div className="flex gap-2 pt-1">
-                    <Button type="button" variant="outline" className="min-h-11 flex-1 gap-1.5" onClick={() => openEditItem(item)}>
+                    <Button type="button" variant="outline" className="min-h-[--h-control] flex-1 gap-1.5" onClick={() => openEditItem(item)}>
                       <span aria-hidden>✏️</span> Edytuj
                     </Button>
                     <Button
                       type="button"
                       variant="outline"
-                      className="min-h-11 flex-1 gap-1.5 text-destructive border-destructive/40 hover:bg-destructive/10"
+                      className="min-h-[--h-control] flex-1 gap-1.5 text-destructive border-destructive/40 hover:bg-destructive/10"
                       onClick={() => setDeleteTarget(item)}
                     >
                       <span aria-hidden>🗑</span> Usuń
@@ -708,7 +707,7 @@ export default function LootGeneratorPage() {
                     id="f-name"
                     value={itemForm.name}
                     onChange={(e) => setItemForm((f) => ({ ...f, name: e.target.value }))}
-                    className="min-h-11"
+                    className="min-h-[--h-control]"
                     placeholder="Nazwa przedmiotu"
                   />
                 </div>
@@ -719,7 +718,7 @@ export default function LootGeneratorPage() {
                     list={typeListId}
                     value={itemForm.type}
                     onChange={(e) => setItemForm((f) => ({ ...f, type: e.target.value }))}
-                    className="min-h-11"
+                    className="min-h-[--h-control]"
                     placeholder="np. broń, mikstura"
                   />
                   <datalist id={typeListId}>
@@ -731,7 +730,7 @@ export default function LootGeneratorPage() {
                 <div className="space-y-1">
                   <Label>Ranga *</Label>
                   <Select value={itemForm.rankName} onValueChange={(v) => setItemForm((f) => ({ ...f, rankName: v }))}>
-                    <SelectTrigger className="min-h-11">
+                    <SelectTrigger className="min-h-[--h-control]">
                       <SelectValue placeholder="Wybierz rangę" />
                     </SelectTrigger>
                     <SelectContent>
@@ -750,7 +749,7 @@ export default function LootGeneratorPage() {
                     value={itemForm.price}
                     onChange={(v) => setItemForm((f) => ({ ...f, price: v }))}
                     min={0}
-                    className="min-h-11 text-center"
+                    className="min-h-[--h-control] text-center"
                     placeholder="0"
                   />
                 </div>
@@ -767,10 +766,10 @@ export default function LootGeneratorPage() {
                 </div>
               </div>
               <DialogFooter className="gap-2 sm:gap-0">
-                <Button type="button" variant="outline" className="min-h-11" onClick={() => setModalOpen(false)}>
+                <Button type="button" variant="outline" className="min-h-[--h-control]" onClick={() => setModalOpen(false)}>
                   Anuluj
                 </Button>
-                <Button type="button" className="min-h-11" disabled={!canSaveItem} onClick={saveItem}>
+                <Button type="button" className="min-h-[--h-control]" disabled={!canSaveItem} onClick={saveItem}>
                   Zapisz
                 </Button>
               </DialogFooter>
@@ -786,9 +785,9 @@ export default function LootGeneratorPage() {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel className="min-h-11">Anuluj</AlertDialogCancel>
+                <AlertDialogCancel className="min-h-[--h-control]">Anuluj</AlertDialogCancel>
                 <AlertDialogAction
-                  className="min-h-11 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  className="min-h-[--h-control] bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   onClick={confirmDeleteItem}
                 >
                   Usuń
@@ -860,7 +859,7 @@ export default function LootGeneratorPage() {
           </div>
 
           <section>
-            <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Dodaj przedmiot</label>
+            <label className="field-label mb-1.5 block">Dodaj przedmiot</label>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Input
                 type="text"

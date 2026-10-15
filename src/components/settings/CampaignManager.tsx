@@ -126,7 +126,7 @@ export default function CampaignManager() {
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.09em] text-muted-foreground">Kampanie</h2>
+        <h2 className="field-label">Kampanie</h2>
         <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setCreating(true)}>
           <Plus className="h-3.5 w-3.5" />
           Nowa kampania
@@ -141,7 +141,7 @@ export default function CampaignManager() {
 
       {archived.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-[10px] font-semibold uppercase tracking-[0.09em] text-muted-foreground/60">
+          <h3 className="field-label">
             Zarchiwizowane
           </h3>
           <ul className="space-y-2">{archived.map(renderRow)}</ul>

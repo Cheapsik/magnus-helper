@@ -1,3 +1,4 @@
+import type { CardSummary } from "@/lib/cardStore";
 import type { CharacterSheetCore } from "@/components/character-sheet/types";
 
 export type EntityKind = "npc" | "hero";
@@ -69,7 +70,7 @@ export interface FilterState {
   changedOnly: boolean;
 }
 
-export type StoredHero = CharacterSheetCore & { id: string };
+export type StoredHero = CardSummary;
 
 export interface EdgeDraft {
   relationType: string;

@@ -4,10 +4,10 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
 import { AmbientProvider } from "@/context/AmbientContext";
-import { ModeProvider } from "@/context/ModeContext";
 import { SceneProvider } from "@/context/SceneContext";
 import { DrawerProvider } from "@/context/DrawerContext";
 import { CommandPaletteProvider } from "@/context/CommandPaletteContext";
+import { PageHeaderProvider } from "@/context/PageHeaderContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { CampaignProvider } from "@/context/CampaignContext";
 import { AuthProvider } from "@/context/AuthContext";
@@ -19,7 +19,6 @@ import Index from "@/pages/Index";
 import DicePage from "@/pages/DicePage";
 import TestsPage from "@/pages/TestsPage";
 import CheatSheetsPage from "@/pages/CheatSheetsPage";
-import CharacterPage from "@/pages/CharacterPage";
 import CombatPage from "@/pages/CombatPage";
 import ConditionsPage from "@/pages/ConditionsPage";
 import SessionNotesPage from "@/pages/SessionNotesPage";
@@ -30,7 +29,6 @@ import LootGeneratorPage from "@/pages/LootGeneratorPage";
 import TimersPage from "@/pages/TimersPage";
 import RumorsPage from "@/pages/RumorsPage";
 import NotFound from "@/pages/NotFound";
-import SimulationsPage from "@/pages/SimulationsPage";
 import ShopPage from "@/pages/ShopPage";
 import AmbientPage from "@/pages/AmbientPage";
 import QuestsPage from "@/pages/QuestsPage";
@@ -51,9 +49,7 @@ function ProtectedApp() {
           <Route path="/tests" element={<TestsPage />} />
           <Route path="/codex" element={<CheatSheetsPage />} />
           <Route path="/scena" element={<ScenePage />} />
-          <Route path="/character" element={<CharacterPage />} />
           <Route path="/combat" element={<CombatPage />} />
-          <Route path="/simulations" element={<SimulationsPage />} />
           <Route path="/conditions" element={<ConditionsPage />} />
           <Route path="/inventory" element={<InventoryPage />} />
           <Route path="/loot" element={<LootGeneratorPage />} />
@@ -86,9 +82,9 @@ const App = () => (
           <AppProvider>
             <AmbientProvider>
               <SceneProvider>
-                <ModeProvider>
                   <DrawerProvider>
                     <CommandPaletteProvider>
+                      <PageHeaderProvider>
                       <BrowserRouter basename={getRouterBasename()}>
                         <AuthProvider>
                           <Routes>
@@ -98,9 +94,9 @@ const App = () => (
                           </Routes>
                         </AuthProvider>
                       </BrowserRouter>
+                      </PageHeaderProvider>
                     </CommandPaletteProvider>
                   </DrawerProvider>
-                </ModeProvider>
               </SceneProvider>
             </AmbientProvider>
           </AppProvider>

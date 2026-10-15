@@ -1,5 +1,6 @@
 import type { DrawerEntityType } from "@/context/DrawerContext";
-import { getStorageKey } from "@/lib/campaignStorage";
+import { readJson } from "@/lib/storage";
+import { readCardSummaries } from "@/lib/cardStore";
 
 export interface SearchResultItem {
   id: string;
@@ -20,13 +21,7 @@ export interface SearchGroup {
 
 function parseJson<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
-  try {
-    const raw = window.localStorage.getItem(getStorageKey(key));
-    if (!raw) return fallback;
-    return JSON.parse(raw) as T;
-  } catch {
-    return fallback;
-  }
+  return readJson(key, fallback);
 }
 
 export function buildSearchIndex(): SearchResultItem[] {
@@ -91,18 +86,14 @@ export function buildSearchIndex(): SearchResultItem[] {
     keywords: `${String(shop.label ?? "")} ${String(shop.name ?? "")}`.toLowerCase(),
   }));
 
-  const heroesRaw = parseJson<Array<Record<string, unknown>>>("rpg_characters", []);
-  const heroesFromSingle = heroesRaw.length
-    ? []
-    : [parseJson<Record<string, unknown>>("rpg_character", {})].filter((hero) => typeof hero.name === "string");
-  const heroes = [...heroesRaw, ...heroesFromSingle].map((hero, index) => ({
-    id: String(hero.id ?? `single-hero-${index}`),
+  const heroes = readCardSummaries("hero").map((hero) => ({
+    id: hero.id,
     type: "hero" as const,
     typeLabel: "Bohater",
     icon: "🛡️",
-    title: String(hero.name ?? "Bohater"),
-    description: `${String(hero.race ?? "")} ${String(hero.career ?? hero.profession ?? "")}`.trim(),
-    keywords: `${String(hero.name ?? "")} ${String(hero.race ?? "")} ${String(hero.career ?? hero.profession ?? "")}`.toLowerCase(),
+    title: hero.name,
+    description: hero.subtitle,
+    keywords: `${hero.name} ${hero.subtitle}`.toLowerCase(),
   }));
 
   return [...npcs, ...monsters, ...items, ...quests, ...rumors, ...shops, ...heroes].filter((item) => item.id);

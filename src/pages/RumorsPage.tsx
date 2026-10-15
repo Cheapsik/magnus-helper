@@ -8,7 +8,7 @@ import {
   Copy, Check, Dice5, Pencil,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getStorageKey } from "@/lib/campaignStorage";
+import { readJson, writeJson } from "@/lib/storage";
 
 interface RumorSegment {
   id: string;
@@ -63,17 +63,11 @@ const DEFAULT_CONFIG: RumorsConfig = {
 const STORAGE_KEY = "rpg_rumors_config";
 
 function loadConfig(): RumorsConfig {
-  try {
-    const raw = localStorage.getItem(getStorageKey(STORAGE_KEY));
-    if (raw) return JSON.parse(raw);
-  } catch {
-    return DEFAULT_CONFIG;
-  }
-  return DEFAULT_CONFIG;
+  return readJson<RumorsConfig>(STORAGE_KEY, DEFAULT_CONFIG);
 }
 
 function saveConfig(cfg: RumorsConfig) {
-  localStorage.setItem(getStorageKey(STORAGE_KEY), JSON.stringify(cfg));
+  writeJson(STORAGE_KEY, cfg);
 }
 
 function pickRandom<T>(arr: T[]): T {
@@ -126,7 +120,7 @@ function SegmentEditor({
     <div className="border border-border rounded-lg overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-3 py-2 bg-muted/50 hover:bg-muted transition-colors min-h-[44px]"
+        className="w-full flex items-center justify-between px-3 py-2 bg-muted/50 hover:bg-muted transition-colors"
       >
         <div className="flex items-center gap-2 flex-1 min-w-0">
           {editingName ? (
@@ -203,7 +197,7 @@ function SegmentEditor({
               placeholder="Nowy wpis..."
               className="text-sm h-9 flex-1"
             />
-            <Button onClick={addEntry} size="sm" variant="outline" className="min-h-[36px] min-w-[44px] shrink-0">
+            <Button onClick={addEntry} size="sm" variant="outline" className="min-h-[36px] shrink-0">
               <Plus className="h-4 w-4" />
             </Button>
           </div>
@@ -304,7 +298,7 @@ function TemplateEditor({
           ) : (
             <button
               onClick={() => setEditingName(true)}
-              className="text-lg font-bold text-foreground hover:text-primary transition-colors text-left w-full min-h-[44px] flex items-center"
+              className="text-lg font-bold text-foreground hover:text-primary transition-colors text-left w-full flex items-center"
             >
               {template.name}
             </button>
@@ -334,7 +328,7 @@ function TemplateEditor({
               onMove={(dir) => moveSegment(i, dir)}
             />
           ))}
-          <Button onClick={addSegment} variant="outline" size="sm" className="w-full min-h-[44px]">
+          <Button onClick={addSegment} variant="outline" size="sm" className="w-full">
             <Plus className="h-4 w-4 mr-1" /> Dodaj segment
           </Button>
         </div>
@@ -350,7 +344,7 @@ function TemplateEditor({
         <div className="flex gap-2">
           <Button
             onClick={generate}
-            className="flex-1 min-h-[44px]"
+            className="flex-1"
             disabled={!hasEntries}
           >
             <Dice5 className="h-4 w-4 mr-1" /> Generuj
@@ -358,7 +352,7 @@ function TemplateEditor({
           <Button
             onClick={() => result && copyText(result, "main")}
             variant="outline"
-            className="min-h-[44px] min-w-[44px]"
+            className=""
             disabled={!result}
           >
             {copiedId === "main" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -369,7 +363,7 @@ function TemplateEditor({
           <div>
             <button
               onClick={() => setShowHistory(!showHistory)}
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 min-h-[44px]"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
             >
               <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", showHistory && "rotate-180")} />
               Ostatnie wyniki ({template.history.length})
@@ -474,14 +468,14 @@ export default function RumorsPage() {
             </div>
             <button
               onClick={(e) => { e.stopPropagation(); removeTemplate(t.id); }}
-              className="p-2 rounded hover:bg-accent text-destructive shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
+              className="p-2 rounded hover:bg-accent text-destructive shrink-0 flex items-center justify-center"
             >
               <Trash2 className="h-4 w-4" />
             </button>
           </CardContent>
         </Card>
       ))}
-      <Button onClick={addTemplate} variant="outline" className="w-full min-h-[44px]">
+      <Button onClick={addTemplate} variant="outline" className="w-full">
         <Plus className="h-4 w-4 mr-1" /> Dodaj szablon
       </Button>
     </div>
@@ -514,7 +508,7 @@ export default function RumorsPage() {
                 onClick={() => setMobileView("editor")}
                 variant="ghost"
                 size="sm"
-                className="min-h-[44px]"
+                className=""
               >
                 Edytuj szablon <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
@@ -528,7 +522,7 @@ export default function RumorsPage() {
             onClick={() => setMobileView("list")}
             variant="ghost"
             size="sm"
-            className="min-h-[44px]"
+            className=""
           >
             <ChevronLeft className="h-4 w-4 mr-1" /> Szablony
           </Button>
@@ -544,7 +538,6 @@ export default function RumorsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="font-app-brand text-xl font-bold text-foreground">Plotki & Haczyki</h1>
       {desktopLayout}
       {mobileLayout}
     </div>
