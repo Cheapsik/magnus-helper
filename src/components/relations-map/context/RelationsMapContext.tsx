@@ -12,6 +12,7 @@ import {
 import { useApp } from "@/context/AppContext";
 import type { SavedNpc } from "@/components/character-sheet/types";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { toCardSummaries, useCardType, useCards } from "@/lib/cardStore";
 import { toast } from "sonner";
 import { BUILTIN_TYPES, DEFAULT_PERSISTED_MAP, STORAGE_KEY } from "../constants";
 import { statusLabel } from "../colors";
@@ -152,7 +153,9 @@ export function useRelationsMapActions() {
 
 export function RelationsMapProvider({ children }: { children: ReactNode }) {
   const { savedNpcs } = useApp();
-  const [heroes] = useLocalStorage<StoredHero[]>("rpg_characters", []);
+  const heroCardType = useCardType("hero");
+  const [heroCards] = useCards("hero");
+  const heroes = useMemo(() => toCardSummaries(heroCards, heroCardType), [heroCards, heroCardType]);
   const [persisted, setPersisted] = useLocalStorage<PersistedMap>(
     STORAGE_KEY,
     DEFAULT_PERSISTED_MAP,

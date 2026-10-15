@@ -1,4 +1,5 @@
 import { getStorageKey } from "@/lib/campaignStorage";
+import { writeJson } from "@/lib/storage";
 
 const RPG_ITEMS_KEY = "rpg_items_db";
 const RPG_LOOT_KEY = "rpg_loot_config";
@@ -131,18 +132,10 @@ function migrateLegacyLootItemsIfNeeded(): void {
     existingIds.add(it.id);
   }
 
-  try {
-    localStorage.setItem(getStorageKey(RPG_ITEMS_KEY), JSON.stringify(existing));
-  } catch {
-    void 0;
-  }
+  writeJson(RPG_ITEMS_KEY, existing);
 
   const { items: _removed, ...rest } = loot;
-  try {
-    localStorage.setItem(getStorageKey(RPG_LOOT_KEY), JSON.stringify(rest));
-  } catch {
-    void 0;
-  }
+  writeJson(RPG_LOOT_KEY, rest);
 }
 
 function migrateItemsDbPolishKeysIfNeeded(): void {
@@ -177,11 +170,7 @@ function migrateItemsDbPolishKeysIfNeeded(): void {
       currency: String(r.waluta ?? "sz"),
     };
   }).filter((x) => x.id && x.name);
-  try {
-    localStorage.setItem(getStorageKey(RPG_ITEMS_KEY), JSON.stringify(converted));
-  } catch {
-    void 0;
-  }
+  writeJson(RPG_ITEMS_KEY, converted);
 }
 
 function migrateLootConfigCurrencyKey(): void {
@@ -197,7 +186,7 @@ function migrateLootConfigCurrencyKey(): void {
     if (typeof o["itemWaluta"] === "string" && typeof o.itemCurrency !== "string") {
       o.itemCurrency = o["itemWaluta"];
       delete o["itemWaluta"];
-      localStorage.setItem(getStorageKey(RPG_LOOT_KEY), JSON.stringify(o));
+      writeJson(RPG_LOOT_KEY, o);
     }
   } catch {
     void 0;
@@ -221,11 +210,7 @@ function seedDefaultLootItemsIfEmpty(): void {
     }
   }
   if (items.length > 0) return;
-  try {
-    localStorage.setItem(getStorageKey(RPG_ITEMS_KEY), JSON.stringify(DEFAULT_LOOT_DB_ITEMS));
-  } catch {
-    void 0;
-  }
+  writeJson(RPG_ITEMS_KEY, DEFAULT_LOOT_DB_ITEMS);
 }
 
 export function initLootStorage(): void {

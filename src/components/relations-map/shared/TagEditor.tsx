@@ -27,7 +27,7 @@ export function TagEditor({
       {tags.map((t) => (
         <span
           key={t}
-          className="inline-flex items-center gap-0.5 text-[9px] uppercase tracking-wider px-1.5 py-0.5 border border-border bg-secondary/40"
+          className="inline-flex items-center gap-0.5 rounded bg-secondary px-1.5 py-0.5 text-[length:--fs-meta]"
         >
           {t}
           <button type="button" onClick={() => onRemove(t)} className="hover:text-destructive">

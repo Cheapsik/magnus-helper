@@ -1,3 +1,7 @@
+---
+status: superseded by ADR-0006
+---
+
 # Wspólne narzędzia Magnusa są generyczne, bez ukrytej automatyki mechaniki
 
 Skoro każda kampania definiuje własną, dowolną strukturę kart, wspólne narzędzia Magnusa (tracker walki, testy/rzuty, pasek stanu itp.) nie mogą zakładać istnienia konkretnych, nazwanych pól ani wzorów pochodzących z dzisiejszej, zaszytej na sztywno mechaniki. Zdecydowano o podziale według rodzaju narzędzia:

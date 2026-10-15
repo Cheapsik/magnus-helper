@@ -169,7 +169,7 @@ function TimerCard({
         ) : (
           <button
             onClick={() => setEditingLabel(true)}
-            className="text-sm font-medium text-foreground hover:text-primary transition-colors text-left w-full truncate min-h-[44px] flex items-center"
+            className="text-sm font-medium text-foreground hover:text-primary transition-colors text-left w-full truncate flex items-center"
           >
             {timer.label || <span className="text-muted-foreground italic">Nazwa timera...</span>}
           </button>
@@ -179,7 +179,7 @@ function TimerCard({
           <button
             onClick={() => toggleMode("stopwatch")}
             className={cn(
-              "flex-1 py-2 text-xs font-medium transition-colors min-h-[44px]",
+              "flex-1 py-2 text-xs font-medium transition-colors",
               timer.mode === "stopwatch"
                 ? "bg-primary text-primary-foreground"
                 : "bg-card text-muted-foreground hover:text-foreground"
@@ -191,7 +191,7 @@ function TimerCard({
           <button
             onClick={() => toggleMode("countdown")}
             className={cn(
-              "flex-1 py-2 text-xs font-medium transition-colors min-h-[44px]",
+              "flex-1 py-2 text-xs font-medium transition-colors",
               timer.mode === "countdown"
                 ? "bg-primary text-primary-foreground"
                 : "bg-card text-muted-foreground hover:text-foreground"
@@ -259,25 +259,25 @@ function TimerCard({
 
         <div className="flex gap-2">
           {timer.running ? (
-            <Button onClick={pause} variant="secondary" className="flex-1 min-h-[44px]">
+            <Button onClick={pause} variant="secondary" className="flex-1">
               <Pause className="h-4 w-4 mr-1" /> Pauza
             </Button>
           ) : (
             <Button
               onClick={start}
-              className="flex-1 min-h-[44px]"
+              className="flex-1"
               disabled={timer.finished || (timer.mode === "countdown" && timer.countdownSet === 0)}
             >
               <Play className="h-4 w-4 mr-1" /> Start
             </Button>
           )}
-          <Button onClick={reset} variant="outline" className="min-h-[44px] min-w-[44px]">
+          <Button onClick={reset} variant="outline" className="">
             <RotateCcw className="h-4 w-4" />
           </Button>
           <Button
             onClick={() => onRemove(timer.id)}
             variant="ghost"
-            className="min-h-[44px] min-w-[44px] text-destructive hover:text-destructive"
+            className="text-destructive hover:text-destructive"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -382,8 +382,7 @@ export default function TimersPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="font-app-brand text-xl font-bold text-foreground">Timery</h1>
-        <Button onClick={addTimer} size="sm" className="min-h-[44px]">
+        <Button onClick={addTimer} size="sm" className="">
           <Plus className="h-4 w-4 mr-1" /> Dodaj timer
         </Button>
       </div>
@@ -405,7 +404,7 @@ export default function TimersPage() {
           <Button
             onClick={stopAll}
             variant="destructive"
-            className="w-full min-h-[44px]"
+            className="w-full"
             disabled={!anyRunning}
           >
             <Square className="h-4 w-4 mr-1" /> Zatrzymaj wszystko

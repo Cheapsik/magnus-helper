@@ -61,7 +61,7 @@ export default function DataManager() {
 
   return (
     <section className="space-y-4">
-      <h2 className="text-[11px] font-bold uppercase tracking-[0.09em] text-muted-foreground">Dane</h2>
+      <h2 className="field-label">Dane</h2>
 
       <input
         ref={fileRef}

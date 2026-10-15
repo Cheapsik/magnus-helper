@@ -1,5 +1,6 @@
 import type { ActiveCondition, Combatant } from "@/context/AppContext";
 import { getStorageKey } from "@/lib/campaignStorage";
+import { readJson } from "@/lib/storage";
 
 export const COMBAT_SESSIONS_STORAGE_KEY = "rpg_combat_sessions";
 export const MAX_COMBAT_FIGHTS = 6;
@@ -61,6 +62,13 @@ function normalizeCombatant(raw: unknown): Combatant | null {
     },
     armor: Number(c.armor) || 0,
     toughness: Number(c.toughness) || 0,
+    stats: Array.isArray(c.stats)
+      ? c.stats
+          .filter((s): s is { label: string; value: unknown } =>
+            !!s && typeof s === "object" && typeof (s as { label?: unknown }).label === "string",
+          )
+          .map((s) => ({ label: s.label, value: Number(s.value) || 0 }))
+      : undefined,
     statuses: Array.isArray(c.statuses) ? c.statuses.filter((s): s is string => typeof s === "string") : [],
     notes: typeof c.notes === "string" ? c.notes : "",
     isEnemy: Boolean(c.isEnemy),
@@ -182,11 +190,10 @@ export function readCombatSessionsFromStorage(
   fallbackCombatants: Combatant[] = [],
 ): CombatSessionsState {
   if (typeof window === "undefined") return createDefaultSessions(fallbackCombatants);
-  try {
-    const item = window.localStorage.getItem(getStorageKey(COMBAT_SESSIONS_STORAGE_KEY));
-    if (item) return reviveCombatSessions(JSON.parse(item));
-  } catch {
-  }
+  const stored = readJson<CombatSessionsState | null>(COMBAT_SESSIONS_STORAGE_KEY, null, {
+    revive: (parsed) => reviveCombatSessions(parsed),
+  });
+  if (stored) return stored;
   const legacy = migrateFromLegacyStorage();
   if (legacy) return legacy;
   return createDefaultSessions(fallbackCombatants);

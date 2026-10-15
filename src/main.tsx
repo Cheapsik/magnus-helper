@@ -1,10 +1,9 @@
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App";
-import { migrateRpgStorageKeys } from "@/lib/rpgStorageMigration";
-import { ensureDefaultCampaignMigration } from "@/lib/campaignMigration";
+import { ensureInitialCampaign, resetDataFromPreviousVersions } from "@/lib/dataReset";
 
-migrateRpgStorageKeys();
-ensureDefaultCampaignMigration();
+resetDataFromPreviousVersions();
+ensureInitialCampaign();
 
 createRoot(document.getElementById("root")!).render(<App />);

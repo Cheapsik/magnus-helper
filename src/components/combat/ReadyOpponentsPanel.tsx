@@ -209,7 +209,7 @@ export function ReadyOpponentsPanel({
       </p>
 
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Lista</span>
+        <span className="field-label">Lista</span>
         <Button size="sm" variant="ghost" className="h-7 text-xs gap-1" onClick={() => setAdding(true)}>
           <Plus className="h-3 w-3" /> Dodaj
         </Button>

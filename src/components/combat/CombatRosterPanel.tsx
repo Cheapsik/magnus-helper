@@ -9,11 +9,15 @@ import {
 } from "@/components/character-sheet/npcAccessors";
 import type { Combatant } from "@/context/AppContext";
 import {
-  heroRosterToCombatant,
+  type Card,
+  type CardTypeDef,
+  cardSubtitle,
+  cardTitle,
+  getCardCombatStats,
+} from "@/lib/cardSchema";
+import { cardToCombatant } from "@/lib/cardRoster";
+import {
   savedNpcToCombatant,
-  getHeroRosterDisplayName,
-  getHeroRosterSubtitle,
-  type HeroRosterEntry,
 } from "@/lib/combatRoster";
 import { ROSTER_HERO_DRAG, ROSTER_NPC_DRAG } from "@/lib/combatDrag";
 import { CombatRosterPill } from "@/components/combat/CombatRosterPill";
@@ -27,7 +31,8 @@ type RosterKind = "npc" | "bohaterowie";
 
 interface CombatRosterPanelProps {
   savedNpcs: SavedNpc[];
-  heroes: HeroRosterEntry[];
+  heroes: Card[];
+  heroCardType: CardTypeDef;
   setCombatants: (fn: Combatant[] | ((prev: Combatant[]) => Combatant[])) => void;
   dragNpcId: string | null;
   dragHeroId: string | null;
@@ -41,6 +46,7 @@ interface CombatRosterPanelProps {
 export function CombatRosterPanel({
   savedNpcs,
   heroes,
+  heroCardType,
   setCombatants,
   dragNpcId,
   dragHeroId,
@@ -68,20 +74,21 @@ export function CombatRosterPanel({
   const filteredHeroes = useMemo(() => {
     if (!q) return heroes;
     return heroes.filter((h) => {
-      const name = getHeroRosterDisplayName(h).toLowerCase();
-      const sub = getHeroRosterSubtitle(h).toLowerCase();
+      const name = cardTitle(h).toLowerCase();
+      const sub = cardSubtitle(heroCardType, h).toLowerCase();
       return name.includes(q) || sub.includes(q);
     });
-  }, [heroes, q]);
+  }, [heroes, heroCardType, q]);
 
   const addNpc = (npc: SavedNpc) => {
     setCombatants((prev) => [...prev, savedNpcToCombatant(npc)]);
     toast.success(`Dodano „${getNpcDisplayName(npc)}” do walki`);
   };
 
-  const addHero = (h: HeroRosterEntry) => {
-    setCombatants((prev) => [...prev, heroRosterToCombatant(h)]);
-    toast.success(`Dodano „${getHeroRosterDisplayName(h)}” do walki`);
+  const addHero = (h: Card) => {
+    const combatant = cardToCombatant(h, heroCardType, false);
+    setCombatants((prev) => [...prev, combatant]);
+    toast.success(`Dodano „${combatant.name}” do walki`);
   };
 
   const list =
@@ -124,19 +131,19 @@ export function CombatRosterPanel({
       </p>
     ) : (
       filteredHeroes.map((h) => {
-        const c = getCharacterSheetCombatStats(h);
+        const c = getCardCombatStats(heroCardType, h.values);
         return (
           <CombatRosterPill
             key={h.id}
             variant="hero"
             entityId={h.id}
             dragMime={ROSTER_HERO_DRAG}
-            name={getHeroRosterDisplayName(h)}
-            subtitle={getHeroRosterSubtitle(h) || undefined}
-            ww={c.ww}
-            hp={c.hp}
-            armor={c.armor}
-            weapon={c.weapon || undefined}
+            name={cardTitle(h)}
+            subtitle={cardSubtitle(heroCardType, h) || undefined}
+            ww={c.stats[0]?.value ?? 0}
+            hp={c.resource?.current ?? 0}
+            armor={0}
+            weapon={undefined}
             finePointer={finePointer}
             isDragging={dragHeroId === h.id}
             onDragStart={() => onDragHeroStart(h.id)}

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Users, Plus, Trash2, Edit2, Dice5, ArrowLeft, Swords, ChevronDown, ChevronUp, GripVertical } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+import { usePageHeader } from "@/context/PageHeaderContext";
 import type { SavedNpc } from "@/context/AppContext";
 import { CharacterSheet } from "@/components/character-sheet/CharacterSheet";
 import { createEmptyNpc } from "@/components/character-sheet/factory";
@@ -277,6 +278,23 @@ export default function NpcManagerPage() {
     toast.success(`Dodano ${getNpcDisplayName(npc)} do walki`);
   };
 
+  usePageHeader(
+    {
+      actions: activeNpc ? null : (
+        <>
+          <Button size="sm" variant="outline" onClick={handleGenerate}>
+            <Dice5 className="h-3 w-3" /> Losuj
+          </Button>
+          <Button size="sm" onClick={handleNew}>
+            <Plus className="h-3 w-3" /> Nowy
+          </Button>
+        </>
+      ),
+      meta: activeNpc ? [] : [`${savedNpcs.length} NPC`, `${npcGroups.length} grup`],
+    },
+    [activeNpc, savedNpcs.length, npcGroups.length],
+  );
+
   if (activeNpc) {
     return (
       <NpcSheet
@@ -292,21 +310,6 @@ export default function NpcManagerPage() {
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <h1 className="font-app-brand text-lg font-bold flex items-center gap-2">
-          <Users className="h-5 w-5" />
-          NPC
-        </h1>
-        <div className="flex gap-1.5">
-          <Button size="sm" variant="outline" className="text-xs gap-1 h-7" onClick={handleGenerate}>
-            <Dice5 className="h-3 w-3" /> Losuj
-          </Button>
-          <Button size="sm" className="text-xs gap-1 h-7" onClick={handleNew}>
-            <Plus className="h-3 w-3" /> Nowy
-          </Button>
-        </div>
-      </div>
-
       {savedNpcs.length === 0 && npcGroups.length === 0 ? (
         <Card>
           <CardContent className="p-6 text-center text-sm text-muted-foreground">
@@ -344,7 +347,7 @@ export default function NpcManagerPage() {
                   <button
                     type="button"
                     onClick={() => toggleGroupCollapse(g.id)}
-                    className="min-h-[44px] min-w-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground"
+                    className="flex items-center justify-center text-muted-foreground hover:text-foreground"
                   >
                     {g.collapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
                   </button>
@@ -353,7 +356,7 @@ export default function NpcManagerPage() {
                   <button
                     type="button"
                     onClick={() => deleteGroup(g.id)}
-                    className="ml-auto min-h-[44px] min-w-[44px] flex items-center justify-center text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="ml-auto flex items-center justify-center text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
                     title="Usuń grupę"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -412,7 +415,7 @@ export default function NpcManagerPage() {
               resetDragUi();
             }}
           >
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="field-label">
               Bez grupy
               {dragNpcId ? (
                 <span className="mt-1 block font-normal normal-case text-[11px] text-primary/90">
@@ -440,7 +443,7 @@ export default function NpcManagerPage() {
             )}
           </section>
 
-          <Button variant="outline" size="sm" className="w-full min-h-[44px]" onClick={addGroup}>
+          <Button variant="outline" size="sm" className="w-full" onClick={addGroup}>
             <Plus className="h-4 w-4 mr-1" /> Dodaj grupę
           </Button>
         </div>
@@ -495,7 +498,7 @@ function NpcSheet({
   return (
     <div className="paper-sheet animate-fade-in">
       <div className="paper-topbar flex flex-wrap items-center gap-2">
-        <button type="button" onClick={handleBack} className="paper-back-btn min-h-[44px]">
+        <button type="button" onClick={handleBack} className="paper-back-btn">
           <ArrowLeft className="h-4 w-4" /> Wróć do listy
         </button>
         <h1 className="paper-title m-0 flex-1 min-w-0">NPC: {getNpcDisplayName(draft)}</h1>

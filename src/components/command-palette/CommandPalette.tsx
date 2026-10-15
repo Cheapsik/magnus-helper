@@ -52,7 +52,7 @@ function ResultRow({
         )}
         <p className="truncate text-xs text-muted-foreground">{item.description || item.typeLabel}</p>
       </div>
-      <span className="rounded bg-secondary px-2 py-0.5 text-[10px] uppercase tracking-wide text-secondary-foreground">
+      <span className="rounded bg-secondary px-2 py-0.5 text-[length:--fs-meta] text-secondary-foreground">
         {item.typeLabel}
       </span>
     </CommandItem>
@@ -93,7 +93,7 @@ export function CommandPalette() {
       case "quest":
         return "/quests";
       case "hero":
-        return "/character";
+        return "/heroes";
       case "rumorTemplate":
         return "/rumors";
       case "shopSnapshot":

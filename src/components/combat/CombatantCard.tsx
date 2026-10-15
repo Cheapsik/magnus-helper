@@ -88,8 +88,8 @@ export function CombatantCard({
   return (
     <Card
       className={cn(
-        "transition-all overflow-hidden",
-        isActive && "ring-2 ring-primary shadow-md shadow-primary/10",
+        "overflow-hidden transition-colors",
+        isActive && "live-marker border-destructive/40 bg-destructive/[0.04]",
         isDead && "opacity-40",
       )}
     >
@@ -171,35 +171,35 @@ export function CombatantCard({
               />
             </div>
             <div className="flex gap-1.5">
-              <Button size="sm" className="h-9 flex-1 gap-1 text-xs" onClick={onSaveEdit}>
+              <Button size="sm" className="flex-1" onClick={onSaveEdit}>
                 <Check className="h-3 w-3" />
                 Zapisz
               </Button>
-              <Button size="sm" variant="ghost" className="h-9 text-xs" onClick={onCancelEdit}>
+              <Button size="sm" variant="ghost" onClick={onCancelEdit}>
                 Anuluj
               </Button>
             </div>
           </div>
         ) : (
           <>
-            <div className="px-3 pt-3 pb-2">
+            <div className="px-3 pb-1.5 pt-2">
               <div className="flex items-center gap-2">
-                {isActive && <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-primary animate-pulse" />}
+                
                 <span
                   className={cn(
-                    "min-w-0 flex-1 truncate text-base font-semibold leading-tight",
+                    "min-w-0 flex-1 truncate text-[length:--fs-section] font-semibold leading-tight",
                     c.isEnemy ? "text-destructive" : "text-foreground",
                   )}
                 >
                   {c.name}
                 </span>
-                <Button size="sm" variant="default" className="h-9 shrink-0 gap-1 px-3 text-xs" onClick={onAction}>
+                <Button size="sm" variant="default" className="shrink-0" onClick={onAction}>
                   <Crosshair className="h-3.5 w-3.5" />
                   Akcja
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0" title="Więcej opcji">
+                    <Button size="icon" variant="ghost" className="shrink-0" title="Więcej opcji">
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -228,52 +228,62 @@ export function CombatantCard({
                   </StatAbbrWithTooltip>{" "}
                   <span className="font-bold text-foreground">{c.initiative}</span>
                 </span>
-                <span className="text-muted-foreground">
-                  <StatAbbrWithTooltip statKey="ww" className="text-muted-foreground">
-                    WW
-                  </StatAbbrWithTooltip>{" "}
-                  <span className="font-bold text-foreground">{c.ww}</span>
-                </span>
-                <span className="text-muted-foreground">
-                  <StatAbbrWithTooltip statKey="us" className="text-muted-foreground">
-                    US
-                  </StatAbbrWithTooltip>{" "}
-                  <span className="font-bold text-foreground">{c.us}</span>
-                </span>
-                <span className="text-muted-foreground">
-                  <StatAbbrWithTooltip statKey="sb" className="text-muted-foreground">
-                    SB
-                  </StatAbbrWithTooltip>{" "}
-                  <span className="font-bold text-foreground">{c.sb}</span>
-                </span>
-                <span className="flex items-center gap-0.5 text-muted-foreground">
-                  <StatAbbrWithTooltip statKey="pnc" className="flex items-center gap-0.5 text-muted-foreground">
-                    <Shield className="h-2.5 w-2.5" />
-                    <span className="font-bold text-foreground">{c.armor}</span>
-                  </StatAbbrWithTooltip>
-                </span>
-                <span className="text-muted-foreground">
-                  <StatAbbrWithTooltip statKey="wtSoak" className="text-muted-foreground">
-                    {getStatGlossaryEntry("wtSoak").abbr}
-                  </StatAbbrWithTooltip>{" "}
-                  <span className="font-bold text-foreground">{c.toughness}</span>
-                </span>
+                {c.stats ? (
+                  c.stats.map((stat) => (
+                    <span key={stat.label} className="text-muted-foreground">
+                      {stat.label} <span className="font-bold text-foreground">{stat.value}</span>
+                    </span>
+                  ))
+                ) : (
+                  <>
+                    <span className="text-muted-foreground">
+                      <StatAbbrWithTooltip statKey="ww" className="text-muted-foreground">
+                        WW
+                      </StatAbbrWithTooltip>{" "}
+                      <span className="font-bold text-foreground">{c.ww}</span>
+                    </span>
+                    <span className="text-muted-foreground">
+                      <StatAbbrWithTooltip statKey="us" className="text-muted-foreground">
+                        US
+                      </StatAbbrWithTooltip>{" "}
+                      <span className="font-bold text-foreground">{c.us}</span>
+                    </span>
+                    <span className="text-muted-foreground">
+                      <StatAbbrWithTooltip statKey="sb" className="text-muted-foreground">
+                        SB
+                      </StatAbbrWithTooltip>{" "}
+                      <span className="font-bold text-foreground">{c.sb}</span>
+                    </span>
+                    <span className="flex items-center gap-0.5 text-muted-foreground">
+                      <StatAbbrWithTooltip statKey="pnc" className="flex items-center gap-0.5 text-muted-foreground">
+                        <Shield className="h-2.5 w-2.5" />
+                        <span className="font-bold text-foreground">{c.armor}</span>
+                      </StatAbbrWithTooltip>
+                    </span>
+                    <span className="text-muted-foreground">
+                      <StatAbbrWithTooltip statKey="wtSoak" className="text-muted-foreground">
+                        {getStatGlossaryEntry("wtSoak").abbr}
+                      </StatAbbrWithTooltip>{" "}
+                      <span className="font-bold text-foreground">{c.toughness}</span>
+                    </span>
+                  </>
+                )}
               </div>
             </div>
 
             <div className="px-3 pb-2">
-              <div className="mx-auto flex max-w-md items-center gap-2">
+              <div className="flex max-w-lg items-center gap-2">
                 <Button
                   type="button"
                   size="icon"
                   variant="secondary"
-                  className="h-9 w-9 shrink-0"
+                  className="shrink-0"
                   onClick={() => onAdjustHp(-1)}
                 >
                   <Minus className="h-4 w-4" />
                 </Button>
                 <div className="min-w-0 flex-1">
-                  <div className="h-3 overflow-hidden rounded-full bg-muted">
+                  <div className="h-1.5 overflow-hidden rounded-full bg-muted">
                     <div
                       className={cn(
                         "h-full rounded-full transition-all duration-300",
@@ -291,7 +301,7 @@ export function CombatantCard({
                   type="button"
                   size="icon"
                   variant="secondary"
-                  className="h-9 w-9 shrink-0"
+                  className="shrink-0"
                   onClick={() => onAdjustHp(1)}
                 >
                   <Plus className="h-4 w-4" />
@@ -344,7 +354,7 @@ export function CombatantCard({
                       type="button"
                       size="sm"
                       variant={delta < 0 ? "destructive" : "secondary"}
-                      className="h-11 text-sm font-semibold"
+                      className="h-[--h-control] text-sm font-semibold"
                       onClick={() => onAdjustHp(delta)}
                     >
                       {delta > 0 ? `+${delta}` : delta}

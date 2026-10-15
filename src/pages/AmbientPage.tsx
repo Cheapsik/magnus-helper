@@ -134,12 +134,11 @@ export default function AmbientPage() {
       )}
 
       <div className="flex items-center justify-between gap-2 flex-wrap">
-        <h1 className="font-app-brand text-xl font-bold text-foreground">🎵 Ambient</h1>
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={stopAll} className="min-h-[44px]" disabled={!anyPlaying}>
+          <Button size="sm" variant="outline" onClick={stopAll} className="" disabled={!anyPlaying}>
             <Square className="h-4 w-4 mr-1" /> Zatrzymaj wszystko
           </Button>
-          <Button size="sm" onClick={openAddModal} className="min-h-[44px]">
+          <Button size="sm" onClick={openAddModal} className="">
             <Plus className="h-4 w-4 mr-1" /> Dodaj dźwięk
           </Button>
         </div>
@@ -149,7 +148,7 @@ export default function AmbientPage() {
         <Volume2 className="h-4 w-4 text-primary shrink-0" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
-            <Label className="text-xs uppercase tracking-[0.08em] text-muted-foreground">Master Volume</Label>
+            <Label className="field-label">Master Volume</Label>
             <span className="text-xs tabular-nums text-muted-foreground">{masterVolume}%</span>
           </div>
           <Slider value={[masterVolume]} onValueChange={([v]) => setMasterVolume(v)} min={0} max={100} step={1} />
@@ -159,7 +158,7 @@ export default function AmbientPage() {
       {grouped.map(({ category: cat, sounds }) => (
         <section key={cat.id} className="space-y-2">
           <div className="flex items-center gap-2 group">
-            <button onClick={() => toggleCollapse(cat.id)} className="min-h-[44px] min-w-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground">
+            <button onClick={() => toggleCollapse(cat.id)} className="flex items-center justify-center text-muted-foreground hover:text-foreground">
               {cat.collapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
             </button>
             <EmojiPickerButton
@@ -170,7 +169,7 @@ export default function AmbientPage() {
             <CategoryName name={cat.name} onRename={(n) => renameCategory(cat.id, n)} />
             <Badge variant="secondary" className="text-xs">{sounds.length} dźwięk{sounds.length === 1 ? "" : sounds.length < 5 ? "i" : "ów"}</Badge>
             {cat.id !== "__uncategorized__" && (
-              <button onClick={() => deleteCategory(cat)} className="min-h-[44px] min-w-[44px] flex items-center justify-center text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity">
+              <button onClick={() => deleteCategory(cat)} className="flex items-center justify-center text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity">
                 <Trash2 className="h-4 w-4" />
               </button>
             )}
@@ -200,13 +199,13 @@ export default function AmbientPage() {
         </section>
       ))}
 
-      <Button variant="outline" size="sm" onClick={addCategory} className="min-h-[44px]">
+      <Button variant="outline" size="sm" onClick={addCategory} className="">
         <Plus className="h-4 w-4 mr-1" /> Dodaj kategorię
       </Button>
 
       {anyPlaying && (
         <div className="fixed bottom-16 left-0 right-0 z-40 p-2 bg-card/95 backdrop-blur-md border-t md:hidden">
-          <Button variant="destructive" className="w-full min-h-[44px]" onClick={stopAll}>
+          <Button variant="destructive" className="w-full" onClick={stopAll}>
             <Square className="h-4 w-4 mr-1" /> Zatrzymaj wszystko
           </Button>
         </div>
@@ -271,8 +270,8 @@ export default function AmbientPage() {
             </div>
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setModalOpen(false)} className="min-h-[44px]">Anuluj</Button>
-            <Button onClick={saveModal} className="min-h-[44px]">Zapisz</Button>
+            <Button variant="outline" onClick={() => setModalOpen(false)} className="">Anuluj</Button>
+            <Button onClick={saveModal} className="">Zapisz</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -329,7 +328,7 @@ function SoundTile({
       <div className="absolute top-1 right-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="min-h-[44px] min-w-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground">
+            <button className="flex items-center justify-center text-muted-foreground hover:text-foreground">
               <MoreVertical className="h-4 w-4" />
             </button>
           </DropdownMenuTrigger>
@@ -359,14 +358,14 @@ function SoundTile({
         onTouchStart={(e) => e.stopPropagation()}
       >
         <Volume2 className="h-3 w-3 text-muted-foreground shrink-0" />
-        <Slider value={[volume]} onValueChange={([v]) => onVolumeChange(v)} min={0} max={100} step={1} className="flex-1 min-h-[44px]" />
+        <Slider value={[volume]} onValueChange={([v]) => onVolumeChange(v)} min={0} max={100} step={1} className="flex-1" />
       </div>
 
       <div className="flex gap-1.5">
         <Button
           variant={isPlaying ? "secondary" : isPaused ? "outline" : "default"}
           size="sm"
-          className={cn("flex-1 min-h-[44px]", isFading && "opacity-50 pointer-events-none")}
+          className={cn("flex-1", isFading && "opacity-50 pointer-events-none")}
           onClick={onToggle}
           disabled={isFading}
         >
@@ -386,7 +385,7 @@ function SoundTile({
           <Button
             variant="destructive"
             size="sm"
-            className={cn("min-h-[44px] min-w-[44px]", isFading && "opacity-50 pointer-events-none")}
+            className={cn("", isFading && "opacity-50 pointer-events-none")}
             onClick={onStop}
             disabled={isFading}
             title="Zatrzymaj (fade out)"

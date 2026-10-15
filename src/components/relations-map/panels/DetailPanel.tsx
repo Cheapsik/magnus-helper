@@ -129,15 +129,9 @@ export function DetailPanel() {
                   <Field label="Opis" value={editingFullNpc.opisOgolny} multiline />
                 </>
               )}
-              {editingFullHero && (
-                <>
-                  <Field label="Rasa" value={editingFullHero.daneOgolne.rasa} />
-                  <Field label="Profesja" value={editingFullHero.daneOgolne.obecnaProfesja} />
-                  <Field label="Znaki" value={editingFullHero.opis.znakiSzczegolne} multiline />
-                </>
-              )}
+              {editingFullHero && <Field label="Opis" value={editingFullHero.subtitle} multiline />}
               <div>
-                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                <Label className="field-label">
                   Opis (mapa)
                 </Label>
                 <Textarea
@@ -164,7 +158,7 @@ export function DetailPanel() {
                   <div key={e.id} className="border border-border p-2 bg-secondary/30">
                     <div className="flex items-center justify-between">
                       <span
-                        className="text-[10px] uppercase tracking-wider"
+                        className="field-label"
                         style={{ color: typeColor(label) }}
                       >
                         {label}
@@ -191,7 +185,7 @@ export function DetailPanel() {
 
             <TabsContent value="mg" className="mt-0 space-y-4">
               <div>
-                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                <Label className="field-label">
                   Sekrety
                 </Label>
                 <Textarea
@@ -202,7 +196,7 @@ export function DetailPanel() {
                 />
               </div>
               <div>
-                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                <Label className="field-label">
                   Cele
                 </Label>
                 <Textarea
@@ -213,7 +207,7 @@ export function DetailPanel() {
                 />
               </div>
               <div>
-                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                <Label className="field-label">
                   Notatki
                 </Label>
                 <Textarea
@@ -224,7 +218,7 @@ export function DetailPanel() {
                 />
               </div>
               <div>
-                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 block">
+                <Label className="field-label mb-1 block">
                   Historia
                 </Label>
                 <QuickHistoryAdder onAdd={(m) => addNodeHistory(editingNode.id, m)} />

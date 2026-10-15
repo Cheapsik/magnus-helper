@@ -469,7 +469,7 @@ export function CombatPresetsMobileTab(
       />
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
-          <Button variant="outline" className="h-11 w-full gap-2">
+          <Button variant="outline" className="h-[--h-control] w-full gap-2">
             <Settings2 className="h-4 w-4" />
             Zarządzaj presetami
           </Button>

@@ -38,7 +38,6 @@ export default function TestsPage() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <h1 className="font-app-brand text-lg font-bold">Test procentowy</h1>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
@@ -61,7 +60,7 @@ export default function TestsPage() {
       </Card>
 
       <section>
-        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Poziom trudności</label>
+        <label className="field-label mb-1.5 block">Poziom trudności</label>
         <div className="flex flex-wrap gap-1.5">
           {difficultyPresets.map((d) => (
             <Button key={d.label} size="sm" variant={modifier === d.modifier ? "default" : "outline"} className="text-xs" onClick={() => setModifier(d.modifier)}>
@@ -92,7 +91,7 @@ export default function TestsPage() {
       {testHistory.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-2">
-            <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ostatnie testy</label>
+            <label className="field-label">Ostatnie testy</label>
             <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground gap-1" onClick={handleClear}>
               <Trash2 className="h-3 w-3" /> Wyczyść
             </Button>

@@ -257,7 +257,7 @@ export default function DicePage() {
 
           <div className="flex min-h-[5rem] max-h-[38dvh] flex-[0.85] flex-col overflow-hidden bg-card/30 basis-0 border-t border-border/40 lg:max-h-none lg:min-h-0 lg:flex-1 lg:border-t-0">
             <div className="flex shrink-0 items-center justify-between border-b border-border/60 px-3 py-2">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground sm:text-xs">
+              <span className="field-label">
                 Historia rzutów
               </span>
               {rollHistory.length > 0 && (
@@ -292,11 +292,10 @@ export default function DicePage() {
 
         <aside className="order-2 flex max-h-[min(48dvh,24rem)] w-full shrink-0 flex-col overflow-y-auto border-t border-border/60 bg-card/35 p-4 pb-5 safe-area-pb lg:order-1 lg:max-h-none lg:h-full lg:min-h-0 lg:max-w-[300px] lg:border-b-0 lg:border-r lg:border-t-0 lg:pb-4">
           <div className="border-b border-border/50 pb-3 mb-3 lg:mb-4">
-            <h1 className="font-app-brand mt-0.5 text-base font-bold tracking-tight sm:text-lg">Rzut kośćmi</h1>
           </div>
 
           <div className="mb-3 lg:mb-4">
-            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">
+            <label className="field-label mb-1.5 block">
               Typ kości
             </label>
             <div className="grid grid-cols-4 gap-2 sm:gap-1.5">
@@ -327,7 +326,7 @@ export default function DicePage() {
           <div className="mb-3 flex flex-col gap-2.5 lg:mb-4">
             <div className="rounded-lg border border-border/60 bg-background/40 p-3">
               <div className="mb-2 flex items-center justify-between gap-2">
-                <label className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Ilość</label>
+                <label className="field-label">Ilość</label>
                 <Button
                   type="button"
                   size="sm"
@@ -371,7 +370,7 @@ export default function DicePage() {
             </div>
             <div className="rounded-lg border border-border/60 bg-background/40 p-3">
               <div className="mb-2 flex items-center justify-between gap-2">
-                <label className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Modyfikator</label>
+                <label className="field-label">Modyfikator</label>
                 <Button
                   type="button"
                   size="sm"
@@ -428,7 +427,7 @@ export default function DicePage() {
           </Button>
 
           <div className="mb-3 lg:mb-4">
-            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">
+            <label className="field-label mb-1.5 block">
               Szybkie presety
             </label>
             <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-1.5">

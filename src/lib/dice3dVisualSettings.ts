@@ -1,5 +1,7 @@
 
 
+import { readJson, writeJson } from "@/lib/storage";
+
 export const DICE_3D_VISUAL_STORAGE_KEY = "magnus-dice-3d-visual";
 
 export const DICE_3D_TEXTURE_KEYS = ["", "wood", "marble", "metal", "fire", "dragon", "uwu"] as const;
@@ -67,21 +69,14 @@ export function normalizeDice3DVisual(raw: unknown): Dice3DVisualConfig {
 }
 
 export function loadDice3DVisualSettings(): Dice3DVisualConfig {
-  try {
-    const raw = localStorage.getItem(DICE_3D_VISUAL_STORAGE_KEY);
-    if (!raw) return { ...DEFAULT_DICE_3D_VISUAL };
-    return normalizeDice3DVisual(JSON.parse(raw) as unknown);
-  } catch {
-    return { ...DEFAULT_DICE_3D_VISUAL };
-  }
+  return readJson<Dice3DVisualConfig>(DICE_3D_VISUAL_STORAGE_KEY, { ...DEFAULT_DICE_3D_VISUAL }, {
+    global: true,
+    revive: normalizeDice3DVisual,
+  });
 }
 
 export function saveDice3DVisualSettings(config: Dice3DVisualConfig): void {
-  try {
-    localStorage.setItem(DICE_3D_VISUAL_STORAGE_KEY, JSON.stringify(config));
-  } catch {
-
-  }
+  writeJson(DICE_3D_VISUAL_STORAGE_KEY, config, { global: true });
 }
 
 export function dice3DVisualConfigKey(c: Dice3DVisualConfig): string {

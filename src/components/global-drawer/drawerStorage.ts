@@ -1,4 +1,4 @@
-import { getStorageKey } from "@/lib/campaignStorage";
+import { readJson, writeJson } from "@/lib/storage";
 
 const STORAGE_UPDATE_EVENT = "rpg-storage-update";
 
@@ -17,7 +17,7 @@ export function readStorageValue<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") {
     return fallback;
   }
-  return safeParseJson<T>(window.localStorage.getItem(getStorageKey(key)), fallback);
+  return readJson<T>(key, fallback);
 }
 
 function emitStorageUpdate(key: string) {
@@ -37,7 +37,7 @@ export function updateStorageCollectionItem<T extends { id: string }>(
   }
   const existing = readStorageValue<T[]>(key, []);
   const updated = existing.map((item) => (item.id === id ? applyChanges(item) : item));
-  window.localStorage.setItem(getStorageKey(key), JSON.stringify(updated));
+  writeJson(key, updated);
   emitStorageUpdate(key);
 }
 
@@ -45,7 +45,7 @@ export function writeStorageValue<T>(key: string, value: T): void {
   if (typeof window === "undefined") {
     return;
   }
-  window.localStorage.setItem(getStorageKey(key), JSON.stringify(value));
+  writeJson(key, value);
   emitStorageUpdate(key);
 }
 

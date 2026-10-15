@@ -19,7 +19,7 @@ export function FiltersPanel({ embedded }: { embedded?: boolean }) {
     <div className={embedded ? "space-y-2" : "border-t border-border px-3 py-3 space-y-2 shrink-0"}>
       {!embedded && (
         <div className="flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-wider text-primary">Filtry</span>
+          <span className="field-label text-primary">Filtry</span>
           <button
             type="button"
             onClick={resetFilters}

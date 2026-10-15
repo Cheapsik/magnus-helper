@@ -31,15 +31,12 @@ import {
   isRosterNpcDragEvent,
 } from "@/lib/combatDrag";
 import {
-  HEROES_STORAGE_KEY,
-  heroRosterToCombatant,
-  reviveHeroRoster,
   savedNpcToCombatant,
-  getHeroRosterDisplayName,
-  type HeroRosterEntry,
 } from "@/lib/combatRoster";
 import { getNpcDisplayName } from "@/components/character-sheet/npcAccessors";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useCardType, useCards } from "@/lib/cardStore";
+import { cardToCombatant } from "@/lib/cardRoster";
 import { useFinePointer } from "@/hooks/useFinePointer";
 import {
   MAX_COMBAT_FIGHTS,
@@ -89,14 +86,12 @@ interface CombatResult {
 function CombatActionPanel({
   attackerId,
   combatants,
-  character,
   difficultyPresets,
   setCombatants,
   onClose,
 }: {
   attackerId: string;
   combatants: Combatant[];
-  character: ReturnType<typeof useApp>["character"];
   difficultyPresets: ReturnType<typeof useApp>["difficultyPresets"];
   setCombatants: ReturnType<typeof useApp>["setCombatants"];
   onClose: () => void;
@@ -110,16 +105,12 @@ function CombatActionPanel({
   const [attackType, setAttackType] = useState("melee");
   const attackDef = ATTACK_TYPES.find((t) => t.id === attackType)!;
 
-  const derivedSkill = attacker
-    ? (attackDef.stat === "us" ? attacker.us : attacker.ww)
-    : (attackDef.stat === "us"
-      ? (character.stats.find((s) => s.abbr === "US")?.value ?? 35)
-      : (character.stats.find((s) => s.abbr === "WW")?.value ?? 40));
+  const derivedSkill = attacker ? (attackDef.stat === "us" ? attacker.us : attacker.ww) : 0;
 
   const [skillOverride, setSkillOverride] = useState<number | null>(null);
   const skillValue = skillOverride ?? derivedSkill;
 
-  const derivedSB = attacker ? attacker.sb : Math.floor((character.stats.find((s) => s.abbr === "S")?.value ?? 30) / 10);
+  const derivedSB = attacker?.sb ?? 0;
 
   const [modTotal, setModTotal] = useState(0);
   const [weaponDamage, setWeaponDamage] = useState(4);
@@ -335,7 +326,6 @@ function CombatActionPanel({
 export default function CombatPage() {
   const location = useLocation();
   const {
-    character,
     combatants,
     setCombatants,
     combatRound,
@@ -349,8 +339,8 @@ export default function CombatPage() {
     combatSessions,
     setCombatSessions,
   } = useApp();
-  const [heroes] = useLocalStorage<HeroRosterEntry[]>(HEROES_STORAGE_KEY, []);
-  const heroRoster = useMemo(() => reviveHeroRoster(heroes), [heroes]);
+  const heroCardType = useCardType("hero");
+  const [heroRoster] = useCards("hero");
   const [combatTab, setCombatTab] = useState<CombatViewMode>("walka");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<Combatant | null>(null);
@@ -498,8 +488,9 @@ export default function CombatPage() {
       const heroId = e.dataTransfer.getData(ROSTER_HERO_DRAG);
       const hero = heroRoster.find((x) => x.id === heroId);
       if (!hero) return;
-      setCombatants((prev) => [...prev, heroRosterToCombatant(hero)]);
-      toast.success(`Dodano „${getHeroRosterDisplayName(hero)}” do walki`);
+      const combatant = cardToCombatant(hero, heroCardType, false);
+      setCombatants((prev) => [...prev, combatant]);
+      toast.success(`Dodano „${combatant.name}” do walki`);
     }
   };
 
@@ -548,7 +539,6 @@ export default function CombatPage() {
         <CombatActionPanel
           attackerId={actionAttackerId}
           combatants={combatants}
-          character={character}
           difficultyPresets={difficultyPresets}
           setCombatants={setCombatants}
           onClose={() => setActionAttackerId(null)}
@@ -675,7 +665,6 @@ export default function CombatPage() {
 
   return (
     <div className="flex flex-col gap-4 animate-fade-in min-h-0">
-      <h1 className="font-app-brand text-lg font-bold leading-tight">Tracker walki</h1>
 
       <FightTabsBar
         fights={combatSessions.fights}
@@ -719,6 +708,7 @@ export default function CombatPage() {
           setGmEnemies={setGmEnemies}
           savedNpcs={savedNpcs}
           heroes={heroRoster}
+          heroCardType={heroCardType}
           setCombatants={setCombatants}
           presets={combatSessions.presets}
           onSavePresets={(presets) => setCombatSessions((prev) => ({ ...prev, presets }))}
@@ -755,6 +745,7 @@ export default function CombatPage() {
           <CombatRosterMobileTab
             savedNpcs={savedNpcs}
             heroes={heroRoster}
+            heroCardType={heroCardType}
             setCombatants={setCombatants}
             dragNpcId={dragNpcId}
             dragHeroId={dragHeroId}

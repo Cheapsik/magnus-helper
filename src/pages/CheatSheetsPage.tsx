@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Search, Pin, PinOff, Plus, Edit2, Check, X, Trash2 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
-import { CHEAT_SHEETS, CATEGORIES } from "@/data/cheatsheets";
 import type { CodexEntry } from "@/context/AppContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -46,16 +45,10 @@ export default function CheatSheetsPage() {
   const [newCategory, setNewCategory] = useState("Walka");
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-    const allSheets = useMemo(() => {
-    const builtIn = CHEAT_SHEETS.map((s) => ({ ...s, isCustom: false }));
-        const customIds = new Set(codexEntries.map((e) => e.id));
-    const merged = builtIn.map((s) => {
-      const custom = codexEntries.find((e) => e.id === s.id);
-      return custom ? { ...custom, isCustom: true } : s;
-    });
-        const purelyNew = codexEntries.filter((e) => !builtIn.some((b) => b.id === e.id));
-    return [...merged, ...purelyNew.map((e) => ({ ...e, isCustom: true }))];
-  }, [codexEntries]);
+  const allSheets = useMemo<CheatSheetView[]>(
+    () => codexEntries.map((e) => ({ ...e, isCustom: true })),
+    [codexEntries],
+  );
 
   const allCategories = useMemo(() => {
     const cats = new Set(allSheets.map((s) => s.category));
@@ -112,7 +105,6 @@ export default function CheatSheetsPage() {
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <h1 className="font-app-brand text-lg font-bold">Baza wiedzy</h1>
 
       <Tabs defaultValue="kodeks" className="space-y-4">
         <TabsList className="flex h-9 w-full items-stretch gap-0.5 rounded-lg bg-muted p-0.5">
@@ -167,7 +159,7 @@ export default function CheatSheetsPage() {
 
             {pinned.length > 0 && (
               <section className="space-y-2">
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <label className="field-label mb-1.5 block">
                   <Pin className="mr-1 inline h-3 w-3" />Przypięte
                 </label>
           <SheetAccordion sheets={pinned} pinnedSheets={pinnedSheets} onTogglePin={togglePinSheet}
@@ -180,12 +172,18 @@ export default function CheatSheetsPage() {
 
             <section className="space-y-2">
               {pinned.length > 0 && (
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <label className="field-label mb-1.5 block">
                   Wszystkie karty
                 </label>
               )}
         {unpinned.length === 0 && pinned.length === 0 && (
-          <Card><CardContent className="p-6 text-center text-muted-foreground text-sm">Brak kart pasujących do wyszukiwania.</CardContent></Card>
+          <Card>
+            <CardContent className="p-6 text-center text-sm text-muted-foreground">
+              {codexEntries.length === 0
+                ? "Kodeks jest pusty. Dodaj własne karty z zasadami swojej kampanii."
+                : "Brak kart pasujących do wyszukiwania."}
+            </CardContent>
+          </Card>
         )}
         <SheetAccordion sheets={unpinned} pinnedSheets={pinnedSheets} onTogglePin={togglePinSheet}
           editingId={editingId} editTitle={editTitle} editContent={editContent} editCategory={editCategory}
@@ -288,7 +286,7 @@ function CodexCardPreview({
     <div className="flex min-w-0 flex-1 flex-col justify-center py-3 pl-4 pr-2">
       <div className="flex min-h-5 w-full items-center gap-2">
         <span className="min-w-0 flex-1 truncate text-sm font-semibold leading-none">{title}</span>
-        <span className="shrink-0 rounded-full border border-border/60 bg-muted/40 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+        <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[length:--fs-meta] font-medium text-muted-foreground">
           {category}
         </span>
         {isPinned && <Pin className="h-3 w-3 shrink-0 text-primary" aria-hidden />}

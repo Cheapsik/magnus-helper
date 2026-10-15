@@ -20,7 +20,7 @@ export function FloatingPanel({
       )}
     >
       <div className="flex items-center justify-between px-3 py-2 border-b border-border/80">
-        <span className="text-[10px] uppercase tracking-wider text-primary font-medium">
+        <span className="field-label text-primary">
           {title}
         </span>
         <button

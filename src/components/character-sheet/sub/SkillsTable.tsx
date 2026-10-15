@@ -97,7 +97,7 @@ export function SkillsTable({
         </tbody>
       </table>
       {allowAdd && (
-        <button type="button" onClick={add} className="paper-add-btn min-h-[44px]">
+        <button type="button" onClick={add} className="paper-add-btn">
           + Dodaj umiejętność
         </button>
       )}

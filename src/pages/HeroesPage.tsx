@@ -1,90 +1,36 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { useApp } from "@/context/AppContext";
-import { getCharacterSheetCombatStats } from "@/components/character-sheet/npcAccessors";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2, ScrollText, Swords } from "lucide-react";
+import { ArrowLeft, Plus, ScrollText, Swords, Trash2 } from "lucide-react";
+import { useApp } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import type { StatRow, StatRow2 } from "@/components/character-sheet/types";
-import { STAT_MAIN, STAT_SECONDARY } from "@/components/character-sheet/constants";
-import { StatTable } from "@/components/character-sheet/sub/StatTable";
-
-interface Bron { id: string; nazwa: string; obc: string; kategoria: string; sila: string; zasieg: string; przeladowanie: string; cechy: string; }
-interface PancerzProsty { id: string; typ: string; pz: string; }
-interface PancerzZlozony { id: string; typ: string; obc: string; lokacja: string; pz: string; }
-interface Umiejetnosc { id: string; nazwa: string; wykupione: boolean; plus10: boolean; plus20: boolean; zdolnosci: string; }
-interface Zdolnosc { id: string; nazwa: string; opis: string; }
-interface Wyposazenie { id: string; nazwa: string; obc: string; opis: string; }
-
-interface Hero {
-  id: string;
-  daneOgolne: { imie: string; rasa: string; obecnaProfesja: string; poprzedniaProfesja: string; };
-  opis: { wiek: string; plec: string; oczy: string; waga: string; wlosy: string; wzrost: string; znakGwiezdny: string; rodzenstwo: string; miejsceUrodzenia: string; znakiSzczegolne: string; };
-  cechyGlowne: { p: StatRow; s: StatRow; a: StatRow; };
-  cechyDrugorzedne: { p: StatRow2; s: StatRow2; a: StatRow2; };
-  xp: { obecne: string; razem: string; };
-  ruch: { ruch: string; szarza: string; bieg: string; };
-  punktyZbroi: { glowa: string; korpus: string; prawaReka: string; lewaReka: string; prawaNoga: string; lewaNoga: string; };
-  bron: Bron[];
-  pancerzProsty: PancerzProsty[];
-  pancerzZlozony: PancerzZlozony[];
-  umiejetnosciPodstawowe: Umiejetnosc[];
-  umiejetnosciZaawansowane: Umiejetnosc[];
-  zdolnosci: Zdolnosc[];
-  pieniadze: { zk: string; s: string; p: string; };
-  wyposazenie: Wyposazenie[];
-}
-
-const DEFAULT_BASIC_SKILLS = [
-  "Charakteryzacja", "Dowodzenie", "Hazard", "Jeździectwo", "Mocna głowa",
-  "Opieka nad zwierzętami", "Plotkowanie", "Pływanie", "Powożenie", "Przekonywanie",
-  "Przeszukiwanie", "Skradanie się", "Spostrzegawczość", "Sztuka przetrwania",
-  "Targowanie", "Ukrywanie się", "Wioślarstwo", "Wspinaczka", "Wycena", "Zastraszanie",
-];
-
-const emptyStat = (): StatRow => ({ ww: "", us: "", k: "", odp: "", zr: "", int: "", sw: "", ogd: "" });
-const emptyStat2 = (): StatRow2 => ({ a: "", zyw: "", s: "", wt: "", sz: "", mag: "", po: "", pp: "" });
-
-const newId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : Math.random().toString(36).slice(2));
-
-const createEmptyHero = (): Hero => ({
-  id: newId(),
-  daneOgolne: { imie: "", rasa: "", obecnaProfesja: "", poprzedniaProfesja: "" },
-  opis: { wiek: "", plec: "", oczy: "", waga: "", wlosy: "", wzrost: "", znakGwiezdny: "", rodzenstwo: "", miejsceUrodzenia: "", znakiSzczegolne: "" },
-  cechyGlowne: { p: emptyStat(), s: emptyStat(), a: emptyStat() },
-  cechyDrugorzedne: { p: emptyStat2(), s: emptyStat2(), a: emptyStat2() },
-  xp: { obecne: "", razem: "" },
-  ruch: { ruch: "", szarza: "", bieg: "" },
-  punktyZbroi: { glowa: "", korpus: "", prawaReka: "", lewaReka: "", prawaNoga: "", lewaNoga: "" },
-  bron: [],
-  pancerzProsty: [],
-  pancerzZlozony: [],
-  umiejetnosciPodstawowe: DEFAULT_BASIC_SKILLS.map((nazwa) => ({ id: newId(), nazwa, wykupione: false, plus10: false, plus20: false, zdolnosci: "" })),
-  umiejetnosciZaawansowane: [],
-  zdolnosci: [],
-  pieniadze: { zk: "", s: "", p: "" },
-  wyposazenie: [],
-});
-
-function getHeroDisplayName(h: Hero) {
-  return h.daneOgolne.imie.trim() || "Bohater";
-}
+import { CardRenderer } from "@/components/card/CardRenderer";
+import { useCardType, useCards } from "@/lib/cardStore";
+import {
+  type Card,
+  type CardTypeDef,
+  cardSubtitle,
+  cardTitle,
+  createEmptyCard,
+} from "@/lib/cardSchema";
+import { cardToCombatant } from "@/lib/cardRoster";
+import { usePageHeader } from "@/context/PageHeaderContext";
 
 export default function HeroesPage() {
   const { setCombatants } = useApp();
-  const [heroes, setHeroes] = useLocalStorage<Hero[]>("rpg_characters", []);
+  const cardType = useCardType("hero");
+  const [heroes, setHeroes] = useCards("hero");
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const activeHero = useMemo(() => heroes.find((h) => h.id === activeId) ?? null, [heroes, activeId]);
 
   const addHero = () => {
-    const h = createEmptyHero();
-    setHeroes((prev) => [...prev, h]);
-    setActiveId(h.id);
+    const hero = createEmptyCard("hero", cardType);
+    setHeroes((prev) => [...prev, hero]);
+    setActiveId(hero.id);
   };
 
   const deleteHero = (id: string) => {
@@ -92,40 +38,35 @@ export default function HeroesPage() {
     if (activeId === id) setActiveId(null);
   };
 
-  const updateHero = (updated: Hero) => {
+  const saveHero = (updated: Card) => {
     setHeroes((prev) => prev.map((h) => (h.id === updated.id ? updated : h)));
   };
 
-  const addHeroToCombat = (h: Hero) => {
-    const c = getCharacterSheetCombatStats(h);
-    const name = getHeroDisplayName(h);
-    const hint = [h.daneOgolne.obecnaProfesja, h.daneOgolne.rasa].filter(Boolean).join(" · ");
-    setCombatants((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        name,
-        initiative: c.initiative,
-        ww: c.ww,
-        us: c.us,
-        sb: c.sb,
-        hp: { current: c.hp, max: Math.max(1, c.hpMax) },
-        armor: c.armor,
-        toughness: c.toughness,
-        statuses: [],
-        notes: hint || c.weapon,
-        isEnemy: false,
-      },
-    ]);
-    toast.success(`Dodano ${name} do walki`);
+  usePageHeader(
+    {
+      actions: activeId ? null : (
+        <Button onClick={addHero}>
+          <Plus className="h-3.5 w-3.5" /> Dodaj bohatera
+        </Button>
+      ),
+      meta: activeId ? [] : [`${heroes.length} ${heroes.length === 1 ? "karta" : "kart"}`],
+    },
+    [activeId, heroes.length],
+  );
+
+  const addHeroToCombat = (hero: Card) => {
+    const combatant = cardToCombatant(hero, cardType, false);
+    setCombatants((prev) => [...prev, combatant]);
+    toast.success(`Dodano ${combatant.name} do walki`);
   };
 
   if (activeHero) {
     return (
       <HeroSheet
         hero={activeHero}
+        cardType={cardType}
         onBack={() => setActiveId(null)}
-        onSave={updateHero}
+        onSave={saveHero}
         onAddToCombat={() => addHeroToCombat(activeHero)}
       />
     );
@@ -133,16 +74,6 @@ export default function HeroesPage() {
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <h1 className="font-app-brand text-lg font-bold">Bohaterowie</h1>
-        <button
-          onClick={addHero}
-          className="inline-flex items-center gap-2 h-11 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors min-h-[44px]"
-        >
-          <Plus className="h-4 w-4" /> Dodaj Bohatera
-        </button>
-      </div>
-
       {heroes.length === 0 ? (
         <div className="border-2 border-dashed border-border rounded-lg p-10 text-center text-muted-foreground">
           <ScrollText className="h-10 w-10 mx-auto mb-3 opacity-60" />
@@ -150,51 +81,62 @@ export default function HeroesPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {heroes.map((h) => (
-            <div
-              key={h.id}
-              className="group bg-card border border-border rounded-lg p-3 flex items-center gap-3 hover:border-primary/50 hover:shadow-md transition-all cursor-pointer"
-              onClick={() => setActiveId(h.id)}
-            >
-              <div className="flex-shrink-0 h-12 w-12 rounded-full bg-primary/15 text-primary flex items-center justify-center">
-                <ScrollText className="h-5 w-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold text-sm truncate">{h.daneOgolne.imie || "Nowy bohater"}</div>
-                <div className="text-xs text-muted-foreground truncate">
-                  {[h.daneOgolne.rasa, h.daneOgolne.obecnaProfesja].filter(Boolean).join(" · ") || "Brak danych"}
+          {heroes.map((hero) => {
+            const name = cardTitle(hero, "Nowy bohater");
+            const subtitle = cardSubtitle(cardType, hero);
+            return (
+              <div
+                key={hero.id}
+                className="group bg-card border border-border rounded-lg p-3 flex items-center gap-3 hover:border-primary/50 hover:shadow-md transition-all cursor-pointer"
+                onClick={() => setActiveId(hero.id)}
+              >
+                <div className="flex-shrink-0 h-12 w-12 overflow-hidden rounded-full bg-primary/15 text-primary flex items-center justify-center">
+                  {hero.portrait ? (
+                    <img src={hero.portrait} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <ScrollText className="h-5 w-5" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-sm truncate">{name}</div>
+                  <div className="text-xs text-muted-foreground truncate">{subtitle || "Brak danych"}</div>
+                </div>
+                <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="h-8 text-xs gap-1 px-2"
+                    onClick={() => addHeroToCombat(hero)}
+                  >
+                    <Swords className="h-3 w-3" /> Walka
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        onClick={(e) => e.stopPropagation()}
+                        className="p-2 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 flex items-center justify-center"
+                        aria-label="Usuń"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Usunąć postać?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Tej operacji nie można cofnąć. Karta „{name}" zostanie trwale usunięta.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Anuluj</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => deleteHero(hero.id)}>Usuń</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
-              <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-                <Button size="sm" variant="secondary" className="h-8 text-xs gap-1 px-2" onClick={() => addHeroToCombat(h)}>
-                  <Swords className="h-3 w-3" /> Walka
-                </Button>
-                <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <button
-                    onClick={(e) => e.stopPropagation()}
-                    className="p-2 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 min-w-[44px] min-h-[44px] flex items-center justify-center"
-                    aria-label="Usuń"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </AlertDialogTrigger>
-                <AlertDialogContent onClick={(e) => e.stopPropagation()}>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Usunąć postać?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Tej operacji nie można cofnąć. Karta „{h.daneOgolne.imie || "Nowy bohater"}" zostanie trwale usunięta.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Anuluj</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => deleteHero(h.id)}>Usuń</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
@@ -203,404 +145,44 @@ export default function HeroesPage() {
 
 function HeroSheet({
   hero,
+  cardType,
   onBack,
   onSave,
   onAddToCombat,
 }: {
-  hero: Hero;
+  hero: Card;
+  cardType: CardTypeDef;
   onBack: () => void;
-  onSave: (h: Hero) => void;
+  onSave: (hero: Card) => void;
   onAddToCombat: () => void;
 }) {
-  const [draft, setDraft] = useState<Hero>(hero);
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isFirstRender = useRef(true);
+  const [draft, setDraft] = useState<Card>(hero);
+  const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => { setDraft(hero); }, [hero.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => setDraft(hero), [hero.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (isFirstRender.current) { isFirstRender.current = false; return; }
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => onSave(draft), 500);
-    return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
+    if (debounce.current) clearTimeout(debounce.current);
+    debounce.current = setTimeout(() => onSave(draft), 500);
+    return () => {
+      if (debounce.current) clearTimeout(debounce.current);
+    };
   }, [draft]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const update = <K extends keyof Hero>(key: K, value: Hero[K]) => setDraft((d) => ({ ...d, [key]: value }));
-
   return (
-    <div className="paper-sheet animate-fade-in">
-      <div className="paper-topbar flex flex-wrap items-center gap-2">
-        <button type="button" onClick={onBack} className="paper-back-btn min-h-[44px]">
+    <div className="animate-fade-in">
+      <div className="paper-topbar">
+        <button onClick={onBack} className="paper-back-btn">
           <ArrowLeft className="h-4 w-4" /> Wróć do listy
         </button>
-        <h1 className="paper-title m-0 flex-1 min-w-0">Karta Postaci: {draft.daneOgolne.imie || "—"}</h1>
-        <Button type="button" size="sm" variant="secondary" className="h-9 text-xs gap-1 shrink-0" onClick={onAddToCombat}>
-          <Swords className="h-3.5 w-3.5" /> Dodaj do walki
+        <h1 className="paper-title">{cardTitle(draft, "Nowy bohater")}</h1>
+        <Button size="sm" variant="secondary" className="h-8 gap-1 text-xs" onClick={onAddToCombat}>
+          <Swords className="h-3 w-3" /> Dodaj do walki
         </Button>
       </div>
 
-      <div className="paper-grid">
-        <Section title="BOHATER">
-          <PaperField label="Imię" value={draft.daneOgolne.imie} onChange={(v) => update("daneOgolne", { ...draft.daneOgolne, imie: v })} />
-          <PaperField label="Rasa" value={draft.daneOgolne.rasa} onChange={(v) => update("daneOgolne", { ...draft.daneOgolne, rasa: v })} />
-          <PaperField label="Obecna profesja" value={draft.daneOgolne.obecnaProfesja} onChange={(v) => update("daneOgolne", { ...draft.daneOgolne, obecnaProfesja: v })} />
-          <PaperField label="Poprzednia profesja" value={draft.daneOgolne.poprzedniaProfesja} onChange={(v) => update("daneOgolne", { ...draft.daneOgolne, poprzedniaProfesja: v })} />
-        </Section>
-
-        <Section title="OPIS BOHATERA">
-          <div className="paper-field-grid">
-            <PaperField label="Wiek" value={draft.opis.wiek} onChange={(v) => update("opis", { ...draft.opis, wiek: v })} />
-            <PaperField label="Płeć" value={draft.opis.plec} onChange={(v) => update("opis", { ...draft.opis, plec: v })} />
-            <PaperField label="Kolor oczu" value={draft.opis.oczy} onChange={(v) => update("opis", { ...draft.opis, oczy: v })} />
-            <PaperField label="Waga" value={draft.opis.waga} onChange={(v) => update("opis", { ...draft.opis, waga: v })} />
-            <PaperField label="Kolor włosów" value={draft.opis.wlosy} onChange={(v) => update("opis", { ...draft.opis, wlosy: v })} />
-            <PaperField label="Wzrost" value={draft.opis.wzrost} onChange={(v) => update("opis", { ...draft.opis, wzrost: v })} />
-            <PaperField label="Znak gwiezdny" value={draft.opis.znakGwiezdny} onChange={(v) => update("opis", { ...draft.opis, znakGwiezdny: v })} />
-            <PaperField label="Rodzeństwo" value={draft.opis.rodzenstwo} onChange={(v) => update("opis", { ...draft.opis, rodzenstwo: v })} />
-            <PaperField label="Miejsce urodzenia" value={draft.opis.miejsceUrodzenia} onChange={(v) => update("opis", { ...draft.opis, miejsceUrodzenia: v })} />
-            <PaperField label="Znaki szczególne" value={draft.opis.znakiSzczegolne} onChange={(v) => update("opis", { ...draft.opis, znakiSzczegolne: v })} />
-          </div>
-        </Section>
-
-        <Section title="CECHY GŁÓWNE" wide>
-          <StatTable
-            cols={STAT_MAIN}
-            rows={draft.cechyGlowne}
-            onChange={(rowKey, colKey, val) =>
-              update("cechyGlowne", { ...draft.cechyGlowne, [rowKey]: { ...draft.cechyGlowne[rowKey], [colKey]: val } })
-            }
-          />
-        </Section>
-
-        <Section title="CECHY DRUGORZĘDNE" wide>
-          <StatTable
-            cols={STAT_SECONDARY}
-            rows={draft.cechyDrugorzedne}
-            onChange={(rowKey, colKey, val) =>
-              update("cechyDrugorzedne", { ...draft.cechyDrugorzedne, [rowKey]: { ...draft.cechyDrugorzedne[rowKey], [colKey]: val } })
-            }
-          />
-        </Section>
-
-        <Section title="DOŚWIADCZENIE · RUCH · PUNKTY ZBROI" wide>
-          <div className="paper-three-col">
-            <div className="paper-subbox">
-              <h4 className="paper-subhead">Punkty doświadczenia</h4>
-              <PaperField label="Obecne" value={draft.xp.obecne} onChange={(v) => update("xp", { ...draft.xp, obecne: v })} />
-              <PaperField label="Razem" value={draft.xp.razem} onChange={(v) => update("xp", { ...draft.xp, razem: v })} />
-            </div>
-            <div className="paper-subbox">
-              <h4 className="paper-subhead">Ruch w walce</h4>
-              <PaperField label="Ruch / odwrót" value={draft.ruch.ruch} onChange={(v) => update("ruch", { ...draft.ruch, ruch: v })} />
-              <PaperField label="Szarża" value={draft.ruch.szarza} onChange={(v) => update("ruch", { ...draft.ruch, szarza: v })} />
-              <PaperField label="Bieg" value={draft.ruch.bieg} onChange={(v) => update("ruch", { ...draft.ruch, bieg: v })} />
-            </div>
-            <div className="paper-subbox">
-              <h4 className="paper-subhead">Punkty zbroi (lokacje)</h4>
-              <BodyArmor
-                values={draft.punktyZbroi}
-                onChange={(patch) => update("punktyZbroi", { ...draft.punktyZbroi, ...patch })}
-              />
-            </div>
-          </div>
-        </Section>
-
-        <Section title="BROŃ" wide>
-          <DynTable
-            headers={["Nazwa", "Obc.", "Kategoria", "Siła broni", "Zasięg", "Przeład.", "Cechy oręża"]}
-            rows={draft.bron}
-            fields={["nazwa", "obc", "kategoria", "sila", "zasieg", "przeladowanie", "cechy"]}
-            onChange={(rows) => update("bron", rows as Bron[])}
-            addLabel="+ Dodaj broń"
-            createRow={() => ({ id: newId(), nazwa: "", obc: "", kategoria: "", sila: "", zasieg: "", przeladowanie: "", cechy: "" })}
-          />
-        </Section>
-
-        <Section title="PANCERZ" wide>
-          <h4 className="paper-subhead">Opancerzenie proste</h4>
-          <DynTable
-            headers={["Typ pancerza", "Punkty Zbroi"]}
-            rows={draft.pancerzProsty}
-            fields={["typ", "pz"]}
-            onChange={(rows) => update("pancerzProsty", rows as PancerzProsty[])}
-            addLabel="+ Dodaj wiersz"
-            createRow={() => ({ id: newId(), typ: "", pz: "" })}
-          />
-          <h4 className="paper-subhead mt-3">Opancerzenie złożone</h4>
-          <DynTable
-            headers={["Typ pancerza", "Obc.", "Lokacja ciała", "PZ"]}
-            rows={draft.pancerzZlozony}
-            fields={["typ", "obc", "lokacja", "pz"]}
-            onChange={(rows) => update("pancerzZlozony", rows as PancerzZlozony[])}
-            addLabel="+ Dodaj wiersz"
-            createRow={() => ({ id: newId(), typ: "", obc: "", lokacja: "", pz: "" })}
-          />
-        </Section>
-
-        <Section title="UMIEJĘTNOŚCI" wide>
-          <div className="paper-skills-grid">
-            <div>
-              <h4 className="paper-subhead">Umiejętności podstawowe</h4>
-              <SkillsTable
-                rows={draft.umiejetnosciPodstawowe}
-                onChange={(rows) => update("umiejetnosciPodstawowe", rows)}
-                allowAdd={false}
-              />
-            </div>
-            <div>
-              <h4 className="paper-subhead">Umiejętności zaawansowane</h4>
-              <SkillsTable
-                rows={draft.umiejetnosciZaawansowane}
-                onChange={(rows) => update("umiejetnosciZaawansowane", rows)}
-                allowAdd
-              />
-            </div>
-          </div>
-        </Section>
-
-        <Section title="ZDOLNOŚCI" wide>
-          <DynTable
-            headers={["Zdolność", "Opis"]}
-            rows={draft.zdolnosci}
-            fields={["nazwa", "opis"]}
-            onChange={(rows) => update("zdolnosci", rows as Zdolnosc[])}
-            addLabel="+ Dodaj zdolność"
-            createRow={() => ({ id: newId(), nazwa: "", opis: "" })}
-          />
-        </Section>
-
-        <Section title="PIENIĄDZE I WYPOSAŻENIE" wide>
-          <div className="paper-money">
-            <PaperField label="Złote korony (zk)" value={draft.pieniadze.zk} onChange={(v) => update("pieniadze", { ...draft.pieniadze, zk: v })} numeric />
-            <PaperField label="Srebrne szylingi (s)" value={draft.pieniadze.s} onChange={(v) => update("pieniadze", { ...draft.pieniadze, s: v })} numeric />
-            <PaperField label="Mosiężne pensy (p)" value={draft.pieniadze.p} onChange={(v) => update("pieniadze", { ...draft.pieniadze, p: v })} numeric />
-          </div>
-          <h4 className="paper-subhead mt-3">Wyposażenie</h4>
-          <DynTable
-            headers={["Przedmiot", "Obc.", "Opis"]}
-            rows={draft.wyposazenie}
-            fields={["nazwa", "obc", "opis"]}
-            onChange={(rows) => update("wyposazenie", rows as Wyposazenie[])}
-            addLabel="+ Dodaj przedmiot"
-            createRow={() => ({ id: newId(), nazwa: "", obc: "", opis: "" })}
-          />
-        </Section>
-      </div>
-    </div>
-  );
-}
-
-function Section({ title, children, wide }: { title: string; children: React.ReactNode; wide?: boolean }) {
-  return (
-    <section className={"paper-section " + (wide ? "paper-section-wide" : "")}>
-      <header className="paper-section-header">{title}</header>
-      <div className="paper-section-body">{children}</div>
-    </section>
-  );
-}
-
-function PaperField({ label, value, onChange, numeric }: { label: string; value: string; onChange: (v: string) => void; numeric?: boolean }) {
-  return (
-    <label className="paper-field">
-      <span className="paper-field-label">{label}</span>
-      <input
-        type={numeric ? "number" : "text"}
-        inputMode={numeric ? "numeric" : undefined}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="paper-input"
-      />
-    </label>
-  );
-}
-
-function DynTable<T extends { id: string }>({
-  headers, rows, fields, onChange, addLabel, createRow,
-}: {
-  headers: string[];
-  rows: T[];
-  fields: (keyof T)[];
-  onChange: (rows: T[]) => void;
-  addLabel: string;
-  createRow: () => T;
-}) {
-  const updateCell = (id: string, field: keyof T, val: string) => {
-    onChange(rows.map((r) => (r.id === id ? { ...r, [field]: val } : r)));
-  };
-  const removeRow = (id: string) => onChange(rows.filter((r) => r.id !== id));
-  const addRow = () => onChange([...rows, createRow()]);
-
-  return (
-    <div className="paper-table-wrap">
-      <table className="paper-table">
-        <thead>
-          <tr>
-            {headers.map((h) => <th key={h}>{h}</th>)}
-            <th className="w-12"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.length === 0 && (
-            <tr><td colSpan={headers.length + 1} className="paper-empty">Brak wpisów</td></tr>
-          )}
-          {rows.map((r) => (
-            <tr key={r.id}>
-              {fields.map((f) => (
-                <td key={String(f)}>
-                  <input
-                    type="text"
-                    value={(r[f] as unknown as string) ?? ""}
-                    onChange={(e) => updateCell(r.id, f, e.target.value)}
-                    className="paper-input paper-input-cell"
-                  />
-                </td>
-              ))}
-              <td>
-                <button
-                  onClick={() => removeRow(r.id)}
-                  className="paper-icon-btn"
-                  aria-label="Usuń wiersz"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <button onClick={addRow} className="paper-add-btn min-h-[44px]">{addLabel}</button>
-    </div>
-  );
-}
-
-function SkillsTable({
-  rows, onChange, allowAdd,
-}: {
-  rows: Umiejetnosc[];
-  onChange: (rows: Umiejetnosc[]) => void;
-  allowAdd: boolean;
-}) {
-  const update = (id: string, patch: Partial<Umiejetnosc>) =>
-    onChange(rows.map((r) => (r.id === id ? { ...r, ...patch } : r)));
-  const remove = (id: string) => onChange(rows.filter((r) => r.id !== id));
-  const add = () => onChange([...rows, { id: newId(), nazwa: "", wykupione: false, plus10: false, plus20: false, zdolnosci: "" }]);
-
-  return (
-    <div className="paper-table-wrap">
-      <table className="paper-table paper-table-skills">
-        <thead>
-          <tr>
-            <th className="text-left">Umiejętność</th>
-            <th className="col-check" title="Wykupione">W</th>
-            <th className="col-check">+10</th>
-            <th className="col-check">+20</th>
-            <th className="text-left">Zdolności pokrewne</th>
-            {allowAdd && <th className="col-check"></th>}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.length === 0 && (
-            <tr><td colSpan={allowAdd ? 6 : 5} className="paper-empty">Brak umiejętności</td></tr>
-          )}
-          {rows.map((r) => (
-            <tr key={r.id}>
-              <td>
-                <input
-                  type="text"
-                  value={r.nazwa}
-                  onChange={(e) => update(r.id, { nazwa: e.target.value })}
-                  className="paper-input paper-input-cell text-left"
-                />
-              </td>
-              <td className="col-check">
-                <input type="checkbox" checked={r.wykupione} onChange={(e) => update(r.id, { wykupione: e.target.checked })} className="paper-checkbox" />
-              </td>
-              <td className="col-check">
-                <input type="checkbox" checked={r.plus10} onChange={(e) => update(r.id, { plus10: e.target.checked })} className="paper-checkbox" />
-              </td>
-              <td className="col-check">
-                <input type="checkbox" checked={r.plus20} onChange={(e) => update(r.id, { plus20: e.target.checked })} className="paper-checkbox" />
-              </td>
-              <td>
-                <input
-                  type="text"
-                  value={r.zdolnosci}
-                  onChange={(e) => update(r.id, { zdolnosci: e.target.value })}
-                  className="paper-input paper-input-cell text-left"
-                />
-              </td>
-              {allowAdd && (
-                <td>
-                  <button onClick={() => remove(r.id)} className="paper-icon-btn" aria-label="Usuń">
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </td>
-              )}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {allowAdd && (
-        <button onClick={add} className="paper-add-btn min-h-[44px]">+ Dodaj umiejętność</button>
-      )}
-    </div>
-  );
-}
-
-function BodyArmor({
-  values,
-  onChange,
-}: {
-  values: Hero["punktyZbroi"];
-  onChange: (patch: Partial<Hero["punktyZbroi"]>) => void;
-}) {
-  const cell = (
-    label: string,
-    range: string,
-    field: keyof Hero["punktyZbroi"],
-  ) => (
-    <div className="armor-cell">
-      <div className="armor-cell-label">
-        <span className="armor-cell-name">{label}</span>
-        <span className="armor-cell-range">{range}</span>
-      </div>
-      <input
-        type="number"
-        inputMode="numeric"
-        value={values[field]}
-        onChange={(e) => onChange({ [field]: e.target.value } as Partial<Hero["punktyZbroi"]>)}
-        className="armor-input"
-        aria-label={`${label} (${range})`}
-      />
-    </div>
-  );
-
-  return (
-    <div className="armor-diagram">
-      <div className="armor-figure" aria-hidden="true">
-        <svg viewBox="0 0 100 200" preserveAspectRatio="xMidYMid meet">
-          <circle cx="50" cy="20" r="13" fill="none" stroke="#1a1a1a" strokeWidth="1.5" />
-          <line x1="50" y1="33" x2="50" y2="40" stroke="#1a1a1a" strokeWidth="1.5" />
-          <path d="M30 42 L70 42 L66 110 L34 110 Z" fill="none" stroke="#1a1a1a" strokeWidth="1.5" />
-          <path d="M30 44 L18 90 L22 120 L28 120 L26 92 L34 60" fill="none" stroke="#1a1a1a" strokeWidth="1.5" />
-          <path d="M70 44 L82 90 L78 120 L72 120 L74 92 L66 60" fill="none" stroke="#1a1a1a" strokeWidth="1.5" />
-          <path d="M36 110 L32 185 L42 185 L46 110" fill="none" stroke="#1a1a1a" strokeWidth="1.5" />
-          <path d="M64 110 L68 185 L58 185 L54 110" fill="none" stroke="#1a1a1a" strokeWidth="1.5" />
-        </svg>
-      </div>
-      <div className="armor-grid">
-        <div className="armor-row armor-row-head">
-          {cell("Głowa", "01–15", "glowa")}
-        </div>
-        <div className="armor-row armor-row-arms">
-          {cell("Pr. ręka", "16–35", "prawaReka")}
-          {cell("Korpus", "56–80", "korpus")}
-          {cell("L. ręka", "36–55", "lewaReka")}
-        </div>
-        <div className="armor-row armor-row-legs">
-          {cell("Pr. noga", "81–90", "prawaNoga")}
-          {cell("L. noga", "91–00", "lewaNoga")}
-        </div>
+      <div className="paper-sheet">
+        <CardRenderer cardType={cardType} card={draft} onChange={setDraft} />
       </div>
     </div>
   );

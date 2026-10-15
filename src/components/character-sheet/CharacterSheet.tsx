@@ -1,13 +1,12 @@
 import type { Bron, CharacterSheetCore, PancerzProsty, PancerzZlozony, SavedNpc, Zdolnosc, Wyposazenie } from "./types";
 import { STAT_MAIN, STAT_SECONDARY } from "./constants";
 import { newId } from "./factory";
-import { Section } from "./sub/Section";
+import { Section } from "@/components/card/Section";
 import { PaperField } from "./sub/PaperField";
 import { StatTable } from "./sub/StatTable";
 import { DynTable } from "./sub/DynTable";
 import { SkillsTable } from "./sub/SkillsTable";
 import { BodyArmor } from "./sub/BodyArmor";
-import { ZestawienieAkcji } from "./sub/ZestawienieAkcji";
 
 export type CharacterSheetProps = {
   value: SavedNpc;
@@ -27,11 +26,11 @@ export function CharacterSheet({ value, onChange }: CharacterSheetProps) {
   };
 
   return (
-    <div className="wfrp-sheet">
-      <div className="wfrp-page wfrp-page-1">
-        <div className="wfrp-p1-grid">
-          <div className="wfrp-p1-left">
-            <Section title="NPC — MG" className="wfrp-mt-section">
+    <div className="sheet-sheet">
+      <div className="sheet-page sheet-page-1">
+        <div className="sheet-p1-grid">
+          <div className="sheet-p1-left">
+            <Section title="NPC — MG" className="sheet-mt-section">
               <PaperField label="Cechy charakteru" value={npcExtras.cechyCharakteru} onChange={npcExtras.setCechy} />
               <PaperField label="Opis / wygląd" value={npcExtras.opisOgolny} onChange={npcExtras.setOpis} />
             </Section>
@@ -57,8 +56,8 @@ export function CharacterSheet({ value, onChange }: CharacterSheetProps) {
                 onChange={(v) => update("daneOgolne", { ...value.daneOgolne, rasa: v })}
               />
             </Section>
-            <Section title="OPIS BOHATERA" className="wfrp-mt-section">
-              <div className="paper-field-grid wfrp-opis-grid">
+            <Section title="OPIS BOHATERA" className="sheet-mt-section">
+              <div className="paper-field-grid sheet-opis-grid">
                 <PaperField label="Płeć" value={value.opis.plec} onChange={(v) => update("opis", { ...value.opis, plec: v })} />
                 <PaperField
                   label="Znaki szczególne"
@@ -89,8 +88,8 @@ export function CharacterSheet({ value, onChange }: CharacterSheetProps) {
             </Section>
           </div>
 
-          <div className="wfrp-p1-mid">
-            <Section title="CECHY" className="wfrp-section-cechy">
+          <div className="sheet-p1-mid">
+            <Section title="CECHY" className="sheet-section-cechy">
               <h4 className="paper-subhead">Cechy główne</h4>
               <StatTable
                 cols={STAT_MAIN}
@@ -102,7 +101,7 @@ export function CharacterSheet({ value, onChange }: CharacterSheetProps) {
                   })
                 }
               />
-              <h4 className="paper-subhead wfrp-subhead-tight">Cechy drugorzędne</h4>
+              <h4 className="paper-subhead sheet-subhead-tight">Cechy drugorzędne</h4>
               <StatTable
                 cols={STAT_SECONDARY}
                 rows={value.cechyDrugorzedne}
@@ -115,21 +114,21 @@ export function CharacterSheet({ value, onChange }: CharacterSheetProps) {
               />
             </Section>
 
-            <div className="wfrp-xp-ruch-stack">
-              <div className="wfrp-xp-ruch-armor">
-                <div className="paper-subbox wfrp-xp-box">
+            <div className="sheet-xp-ruch-stack">
+              <div className="sheet-xp-ruch-armor">
+                <div className="paper-subbox sheet-xp-box">
                   <h4 className="paper-subhead">Punkty doświadczenia</h4>
                   <PaperField label="Obecne" value={value.xp.obecne} onChange={(v) => update("xp", { ...value.xp, obecne: v })} />
                   <PaperField label="Razem" value={value.xp.razem} onChange={(v) => update("xp", { ...value.xp, razem: v })} />
                 </div>
-                <div className="paper-subbox wfrp-ruch-box">
+                <div className="paper-subbox sheet-ruch-box">
                   <h4 className="paper-subhead">Ruch w walce</h4>
                   <PaperField label="Ruch / odwrót" value={value.ruch.ruch} onChange={(v) => update("ruch", { ...value.ruch, ruch: v })} />
                   <PaperField label="Szarża" value={value.ruch.szarza} onChange={(v) => update("ruch", { ...value.ruch, szarza: v })} />
                   <PaperField label="Bieg" value={value.ruch.bieg} onChange={(v) => update("ruch", { ...value.ruch, bieg: v })} />
                 </div>
               </div>
-              <div className="paper-subbox wfrp-armor-block">
+              <div className="paper-subbox sheet-armor-block">
                 <h4 className="paper-subhead">Punkty zbroi</h4>
                 <BodyArmor
                   values={value.punktyZbroi}
@@ -140,9 +139,7 @@ export function CharacterSheet({ value, onChange }: CharacterSheetProps) {
           </div>
         </div>
 
-        <ZestawienieAkcji />
-
-        <Section title="BROŃ" wide className="wfrp-section-bron">
+        <Section title="BROŃ" wide className="sheet-section-bron">
           <DynTable
             headers={["Nazwa", "Obc.", "Cechy oręża", "Przeład.", "Zasięg", "Siła broni", "Kategoria"]}
             rows={value.bron}
@@ -172,7 +169,7 @@ export function CharacterSheet({ value, onChange }: CharacterSheetProps) {
             addLabel="+ Dodaj wiersz"
             createRow={() => ({ id: newId(), typ: "", pz: "" })}
           />
-          <h4 className="paper-subhead wfrp-subhead-tight">Opancerzenie złożone</h4>
+          <h4 className="paper-subhead sheet-subhead-tight">Opancerzenie złożone</h4>
           <DynTable
             headers={["Typ pancerza", "Obc.", "Lokacja ciała", "PZ"]}
             rows={value.pancerzZlozony}
@@ -183,21 +180,21 @@ export function CharacterSheet({ value, onChange }: CharacterSheetProps) {
           />
         </Section>
 
-        <p className="wfrp-kosmit">KOSMIT 2013 · www.kosmitpaczy.pl</p>
+        <p className="sheet-kosmit">KOSMIT 2013 · www.kosmitpaczy.pl</p>
       </div>
 
-      <div className="wfrp-page wfrp-page-2">
-        <div className="wfrp-p2-columns">
-          <section className="paper-section wfrp-p2-skills-section">
+      <div className="sheet-page sheet-page-2">
+        <div className="sheet-p2-columns">
+          <section className="paper-section sheet-p2-skills-section">
             <header className="paper-section-header">UMIEJĘTNOŚCI</header>
             <div className="paper-section-body">
               <h4 className="paper-subhead">Umiejętności podstawowe</h4>
               <SkillsTable rows={value.umiejetnosciPodstawowe} onChange={(rows) => update("umiejetnosciPodstawowe", rows)} allowAdd={false} />
-              <h4 className="paper-subhead wfrp-subhead-tight">Umiejętności zaawansowane</h4>
+              <h4 className="paper-subhead sheet-subhead-tight">Umiejętności zaawansowane</h4>
               <SkillsTable rows={value.umiejetnosciZaawansowane} onChange={(rows) => update("umiejetnosciZaawansowane", rows)} allowAdd />
             </div>
           </section>
-          <section className="paper-section wfrp-p2-talents-section">
+          <section className="paper-section sheet-p2-talents-section">
             <header className="paper-section-header">ZDOLNOŚCI</header>
             <div className="paper-section-body">
               <DynTable
@@ -213,7 +210,7 @@ export function CharacterSheet({ value, onChange }: CharacterSheetProps) {
         </div>
 
         <Section title="PIENIĄDZE" wide>
-          <div className="paper-money wfrp-money-row">
+          <div className="paper-money sheet-money-row">
             <PaperField label="Złote korony (zk)" value={value.pieniadze.zk} onChange={(v) => update("pieniadze", { ...value.pieniadze, zk: v })} numeric />
             <PaperField label="Srebrne szylingi (s)" value={value.pieniadze.s} onChange={(v) => update("pieniadze", { ...value.pieniadze, s: v })} numeric />
             <PaperField label="Mosiężne pensy (p)" value={value.pieniadze.p} onChange={(v) => update("pieniadze", { ...value.pieniadze, p: v })} numeric />

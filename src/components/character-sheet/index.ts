@@ -10,7 +10,7 @@ export type {
   Wyposazenie,
   Zdolnosc,
 } from "./types";
-export { AKCJE_GRUPY, DEFAULT_BASIC_SKILLS, STAT_MAIN, STAT_SECONDARY } from "./constants";
+export { DEFAULT_BASIC_SKILLS, STAT_MAIN, STAT_SECONDARY } from "./constants";
 export {
   createCharacterSheetCore,
   createEmptyNpc,
