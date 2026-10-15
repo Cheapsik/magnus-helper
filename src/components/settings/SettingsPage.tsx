@@ -3,20 +3,34 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CampaignManager from "./CampaignManager";
 import DataManager from "./DataManager";
 import { CardStructureEditor } from "@/components/system/CardStructureEditor";
+import { TestTypesEditor } from "@/components/system/TestTypesEditor";
+import { CombatSettingsEditor } from "@/components/system/CombatSettingsEditor";
+import { ConditionsEditor } from "@/components/system/ConditionsEditor";
+import { CurrencyEditor } from "@/components/system/CurrencyEditor";
 
-const TABS = ["kampanie", "karty"] as const;
-type Tab = (typeof TABS)[number];
+const TABS = [
+  { value: "kampanie", label: "Kampanie i dane" },
+  { value: "karty", label: "Karty" },
+  { value: "testy", label: "Testy" },
+  { value: "walka", label: "Walka" },
+  { value: "stany", label: "Stany" },
+  { value: "waluta", label: "Waluta" },
+] as const;
+type Tab = (typeof TABS)[number]["value"];
 
 export default function SettingsPage() {
   const [params, setParams] = useSearchParams();
   const requested = params.get("tab");
-  const tab: Tab = TABS.includes(requested as Tab) ? (requested as Tab) : "kampanie";
+  const tab: Tab = TABS.some((t) => t.value === requested) ? (requested as Tab) : "kampanie";
 
   return (
     <Tabs value={tab} onValueChange={(next) => setParams({ tab: next }, { replace: true })} className="space-y-4">
-      <TabsList>
-        <TabsTrigger value="kampanie">Kampanie i dane</TabsTrigger>
-        <TabsTrigger value="karty">System: karty</TabsTrigger>
+      <TabsList className="h-auto flex-wrap justify-start">
+        {TABS.map((t) => (
+          <TabsTrigger key={t.value} value={t.value}>
+            {t.label}
+          </TabsTrigger>
+        ))}
       </TabsList>
       <TabsContent value="kampanie" className="space-y-6">
         <CampaignManager />
@@ -24,6 +38,18 @@ export default function SettingsPage() {
       </TabsContent>
       <TabsContent value="karty">
         <CardStructureEditor />
+      </TabsContent>
+      <TabsContent value="testy">
+        <TestTypesEditor />
+      </TabsContent>
+      <TabsContent value="walka">
+        <CombatSettingsEditor />
+      </TabsContent>
+      <TabsContent value="stany">
+        <ConditionsEditor />
+      </TabsContent>
+      <TabsContent value="waluta">
+        <CurrencyEditor />
       </TabsContent>
     </Tabs>
   );
