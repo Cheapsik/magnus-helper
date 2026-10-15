@@ -1,6 +1,3 @@
-import { createCampaign, readCampaignsRegistry } from "@/lib/campaignStorage";
-import { initializeCampaignSystem } from "@/lib/cardStore";
-
 /**
  * Data written before the configurable campaign system has the shape of one
  * hardcoded game. It is not migrated (docs/adr/0008): the first run of this
@@ -43,19 +40,5 @@ export function resetDataFromPreviousVersions(storage: Storage = window.localSto
     return keys.length > 0;
   } catch {
     return false;
-  }
-}
-
-/**
- * Until the first-campaign wizard exists, a fresh install gets one campaign
- * started from the neutral template so every screen has a system to read.
- */
-export function ensureInitialCampaign(): void {
-  try {
-    if (readCampaignsRegistry().campaigns.length > 0) return;
-    const campaign = createCampaign("Moja kampania");
-    initializeCampaignSystem(campaign.id, "template");
-  } catch {
-    // storage unavailable — the app runs without persistence
   }
 }

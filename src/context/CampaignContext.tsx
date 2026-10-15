@@ -10,6 +10,7 @@ import {
   unarchiveCampaign as unarchiveCampaignInStorage,
 } from "@/lib/campaignStorage";
 import { initializeCampaignSystem } from "@/lib/cardStore";
+import { getAppUrl } from "@/lib/authUrls";
 import type { StartingPoint } from "@/lib/systemTemplates";
 
 interface CampaignContextValue {
@@ -30,9 +31,10 @@ interface CampaignContextValue {
    * Makes a campaign active and reloads the app so every module re-reads its
    * state from the newly namespaced storage keys — the simplest way to
    * guarantee the full isolation required by Decyzja 2 with ~15 independent
-   * pieces of app state.
+   * pieces of app state. `path` (relative to the app root) is where the
+   * reload lands; the current page by default.
    */
-  switchCampaign: (campaignId: string) => void;
+  switchCampaign: (campaignId: string, path?: string) => void;
 }
 
 const CampaignContext = createContext<CampaignContextValue | null>(null);
@@ -91,9 +93,10 @@ export function CampaignProvider({ children }: { children: ReactNode }) {
     [refresh],
   );
 
-  const switchCampaign = useCallback((campaignId: string) => {
+  const switchCampaign = useCallback((campaignId: string, path?: string) => {
     setActiveCampaignIdInStorage(campaignId);
-    window.location.reload();
+    if (path === undefined) window.location.reload();
+    else window.location.assign(getAppUrl(path));
   }, []);
 
   const value = useMemo<CampaignContextValue>(() => {

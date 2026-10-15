@@ -9,7 +9,8 @@ import { DrawerProvider } from "@/context/DrawerContext";
 import { CommandPaletteProvider } from "@/context/CommandPaletteContext";
 import { PageHeaderProvider } from "@/context/PageHeaderContext";
 import { SettingsProvider } from "@/context/SettingsContext";
-import { CampaignProvider } from "@/context/CampaignContext";
+import { CampaignProvider, useCampaigns } from "@/context/CampaignContext";
+import { FirstCampaignScreen } from "@/components/campaign/FirstCampaignScreen";
 import { AuthProvider } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
 import { AuthGuard } from "@/components/AuthGuard";
@@ -42,6 +43,17 @@ import RelationsMapPage from "./pages/RelationsMapPage";
 function ProtectedApp() {
   return (
     <AuthGuard>
+      <CampaignGate />
+    </AuthGuard>
+  );
+}
+
+/** Every screen reads campaign data, so nothing renders until a campaign exists. */
+function CampaignGate() {
+  const { campaigns } = useCampaigns();
+  if (campaigns.length === 0) return <FirstCampaignScreen />;
+  return (
+    <>
       <Layout>
         <Routes>
           <Route path="/" element={<Index />} />
@@ -69,7 +81,7 @@ function ProtectedApp() {
       </Layout>
       <GlobalDrawer />
       <CommandPalette />
-    </AuthGuard>
+    </>
   );
 }
 

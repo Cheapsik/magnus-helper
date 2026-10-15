@@ -13,14 +13,14 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NewCampaignDialog } from "@/components/campaign/NewCampaignDialog";
 
 /** Decyzja 1: pełne zarządzanie cyklem życia kampanii żyje w Ustawieniach. */
 export default function CampaignManager() {
-  const { campaigns, activeCampaignId, createCampaign, renameCampaign, archiveCampaign, unarchiveCampaign, deleteCampaign, switchCampaign } =
+  const { campaigns, activeCampaignId, renameCampaign, archiveCampaign, unarchiveCampaign, deleteCampaign, switchCampaign } =
     useCampaigns();
 
   const [creating, setCreating] = useState(false);
-  const [newName, setNewName] = useState("");
   const [renaming, setRenaming] = useState<Campaign | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Campaign | null>(null);
@@ -32,14 +32,6 @@ export default function CampaignManager() {
   const rowBtn = cn(
     "p-1.5 text-muted-foreground hover:text-foreground transition-colors rounded-sm hover:bg-white/[0.06]",
   );
-
-  const submitCreate = () => {
-    const trimmed = newName.trim();
-    if (!trimmed) return;
-    createCampaign(trimmed);
-    setNewName("");
-    setCreating(false);
-  };
 
   const submitRename = () => {
     if (!renaming) return;
@@ -134,7 +126,7 @@ export default function CampaignManager() {
       </div>
 
       {active.length === 0 && (
-        <p className="text-sm text-muted-foreground">Nie masz jeszcze żadnej kampanii — utwórz pierwszą.</p>
+        <p className="text-sm text-muted-foreground">Nie masz jeszcze żadnej kampanii. Utwórz pierwszą.</p>
       )}
 
       {active.length > 0 && <ul className="space-y-2">{active.map(renderRow)}</ul>}
@@ -148,30 +140,7 @@ export default function CampaignManager() {
         </div>
       )}
 
-      <Dialog open={creating} onOpenChange={setCreating}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Nowa kampania</DialogTitle>
-          </DialogHeader>
-          <Input
-            autoFocus
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder="Nazwa kampanii"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") submitCreate();
-            }}
-          />
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setCreating(false)}>
-              Anuluj
-            </Button>
-            <Button onClick={submitCreate} disabled={!newName.trim()}>
-              Utwórz
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <NewCampaignDialog open={creating} onOpenChange={setCreating} />
 
       <Dialog open={!!renaming} onOpenChange={(open) => !open && setRenaming(null)}>
         <DialogContent>

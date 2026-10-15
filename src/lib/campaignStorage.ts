@@ -22,6 +22,8 @@ const EMPTY_REGISTRY: CampaignsRegistry = { campaigns: [], activeCampaignId: nul
  */
 const GLOBAL_KEYS = new Set<string>([
   CAMPAIGNS_REGISTRY_KEY,
+  // Read at boot to decide whether data predates the current format (lib/dataReset).
+  "magnus_data_version",
   "magnus_settings",
   "rpg_theme",
   "magnus_sidebar_width",
