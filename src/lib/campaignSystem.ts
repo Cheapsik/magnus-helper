@@ -57,8 +57,11 @@ export type TestType = {
   defaultDifficultyId?: string;
   /** rollUnder / rollOver: degrees of success = floor(margin / divisor). */
   margin?: { divisor: number; label: string };
-  /** On the natural roll. */
-  critical?: { successAtMost?: number; failureAtLeast?: number };
+  /**
+   * On the natural roll. `successAtMost` / `failureAtLeast` suit systems where a
+   * low roll is good; `successAtLeast` / `failureAtMost` those where a high one is.
+   */
+  critical?: { successAtMost?: number; failureAtLeast?: number; successAtLeast?: number; failureAtMost?: number };
   pool?: { successAt: number; explodeAt?: number; onesCancel?: boolean; required: number };
   bands?: OutcomeBand[];
   /** Card fields the test may be rolled from, per card type. */

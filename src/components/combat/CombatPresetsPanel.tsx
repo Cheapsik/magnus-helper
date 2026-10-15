@@ -70,7 +70,7 @@ function PresetCombatantEditor({
 
   const startEditCombatant = (c: Combatant) => {
     setEditingCombatantId(c.id);
-    setCombatantDraft({ ...c, hp: { ...c.hp }, statuses: [...c.statuses] });
+    setCombatantDraft({ ...c, resource: { ...c.resource }, stats: c.stats.map((s) => ({ ...s })), statuses: [...c.statuses] });
     setAddingNew(false);
   };
 

@@ -1,5 +1,4 @@
 import type { CardSummary } from "@/lib/cardStore";
-import type { CharacterSheetCore } from "@/components/character-sheet/types";
 
 export type EntityKind = "npc" | "hero";
 export type RelationStatus = "aktywna" | "ukryta" | "zmienna" | "zerwana";

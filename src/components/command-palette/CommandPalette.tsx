@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { useNavigate } from "react-router-dom";
 import { useCommandPalette } from "@/context/CommandPaletteContext";
+import { CARD_KIND_ROUTES } from "@/lib/cardSchema";
 import { useDrawer } from "@/context/DrawerContext";
 import type { DrawerEntityType } from "@/context/DrawerContext";
 import { buildSearchIndex, searchIndex, type SearchResultItem } from "@/components/command-palette/searchUtils";
@@ -82,18 +83,16 @@ export function CommandPalette() {
   const isPreviewType = (type: DrawerEntityType): type is EntityPreviewType =>
     type === "npc" || type === "monster" || type === "item" || type === "quest" || type === "hero";
 
-  const getTargetRoute = (type: DrawerEntityType) => {
+  const getTargetRoute = (type: DrawerEntityType, id?: string) => {
     switch (type) {
       case "npc":
-        return "/npcs";
       case "monster":
-        return "/combat";
+      case "hero":
+        return id ? `${CARD_KIND_ROUTES[type]}?id=${encodeURIComponent(id)}` : CARD_KIND_ROUTES[type];
       case "item":
         return "/inventory";
       case "quest":
         return "/quests";
-      case "hero":
-        return "/heroes";
       case "rumorTemplate":
         return "/rumors";
       case "shopSnapshot":
@@ -205,7 +204,7 @@ export function CommandPalette() {
           if (!selectedResult) {
             return;
           }
-          const route = getTargetRoute(selectedResult.type);
+          const route = getTargetRoute(selectedResult.type, selectedResult.id);
           if (route) {
             navigate(route);
           }

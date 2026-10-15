@@ -1,6 +1,7 @@
 import type { DrawerEntityType } from "@/context/DrawerContext";
 import { readJson } from "@/lib/storage";
-import { readCardSummaries } from "@/lib/cardStore";
+import { readCampaignSystem, readCards } from "@/lib/cardStore";
+import { CARD_KIND_LABELS, type CardKind, cardSubtitle, cardTitle } from "@/lib/cardSchema";
 
 export interface SearchResultItem {
   id: string;
@@ -24,26 +25,28 @@ function parseJson<T>(key: string, fallback: T): T {
   return readJson(key, fallback);
 }
 
-export function buildSearchIndex(): SearchResultItem[] {
-  const npcs = parseJson<Array<Record<string, unknown>>>("rpg_saved_npcs", []).map((npc) => ({
-    id: String(npc.id ?? ""),
-    type: "npc" as const,
-    typeLabel: "NPC",
-    icon: "👤",
-    title: String((npc.daneOgolne as Record<string, unknown> | undefined)?.imie ?? "NPC"),
-    description: String((npc.daneOgolne as Record<string, unknown> | undefined)?.obecnaProfesja ?? ""),
-    keywords: `${String((npc.daneOgolne as Record<string, unknown> | undefined)?.imie ?? "")} ${String((npc.daneOgolne as Record<string, unknown> | undefined)?.obecnaProfesja ?? "")} ${String(npc.notatkiMG ?? "")}`.toLowerCase(),
-  }));
+/** Campaign cards of one kind; keywords cover name, subtitle and notes. */
+function cardSearchItems(kind: CardKind, icon: string): SearchResultItem[] {
+  if (typeof window === "undefined") return [];
+  const cardType = readCampaignSystem().cards[kind];
+  return readCards(kind).map((card) => {
+    const title = cardTitle(card, CARD_KIND_LABELS[kind]);
+    const subtitle = cardSubtitle(cardType, card);
+    return {
+      id: card.id,
+      type: kind,
+      typeLabel: CARD_KIND_LABELS[kind],
+      icon,
+      title,
+      description: subtitle,
+      keywords: `${title} ${subtitle} ${card.notes ?? ""}`.toLowerCase(),
+    };
+  });
+}
 
-  const monsters = parseJson<Array<Record<string, unknown>>>("rpg_gm_enemies", []).map((monster) => ({
-    id: String(monster.id ?? ""),
-    type: "monster" as const,
-    typeLabel: "Potwor",
-    icon: "💀",
-    title: String(monster.name ?? "Potwor"),
-    description: String(monster.weapon ?? ""),
-    keywords: `${String(monster.name ?? "")} ${String(monster.weapon ?? "")}`.toLowerCase(),
-  }));
+export function buildSearchIndex(): SearchResultItem[] {
+  const npcs = cardSearchItems("npc", "👤");
+  const monsters = cardSearchItems("monster", "💀");
 
   const items = parseJson<Array<Record<string, unknown>>>("rpg_items_db", []).map((item) => ({
     id: String(item.id ?? ""),
@@ -86,15 +89,7 @@ export function buildSearchIndex(): SearchResultItem[] {
     keywords: `${String(shop.label ?? "")} ${String(shop.name ?? "")}`.toLowerCase(),
   }));
 
-  const heroes = readCardSummaries("hero").map((hero) => ({
-    id: hero.id,
-    type: "hero" as const,
-    typeLabel: "Bohater",
-    icon: "🛡️",
-    title: hero.name,
-    description: hero.subtitle,
-    keywords: `${hero.name} ${hero.subtitle}`.toLowerCase(),
-  }));
+  const heroes = cardSearchItems("hero", "🛡️");
 
   return [...npcs, ...monsters, ...items, ...quests, ...rumors, ...shops, ...heroes].filter((item) => item.id);
 }

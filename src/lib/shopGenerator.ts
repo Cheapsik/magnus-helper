@@ -1,6 +1,6 @@
-import type { LootRank } from "@/context/AppContext";
-import type { LootDbItem } from "@/lib/lootDb";
-import type { ShopConfigStored, ShopCurrencyConfig, ShopStockLine, ShopWealthLevel, ShopTypeEntry } from "@/lib/shopTypes";
+import type { LootDbItem, LootRank } from "@/lib/lootDb";
+import { DEFAULT_PRICE_RANGE } from "@/lib/shopTypes";
+import type { ShopConfigStored, ShopStockLine, ShopWealthLevel, ShopTypeEntry } from "@/lib/shopTypes";
 
 function randInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -74,41 +74,16 @@ export function filterPoolByShopType(items: LootDbItem[], shopType: ShopTypeEntr
   return items.filter((it) => itemMatchesPreferredTypes(it, shopType.preferredTypes));
 }
 
-function priceLabelToTier(
-  currency: string,
-  cfg: ShopCurrencyConfig,
-): "gold" | "silver" | "copper" {
-  const c = currency.trim().toLowerCase();
-  if (c === cfg.goldLabel.trim().toLowerCase()) return "gold";
-  if (c === cfg.copperLabel.trim().toLowerCase()) return "copper";
-  if (c === cfg.silverLabel.trim().toLowerCase()) return "silver";
-  if (c === "zł" || c === "zl" || c === "gold") return "gold";
-  if (c === "mk" || c === "pn" || c === "cp" || c === "miedź" || c === "miedz") return "copper";
-  if (c === "sz" || c === "ss" || c === "silver") return "silver";
-  return "silver";
-}
-
-export function itemPriceToCopper(price: number, itemCurrency: string, cfg: ShopCurrencyConfig): number {
-  if (!Number.isFinite(price) || price <= 0) return 0;
-  const g = Math.max(1, cfg.silverPerGold);
-  const s = Math.max(1, cfg.copperPerSilver);
-  const tier = priceLabelToTier(itemCurrency || cfg.silverLabel, cfg);
-  if (tier === "gold") return Math.round(price * g * s);
-  if (tier === "silver") return Math.round(price * s);
-  return Math.round(price);
-}
-
+/** Prices are in the campaign's smallest denomination. */
 function rollPriceForLine(
   item: LootDbItem,
   rankId: string,
   rankPriceRanges: Record<string, { min: number; max: number }>,
-  currencyCfg: ShopCurrencyConfig,
 ): number {
-  const base = item.price > 0 ? itemPriceToCopper(item.price, item.currency, currencyCfg) : 0;
-  if (base > 0) {
-    return Math.round(base * randFloat(0.8, 1.2));
+  if (item.price > 0) {
+    return Math.max(1, Math.round(item.price * randFloat(0.8, 1.2)));
   }
-  const range = rankPriceRanges[rankId] ?? { min: 5, max: 30 };
+  const range = rankPriceRanges[rankId] ?? DEFAULT_PRICE_RANGE;
   return randInt(range.min, range.max);
 }
 
@@ -163,7 +138,7 @@ export function generateShopAssortment(input: GenerateShopInput): { lines: ShopS
     if (!chosenItem || !chosenRank) continue;
 
     const rankId = chosenRank.id;
-    const priceCopper = rollPriceForLine(chosenItem, rankId, shopConfig.rankPriceRanges, shopConfig.currency);
+    const price = rollPriceForLine(chosenItem, rankId, shopConfig.rankPriceRanges);
 
     lines.push({
       lineId: crypto.randomUUID(),
@@ -172,7 +147,7 @@ export function generateShopAssortment(input: GenerateShopInput): { lines: ShopS
       type: chosenItem.type,
       rankName: chosenItem.rankName,
       description: chosenItem.description,
-      priceCopper,
+      price,
     });
   }
 
@@ -185,18 +160,5 @@ export function rollPriceForManualItem(
   shopConfig: ShopConfigStored,
 ): number {
   const rankId = rankIdByName(ranks, item.rankName);
-  return rollPriceForLine(item, rankId, shopConfig.rankPriceRanges, shopConfig.currency);
-}
-
-export function copperToGoldDecimal(priceCopper: number, cfg: ShopCurrencyConfig): number {
-  const g = Math.max(1, cfg.silverPerGold);
-  const s = Math.max(1, cfg.copperPerSilver);
-  const perGold = g * s;
-  return priceCopper / perGold;
-}
-
-export function formatPriceInGold(priceCopper: number, cfg: ShopCurrencyConfig, fractionDigits = 2): string {
-  const v = copperToGoldDecimal(priceCopper, cfg);
-  const label = cfg.goldLabel || "zł";
-  return `${v.toFixed(fractionDigits)} ${label}`;
+  return rollPriceForLine(item, rankId, shopConfig.rankPriceRanges);
 }

@@ -23,7 +23,7 @@ export default function StatusBar() {
     return () => clearInterval(i);
   }, []);
 
-  const enemyAlive = combatants.filter((c) => c.isEnemy && c.hp.current > 0).length;
+  const enemyAlive = combatants.filter((c) => c.isEnemy && c.resource.current > 0).length;
   const combatActive = enemyAlive > 0 && combatants.length > 1;
   const currentName = combatActive ? combatants[combatTurn % combatants.length]?.name : null;
 

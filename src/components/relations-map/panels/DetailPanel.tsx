@@ -4,8 +4,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { CardQuickPreview } from "@/components/card/CardQuickPreview";
 import { typeColor, statusLabel } from "../colors";
-import { Field } from "../shared/FormBits";
 import { TagEditor, QuickHistoryAdder } from "../shared/TagEditor";
 import { useRelationsMap } from "../context/RelationsMapContext";
 import { getSessionName } from "../storage";
@@ -18,8 +18,8 @@ export function DetailPanel() {
     selectedNodeId,
     editingNode,
     editingEntity,
-    editingFullNpc,
-    editingFullHero,
+    editingCard,
+    editingCardType,
     editingEdges,
     lookup,
     persisted,
@@ -122,14 +122,11 @@ export function DetailPanel() {
 
           <div className="flex-1 overflow-y-auto min-h-0 mt-3">
             <TabsContent value="opis" className="space-y-3 mt-0 text-sm">
-              {editingFullNpc && (
-                <>
-                  <Field label="Profesja" value={editingFullNpc.daneOgolne.obecnaProfesja} />
-                  <Field label="Cechy" value={editingFullNpc.cechyCharakteru} />
-                  <Field label="Opis" value={editingFullNpc.opisOgolny} multiline />
-                </>
+              {editingCard && editingCardType ? (
+                <CardQuickPreview card={editingCard} cardType={editingCardType} />
+              ) : (
+                <p className="text-xs text-muted-foreground">Karta tej postaci nie istnieje.</p>
               )}
-              {editingFullHero && <Field label="Opis" value={editingFullHero.subtitle} multiline />}
               <div>
                 <Label className="field-label">
                   Opis (mapa)

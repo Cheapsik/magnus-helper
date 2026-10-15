@@ -4,6 +4,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import type { LootDbItem } from "@/lib/lootDb";
 import { readStorageValue, updateStorageCollectionItem } from "@/components/global-drawer/drawerStorage";
+import { MoneyInput } from "@/components/money/MoneyInput";
+import { useCampaignSystem } from "@/lib/cardStore";
 
 const ITEMS_STORAGE_KEY = "rpg_items_db";
 
@@ -12,6 +14,7 @@ interface ItemDrawerViewProps {
 }
 
 export function ItemDrawerView({ id }: ItemDrawerViewProps) {
+  const [system] = useCampaignSystem();
   const [item, setItem] = useState<LootDbItem | null>(null);
   const saveTimer = useRef<number | null>(null);
 
@@ -40,10 +43,7 @@ export function ItemDrawerView({ id }: ItemDrawerViewProps) {
         <Input value={item.type} onChange={(e) => updateItem({ type: e.target.value })} placeholder="Typ" />
         <Input value={item.rankName} onChange={(e) => updateItem({ rankName: e.target.value })} placeholder="Ranga" />
       </div>
-      <div className="grid grid-cols-2 gap-2">
-        <Input value={String(item.price)} onChange={(e) => updateItem({ price: Math.max(0, Number(e.target.value) || 0) })} placeholder="Cena" />
-        <Input value={item.currency} onChange={(e) => updateItem({ currency: e.target.value })} placeholder="Waluta" />
-      </div>
+      <MoneyInput value={item.price} onChange={(price) => updateItem({ price: Math.max(0, price) })} currency={system.currency} />
       <Textarea value={item.description} onChange={(e) => updateItem({ description: e.target.value })} className="min-h-[120px]" placeholder="Opis" />
       <Badge variant="outline" className="w-fit">
         Ranga: {item.rankName}

@@ -1,21 +1,18 @@
-export const GM_ENEMY_DRAG = "text/magnus-gm-enemy-id";
+import type { CardKind } from "@/lib/cardSchema";
 
-export const ROSTER_NPC_DRAG = "text/magnus-roster-npc-id";
+/** Payload is `<kind>:<cardId>`. */
+export const ROSTER_CARD_DRAG = "text/magnus-roster-card";
 
-export const ROSTER_HERO_DRAG = "text/magnus-roster-hero-id";
-
-export function isGmEnemyDragEvent(e: React.DragEvent) {
-  return Boolean(e.dataTransfer.types?.includes?.(GM_ENEMY_DRAG));
+export function rosterCardKey(kind: CardKind, id: string): string {
+  return `${kind}:${id}`;
 }
 
-export function isRosterNpcDragEvent(e: React.DragEvent) {
-  return Boolean(e.dataTransfer.types?.includes?.(ROSTER_NPC_DRAG));
-}
-
-export function isRosterHeroDragEvent(e: React.DragEvent) {
-  return Boolean(e.dataTransfer.types?.includes?.(ROSTER_HERO_DRAG));
+export function parseRosterCardKey(key: string): { kind: CardKind; id: string } | null {
+  const [kind, id] = key.split(":");
+  if (!id || (kind !== "hero" && kind !== "npc" && kind !== "monster")) return null;
+  return { kind, id };
 }
 
 export function isCombatRosterDragEvent(e: React.DragEvent) {
-  return isGmEnemyDragEvent(e) || isRosterNpcDragEvent(e) || isRosterHeroDragEvent(e);
+  return Boolean(e.dataTransfer.types?.includes?.(ROSTER_CARD_DRAG));
 }

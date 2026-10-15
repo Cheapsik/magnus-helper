@@ -1,27 +1,18 @@
 import { useId } from "react";
+import { Plus, Trash2 } from "lucide-react";
 import type { Combatant } from "@/context/AppContext";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { NumberInput } from "@/components/ui/number-input";
-import { CombatStatCell, NARROW_NUM } from "@/components/game/CombatStatCell";
-import { getStatFullName } from "@/lib/gameStatGlossary";
-import { StatAbbrWithTooltip } from "@/components/game/StatAbbrWithTooltip";
-import { Shield } from "lucide-react";
-import { getStatGlossaryEntry } from "@/lib/gameStatGlossary";
 
 export function emptyCombatant(partial?: Partial<Combatant>): Combatant {
   return {
     id: crypto.randomUUID(),
     name: "",
-    initiative: 30,
-    ww: 30,
-    us: 25,
-    sb: 3,
-    hp: { current: 10, max: 10 },
-    armor: 0,
-    toughness: 3,
+    initiative: 0,
+    resource: { current: 10, max: 10 },
+    stats: [],
     statuses: [],
     notes: "",
     isEnemy: true,
@@ -30,48 +21,59 @@ export function emptyCombatant(partial?: Partial<Combatant>): Combatant {
 }
 
 export function formatCombatantSummary(c: Combatant): string {
-  const parts = [
-    `Inic ${c.initiative}`,
-    `WW ${c.ww}`,
-    `US ${c.us}`,
-    `SB ${c.sb}`,
-    `PŻ ${c.hp.current}/${c.hp.max}`,
-    `Pnc ${c.armor}`,
-    `${getStatGlossaryEntry("wtSoak").abbr} ${c.toughness}`,
-  ];
-  return parts.join(" · ");
+  return [
+    `Inicjatywa ${c.initiative}`,
+    `${c.resourceLabel ?? "Zasób"} ${c.resource.current}/${c.resource.max}`,
+    ...c.stats.map((stat) => `${stat.label} ${stat.value}`),
+  ].join(" · ");
 }
 
-interface CombatantFormFieldsProps {
+const NUM = "h-8 w-20";
+
+function Field({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-px">
+      <label htmlFor={id} className="block text-[10px] leading-tight text-muted-foreground">
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+/**
+ * A fight participant typed in by hand, or edited mid-fight. Only what the
+ * tracker itself keeps: order, main resource, extra values to show, notes.
+ */
+export function CombatantFormFields({
+  combatant: d,
+  onChange,
+  idPrefix = "c",
+}: {
   combatant: Combatant;
   onChange: (c: Combatant) => void;
   idPrefix?: string;
-}
-
-export function CombatantFormFields({ combatant: d, onChange, idPrefix = "c" }: CombatantFormFieldsProps) {
-  const uid = useId();
-  const base = `${idPrefix}-${uid}`;
+}) {
+  const base = `${idPrefix}-${useId()}`;
+  const setStat = (index: number, patch: Partial<Combatant["stats"][number]>) =>
+    onChange({ ...d, stats: d.stats.map((stat, i) => (i === index ? { ...stat, ...patch } : stat)) });
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end">
-        <div className="min-w-0 flex-1 space-y-px">
-          <label htmlFor={`${base}-name`} className="block text-[10px] leading-tight text-muted-foreground">
-            Imię<span className="text-destructive"> *</span>
-          </label>
-          <Input
-            id={`${base}-name`}
-            value={d.name}
-            onChange={(e) => onChange({ ...d, name: e.target.value })}
-            className="h-8 w-full text-sm"
-          />
+        <div className="min-w-0 flex-1">
+          <Field id={`${base}-name`} label="Nazwa">
+            <Input id={`${base}-name`} value={d.name} onChange={(e) => onChange({ ...d, name: e.target.value })} className="h-8 text-sm" />
+          </Field>
         </div>
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1" role="radiogroup" aria-label="Strona">
           <Button
             type="button"
             size="sm"
             variant={!d.isEnemy ? "default" : "outline"}
-            className="h-8 text-xs px-2"
+            className="h-8 px-2 text-xs"
+            role="radio"
+            aria-checked={!d.isEnemy}
             onClick={() => onChange({ ...d, isEnemy: false })}
           >
             Sojusznik
@@ -80,7 +82,9 @@ export function CombatantFormFields({ combatant: d, onChange, idPrefix = "c" }: 
             type="button"
             size="sm"
             variant={d.isEnemy ? "destructive" : "outline"}
-            className="h-8 text-xs px-2"
+            className="h-8 px-2 text-xs"
+            role="radio"
+            aria-checked={d.isEnemy}
             onClick={() => onChange({ ...d, isEnemy: true })}
           >
             Wróg
@@ -88,52 +92,81 @@ export function CombatantFormFields({ combatant: d, onChange, idPrefix = "c" }: 
         </div>
       </div>
 
-      <Separator className="my-0" />
-
-      <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 sm:grid-cols-3 md:grid-cols-4">
-        <CombatStatCell statKey="inic">
-          <NumberInput value={d.initiative} onChange={(v) => onChange({ ...d, initiative: v })} className={NARROW_NUM} />
-        </CombatStatCell>
-        <CombatStatCell statKey="ww">
-          <NumberInput value={d.ww} onChange={(v) => onChange({ ...d, ww: v })} className={NARROW_NUM} />
-        </CombatStatCell>
-        <CombatStatCell statKey="us">
-          <NumberInput value={d.us} onChange={(v) => onChange({ ...d, us: v })} className={NARROW_NUM} />
-        </CombatStatCell>
-        <CombatStatCell statKey="sb">
-          <NumberInput value={d.sb} onChange={(v) => onChange({ ...d, sb: v })} className={NARROW_NUM} />
-        </CombatStatCell>
-        <CombatStatCell label={`${getStatFullName("pż")} — bieżące`}>
-          <NumberInput
-            value={d.hp.current}
-            onChange={(v) => onChange({ ...d, hp: { ...d.hp, current: v } })}
-            className={NARROW_NUM}
+      <div className="flex flex-wrap items-end gap-2">
+        <Field id={`${base}-init`} label="Inicjatywa">
+          <NumberInput id={`${base}-init`} value={d.initiative} onChange={(v) => onChange({ ...d, initiative: v })} className={NUM} />
+        </Field>
+        <Field id={`${base}-res-label`} label="Zasób główny">
+          <Input
+            id={`${base}-res-label`}
+            value={d.resourceLabel ?? ""}
+            placeholder="np. Zdrowie"
+            onChange={(e) => onChange({ ...d, resourceLabel: e.target.value || undefined })}
+            className="h-8 w-28 text-sm"
           />
-        </CombatStatCell>
-        <CombatStatCell label={`${getStatFullName("pż")} — maksimum`} tooltip="Maksymalna liczba punktów żywotności.">
-          <NumberInput value={d.hp.max} onChange={(v) => onChange({ ...d, hp: { ...d.hp, max: v } })} className={NARROW_NUM} />
-        </CombatStatCell>
-        <CombatStatCell statKey="pnc">
-          <NumberInput value={d.armor} onChange={(v) => onChange({ ...d, armor: v })} className={NARROW_NUM} />
-        </CombatStatCell>
-        <CombatStatCell statKey="wtSoak">
-          <NumberInput value={d.toughness} onChange={(v) => onChange({ ...d, toughness: v })} className={NARROW_NUM} />
-        </CombatStatCell>
+        </Field>
+        <Field id={`${base}-res-cur`} label="Aktualnie">
+          <NumberInput
+            id={`${base}-res-cur`}
+            value={d.resource.current}
+            onChange={(v) => onChange({ ...d, resource: { ...d.resource, current: v } })}
+            className={NUM}
+          />
+        </Field>
+        <Field id={`${base}-res-max`} label="Maksimum">
+          <NumberInput
+            id={`${base}-res-max`}
+            value={d.resource.max}
+            onChange={(v) => onChange({ ...d, resource: { ...d.resource, max: v } })}
+            className={NUM}
+          />
+        </Field>
       </div>
 
-      <div className="space-y-px">
-        <label htmlFor={`${base}-notes`} className="block text-[10px] leading-tight text-muted-foreground">
-          Broń, opis, notatki
-        </label>
+      <div className="space-y-1">
+        <span className="block text-[10px] leading-tight text-muted-foreground">Inne wartości widoczne w trackerze</span>
+        {d.stats.map((stat, index) => (
+          <div key={index} className="flex items-center gap-1.5">
+            <Input
+              value={stat.label}
+              onChange={(e) => setStat(index, { label: e.target.value })}
+              placeholder="Nazwa"
+              className="h-8 flex-1 text-sm"
+              aria-label="Nazwa wartości"
+            />
+            <NumberInput value={stat.value} onChange={(v) => setStat(index, { value: v })} className={NUM} aria-label="Wartość" />
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8"
+              onClick={() => onChange({ ...d, stats: d.stats.filter((_, i) => i !== index) })}
+              aria-label="Usuń wartość"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        ))}
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          className="h-7 gap-1 px-2 text-xs text-muted-foreground"
+          onClick={() => onChange({ ...d, stats: [...d.stats, { label: "", value: 0 }] })}
+        >
+          <Plus className="h-3.5 w-3.5" /> Dodaj wartość
+        </Button>
+      </div>
+
+      <Field id={`${base}-notes`} label="Notatki">
         <Textarea
           id={`${base}-notes`}
           value={d.notes}
           onChange={(e) => onChange({ ...d, notes: e.target.value })}
           rows={2}
-          className="min-h-[52px] w-full text-xs"
-          placeholder="Np. tasak (SB+2), zdolności specjalne…"
+          className="min-h-[40px] text-xs"
         />
-      </div>
+      </Field>
     </div>
   );
 }
@@ -142,64 +175,19 @@ export function CombatantStatLine({ c }: { c: Combatant }) {
   return (
     <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-muted-foreground">
       <span>
-        <StatAbbrWithTooltip statKey="inic" className="text-muted-foreground">
-          Inic
-        </StatAbbrWithTooltip>{" "}
-        <span className="font-bold text-foreground">{c.initiative}</span>
+        Inicjatywa <span className="font-bold text-foreground">{c.initiative}</span>
       </span>
-      {c.stats ? (
-        c.stats.map((stat) => (
-          <span key={stat.label}>
-            <span className="text-muted-foreground">{stat.label}</span>{" "}
-            <span className="font-bold text-foreground">{stat.value}</span>
-          </span>
-        ))
-      ) : (
-        <>
-          <span>
-            <StatAbbrWithTooltip statKey="ww" className="text-muted-foreground">
-              WW
-            </StatAbbrWithTooltip>{" "}
-            <span className="font-bold text-foreground">{c.ww}</span>
-          </span>
-          <span>
-            <StatAbbrWithTooltip statKey="us" className="text-muted-foreground">
-              US
-            </StatAbbrWithTooltip>{" "}
-            <span className="font-bold text-foreground">{c.us}</span>
-          </span>
-          <span>
-            <StatAbbrWithTooltip statKey="sb" className="text-muted-foreground">
-              SB
-            </StatAbbrWithTooltip>{" "}
-            <span className="font-bold text-foreground">{c.sb}</span>
-          </span>
-        </>
-      )}
       <span>
-        <StatAbbrWithTooltip statKey="pż" className="text-muted-foreground">
-          PŻ
-        </StatAbbrWithTooltip>{" "}
+        {c.resourceLabel ?? "Zasób"}{" "}
         <span className="font-bold text-foreground">
-          {c.hp.current}/{c.hp.max}
+          {c.resource.current}/{c.resource.max}
         </span>
       </span>
-      {!c.stats && (
-        <>
-          <span className="flex items-center gap-0.5">
-            <StatAbbrWithTooltip statKey="pnc" className="flex items-center gap-0.5 text-muted-foreground">
-              <Shield className="h-2.5 w-2.5" />
-              <span className="font-bold text-foreground">{c.armor}</span>
-            </StatAbbrWithTooltip>
-          </span>
-          <span>
-            <StatAbbrWithTooltip statKey="wtSoak" className="text-muted-foreground">
-              {getStatGlossaryEntry("wtSoak").abbr}
-            </StatAbbrWithTooltip>{" "}
-            <span className="font-bold text-foreground">{c.toughness}</span>
-          </span>
-        </>
-      )}
+      {c.stats.map((stat) => (
+        <span key={stat.label}>
+          {stat.label} <span className="font-bold text-foreground">{stat.value}</span>
+        </span>
+      ))}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import {
   Home, Dice5, Target, BookOpen, MoreHorizontal, Search,
   Swords, Activity, Package, StickyNote, Wrench, Users, Gem, Timer, MessageSquare, Music, Network, ScrollText,
-  MapPin, SlidersHorizontal, Settings as SettingsIcon, LogOut,
+  MapPin, Skull, SlidersHorizontal, Settings as SettingsIcon, LogOut,
   type LucideIcon,
   Waypoints,
 } from "lucide-react";
@@ -65,6 +65,7 @@ const SIDEBAR_GROUPS: { label: string; items: { path: string; label: string; ico
     items: [
       { path: "/heroes", label: "Bohaterowie", icon: ScrollText },
       { path: "/npcs", label: "NPC", icon: Users },
+      { path: "/monsters", label: "Potwory", icon: Skull },
       { path: "/inventory", label: "Ekwipunek", icon: Package },
     ],
   },

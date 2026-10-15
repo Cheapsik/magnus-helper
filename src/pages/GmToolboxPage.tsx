@@ -252,7 +252,7 @@ export default function GmToolboxPage() {
     setDifficultyPresets((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  const enemyAlive = combatants.filter((c) => c.isEnemy && c.hp.current > 0).length;
+  const enemyAlive = combatants.filter((c) => c.isEnemy && c.resource.current > 0).length;
   const combatActive = enemyAlive > 0 && combatants.length > 1;
   const sorted = useMemo(() => [...combatants].sort((a, b) => b.initiative - a.initiative), [combatants]);
   const currentTurnName = combatActive ? sorted[combatTurn % sorted.length]?.name : null;
@@ -616,7 +616,7 @@ export default function GmToolboxPage() {
               Zarządzaj NPC
             </Link>
           </Button>
-          <Button variant="outline" className="justify-start gap-2 h-auto py-3" onClick={() => navigate("/combat", { state: { combatTab: "gotowi" } })}>
+          <Button variant="outline" className="justify-start gap-2 h-auto py-3" onClick={() => navigate("/combat", { state: { combatTab: "potwory" } })}>
             <Swords className="h-4 w-4 shrink-0" />
             Gotowi przeciwnicy
           </Button>

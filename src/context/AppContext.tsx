@@ -8,7 +8,6 @@ import {
   type CombatSessionsState,
 } from "@/lib/combatSessions";
 import { initLootStorage } from "@/lib/lootDb";
-import type { LootDbItem } from "@/lib/lootDb";
 import type { DiceRoll, TestResult } from "@/lib/dice";
 import type { SessionNote, NoteSessionCatalog } from "@/lib/sessionNoteModel";
 import {
@@ -16,10 +15,7 @@ import {
   reviveNoteSessionCatalog,
   readNoteSessionCatalogFromStorage,
 } from "@/lib/sessionNotesMigration";
-import type { SavedNpc } from "@/components/character-sheet/types";
-import { normalizeSavedNpcArray } from "@/components/character-sheet/migrateLegacyStorage";
-import type { GmEnemy } from "@/lib/gmEnemy";
-import { reviveGmEnemies } from "@/lib/gmEnemy";
+import type { CardKind } from "@/lib/cardSchema";
 
 initLootStorage();
 
@@ -29,24 +25,19 @@ export interface Combatant {
   id: string;
   name: string;
   initiative: number;
-  ww: number;
-  us: number;
-  sb: number;
-  hp: { current: number; max: number };
-  armor: number;
-  toughness: number;
-  /**
-   * Stats declared by the card's combat-resource roles. Present on combatants
-   * built from cards; older combatants fall back to the fixed fields above,
-   * which disappear once every source goes through roles.
-   */
-  stats?: { label: string; value: number }[];
+  /** The card's main resource (CONTEXT.md: "zasób główny"), tracked per fight. */
+  resource: { current: number; max: number };
+  /** Name of the main resource on the source card, e.g. the GM's "Zdrowie". */
+  resourceLabel?: string;
+  /** Values from the card's additional-resource roles, shown in the tracker. */
+  stats: { label: string; value: number }[];
+  /** Source card. Attacks read its tests, defenses and damage reduction live. */
+  card?: { kind: CardKind; id: string };
   statuses: string[];
   notes: string;
   isEnemy: boolean;
 }
 
-export type { GmEnemy } from "@/lib/gmEnemy";
 
 export interface InventoryItem {
   id: string;
@@ -63,36 +54,11 @@ export interface ActiveCondition {
   severity: "low" | "medium" | "high";
 }
 
-export type { SavedNpc } from "@/components/character-sheet/types";
-
-export interface NpcGroup {
-  id: string;
-  name: string;
-  collapsed: boolean;
-}
 
 export interface DifficultyPreset {
   label: string;
   labelPl: string;
   modifier: number;
-}
-
-export interface LootRank {
-  id: string;
-  name: string;
-  chance: number;
-}
-
-export interface CoinRange {
-  min: number;
-  max: number;
-}
-
-export interface LootConfig {
-  ranks: LootRank[];
-  itemCurrency?: string;
-  coinRanges: { gold: CoinRange; silver: CoinRange; copper: CoinRange };
-  itemCount: { min: number; max: number };
 }
 
 export interface CodexEntry {
@@ -108,7 +74,6 @@ export interface CodexEntry {
  */
 const DEFAULT_COMBATANTS: Combatant[] = [];
 
-const DEFAULT_ENEMIES: GmEnemy[] = [];
 
 const DEFAULT_NOTES: SessionNote[] = [];
 
@@ -123,23 +88,6 @@ const DEFAULT_DIFFICULTY_PRESETS: DifficultyPreset[] = [
   { label: "Hard", labelPl: "Trudny", modifier: -20 },
   { label: "Very Hard", labelPl: "Bardzo trudny", modifier: -30 },
 ];
-
-const DEFAULT_LOOT_CONFIG: LootConfig = {
-  ranks: [
-    { id: "r1", name: "Zniszczony", chance: 35 },
-    { id: "r2", name: "Pospolity", chance: 30 },
-    { id: "r3", name: "Rzadki", chance: 20 },
-    { id: "r4", name: "Ciekawy", chance: 10 },
-    { id: "r5", name: "Wyjątkowy", chance: 5 },
-  ],
-  itemCurrency: "sz",
-  coinRanges: {
-    gold: { min: 0, max: 2 },
-    silver: { min: 0, max: 15 },
-    copper: { min: 0, max: 30 },
-  },
-  itemCount: { min: 1, max: 4 },
-};
 
 interface AppContextType {
   rollHistory: DiceRoll[];
@@ -166,18 +114,8 @@ interface AppContextType {
   setSessionNotes: (fn: SessionNote[] | ((prev: SessionNote[]) => SessionNote[])) => void;
   noteSessionCatalog: NoteSessionCatalog;
   setNoteSessionCatalog: (fn: NoteSessionCatalog | ((prev: NoteSessionCatalog) => NoteSessionCatalog)) => void;
-  gmEnemies: GmEnemy[];
-  setGmEnemies: (fn: GmEnemy[] | ((prev: GmEnemy[]) => GmEnemy[])) => void;
-  savedNpcs: SavedNpc[];
-  setSavedNpcs: (fn: SavedNpc[] | ((prev: SavedNpc[]) => SavedNpc[])) => void;
-  npcGroups: NpcGroup[];
-  setNpcGroups: (fn: NpcGroup[] | ((prev: NpcGroup[]) => NpcGroup[])) => void;
   difficultyPresets: DifficultyPreset[];
   setDifficultyPresets: (fn: DifficultyPreset[] | ((prev: DifficultyPreset[]) => DifficultyPreset[])) => void;
-  lootConfig: LootConfig;
-  setLootConfig: (fn: LootConfig | ((prev: LootConfig) => LootConfig)) => void;
-  lootItems: LootDbItem[];
-  setLootItems: (fn: LootDbItem[] | ((prev: LootDbItem[]) => LootDbItem[])) => void;
   codexEntries: CodexEntry[];
   setCodexEntries: (fn: CodexEntry[] | ((prev: CodexEntry[]) => CodexEntry[])) => void;
 }
@@ -259,16 +197,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     catalogInitial,
     { revive: reviveNoteSessionCatalog },
   );
-  const [gmEnemies, setGmEnemies] = useLocalStorage<GmEnemy[]>("rpg_gm_enemies", DEFAULT_ENEMIES, {
-    revive: reviveGmEnemies,
-  });
-  const [savedNpcs, setSavedNpcs] = useLocalStorage<SavedNpc[]>("rpg_saved_npcs", [], {
-    revive: (parsed) => normalizeSavedNpcArray(parsed),
-  });
-  const [npcGroups, setNpcGroups] = useLocalStorage<NpcGroup[]>("rpg_npc_groups", []);
   const [difficultyPresets, setDifficultyPresets] = useLocalStorage<DifficultyPreset[]>("rpg_difficulty_presets", DEFAULT_DIFFICULTY_PRESETS);
-  const [lootConfig, setLootConfig] = useLocalStorage<LootConfig>("rpg_loot_config", DEFAULT_LOOT_CONFIG);
-  const [lootItems, setLootItems] = useLocalStorage<LootDbItem[]>("rpg_items_db", []);
   const [codexEntries, setCodexEntries] = useLocalStorage<CodexEntry[]>("rpg_codex_entries", []);
 
   const addRoll = (roll: DiceRoll) => setRollHistory((prev) => [roll, ...prev].slice(0, 50));
@@ -288,12 +217,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       inventory, setInventory,
       sessionNotes, setSessionNotes,
       noteSessionCatalog, setNoteSessionCatalog,
-      gmEnemies, setGmEnemies,
-      savedNpcs, setSavedNpcs,
-      npcGroups, setNpcGroups,
       difficultyPresets, setDifficultyPresets,
-      lootConfig, setLootConfig,
-      lootItems, setLootItems,
       codexEntries, setCodexEntries,
     }}>
       {children}
