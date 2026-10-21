@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Eraser, ExternalLink, ImagePlus } from "lucide-react";
+import { Eraser, ExternalLink, ImagePlus, Pause, Play } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { DEFAULT_PLAYER_SCREEN, openPlayerScreenWindow, usePlayerScreen, type PlayerScreenState } from "@/lib/playerScreen";
+import { setPlayerScreenPaused } from "@/lib/safety";
 import { PlayerScreenView } from "./PlayerScreenView";
 import { ShowToPlayersButton } from "./ShowToPlayersButton";
 
@@ -34,10 +35,14 @@ function readImage(file: File): Promise<string> {
   });
 }
 
-const TOGGLES: { key: keyof Pick<PlayerScreenState, "showInitiative" | "hideEnemyResources" | "showClocks">; label: string }[] = [
+const TOGGLES: {
+  key: keyof Pick<PlayerScreenState, "showInitiative" | "hideEnemyResources" | "showClocks" | "showSafety">;
+  label: string;
+}[] = [
   { key: "showInitiative", label: "Inicjatywa (aktywna walka)" },
   { key: "hideEnemyResources", label: "Ukryj zasoby wrogów" },
   { key: "showClocks", label: "Zegary oznaczone jako widoczne" },
+  { key: "showSafety", label: "Ustalenia bezpieczeństwa (granice i zasłony)" },
 ];
 
 /** GM-side controls for the second-window player screen. */
@@ -72,6 +77,14 @@ export function PlayerScreenControls() {
         <Button type="button" variant="outline" onClick={() => setScreen({ ...DEFAULT_PLAYER_SCREEN, hideEnemyResources: screen.hideEnemyResources })}>
           <Eraser className="h-4 w-4 mr-1.5" />
           Wyczyść ekran
+        </Button>
+        <Button
+          type="button"
+          variant={screen.paused ? "default" : "destructive"}
+          onClick={() => setPlayerScreenPaused(!screen.paused)}
+        >
+          {screen.paused ? <Play className="h-4 w-4 mr-1.5" /> : <Pause className="h-4 w-4 mr-1.5" />}
+          {screen.paused ? "Wznów ekran" : "Przerwa (karta X)"}
         </Button>
       </div>
 
