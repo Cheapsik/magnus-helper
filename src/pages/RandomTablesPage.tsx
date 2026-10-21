@@ -116,7 +116,7 @@ export default function RandomTablesPage() {
               )}
               <div className="flex gap-2">
                 <Button onClick={roll} disabled={diceInvalid || parsed.entries.length === 0} className="flex-1">
-                  <Dices className="h-4 w-4 mr-1" /> Losuj ({tableDice(selected, parsed.entries)})
+                  <Dices className="h-4 w-4 mr-1" /> Losuj{parsed.entries.length > 0 && ` (${tableDice(selected, parsed.entries)})`}
                 </Button>
                 <Button onClick={remove} variant="outline" size="icon" aria-label="Usuń tabelę" className="text-destructive">
                   <Trash2 className="h-4 w-4" />
