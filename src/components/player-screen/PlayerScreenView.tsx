@@ -3,6 +3,7 @@ import { useApp } from "@/context/AppContext";
 import { getActiveFight } from "@/lib/combatSessions";
 import { segmentPath, useClocks } from "@/lib/clocks";
 import { toPlayerInitiative, usePlayerScreen } from "@/lib/playerScreen";
+import { useSafety } from "@/lib/safety";
 import Logo from "@/components/Logo";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +16,7 @@ export function PlayerScreenView({ compact = false }: { compact?: boolean }) {
   const [screen] = usePlayerScreen();
   const { combatSessions } = useApp();
   const [clocks] = useClocks();
+  const [safety] = useSafety();
 
   const initiative = useMemo(
     () => toPlayerInitiative(getActiveFight(combatSessions), screen.hideEnemyResources),
@@ -25,7 +27,8 @@ export function PlayerScreenView({ compact = false }: { compact?: boolean }) {
   const showInitiative = screen.showInitiative && initiative.rows.length > 0;
   const showClocks = screen.showClocks && visibleClocks.length > 0;
   const handout = screen.handout;
-  const empty = screen.blank || (!showInitiative && !showClocks && !handout);
+  const showSafety = screen.showSafety && (safety.lines.length > 0 || safety.veils.length > 0);
+  const empty = screen.blank || (!showInitiative && !showClocks && !handout && !showSafety);
 
   return (
     <div
@@ -34,7 +37,12 @@ export function PlayerScreenView({ compact = false }: { compact?: boolean }) {
         compact ? "text-xs p-3" : "text-2xl md:text-3xl p-8 md:p-12",
       )}
     >
-      {empty ? (
+      {screen.paused ? (
+        <div className="h-full flex flex-col items-center justify-center text-center gap-4" role="status">
+          <p className={cn("font-semibold text-neutral-200", compact ? "text-base" : "text-5xl md:text-6xl")}>Przerwa</p>
+          <p className="text-neutral-400">Wracamy za chwilę</p>
+        </div>
+      ) : empty ? (
         <div className="h-full flex items-center justify-center">
           <Logo className={cn("opacity-60", compact ? "h-12 w-12" : "h-40 w-40")} />
         </div>
@@ -53,6 +61,30 @@ export function PlayerScreenView({ compact = false }: { compact?: boolean }) {
                 />
               )}
               {handout.text && <p className="whitespace-pre-wrap leading-relaxed max-w-4xl">{handout.text}</p>}
+            </section>
+          )}
+
+          {showSafety && (
+            <section className={cn("flex-1 min-w-0 flex flex-col", compact ? "gap-2" : "gap-8")}>
+              <h1 className={cn("font-bold", compact ? "text-base" : "text-5xl")}>Nasze ustalenia</h1>
+              {[
+                { title: "Granice — nie pojawia się w grze", items: safety.lines },
+                { title: "Zasłony — dzieje się poza kadrem", items: safety.veils },
+              ].map(
+                (group) =>
+                  group.items.length > 0 && (
+                    <div key={group.title}>
+                      <h2 className={cn("uppercase tracking-widest text-neutral-400", compact ? "mb-1" : "text-xl mb-3")}>
+                        {group.title}
+                      </h2>
+                      <ul className={cn("list-disc pl-6", compact ? "space-y-0.5" : "space-y-2")}>
+                        {group.items.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ),
+              )}
             </section>
           )}
 

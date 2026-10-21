@@ -26,6 +26,10 @@ export interface PlayerScreenState {
   hideEnemyResources: boolean;
   showClocks: boolean;
   handout: PlayerHandout | null;
+  /** Safety pause: overrides everything with a calm "break" view. */
+  paused: boolean;
+  /** Show the campaign's table safety agreements (hard lines and veils). */
+  showSafety: boolean;
 }
 
 export const DEFAULT_PLAYER_SCREEN: PlayerScreenState = {
@@ -34,6 +38,8 @@ export const DEFAULT_PLAYER_SCREEN: PlayerScreenState = {
   hideEnemyResources: true,
   showClocks: false,
   handout: null,
+  paused: false,
+  showSafety: false,
 };
 
 function str(v: unknown): string {
@@ -54,6 +60,8 @@ export function revivePlayerScreen(parsed: unknown): PlayerScreenState {
     hideEnemyResources: p.hideEnemyResources === undefined ? true : Boolean(p.hideEnemyResources),
     showClocks: Boolean(p.showClocks),
     handout,
+    paused: Boolean(p.paused),
+    showSafety: Boolean(p.showSafety),
   };
 }
 
