@@ -13,6 +13,8 @@ export type TestInput = {
   value: number;
   /** A step of the test type's difficulty ladder; falls back to its default. */
   difficultyId?: string;
+  /** Replaces the chosen step's value — a target's defense field taking the place of the ladder. */
+  difficultyValue?: number;
   /** Situational bonus or penalty, applied on the value's side. */
   modifier?: number;
 };
@@ -128,7 +130,7 @@ export function resolveTest(testType: TestType, input: TestInput, roller: DieRol
   if (issue) return { kind: "invalid", summary: issue };
 
   const difficulty = pickDifficulty(testType, input.difficultyId);
-  const difficultyValue = difficulty?.value ?? 0;
+  const difficultyValue = input.difficultyValue ?? difficulty?.value ?? 0;
   const modifier = input.modifier ?? 0;
   const base = { difficulty, value: input.value, modifier };
   const adjusted = input.value + modifier;
