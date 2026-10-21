@@ -49,6 +49,7 @@ import MapsPage from "@/pages/MapsPage";
 import GmScreenPage from "@/pages/GmScreenPage";
 import TravelPage from "@/pages/TravelPage";
 import SafetyPage from "@/pages/SafetyPage";
+import DungeonGeneratorPage from "@/pages/DungeonGeneratorPage";
 
 function ProtectedApp() {
   return (
@@ -106,6 +107,7 @@ function GmApp() {
           <Route path="/gm-screen" element={<GmScreenPage />} />
           <Route path="/travel" element={<TravelPage />} />
           <Route path="/safety" element={<SafetyPage />} />
+          <Route path="/dungeon" element={<DungeonGeneratorPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
