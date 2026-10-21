@@ -189,8 +189,9 @@ export function deleteCampaign(campaignId: string): void {
   } catch {
     // storage unavailable — nothing left to clean up
   }
-  // Audio files sit in IndexedDB; loaded lazily so storage code stays free of it.
+  // Audio files and map images sit in IndexedDB; loaded lazily so storage code stays free of it.
   void import("@/lib/audioStore").then((m) => m.deleteCampaignAudio(campaignId)).catch(() => {});
+  void import("@/lib/imageStore").then((m) => m.deleteCampaignImages(campaignId)).catch(() => {});
 
   writeCampaignsRegistry({ campaigns: remaining, activeCampaignId });
 }
