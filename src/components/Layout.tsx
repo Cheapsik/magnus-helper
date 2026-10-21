@@ -5,7 +5,7 @@ import {
   Swords, Activity, Package, StickyNote, Wrench, Users, Gem, Timer, MessageSquare, Music, Network, ScrollText,
   MapPin, Skull, SlidersHorizontal, Settings as SettingsIcon, LogOut,
   type LucideIcon,
-  Waypoints, Lightbulb, PieChart, Flag, Shuffle, CalendarDays,
+  Waypoints, Lightbulb, PieChart, Flag, Shuffle, CalendarDays, LayoutDashboard, BookMarked, Map as MapIcon, Route, ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useScene } from "@/context/SceneContext";
@@ -52,6 +52,7 @@ const SIDEBAR_GROUPS: { label: string; items: { path: string; label: string; ico
   {
     label: "Sesja",
     items: [
+      { path: "/gm-screen", label: "Ekran MG", icon: LayoutDashboard },
       { path: "/prep", label: "Przygotowanie sesji", icon: Lightbulb },
       { path: "/combat", label: "Tracker walki", icon: Swords },
       { path: "/scena", label: "Scena", icon: MapPin },
@@ -61,6 +62,7 @@ const SIDEBAR_GROUPS: { label: string; items: { path: string; label: string; ico
       { path: "/calendar", label: "Kalendarz", icon: CalendarDays },
       { path: "/timers", label: "Timery", icon: Timer },
       { path: "/notes", label: "Notatki", icon: StickyNote },
+      { path: "/chronicle", label: "Kronika", icon: BookMarked },
     ],
   },
   {
@@ -77,9 +79,12 @@ const SIDEBAR_GROUPS: { label: string; items: { path: string; label: string; ico
     items: [
       { path: "/gm-toolbox", label: "Skrzynka MG", icon: Wrench },
       { path: "/settings?tab=karty", label: "System kampanii", icon: SlidersHorizontal },
+      { path: "/maps", label: "Mapy", icon: MapIcon },
       { path: "/relations", label: "Mapa relacji", icon: Waypoints },
       { path: "/factions", label: "Frakcje", icon: Flag },
       { path: "/tables", label: "Tabele losowe", icon: Shuffle },
+      { path: "/travel", label: "Podróże", icon: Route },
+      { path: "/safety", label: "Bezpieczeństwo", icon: ShieldCheck },
       { path: "/loot", label: "Generator łupu", icon: Gem },
       { path: "/rumors", label: "Plotki", icon: MessageSquare },
       { path: "/ambient", label: "Ambient", icon: Music },

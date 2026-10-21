@@ -44,6 +44,11 @@ import RandomTablesPage from "@/pages/RandomTablesPage";
 import FactionsPage from "@/pages/FactionsPage";
 import PlayerScreenPage from "@/pages/PlayerScreenPage";
 import CalendarPage from "@/pages/CalendarPage";
+import ChroniclePage from "@/pages/ChroniclePage";
+import MapsPage from "@/pages/MapsPage";
+import GmScreenPage from "@/pages/GmScreenPage";
+import TravelPage from "@/pages/TravelPage";
+import SafetyPage from "@/pages/SafetyPage";
 
 function ProtectedApp() {
   return (
@@ -96,6 +101,11 @@ function GmApp() {
           <Route path="/tables" element={<RandomTablesPage />} />
           <Route path="/factions" element={<FactionsPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/chronicle" element={<ChroniclePage />} />
+          <Route path="/maps" element={<MapsPage />} />
+          <Route path="/gm-screen" element={<GmScreenPage />} />
+          <Route path="/travel" element={<TravelPage />} />
+          <Route path="/safety" element={<SafetyPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
