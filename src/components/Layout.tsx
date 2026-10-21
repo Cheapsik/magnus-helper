@@ -186,7 +186,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     SIDEBAR_GROUPS.flatMap((group) => group.items).find((item) => item.path === location.pathname)
       ?.label ??
     EXTRA_TITLES[location.pathname] ??
-    "Magnus";
+    "Magnus Helper";
 
   return (
     <div className="h-screen flex overflow-hidden">
@@ -200,7 +200,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         >
           <Logo className="h-6 w-6" />
           <span className="font-app-brand min-w-0 truncate text-[1.0625rem] leading-none text-foreground">
-            Magnus
+            Magnus Helper
           </span>
         </Link>
 

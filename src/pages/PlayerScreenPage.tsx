@@ -9,7 +9,7 @@ import { PlayerScreenView } from "@/components/player-screen/PlayerScreenView";
 export default function PlayerScreenPage() {
   useEffect(() => {
     const previous = document.title;
-    document.title = "Magnus · ekran graczy";
+    document.title = "Magnus Helper · ekran graczy";
     return () => {
       document.title = previous;
     };

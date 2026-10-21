@@ -267,7 +267,7 @@ function AttackSection({
             {hit.kind === "vsDefense" &&
               "Pole obrony celu (ustawiasz je na karcie, w powiązaniach z narzędziami) zastępuje wartość poziomu trudności."}
             {hit.kind === "opposed" && "Broniący wykonuje ten sam test. Atakujący musi odnieść sukces i mieć wyższy wynik."}
-            {hit.kind === "manual" && "Magnus pokaże rzut, a trafienie oceniasz Ty."}
+            {hit.kind === "manual" && "Magnus Helper pokaże rzut, a trafienie oceniasz Ty."}
           </p>
 
           <div className="space-y-2">

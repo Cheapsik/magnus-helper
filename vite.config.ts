@@ -20,8 +20,8 @@ export default defineConfig(({ mode }) => ({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "favicon.png", "icons/*.png"],
       manifest: {
-        name: "Magnus — pomocnik MG",
-        short_name: "Magnus",
+        name: "Magnus Helper — pomocnik MG",
+        short_name: "Magnus Helper",
         lang: "pl",
         display: "standalone",
         scope: "/magnus-helper/",

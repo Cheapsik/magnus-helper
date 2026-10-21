@@ -13,7 +13,7 @@ export function FirstCampaignScreen() {
           <Logo />
           <h1 className="text-[length:--fs-title] font-semibold">Załóż pierwszą kampanię</h1>
           <p className="max-w-prose text-sm text-muted-foreground">
-            Magnus nie zakłada żadnego systemu gry. Kampania niesie własne karty, testy i zasady walki, więc ta sama
+            Magnus Helper nie zakłada żadnego systemu gry. Kampania niesie własne karty, testy i zasady walki, więc ta sama
             aplikacja posłuży do każdej gry, którą prowadzisz.
           </p>
         </header>
