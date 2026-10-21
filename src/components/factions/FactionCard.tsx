@@ -7,6 +7,7 @@ import { NumberInput } from "@/components/ui/number-input";
 import { Textarea } from "@/components/ui/textarea";
 import { cardTitle, newId, type Card as GameCard } from "@/lib/cardSchema";
 import type { Clock } from "@/lib/clocks";
+import { logChronicleEvent } from "@/lib/chronicle";
 import { reputationTier, reputationValue, type Faction, type ReputationTier } from "@/lib/factions";
 import type { NamedNoteSession } from "@/lib/sessionNoteModel";
 
@@ -55,6 +56,7 @@ export function FactionCard({ faction, others, ladder, npcs, heroes, clocks, ses
       heroId: target || undefined,
       timestamp: Date.now(),
     };
+    logChronicleEvent({ kind: "faction", text: `Frakcja „${faction.name}”: reputacja ${signed(delta)}${change.reason ? ` (${change.reason})` : ""}` });
     onChange({ log: [...faction.log, change] });
     setReason("");
   };

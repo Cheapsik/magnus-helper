@@ -6,6 +6,7 @@ import type { Combatant } from "@/context/AppContext";
 import { useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { logChronicleEvent } from "@/lib/chronicle";
 import { cn } from "@/lib/utils";
 import { FightTabsBar } from "@/components/combat/FightTabsBar";
 import { CombatPresetsMobileTab } from "@/components/combat/CombatPresetsPanel";
@@ -324,6 +325,7 @@ export default function CombatPage() {
         onToggleFinished={(id) => {
           const fight = combatSessions.fights.find((f) => f.id === id);
           if (!fight) return;
+          if (fight.status !== "finished") logChronicleEvent({ kind: "combat", text: `Walka „${fight.name}” zakończona` });
           setCombatSessions((prev) =>
             setFightStatus(prev, id, fight.status === "finished" ? "active" : "finished"),
           );

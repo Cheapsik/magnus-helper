@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, Eye, Link2, Minus, Pencil, Plus, RotateCcw, Tra
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { isDone, moveClock, normalizeClock, tick, useClocks, type Clock } from "@/lib/clocks";
+import { logChronicleEvent } from "@/lib/chronicle";
 import { cn } from "@/lib/utils";
 import { ClockDial } from "./ClockDial";
 import { ClockEditor, useQuestTitles } from "./ClockEditor";
@@ -23,6 +24,11 @@ export function ClocksPanel({ wide = false }: { wide?: boolean }) {
   const remove = (c: Clock) => {
     if (!confirm(`Czy na pewno usunąć zegar '${c.name}'?`)) return;
     setClocks((prev) => prev.filter((p) => p.id !== c.id));
+  };
+  const tickLogged = (c: Clock, delta: number) => {
+    const next = tick(c, delta);
+    logChronicleEvent({ kind: "clock", text: isDone(next) ? `Zegar „${c.name}” zapełniony` : `Zegar „${c.name}”: ${next.filled}/${next.segments}` });
+    update(c.id, () => next);
   };
   const questTitle = (id: string | null) => (id ? quests.find((q) => q.id === id)?.title : undefined);
 
@@ -56,7 +62,7 @@ export function ClocksPanel({ wide = false }: { wide?: boolean }) {
                       type="button"
                       className="shrink-0 rounded-full disabled:cursor-default"
                       disabled={done}
-                      onClick={() => update(c.id, (x) => tick(x, 1))}
+                      onClick={() => tickLogged(c, 1)}
                       aria-label={`Dodaj segment: ${c.name}`}
                       title="Kliknij, aby dodać segment"
                     >
@@ -90,10 +96,10 @@ export function ClocksPanel({ wide = false }: { wide?: boolean }) {
                       )}
                       {wide && c.note && <p className="text-xs whitespace-pre-wrap">{c.note}</p>}
                       <div className="flex gap-1 pt-1">
-                        <Button variant="outline" size="icon" className={iconBtn} aria-label="Cofnij segment" disabled={c.filled === 0} onClick={() => update(c.id, (x) => tick(x, -1))}>
+                        <Button variant="outline" size="icon" className={iconBtn} aria-label="Cofnij segment" disabled={c.filled === 0} onClick={() => tickLogged(c, -1)}>
                           <Minus className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="icon" className={iconBtn} aria-label="Dodaj segment" disabled={done} onClick={() => update(c.id, (x) => tick(x, 1))}>
+                        <Button variant="outline" size="icon" className={iconBtn} aria-label="Dodaj segment" disabled={done} onClick={() => tickLogged(c, 1)}>
                           <Plus className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon" className={iconBtn} aria-label="Wyzeruj" disabled={c.filled === 0} onClick={() => update(c.id, (x) => ({ ...x, filled: 0 }))}>
