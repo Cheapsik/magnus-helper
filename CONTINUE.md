@@ -16,12 +16,28 @@ Stan: `tsc` 0 błędów, testy 149/149 (w tym „IP guard”), `vite build` OK, 
 5. **Listy kampanii**: stany, waluta, łup i sklep na walucie kampanii.
 6. **Sprzątanie IP**: usunięte tło logowania z okładkami cudzych podręczników (gradient CSS), martwe style `.sheet-*`/`.armor-*`, `og:image`, `raport-projektu-dla-konsultanta.md`; test `src/test/ipGuard.test.ts` skanuje `src/`, `public/`, `docs/` i `index.html` pod kątem listy z `IP_CLEANUP_PLAN.md` §4.2.
 
+7. **Nowe moduły (2026-10-22, analiza w `docs/konkurencja-funkcje.md`)**:
+   - `/prep`: przygotowanie sesji (mocny początek, sceny, sekrety i tropy z ujawnianiem, `src/lib/secrets.ts`);
+   - `/clocks`: zegary postępu, także jako zakładka „Zegary” w trackerze (`src/lib/clocks.ts`);
+   - `/calendar`: kalendarz kampanii, data świata na pasku statusu (`src/lib/campaignCalendar.ts`);
+   - `/tables`: tabele losowe z `[[tabela tabel]]` (`src/lib/randomTables.ts`);
+   - `/factions`: frakcje i drabina reputacji (`src/lib/factions.ts`);
+   - `/player-screen`: ekran graczy w drugim oknie, sterowany z zakładki „Ekran” w trackerze (`src/lib/playerScreen.ts`);
+   - wzmianki na kartach (`src/lib/mentionIndex.ts`), własne pliki audio w Ambiencie (IndexedDB, `src/lib/audioStore.ts`), PWA (`vite-plugin-pwa`).
+
 ## Do zrobienia
 1. **Ścieżka karta → atak w UI**: silnik ma testy jednostkowe, ale panel z uczestnikami z kart (źródła z `testType.sources`, obrona z karty, kości broni z tabeli) nie był jeszcze przeklikany w przeglądarce.
 2. **Import/eksport systemu kampanii** (`*.magnus-rules.json`, `IP_CLEANUP_PLAN.md` §6): schemat Zod, limity rozmiaru, `rightsAttestation`, UI w `settings/DataManager.tsx`. Bez tego nie da się przenieść własnego systemu między kampaniami ani go udostępnić.
 3. **Marka**: kontrola znaku „Magnus” (EUIPO/USPTO/UPRP, klasy 9/41/42) i decyzja o ewentualnej zmianie nazwy.
 4. **ADR o polityce IP i treści użytkownika**, regulamin, procedura zgłaszania naruszeń, przegląd licencji zależności i assetów (`favicon`, dźwięki `dice-box`). Do ustalenia z prawnikiem od IP.
 5. **Ekspozycja publiczna** (P0-1…P0-3 w planie IP, po stronie właściciela): push i merge `chore/ip-cleanup-p0`, przebudowa albo wyłączenie `gh-pages`, widoczność repo i historia gita.
+
+6. **Po nowych modułach**:
+   - `ShowToPlayersButton` (`src/components/player-screen/`) nie jest jeszcze podpięty w notatkach i kodeksie;
+   - wzmianki nie przewijają do konkretnej notatki ani wpisu kodeksu (strony nie przyjmują id);
+   - stara kategoria notatek „Tropy” nie jest połączona z nowymi sekretami;
+   - ikony PWA są powiększone z favicon 256 px;
+   - logowanie offline zależy od zapisanej sesji Supabase i nie było testowane.
 
 ## Uwagi
 - `src/components/AuthGuard.tsx` ma **tymczasową, niezacommitowaną** zmianę (pomija logowanie w `npm run dev`). Nie commitować; cofnąć `git checkout src/components/AuthGuard.tsx`.
