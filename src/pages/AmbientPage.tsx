@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { Plus, Square, Play, Pause, Volume2, AlertTriangle, MoreVertical, ChevronUp, ChevronDown, Pencil, Trash2, ArrowUpDown } from "lucide-react";
+import { Plus, Square, Play, Pause, Volume2, AlertTriangle, MoreVertical, ChevronUp, ChevronDown, Pencil, Trash2, ArrowUpDown, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -15,13 +16,14 @@ import { cn } from "@/lib/utils";
 import { useAmbient, type SoundItem, type Category } from "@/context/AmbientContext";
 import { unlockMobileAudio } from "@/lib/mobileAudioUnlock";
 import { EmojiPickerButton } from "@/components/emoji/EmojiPickerButton";
+import { AUDIO_ACCEPT, AUDIO_FILE_WARN_BYTES, deleteAudio, formatBytes, isAudioFile, putAudio } from "@/lib/audioStore";
 
 function genId() { return Math.random().toString(36).slice(2, 10); }
 
 export default function AmbientPage() {
   const {
     config, setConfig,
-    playing, paused, fading, errors, volumes,
+    playing, paused, fading, errors, missing, volumes,
     masterVolume, setMasterVolume,
     toggleSound, stopSoundWithFade, stopAll, changeVolume, killSound,
   } = useAmbient();
@@ -29,6 +31,17 @@ export default function AmbientPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingSound, setEditingSound] = useState<SoundItem | null>(null);
   const [form, setForm] = useState({ name: "", emoji: "🔊", url: "", type: "loop" as "loop" | "effect", categoryId: "", newCategory: "", volume: 70 });
+  const [source, setSource] = useState<"file" | "link">("file");
+  const [file, setFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
+  const totalFileBytes = config.sounds.reduce((sum, s) => sum + (s.file?.size ?? 0), 0);
+
+  const pickFile = (f: File | undefined) => {
+    if (!f) return;
+    if (!isAudioFile(f)) { toast.error("Obsługiwane formaty: mp3, ogg, wav, m4a"); return; }
+    setFile(f);
+    setForm((prev) => (prev.name.trim() ? prev : { ...prev, name: f.name.replace(/\.[^.]+$/, "") }));
+  };
   const [showTouchHint, setShowTouchHint] = useState(false);
 
   const anyPlaying = Object.values(playing).some(Boolean);
@@ -54,17 +67,23 @@ export default function AmbientPage() {
   const openAddModal = () => {
     setEditingSound(null);
     setForm({ name: "", emoji: "🔊", url: "", type: "loop", categoryId: config.categories[0]?.id || "", newCategory: "", volume: 70 });
+    setSource("file");
+    setFile(null);
     setModalOpen(true);
   };
 
   const openEditModal = (sound: SoundItem) => {
     setEditingSound(sound);
     setForm({ name: sound.name, emoji: sound.emoji, url: sound.url, type: sound.type, categoryId: sound.categoryId, newCategory: "", volume: sound.volume });
+    setSource(sound.file ? "file" : "link");
+    setFile(null);
     setModalOpen(true);
   };
 
-  const saveModal = () => {
-    if (!form.name.trim() || !form.url.trim()) { toast.error("Nazwa i URL są wymagane"); return; }
+  const saveModal = async () => {
+    if (!form.name.trim()) { toast.error("Nazwa jest wymagana"); return; }
+    if (source === "link" && !form.url.trim()) { toast.error("Link jest wymagany"); return; }
+    if (source === "file" && !file && !editingSound?.file) { toast.error("Wybierz plik dźwiękowy"); return; }
     let catId = form.categoryId;
     let newCat: Category | null = null;
     if (catId === "__new__" && form.newCategory.trim()) {
@@ -73,24 +92,39 @@ export default function AmbientPage() {
     }
     if (!catId) { toast.error("Wybierz kategorię"); return; }
 
+    const id = editingSound?.id ?? genId();
+    let fileMeta = source === "file" ? editingSound?.file : undefined;
+    if (source === "file" && file) {
+      setSaving(true);
+      try {
+        await putAudio(id, file);
+      } catch {
+        toast.error("Nie udało się zapisać pliku (brak miejsca w przeglądarce?)");
+        return;
+      } finally {
+        setSaving(false);
+      }
+      fileMeta = { name: file.name, size: file.size };
+    }
+    if (editingSound && (file || source !== (editingSound.file ? "file" : "link"))) killSound(id);
+    if (editingSound?.file && source === "link") deleteAudio(id).catch(() => {});
+    const fields = { name: form.name.trim(), emoji: form.emoji || "🔊", url: source === "link" ? form.url.trim() : "", file: fileMeta, type: form.type, categoryId: catId, volume: form.volume };
+
     save((c) => {
       const cats = newCat ? [...c.categories, newCat] : c.categories;
       if (editingSound) {
         return {
           categories: cats,
-          sounds: c.sounds.map((s) => s.id === editingSound.id
-            ? { ...s, name: form.name.trim(), emoji: form.emoji || "🔊", url: form.url.trim(), type: form.type, categoryId: catId, volume: form.volume }
-            : s),
+          sounds: c.sounds.map((s) => s.id === editingSound.id ? { ...s, ...fields } : s),
         };
       } else {
-        const ns: SoundItem = { id: genId(), name: form.name.trim(), emoji: form.emoji || "🔊", url: form.url.trim(), type: form.type, categoryId: catId, volume: form.volume };
-        return { categories: cats, sounds: [...c.sounds, ns] };
+        return { categories: cats, sounds: [...c.sounds, { id, ...fields }] };
       }
     });
     setModalOpen(false);
   };
 
-  const deleteSound = (id: string) => { killSound(id); save((c) => ({ ...c, sounds: c.sounds.filter((s) => s.id !== id) })); };
+  const deleteSound = (id: string) => { killSound(id); deleteAudio(id).catch(() => {}); save((c) => ({ ...c, sounds: c.sounds.filter((s) => s.id !== id) })); };
   const moveToCategory = (soundId: string, catId: string) => { save((c) => ({ ...c, sounds: c.sounds.map((s) => s.id === soundId ? { ...s, categoryId: catId } : s) })); };
   const toggleCollapse = (catId: string) => { save((c) => ({ ...c, categories: c.categories.map((cat) => cat.id === catId ? { ...cat, collapsed: !cat.collapsed } : cat) })); };
   const renameCategory = (catId: string, name: string) => { save((c) => ({ ...c, categories: c.categories.map((cat) => cat.id === catId ? { ...cat, name } : cat) })); };
@@ -184,6 +218,7 @@ export default function AmbientPage() {
                   isPaused={!!paused[sound.id]}
                   isFading={!!fading[sound.id]}
                   hasError={!!errors[sound.id]}
+                  isMissing={!!missing[sound.id]}
                   volume={volumes[sound.id] ?? sound.volume}
                   onToggle={() => handleToggleSound(sound)}
                   onStop={() => stopSoundWithFade(sound.id)}
@@ -228,11 +263,40 @@ export default function AmbientPage() {
                 <span className="text-xs text-muted-foreground">Kliknij aby wybrać</span>
               </div>
             </div>
-            <div className="space-y-1">
-              <Label>URL lub link YouTube *</Label>
-              <Input value={form.url} onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))} placeholder="https://..." />
-              <p className="text-xs text-muted-foreground">Wklej link YouTube lub bezpośredni URL do pliku mp3/ogg/wav</p>
-            </div>
+            <Tabs value={source} onValueChange={(v) => setSource(v as "file" | "link")}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="file">Własny plik</TabsTrigger>
+                <TabsTrigger value="link">Link / YouTube</TabsTrigger>
+              </TabsList>
+              <TabsContent value="file" className="space-y-1">
+                <label
+                  className="flex cursor-pointer flex-col items-center gap-1 rounded-lg border border-dashed border-border px-3 py-4 text-center text-sm text-muted-foreground hover:bg-muted/40"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => { e.preventDefault(); pickFile(e.dataTransfer.files[0]); }}
+                >
+                  <Upload className="h-5 w-5" />
+                  {file
+                    ? <span className="text-foreground">{file.name} ({formatBytes(file.size)})</span>
+                    : editingSound?.file
+                      ? <span className="text-foreground">{editingSound.file.name} ({formatBytes(editingSound.file.size)}) — kliknij, aby podmienić</span>
+                      : <span>Przeciągnij plik lub kliknij, aby wybrać (mp3, ogg, wav, m4a)</span>}
+                  <input type="file" accept={AUDIO_ACCEPT} className="sr-only" onChange={(e) => { pickFile(e.target.files?.[0]); e.target.value = ""; }} />
+                </label>
+                {file && file.size > AUDIO_FILE_WARN_BYTES && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400">
+                    Duży plik (ponad {formatBytes(AUDIO_FILE_WARN_BYTES)}) — może zająć dużo miejsca w przeglądarce. Rozważ krótszą pętlę lub niższy bitrate.
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Plik zostaje tylko w tej przeglądarce. Zajęte przez pliki tej kampanii: {formatBytes(totalFileBytes)}
+                </p>
+              </TabsContent>
+              <TabsContent value="link" className="space-y-1">
+                <Input value={form.url} onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))} placeholder="https://..." />
+                <p className="text-xs text-muted-foreground">Wklej link YouTube lub bezpośredni URL do pliku mp3/ogg/wav.</p>
+                <p className="text-xs text-muted-foreground">Odtwarzaj tylko materiały, do których masz prawa (licencja lub własne nagranie).</p>
+              </TabsContent>
+            </Tabs>
             <div className="space-y-1">
               <Label>Typ odtwarzania</Label>
               <RadioGroup value={form.type} onValueChange={(v: "loop" | "effect") => setForm((f) => ({ ...f, type: v }))} className="flex gap-4">
@@ -271,7 +335,7 @@ export default function AmbientPage() {
           </div>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setModalOpen(false)} className="">Anuluj</Button>
-            <Button onClick={saveModal} className="">Zapisz</Button>
+            <Button onClick={saveModal} disabled={saving} className="">{saving ? "Zapisywanie…" : "Zapisz"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -301,13 +365,14 @@ function CategoryName({ name, onRename }: { name: string; onRename: (n: string) 
 }
 
 function SoundTile({
-  sound, isPlaying, isPaused, isFading, hasError, volume, onToggle, onStop, onVolumeChange, onEdit, onDelete, categories, onMoveToCategory,
+  sound, isPlaying, isPaused, isFading, hasError, isMissing, volume, onToggle, onStop, onVolumeChange, onEdit, onDelete, categories, onMoveToCategory,
 }: {
   sound: SoundItem;
   isPlaying: boolean;
   isPaused: boolean;
   isFading: boolean;
   hasError: boolean;
+  isMissing: boolean;
   volume: number;
   onToggle: () => void;
   onStop: () => void;
@@ -352,6 +417,12 @@ function SoundTile({
         </div>
       </div>
 
+      {isMissing && (
+        <p className="mb-2 flex items-center gap-1 text-xs text-destructive">
+          <AlertTriangle className="h-3 w-3 shrink-0" /> Plik niedostępny na tym urządzeniu
+        </p>
+      )}
+
       <div
         className="flex items-center gap-2 mb-2 flex-1 min-w-0"
         onPointerDown={(e) => e.stopPropagation()}
@@ -367,7 +438,7 @@ function SoundTile({
           size="sm"
           className={cn("flex-1", isFading && "opacity-50 pointer-events-none")}
           onClick={onToggle}
-          disabled={isFading}
+          disabled={isFading || (isMissing && !active)}
         >
           {hasError ? (
             <><AlertTriangle className="h-4 w-4 mr-1" /> Błąd</>
