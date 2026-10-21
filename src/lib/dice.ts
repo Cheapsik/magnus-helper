@@ -16,15 +16,6 @@ export interface DiceRoll {
     modifier: number;
   }
 
-  export interface TestResult {
-    roll: number;
-    target: number;
-    success: boolean;
-    margin: number;
-    label: string;
-    timestamp: number;
-  }
-
   export const rollDie = (sides: number): number =>
     Math.floor(Math.random() * sides) + 1;
 
@@ -52,13 +43,3 @@ export interface DiceRoll {
   ];
 
   export const DICE_TYPES = [4, 6, 8, 10, 12, 20, 100];
-
-  export const DIFFICULTY_PRESETS = [
-    { label: "Very Easy", labelPl: "Bardzo łatwy", modifier: 30 },
-    { label: "Easy", labelPl: "Łatwy", modifier: 20 },
-    { label: "Routine", labelPl: "Rutynowy", modifier: 10 },
-    { label: "Average", labelPl: "Przeciętny", modifier: 0 },
-    { label: "Challenging", labelPl: "Wymagający", modifier: -10 },
-    { label: "Hard", labelPl: "Trudny", modifier: -20 },
-    { label: "Very Hard", labelPl: "Bardzo trudny", modifier: -30 },
-  ];
