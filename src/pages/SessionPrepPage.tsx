@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MentionTextarea } from "@/components/mention/MentionTextarea";
 import { useApp } from "@/context/AppContext";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { logChronicleEvent } from "@/lib/chronicle";
 import {
   prepForSession,
   reviveSecrets,
@@ -139,9 +140,10 @@ export default function SessionPrepPage() {
               <label className="flex items-center gap-1.5 pt-2 text-xs text-muted-foreground whitespace-nowrap">
                 <Checkbox
                   checked={secret.revealedInSessionId === sessionId}
-                  onCheckedChange={(checked) =>
-                    setSecrets((all) => setSecretRevealed(all, secret.id, checked === true ? sessionId : null))
-                  }
+                  onCheckedChange={(checked) => {
+                    if (checked === true) logChronicleEvent({ kind: "secret", text: `Ujawniono sekret: ${secret.text}` });
+                    setSecrets((all) => setSecretRevealed(all, secret.id, checked === true ? sessionId : null));
+                  }}
                 />
                 ujawniono
               </label>

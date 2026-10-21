@@ -12,6 +12,7 @@ import { CalendarSettings } from "@/components/calendar/CalendarSettings";
 import { DateFields } from "@/components/calendar/DateFields";
 import { MonthGrid } from "@/components/calendar/MonthGrid";
 import { useCalendarState } from "@/components/calendar/useCampaignDate";
+import { logChronicleEvent } from "@/lib/chronicle";
 import { cn } from "@/lib/utils";
 import {
   eventDayIndex, formatDate, fromDayIndex, moonPhase, toDayIndex,
@@ -40,6 +41,9 @@ export default function CalendarPage() {
 
   const goTo = (index: number) => {
     const date = fromDayIndex(definition, index);
+    if (index === today) return;
+    const diff = index - today;
+    logChronicleEvent({ kind: "calendar", text: `Czas w świecie: ${diff > 0 ? "+" : ""}${diff} dni → ${formatDate(definition, index)}` });
     setState((s) => ({ ...s, today: index }));
     if (date) setView({ year: date.year, month: date.month });
   };
