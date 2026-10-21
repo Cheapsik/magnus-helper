@@ -9,6 +9,7 @@ import { useApp } from "@/context/AppContext";
 import { useCardType, useCards } from "@/lib/cardStore";
 import { type CardKind, CARD_KIND_LABELS, CARD_KIND_ROUTES, cardSubtitle, getCardCombatStats } from "@/lib/cardSchema";
 import { cardToCombatant } from "@/lib/cardRoster";
+import { MentionTimeline } from "@/components/card/MentionTimeline";
 
 /** Quick view of any card: rename, jot notes, send to combat, or open the full card. */
 export function CardDrawerView({ kind, id }: { kind: CardKind; id: string }) {
@@ -57,6 +58,7 @@ export function CardDrawerView({ kind, id }: { kind: CardKind; id: string }) {
         className="min-h-[96px]"
         aria-label="Notatki"
       />
+      <MentionTimeline cardId={id} />
       <div className="grid grid-cols-2 gap-2">
         <Button
           type="button"
