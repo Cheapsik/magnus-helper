@@ -5,7 +5,7 @@ import {
   Swords, Activity, Package, StickyNote, Wrench, Users, Gem, Timer, MessageSquare, Music, Network, ScrollText,
   MapPin, Skull, SlidersHorizontal, Settings as SettingsIcon, LogOut,
   type LucideIcon,
-  Waypoints,
+  Waypoints, Lightbulb, PieChart, Flag, Shuffle, CalendarDays,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useScene } from "@/context/SceneContext";
@@ -52,10 +52,13 @@ const SIDEBAR_GROUPS: { label: string; items: { path: string; label: string; ico
   {
     label: "Sesja",
     items: [
+      { path: "/prep", label: "Przygotowanie sesji", icon: Lightbulb },
       { path: "/combat", label: "Tracker walki", icon: Swords },
       { path: "/scena", label: "Scena", icon: MapPin },
       { path: "/quests", label: "Wątki", icon: Network },
       { path: "/conditions", label: "Stany", icon: Activity },
+      { path: "/clocks", label: "Zegary", icon: PieChart },
+      { path: "/calendar", label: "Kalendarz", icon: CalendarDays },
       { path: "/timers", label: "Timery", icon: Timer },
       { path: "/notes", label: "Notatki", icon: StickyNote },
     ],
@@ -75,6 +78,8 @@ const SIDEBAR_GROUPS: { label: string; items: { path: string; label: string; ico
       { path: "/gm-toolbox", label: "Skrzynka MG", icon: Wrench },
       { path: "/settings?tab=karty", label: "System kampanii", icon: SlidersHorizontal },
       { path: "/relations", label: "Mapa relacji", icon: Waypoints },
+      { path: "/factions", label: "Frakcje", icon: Flag },
+      { path: "/tables", label: "Tabele losowe", icon: Shuffle },
       { path: "/loot", label: "Generator łupu", icon: Gem },
       { path: "/rumors", label: "Plotki", icon: MessageSquare },
       { path: "/ambient", label: "Ambient", icon: Music },

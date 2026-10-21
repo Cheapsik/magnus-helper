@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Swords, Timer as TimerIcon, Volume2, MapPin } from "lucide-react";
+import { Swords, Timer as TimerIcon, Volume2, MapPin, CalendarDays } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { useAmbient } from "@/context/AmbientContext";
 import { useScene } from "@/context/SceneContext";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { RPG_TIMERS_STORAGE_KEY } from "@/lib/rpgTimersStorage";
+import { useCampaignDate } from "@/components/calendar/useCampaignDate";
 
 interface TimerLite { id: string; label: string; mode: "stopwatch" | "countdown"; countdownSet: number; }
 
@@ -15,6 +16,7 @@ export default function StatusBar() {
   const { combatants, combatRound, combatTurn } = useApp();
   const { playingLayers } = useAmbient();
   const { activeScene } = useScene();
+  const worldDate = useCampaignDate();
   const [timers] = useLocalStorage<TimerLite[]>(RPG_TIMERS_STORAGE_KEY, []);
   const [tick, setTick] = useState(0);
 
@@ -42,6 +44,14 @@ export default function StatusBar() {
       style={{ height: 28 }}
     >
       <div className="hidden md:flex items-center w-full max-w-6xl mx-auto justify-center">
+        <button
+          onClick={() => navigate("/calendar")}
+          className="flex items-center gap-1.5 hover:text-foreground transition-colors"
+          title="Otwórz kalendarz"
+        >
+          <CalendarDays className="h-3 w-3" /> {worldDate}
+        </button>
+        {!(sectionsEmpty && !activeScene && playingLayers.length === 0) && sep}
         {firstTimer && (
           <span className="flex items-center gap-1.5">
             <TimerIcon className="h-3 w-3" /> {firstTimer.label || "Timer"}
@@ -68,7 +78,6 @@ export default function StatusBar() {
             {playingLayers.length > 0 && sep}
           </>
         )}
-        {sectionsEmpty && !activeScene && playingLayers.length === 0 && <span className="opacity-50">Magnus</span>}
         {playingLayers.length > 0 && (() => {
           const count = playingLayers.length;
           let label: string;
