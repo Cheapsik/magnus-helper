@@ -127,8 +127,8 @@ export function TestTypesEditor() {
   return (
     <div className="space-y-3">
       <p className="text-[length:--fs-meta] text-muted-foreground">
-        Rodzaj testu opisuje, jak Magnus rozstrzyga rzut: czym się rzuca, z czym porównuje wynik i z których pól karty
-        wolno go wykonać. Magnus nie zna żadnych zasad — wszystko ustalasz tutaj.
+        Rodzaj testu opisuje, jak Magnus Helper rozstrzyga rzut: czym się rzuca, z czym porównuje wynik i z których pól karty
+        wolno go wykonać. Magnus Helper nie zna żadnych zasad — wszystko ustalasz tutaj.
       </p>
 
       {types.length === 0 && (
