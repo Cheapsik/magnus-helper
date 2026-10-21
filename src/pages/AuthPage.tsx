@@ -14,7 +14,6 @@ import { useAuth } from "@/context/AuthContext";
 import { isRecoveryAuthCallback } from "@/lib/authUrls";
 import { cn } from "@/lib/utils";
 
-const AUTH_BG = `${import.meta.env.BASE_URL}assets/images/background.png`;
 const AUTH_FAVICON = `${import.meta.env.BASE_URL}favicon.png`;
 
 type AuthView = "login" | "register" | "forgot" | "new-password";
@@ -131,7 +130,7 @@ function AuthShell({ children }: { children: ReactNode }) {
     <div className="auth-page relative flex min-h-screen flex-col text-white">
       <div
         className="pointer-events-none fixed inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${AUTH_BG})` }}
+        style={{ backgroundImage: "radial-gradient(ellipse at 50% 20%, #3a2a1c 0%, #1b1410 55%, #0c0a08 100%)" }}
         aria-hidden
       />
       <div className="pointer-events-none fixed inset-0 bg-black/55" aria-hidden />
