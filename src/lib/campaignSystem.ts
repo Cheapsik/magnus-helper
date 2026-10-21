@@ -70,7 +70,15 @@ export type TestType = {
 
 export type DefenseType = { id: string; name: string };
 
-/** How the attacker's roll decides a hit. */
+/**
+ * How the attacker's roll decides a hit (src/lib/combatEngine.ts).
+ * - `self` — the attacker's own test succeeds.
+ * - `vsDefense` — the target's defense field takes the place of the difficulty
+ *   step's value, so a d20 attack beats an armor class by reaching it.
+ * - `opposed` — the defender rolls the same test type; the attacker must
+ *   succeed and score higher (margin, total or successes, per mode).
+ * - `manual` — the roll is shown, the GM calls the hit.
+ */
 export type HitResolution =
   | { kind: "self" }
   | { kind: "vsDefense"; defenseId: string }
