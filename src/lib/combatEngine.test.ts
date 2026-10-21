@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { type Card, type CardKind, emptyCardTypeDef } from "./cardSchema";
+import { type Card, type CardKind, type CardTypeDef, emptyCardTypeDef } from "./cardSchema";
 import {
   type AttackType,
   type CampaignSystem,
@@ -7,7 +7,7 @@ import {
   type TestType,
   emptyCampaignSystem,
 } from "./campaignSystem";
-import { resolveDamage, resolveHit } from "./combatEngine";
+import { resolveDamage, resolveHit, weaponDiceOptions } from "./combatEngine";
 import { resolveTest } from "./testEngine";
 
 /** Hands out the given faces in order and fails loudly if the engine rolls more. */
@@ -276,5 +276,52 @@ describe("resolveDamage — hit locations", () => {
     const off = attack({ damage: { source: "fixed", fixed: 10 }, useHitLocations: false });
     expect(resolveDamage(system({ hitLocations: table }), off, { target: goblin, attack: null }, faces()).location).toBeNull();
     expect(resolveDamage(system({ hitLocations: null }), located, { target: goblin, attack: null }, faces()).location).toBeNull();
+  });
+});
+
+describe("weaponDiceOptions", () => {
+  const cardType: CardTypeDef = {
+    ...emptyCardTypeDef(),
+    sections: [
+      {
+        id: "s",
+        name: "Walka",
+        fields: [
+          { id: "fists", name: "Pięści", type: "dice" },
+          { id: "empty", name: "Puste", type: "dice" },
+          { id: "hidden", name: "Ukryte", type: "dice", hidden: true },
+          {
+            id: "weapons",
+            name: "Broń",
+            type: "table",
+            rowMode: { kind: "dynamic" },
+            columns: [
+              { id: "n", name: "Nazwa", type: "text" },
+              { id: "d", name: "Obrażenia", type: "dice" },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+  const card = party("hero", {
+    fists: "1k4",
+    empty: " ",
+    hidden: "9k9",
+    weapons: {
+      rows: [
+        { id: "r1", cells: { n: "Miecz", d: "1k8+1" } },
+        { id: "r2", cells: { n: "", d: "2k6" } },
+        { id: "r3", cells: { n: "Kij", d: "" } },
+      ],
+    },
+  }).card;
+
+  it("lists dice fields and dice cells that have a value, skipping hidden fields", () => {
+    expect(weaponDiceOptions(cardType, card)).toEqual([
+      { label: "Pięści", notation: "1k4" },
+      { label: "Miecz · Obrażenia", notation: "1k8+1" },
+      { label: "Wpis 2 · Obrażenia", notation: "2k6" },
+    ]);
   });
 });

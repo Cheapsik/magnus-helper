@@ -1,4 +1,4 @@
-import { type Card, type CardKind, readNumberRef } from "@/lib/cardSchema";
+import { type Card, type CardKind, type CardTypeDef, isTableValue, readNumberRef, visibleFields } from "@/lib/cardSchema";
 import type { AttackType, CampaignSystem, HitLocation, HitLocationTable } from "@/lib/campaignSystem";
 import { rollDie } from "@/lib/dice";
 import { type DieRoller, rollDiceNotation } from "@/lib/diceNotation";
@@ -204,4 +204,30 @@ export function resolveDamage(
     location ? `lokacja: ${location.location.name} (${location.roll})` : null,
   ];
   return { location, base, fieldBonus, marginBonus, raw, reduction, final, summary: parts.filter(Boolean).join(" · ") };
+}
+
+export type DiceOption = { label: string; notation: string };
+
+/** Every dice field or dice cell with a value on the card — what a `weapon` damage can roll. */
+export function weaponDiceOptions(cardType: CardTypeDef, card: Card): DiceOption[] {
+  const options: DiceOption[] = [];
+  for (const field of visibleFields(cardType)) {
+    const value = card.values[field.id];
+    if (field.type === "dice" && typeof value === "string" && value.trim()) {
+      options.push({ label: field.name, notation: value.trim() });
+    }
+    if (field.type !== "table" || !isTableValue(value)) continue;
+    const columns = field.columns ?? [];
+    const nameColumn = columns.find((column) => column.type === "text");
+    value.rows.forEach((row, index) => {
+      const fixed = field.rowMode?.kind === "fixed" ? field.rowMode.rows.find((r) => r.id === row.id)?.label : undefined;
+      const named = nameColumn ? String(row.cells[nameColumn.id] ?? "").trim() : "";
+      const rowLabel = fixed ?? (named || `Wpis ${index + 1}`);
+      for (const column of columns.filter((c) => c.type === "dice")) {
+        const cell = String(row.cells[column.id] ?? "").trim();
+        if (cell) options.push({ label: `${rowLabel} · ${column.name}`, notation: cell });
+      }
+    });
+  }
+  return options;
 }
