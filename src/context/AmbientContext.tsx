@@ -30,15 +30,8 @@ const DEFAULT_CONFIG: SoundboardConfig = {
     { id: "music", name: "Muzyka", collapsed: false, emoji: "🎵" },
     { id: "fx", name: "Efekty", collapsed: false, emoji: "✨" },
   ],
-  sounds: [
-    { id: "s1", name: "Deszcz", emoji: "🌧️", url: "https://www.youtube.com/watch?v=q76bMs-NwRk", type: "loop", categoryId: "env", volume: 70 },
-    { id: "s2", name: "Las — ptaki", emoji: "🌲", url: "https://www.youtube.com/watch?v=xNN7iTA57jM", type: "loop", categoryId: "env", volume: 70 },
-    { id: "s3", name: "Miasto — gwar", emoji: "🏙️", url: "https://www.youtube.com/watch?v=3sL0omwElxw", type: "loop", categoryId: "env", volume: 70 },
-    { id: "s4", name: "Karczma — muzyka", emoji: "🏰", url: "https://www.youtube.com/watch?v=vyg5jJrZ42s", type: "loop", categoryId: "music", volume: 70 },
-    { id: "s5", name: "Bitwa — epicka", emoji: "⚔️", url: "https://www.youtube.com/watch?v=nso6Vhg0p9k", type: "loop", categoryId: "music", volume: 70 },
-    { id: "s6", name: "Podziemia — mroczny ambient", emoji: "🕌", url: "https://www.youtube.com/watch?v=TVGsIU4WFF4", type: "loop", categoryId: "music", volume: 70 },
-    { id: "s8", name: "Dzwon kościelny", emoji: "🔔", url: "https://www.youtube.com/watch?v=D1hddNfO7C0", type: "loop", categoryId: "fx", volume: 70 },
-  ],
+  // No bundled tracks: every link is the GM's own, and so is the right to play it.
+  sounds: [],
 };
 
 function reviveSoundboardConfig(parsed: unknown): SoundboardConfig {
