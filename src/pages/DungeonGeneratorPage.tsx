@@ -20,7 +20,6 @@ const SIZES: Choice[] = [
   ["Huge", "Bardzo duży"],
   ["Gargantuan", "Ogromny"],
   ["Colossal", "Kolosalny"],
-  ["Custom", "Własny"],
 ];
 const LAYOUTS: Choice[] = [
   ["Square", "Kwadrat"],
@@ -34,12 +33,6 @@ const LAYOUTS: Choice[] = [
   ["Round", "Okrąg"],
   ["Cavernous", "Jaskinie"],
 ];
-const NO_YES_MANY: Choice[] = [
-  ["", "Nie"],
-  ["Yes", "Tak"],
-  ["Many", "Wiele"],
-];
-const EGRESS: Choice[] = [...NO_YES_MANY, ["Tiling", "Do łączenia map"]];
 const ROOM_LAYOUTS: Choice[] = [
   ["Sparse", "Rzadki"],
   ["Scattered", "Rozproszony"],
@@ -66,36 +59,16 @@ const CORRIDORS: Choice[] = [
   ["Errant", "Kręte"],
   ["Straight", "Proste"],
 ];
-const DEADENDS: Choice[] = [
-  ["", "Zostaw"],
-  ["Some", "Usuń część"],
-  ["All", "Usuń wszystkie"],
-];
 const STYLES: Choice[] = [
   ["Battlemap", "Mapa bitewna"],
-  ["Battlemap Sandstone", "Mapa bitewna: piaskowiec"],
-  ["Battlemap Basalt", "Mapa bitewna: bazalt"],
-  ["Standard", "Standardowy"],
-  ["Classic", "Klasyczny"],
-  ["Crosshatch", "Kreskowanie"],
-  ["GraphPaper", "Papier w kratkę"],
   ["Parchment", "Pergamin"],
-  ["Marble", "Marmur"],
-  ["Sandstone", "Piaskowiec"],
-  ["Slate", "Łupek"],
-  ["Aquatic", "Podwodny"],
-  ["Infernal", "Piekielny"],
-  ["Glacial", "Lodowy"],
-  ["Wooden", "Drewniany"],
-  ["Asylum", "Szpitalny"],
-  ["Steampunk", "Steampunk"],
-  ["Gamma", "Gamma"],
+  ["Classic", "Klasyczna (niebieska)"],
+  ["Standard", "Czarno-biała (do druku)"],
 ];
 const GRIDS: Choice[] = [
   ["None", "Brak"],
   ["Square", "Kwadratowa"],
   ["Hex", "Heksagonalna"],
-  ["VertHex", "Heksagonalna pionowa"],
 ];
 const FURNISH: Choice[] = [
   ["None", "Bez wyposażenia"],
@@ -106,37 +79,35 @@ const FURNISH: Choice[] = [
   ["Monster Infested", "Siedlisko potworów"],
   ["Haunted Crypt", "Nawiedzona krypta"],
 ];
-const ART: Choice[] = [
-  ["painted", "Malowane"],
-  ["ink", "Szkic tuszem"],
-  ["scribble", "Szkic odręczny"],
-  ["pixel", "Piksele 1-bit"],
-];
-const SCALES: Choice[] = [
-  ["", "Automatyczna"],
-  ["16", "16 px na pole"],
-  ["32", "32 px na pole"],
-  ["70", "70 px na pole"],
-];
-/** What "Losowy loch" rerolls; the size never becomes custom. */
-const REROLLED: [keyof DungeonOptions, Choice[]][] = [
-  ["dungeon_size", SIZES.filter(([v]) => v !== "Custom")],
-  ["dungeon_layout", LAYOUTS],
-  ["peripheral_egress", EGRESS],
-  ["room_layout", ROOM_LAYOUTS],
-  ["room_size", ROOM_SIZES],
-  ["room_polymorph", NO_YES_MANY],
-  ["door_set", DOORS],
-  ["corridor_layout", CORRIDORS],
-  ["remove_deadends", DEADENDS],
-  ["add_stairs", NO_YES_MANY],
-];
+/** The settings shown, with their choices: "Losowy loch" rerolls these and stale saved values fall back to defaults. */
+const CHOICES: Partial<Record<keyof DungeonOptions, Choice[]>> = {
+  dungeon_size: SIZES,
+  dungeon_layout: LAYOUTS,
+  room_layout: ROOM_LAYOUTS,
+  room_size: ROOM_SIZES,
+  door_set: DOORS,
+  corridor_layout: CORRIDORS,
+  map_style: STYLES,
+  grid: GRIDS,
+  furnish: FURNISH,
+};
+const REROLLED: (keyof DungeonOptions)[] = ["dungeon_size", "dungeon_layout", "room_layout", "room_size", "door_set", "corridor_layout"];
+
+/** Saved settings, minus anything this page no longer offers; hidden options always use the defaults. */
+export function fromSaved(saved: Partial<DungeonOptions>): DungeonOptions {
+  const next: DungeonOptions = { ...DEFAULT_DUNGEON_OPTIONS, seed: saved.seed ?? randomSeed(), floors: saved.floors ?? 1, labels: saved.labels ?? true };
+  for (const [key, choices] of Object.entries(CHOICES)) {
+    const value = saved[key as keyof DungeonOptions];
+    if (choices.some(([v]) => v === value)) (next as Record<string, unknown>)[key] = value;
+  }
+  return next;
+}
 
 const pick = <T,>(list: T[]) => list[Math.floor(Math.random() * list.length)];
 
 export default function DungeonGeneratorPage() {
   const [saved, setSaved] = useLocalStorage<DungeonOptions>("rpg_dungeon_generator", { ...DEFAULT_DUNGEON_OPTIONS, seed: randomSeed() });
-  const [form, setForm] = useState<DungeonOptions>({ ...DEFAULT_DUNGEON_OPTIONS, ...saved });
+  const [form, setForm] = useState<DungeonOptions>(() => fromSaved(saved));
   const [images, setImages] = useState<string[]>([]);
   const [floor, setFloor] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -153,7 +124,8 @@ export default function DungeonGeneratorPage() {
     setError(null);
     setSaved(options);
     try {
-      const blobs = await renderDungeon(options);
+      // Furniture art follows the map: painted on the battlemap, ink sketches on paper styles.
+      const blobs = await renderDungeon({ ...options, furniture_art: options.map_style === "Battlemap" ? "painted" : "ink" });
       if (run !== latest.current) return;
       setImages((old) => {
         old.forEach((url) => URL.revokeObjectURL(url));
@@ -180,7 +152,7 @@ export default function DungeonGeneratorPage() {
 
   const randomDungeon = () => {
     const next = { ...form, seed: randomSeed() };
-    for (const [key, choices] of REROLLED) (next as Record<string, unknown>)[key] = pick(choices)[0];
+    for (const key of REROLLED) (next as Record<string, unknown>)[key] = pick(CHOICES[key]!)[0];
     submit(next);
   };
 
@@ -237,32 +209,19 @@ export default function DungeonGeneratorPage() {
 
               <Section title="Układ">
                 {select("dungeon_size", "Rozmiar podziemi", SIZES)}
-                {form.dungeon_size === "Custom" && (
-                  <Labeled label="Kolumny × wiersze (11–301)">
-                    <div className="flex gap-1.5">
-                      <input type="number" min={11} max={301} className={inputCls} value={form.map_cols} onChange={(e) => set("map_cols", Number(e.target.value))} aria-label="Kolumny" />
-                      <input type="number" min={11} max={301} className={inputCls} value={form.map_rows} onChange={(e) => set("map_rows", Number(e.target.value))} aria-label="Wiersze" />
-                    </div>
-                  </Labeled>
-                )}
                 {select("dungeon_layout", "Kształt podziemi", LAYOUTS)}
-                {select("peripheral_egress", "Wyjścia na krawędziach", EGRESS)}
               </Section>
 
               <Section title="Pomieszczenia i korytarze">
                 {select("room_layout", "Rozmieszczenie pomieszczeń", ROOM_LAYOUTS)}
                 {select("room_size", "Wielkość pomieszczeń", ROOM_SIZES)}
-                {select("room_polymorph", "Nieregularne kształty", NO_YES_MANY)}
                 {select("door_set", "Drzwi", DOORS)}
                 {select("corridor_layout", "Korytarze", CORRIDORS)}
-                {select("remove_deadends", "Ślepe zaułki", DEADENDS)}
-                {select("add_stairs", "Schody", NO_YES_MANY)}
               </Section>
 
               <Section title="Mapa">
                 {select("map_style", "Styl mapy", STYLES)}
                 {select("grid", "Siatka", GRIDS)}
-                {select("cell_size", "Skala", SCALES)}
                 <label className="flex items-center gap-2 text-sm">
                   <input type="checkbox" checked={form.labels} onChange={(e) => set("labels", e.target.checked)} />
                   Numery pomieszczeń i oznaczenia schodów
@@ -271,7 +230,6 @@ export default function DungeonGeneratorPage() {
 
               <Section title="Wyposażenie">
                 {select("furnish", "Wyposażenie pomieszczeń", FURNISH)}
-                {form.furnish !== "None" && select("furniture_art", "Styl rysunków", ART)}
               </Section>
 
               <div className="flex gap-2">
