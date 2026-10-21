@@ -25,6 +25,8 @@ Stan: `tsc` 0 błędów, testy 149/149 (w tym „IP guard”), `vite build` OK, 
    - `/player-screen`: ekran graczy w drugim oknie, sterowany z zakładki „Ekran” w trackerze (`src/lib/playerScreen.ts`);
    - wzmianki na kartach (`src/lib/mentionIndex.ts`), własne pliki audio w Ambiencie (IndexedDB, `src/lib/audioStore.ts`), PWA (`vite-plugin-pwa`).
 
+   - `/chronicle` kronika sesji (dziennik zdarzeń `src/lib/chronicle.ts`, do którego zapisują zegary, kalendarz, walka, sekrety, frakcje i podróże), `/maps` mapy z pinezkami (obrazy w IndexedDB), `/gm-screen` ekran MG z kafelków, `/travel` podróże, `/safety` granice, zasłony i pauza (karta X) na ekranie graczy.
+
 ## Do zrobienia
 1. **Ścieżka karta → atak w UI**: silnik ma testy jednostkowe, ale panel z uczestnikami z kart (źródła z `testType.sources`, obrona z karty, kości broni z tabeli) nie był jeszcze przeklikany w przeglądarce.
 2. **Import/eksport systemu kampanii** (`*.magnus-rules.json`, `IP_CLEANUP_PLAN.md` §6): schemat Zod, limity rozmiaru, `rightsAttestation`, UI w `settings/DataManager.tsx`. Bez tego nie da się przenieść własnego systemu między kampaniami ani go udostępnić.
@@ -37,7 +39,9 @@ Stan: `tsc` 0 błędów, testy 149/149 (w tym „IP guard”), `vite build` OK, 
    - wzmianki nie przewijają do konkretnej notatki ani wpisu kodeksu (strony nie przyjmują id);
    - stara kategoria notatek „Tropy” nie jest połączona z nowymi sekretami;
    - ikony PWA są powiększone z favicon 256 px;
-   - logowanie offline zależy od zapisanej sesji Supabase i nie było testowane.
+   - logowanie offline zależy od zapisanej sesji Supabase i nie było testowane;
+   - mapy: nie przeklikane w przeglądarce (wgrywanie obrazu, pinezki, dotyk); brak przybliżania dwoma palcami;
+   - obrazy map i pliki audio (IndexedDB) nie trafiają do eksportu danych.
 
 ## Uwagi
 - `src/components/AuthGuard.tsx` ma **tymczasową, niezacommitowaną** zmianę (pomija logowanie w `npm run dev`). Nie commitować; cofnąć `git checkout src/components/AuthGuard.tsx`.
