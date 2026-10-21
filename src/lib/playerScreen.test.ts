@@ -65,4 +65,9 @@ describe("revivePlayerScreen", () => {
       handout: { title: "", text: "", image: "data:x" },
     });
   });
+
+  it("defaults pause and safety view off for older saved state", () => {
+    expect(revivePlayerScreen({ blank: false })).toMatchObject({ paused: false, showSafety: false });
+    expect(revivePlayerScreen({ paused: true, showSafety: true })).toMatchObject({ paused: true, showSafety: true });
+  });
 });
