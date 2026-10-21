@@ -9,6 +9,7 @@ import {
   type SectionDef,
   allFields,
   defaultValueForField,
+  findField,
   isCurrentMaxValue,
   isTableValue,
   validateRef,
@@ -315,6 +316,16 @@ export function listRefTargets(type: CardTypeDef): RefTarget[] {
     }
   }
   return targets;
+}
+
+/** Values a test or damage bonus can read: numbers only, so text and dice fields are left out. */
+export function numericRefTargets(cardType: CardTypeDef): RefTarget[] {
+  return listRefTargets(cardType).filter(({ ref }) => {
+    const field = findField(cardType, ref.fieldId);
+    if (!field) return false;
+    if (field.type === "table") return field.columns?.find((column) => column.id === ref.columnId)?.type === "number";
+    return field.type === "number" || field.type === "track" || field.type === "currentMax";
+  });
 }
 
 export function refKey(ref: FieldRef | undefined): string {

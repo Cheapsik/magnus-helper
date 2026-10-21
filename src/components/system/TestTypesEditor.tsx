@@ -3,11 +3,9 @@ import { ChevronDown, ChevronRight, Copy, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   type CardKind,
-  type CardTypeDef,
   type LabelledRef,
   CARD_KINDS,
   CARD_KIND_LABELS,
-  findField,
   newId,
 } from "@/lib/cardSchema";
 import {
@@ -19,7 +17,7 @@ import {
   TEST_MODE_LABELS,
   emptyTestSources,
 } from "@/lib/campaignSystem";
-import { type RefTarget, listRefTargets, refKey } from "@/lib/structureOps";
+import { type RefTarget, numericRefTargets, refKey } from "@/lib/structureOps";
 import { diceIssue } from "@/lib/testEngine";
 import { useCampaignSystem } from "@/lib/cardStore";
 import { NumberInput } from "@/components/ui/number-input";
@@ -89,16 +87,6 @@ function move<T>(items: T[], index: number, direction: -1 | 1): T[] {
   const next = [...items];
   [next[index], next[target]] = [next[target], next[index]];
   return next;
-}
-
-/** Card values a test can be rolled from: numbers only, so text and dice fields are left out. */
-function numericTargets(cardType: CardTypeDef): RefTarget[] {
-  return listRefTargets(cardType).filter(({ ref }) => {
-    const field = findField(cardType, ref.fieldId);
-    if (!field) return false;
-    if (field.type === "table") return field.columns?.find((column) => column.id === ref.columnId)?.type === "number";
-    return field.type === "number" || field.type === "track" || field.type === "currentMax";
-  });
 }
 
 export function TestTypesEditor() {
@@ -617,7 +605,7 @@ function SourcesEditor({ type, system, onChange }: SubEditorProps & { system: Ca
           <SourceList
             key={kind}
             kind={kind}
-            targets={numericTargets(system.cards[kind])}
+            targets={numericRefTargets(system.cards[kind])}
             entries={type.sources?.[kind] ?? []}
             onChange={(fn) => setSources(kind, fn)}
           />
