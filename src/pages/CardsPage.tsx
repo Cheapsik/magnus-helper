@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { CardRenderer } from "@/components/card/CardRenderer";
+import { MentionTimeline } from "@/components/card/MentionTimeline";
 import { useCardType, useCards } from "@/lib/cardStore";
 import {
   type Card,
@@ -360,6 +361,7 @@ function CardSheet({
       <div className="paper-sheet">
         <CardRenderer cardType={cardType} card={draft} onChange={setDraft} />
       </div>
+      <MentionTimeline cardId={card.id} className="mt-4 bg-card" />
     </div>
   );
 }
