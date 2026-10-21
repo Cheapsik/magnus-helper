@@ -3,26 +3,28 @@
 Gałąź `feat/campaigns`, commity lokalne (bez pusha, bez merge'a; merge robi właściciel repo).
 Decyzje projektowe: `CONTEXT.md` + `docs/adr/0006`–`0009`. Plan IP: `IP_CLEANUP_PLAN.md`.
 
-Stan po ostatnim commicie: `tsc` 0 błędów, testy 119/119, `vite build` OK, ESLint 23 błędy (wszystkie zastane, w plikach nieruszanych).
+Stan: `tsc` 0 błędów, testy 149/149 (w tym „IP guard”), `vite build` OK, ESLint 7 błędów `no-empty` (wszystkie zastane, w nieruszanych plikach: `mobileAudioUnlock.ts`, `sessionNotesMigration.ts`).
 
 ## Zrobione
-1. **Model** (`src/lib/cardSchema.ts`, `campaignSystem.ts`, `systemTemplates.ts`, `cardStore.ts`, `dataReset.ts`, `diceNotation.ts`): rdzeń karty (nazwa/portret/notatki), ukryte pola, typy pól `dice`/`track`, reguły losowania, role (inicjatywa, zasób główny, zasoby dodatkowe, obrony, redukcja, redukcja per lokacja), rodzaje testów i ataku, stany, waluta; neutralny szablon i pusta struktura; reset danych sprzed przebudowy (bez migracji).
-2. **Edytor struktury kart**: Ustawienia → Karty (`src/components/system/*`, `src/lib/structureOps.ts`).
-3. **Kreator kampanii**: `src/components/campaign/*`, ekran pierwszej kampanii w `App.tsx`.
-4. **Karty bohaterów/NPC/potworów**: `src/pages/CardsPage.tsx` (`/heroes`, `/npcs`, `/monsters`), grupy, „Losuj” (`src/lib/cardGenerator.ts`), szuflada `CardDrawerView`; mapa relacji, notatki, wątki, sceny, wyszukiwarka czytają karty. Usunięte: `character-sheet/*`, `/character`, `/simulations`, tryb gracza, `gmEnemy`, `gameStatGlossary`.
-5. **Walka (częściowo)**: generyczny `Combatant` (`resource`, `resourceLabel`, `stats`, `card`), roster z kart (przeciąganie `typ:id`), formularz uczestnika, stany z kampanii.
-6. **Testy (częściowo)**: `src/lib/testEngine.ts` (+ testy) i edytor Ustawienia → Testy (`TestTypesEditor.tsx`).
-7. **Listy kampanii**: Ustawienia → Stany / Waluta, `/conditions`, łup i sklep na walucie kampanii (`src/lib/currency.ts`, `MoneyInput`).
+1. **Model** (`src/lib/cardSchema.ts`, `campaignSystem.ts`, `systemTemplates.ts`, `cardStore.ts`, `dataReset.ts`, `diceNotation.ts`): konfigurowalna struktura kart, role pól, rodzaje testów i ataku, stany, waluta; neutralny szablon i pusta struktura; reset danych sprzed przebudowy (bez migracji).
+2. **Edytor struktury kart** (Ustawienia → Karty), **kreator kampanii**, **karty** bohaterów/NPC/potworów z generatorem „Losuj”.
+3. **Testy**: `testEngine.ts` + `TestsPage` + edytor (Ustawienia → Testy). Stare `difficultyPresets`/`testHistory` usunięte z `AppContext` i `dice.ts`; Skrzynka MG linkuje do ustawień testów.
+4. **Walka**: generyczny `Combatant`, roster z kart, stany z kampanii oraz
+   - `src/lib/combatEngine.ts` (+ testy): `resolveHit` (self / vsDefense / opposed z zasadą remisu / manual) i `resolveDamage` (kości z karty, wartość stała lub ręczna, `+ pole atakującego`, `+ margines`, redukcja z minimum 0/1, lokacje z kością albo odwróconym k100, redukcja per lokacja). `resolveTest` przyjmuje `difficultyValue` (obrona celu w miejsce stopnia trudności);
+   - `CombatAttackPanel.tsx`: wybór rodzaju ataku i celu, rzut, ręczne „Trafienie/Pudło”, kości obrażeń z karty, „Zadaj X” odejmujące od zasobu głównego (sprawdzone w przeglądarce na uczestnikach bez kart);
+   - `CombatSettingsEditor.tsx` (Ustawienia → Walka): rodzaje ataku, typy obrony, tabela lokacji; w edytorze kart (`RolesEditor`) przypisanie pól do obron i redukcji per lokacja.
+5. **Listy kampanii**: stany, waluta, łup i sklep na walucie kampanii.
+6. **Sprzątanie IP**: usunięte tło logowania z okładkami cudzych podręczników (gradient CSS), martwe style `.sheet-*`/`.armor-*`, `og:image`, `raport-projektu-dla-konsultanta.md`; test `src/test/ipGuard.test.ts` skanuje `src/`, `public/`, `docs/` i `index.html` pod kątem listy z `IP_CLEANUP_PLAN.md` §4.2.
 
-## Do zrobienia (w tej kolejności)
-1. **`src/pages/TestsPage.tsx`** — przepisać na `resolveTest` z `testEngine.ts`: wybór rodzaju testu, źródło (karta + pole z `testType.sources[kind]` albo wartość ręczna), stopień trudności, modyfikator, historia w `useLocalStorage("rpg_test_history")`. Pusty stan → `/settings?tab=testy`. Strona wciąż używa starego `difficultyPresets`/`addTestResult` z AppContext.
-2. **`GmToolboxPage.tsx`** — sekcja edycji presetów trudności → link do Ustawienia → Testy. Potem usunąć z `AppContext` `difficultyPresets`, `testHistory`, `addTestResult` oraz `DIFFICULTY_PRESETS`/`TestResult` z `src/lib/dice.ts`.
-3. **Silnik ataku** `src/lib/combatEngine.ts` (TDD) wg `AttackType` z `campaignSystem.ts`: test atakującego (`resolveTest`), rozstrzygnięcie (`self` / `vsDefense` przez `roles.defenses[defenseId]` celu / `opposed` z zasadą remisu / `manual`), obrażenia (`weapon` = pole/komórka `dice` wybrana na karcie, `fixed`, `manual`; `+ addField[kind]`, `+ margines`), redukcja (`roles.damageReduction` albo `locationReduction` dla trafionej lokacji, minimum 0/1), lokacje (`system.hitLocations`, kość albo odwrócony wynik ataku). Wartości kart czytać przez `combatant.card` + `readCards`.
-4. **`src/components/combat/CombatAttackPanel.tsx`** — dziś placeholder; zbudować UI na `combatEngine`, z podglądem i „Zadaj X” odejmującym od `combatant.resource`.
-5. **`src/components/system/CombatSettingsEditor.tsx`** — dziś placeholder: edytor rodzajów ataku, typów obrony, tabeli lokacji; w edytorze kart (RolesEditor) dodać przypisanie pól do obron i redukcji per lokacja.
-6. **Sprzątanie i dokumenty**: `IP_CLEANUP_PLAN.md` (zaktualizować status, P0-2…P0-5 nadal otwarte: gh-pages, prywatność repo, `background.png` z okładkami D&D, `raport-projektu-dla-konsultanta.md`), test „IP guard” w Vitest, `docs/adr/0002` wspomina „neutralny szablon” — już istnieje.
+## Do zrobienia
+1. **Ścieżka karta → atak w UI**: silnik ma testy jednostkowe, ale panel z uczestnikami z kart (źródła z `testType.sources`, obrona z karty, kości broni z tabeli) nie był jeszcze przeklikany w przeglądarce.
+2. **Import/eksport systemu kampanii** (`*.magnus-rules.json`, `IP_CLEANUP_PLAN.md` §6): schemat Zod, limity rozmiaru, `rightsAttestation`, UI w `settings/DataManager.tsx`. Bez tego nie da się przenieść własnego systemu między kampaniami ani go udostępnić.
+3. **Marka**: kontrola znaku „Magnus” (EUIPO/USPTO/UPRP, klasy 9/41/42) i decyzja o ewentualnej zmianie nazwy.
+4. **ADR o polityce IP i treści użytkownika**, regulamin, procedura zgłaszania naruszeń, przegląd licencji zależności i assetów (`favicon`, dźwięki `dice-box`). Do ustalenia z prawnikiem od IP.
+5. **Ekspozycja publiczna** (P0-1…P0-3 w planie IP, po stronie właściciela): push i merge `chore/ip-cleanup-p0`, przebudowa albo wyłączenie `gh-pages`, widoczność repo i historia gita.
 
 ## Uwagi
 - `src/components/AuthGuard.tsx` ma **tymczasową, niezacommitowaną** zmianę (pomija logowanie w `npm run dev`). Nie commitować; cofnąć `git checkout src/components/AuthGuard.tsx`.
-- Osobna gałąź `chore/ip-cleanup-p0` (commit `e5cb367`, od `main`) usuwa treści WFRP z `main`; czeka na decyzję o pushu/merge'u.
+- Gałąź `chore/ip-cleanup-p0` (commit `e5cb367`, od `main`) usuwa treści WFRP z `main`; czeka na decyzję o pushu/merge'u.
 - Przy pierwszym uruchomieniu nowej wersji dane w przeglądarce są czyszczone (ADR 0008).
+- Atak: `vsDefense` podstawia pole obrony celu w miejsce wartości stopnia trudności; `opposed` wymaga sukcesu atakującego i wyższego wyniku (margines / suma / sukcesy zależnie od trybu).
