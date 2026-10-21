@@ -57,3 +57,9 @@ export async function hasAudio(soundId: string): Promise<boolean> {
 export async function deleteAudio(soundId: string): Promise<void> {
   await run("readwrite", (s) => s.delete(audioBlobKey(soundId)));
 }
+
+/** Drops every stored file of a campaign; called when the campaign is deleted. */
+export async function deleteCampaignAudio(campaignId: string): Promise<void> {
+  const prefix = getStorageKey("rpg_ambient_audio:", campaignId);
+  await run("readwrite", (s) => s.delete(IDBKeyRange.bound(prefix, `${prefix}\uffff`)));
+}

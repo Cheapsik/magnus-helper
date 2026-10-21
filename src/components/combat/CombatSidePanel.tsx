@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { CombatPresetsPanel } from "@/components/combat/CombatPresetsPanel";
 import { CombatRosterPanel } from "@/components/combat/CombatRosterPanel";
+import { ClocksPanel } from "@/components/clocks/ClocksPanel";
+import { PlayerScreenControls } from "@/components/player-screen/PlayerScreenControls";
 
-type SideTab = "potwory" | "postacie" | "presety";
+type SideTab = "potwory" | "postacie" | "presety" | "zegary" | "ekran";
 
 interface CombatSidePanelProps {
   setCombatants: (fn: Combatant[] | ((prev: Combatant[]) => Combatant[])) => void;
@@ -47,6 +49,8 @@ export function CombatSidePanel({
             { id: "potwory" as const, label: "Potwory" },
             { id: "postacie" as const, label: "Postacie" },
             { id: "presety" as const, label: "Presety" },
+            { id: "zegary" as const, label: "Zegary" },
+            { id: "ekran" as const, label: "Ekran" },
           ] as const
         ).map(({ id, label }) => (
           <button
@@ -66,7 +70,15 @@ export function CombatSidePanel({
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col">
-        {tab === "postacie" || tab === "potwory" ? (
+        {tab === "zegary" ? (
+          <div className="min-h-0 flex-1 overflow-y-auto p-2">
+            <ClocksPanel />
+          </div>
+        ) : tab === "ekran" ? (
+          <div className="min-h-0 flex-1 overflow-y-auto p-2">
+            <PlayerScreenControls />
+          </div>
+        ) : tab === "postacie" || tab === "potwory" ? (
           <CombatRosterPanel
             key={tab}
             kinds={tab === "potwory" ? ["monster"] : ["hero", "npc"]}

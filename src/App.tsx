@@ -38,6 +38,12 @@ import SettingsPage from "@/components/settings/SettingsPage";
 import AuthPage from "@/pages/AuthPage";
 import { getRouterBasename } from "@/lib/authUrls";
 import RelationsMapPage from "./pages/RelationsMapPage";
+import SessionPrepPage from "@/pages/SessionPrepPage";
+import ClocksPage from "@/pages/ClocksPage";
+import RandomTablesPage from "@/pages/RandomTablesPage";
+import FactionsPage from "@/pages/FactionsPage";
+import PlayerScreenPage from "@/pages/PlayerScreenPage";
+import CalendarPage from "@/pages/CalendarPage";
 
 function ProtectedApp() {
   return (
@@ -51,6 +57,16 @@ function ProtectedApp() {
 function CampaignGate() {
   const { campaigns } = useCampaigns();
   if (campaigns.length === 0) return <FirstCampaignScreen />;
+  return (
+    <Routes>
+      {/* Shown on a second screen to the players, so it has none of the GM's chrome. */}
+      <Route path="/player-screen" element={<PlayerScreenPage />} />
+      <Route path="*" element={<GmApp />} />
+    </Routes>
+  );
+}
+
+function GmApp() {
   return (
     <>
       <Layout>
@@ -75,6 +91,11 @@ function CampaignGate() {
           <Route path="/rumors" element={<RumorsPage />} />
           <Route path="/ambient" element={<AmbientPage />} />
           <Route path="/quests" element={<QuestsPage />} />
+          <Route path="/prep" element={<SessionPrepPage />} />
+          <Route path="/clocks" element={<ClocksPage />} />
+          <Route path="/tables" element={<RandomTablesPage />} />
+          <Route path="/factions" element={<FactionsPage />} />
+          <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
