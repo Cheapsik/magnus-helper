@@ -8,7 +8,7 @@ import {
   type CombatSessionsState,
 } from "@/lib/combatSessions";
 import { initLootStorage } from "@/lib/lootDb";
-import type { DiceRoll, TestResult } from "@/lib/dice";
+import type { DiceRoll } from "@/lib/dice";
 import type { SessionNote, NoteSessionCatalog } from "@/lib/sessionNoteModel";
 import {
   migrateSessionNotesFromUnknown,
@@ -55,12 +55,6 @@ export interface ActiveCondition {
 }
 
 
-export interface DifficultyPreset {
-  label: string;
-  labelPl: string;
-  modifier: number;
-}
-
 export interface CodexEntry {
   id: string;
   title: string;
@@ -79,23 +73,10 @@ const DEFAULT_NOTES: SessionNote[] = [];
 
 const DEFAULT_INVENTORY: InventoryItem[] = [];
 
-const DEFAULT_DIFFICULTY_PRESETS: DifficultyPreset[] = [
-  { label: "Very Easy", labelPl: "Bardzo łatwy", modifier: 30 },
-  { label: "Easy", labelPl: "Łatwy", modifier: 20 },
-  { label: "Routine", labelPl: "Rutynowy", modifier: 10 },
-  { label: "Average", labelPl: "Przeciętny", modifier: 0 },
-  { label: "Challenging", labelPl: "Wymagający", modifier: -10 },
-  { label: "Hard", labelPl: "Trudny", modifier: -20 },
-  { label: "Very Hard", labelPl: "Bardzo trudny", modifier: -30 },
-];
-
 interface AppContextType {
   rollHistory: DiceRoll[];
   addRoll: (roll: DiceRoll) => void;
   clearRollHistory: () => void;
-  testHistory: TestResult[];
-  addTestResult: (result: TestResult) => void;
-  clearTestHistory: () => void;
   pinnedSheets: string[];
   togglePinSheet: (id: string) => void;
   combatSessions: CombatSessionsState;
@@ -114,8 +95,6 @@ interface AppContextType {
   setSessionNotes: (fn: SessionNote[] | ((prev: SessionNote[]) => SessionNote[])) => void;
   noteSessionCatalog: NoteSessionCatalog;
   setNoteSessionCatalog: (fn: NoteSessionCatalog | ((prev: NoteSessionCatalog) => NoteSessionCatalog)) => void;
-  difficultyPresets: DifficultyPreset[];
-  setDifficultyPresets: (fn: DifficultyPreset[] | ((prev: DifficultyPreset[]) => DifficultyPreset[])) => void;
   codexEntries: CodexEntry[];
   setCodexEntries: (fn: CodexEntry[] | ((prev: CodexEntry[]) => CodexEntry[])) => void;
 }
@@ -124,7 +103,6 @@ const AppContext = createContext<AppContextType | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [rollHistory, setRollHistory] = useLocalStorage<DiceRoll[]>("rpg_dice_rolls", []);
-  const [testHistory, setTestHistory] = useLocalStorage<TestResult[]>("rpg_test_results", []);
   const [pinnedSheets, setPinnedSheets] = useLocalStorage<string[]>("rpg_codex_pins", []);
   const combatSessionsInitial = useMemo(() => readCombatSessionsFromStorage(DEFAULT_COMBATANTS), []);
   const [combatSessions, setCombatSessions] = useLocalStorage<CombatSessionsState>(
@@ -197,19 +175,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     catalogInitial,
     { revive: reviveNoteSessionCatalog },
   );
-  const [difficultyPresets, setDifficultyPresets] = useLocalStorage<DifficultyPreset[]>("rpg_difficulty_presets", DEFAULT_DIFFICULTY_PRESETS);
   const [codexEntries, setCodexEntries] = useLocalStorage<CodexEntry[]>("rpg_codex_entries", []);
 
   const addRoll = (roll: DiceRoll) => setRollHistory((prev) => [roll, ...prev].slice(0, 50));
   const clearRollHistory = () => setRollHistory([]);
-  const addTestResult = (result: TestResult) => setTestHistory((prev) => [result, ...prev].slice(0, 50));
-  const clearTestHistory = () => setTestHistory([]);
   const togglePinSheet = (id: string) => setPinnedSheets((prev) => prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]);
 
   return (
     <AppContext.Provider value={{
       rollHistory, addRoll, clearRollHistory,
-      testHistory, addTestResult, clearTestHistory,
       pinnedSheets, togglePinSheet,
       combatSessions, setCombatSessions,
       combatants, setCombatants, combatRound, setCombatRound, combatTurn, setCombatTurn,
@@ -217,7 +191,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       inventory, setInventory,
       sessionNotes, setSessionNotes,
       noteSessionCatalog, setNoteSessionCatalog,
-      difficultyPresets, setDifficultyPresets,
       codexEntries, setCodexEntries,
     }}>
       {children}

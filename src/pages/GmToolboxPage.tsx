@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
-  Plus,
-  Trash2,
-  Edit2,
-  Check,
-  X,
   Swords,
   Dices,
   Gem,
@@ -20,6 +15,7 @@ import {
   Pause,
   MapPin,
   Tag,
+  Settings2,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -124,8 +120,6 @@ function QuickActionTile({
 export default function GmToolboxPage() {
   const navigate = useNavigate();
   const {
-    difficultyPresets,
-    setDifficultyPresets,
     combatants,
     setCombatants,
     combatRound,
@@ -140,8 +134,6 @@ export default function GmToolboxPage() {
 
   const { timers, gmTick, addTimer } = useGmTimersMirror();
 
-  const [editingDiffIdx, setEditingDiffIdx] = useState<number | null>(null);
-  const [diffDraft, setDiffDraft] = useState<{ labelPl: string; modifier: number }>({ labelPl: "", modifier: 0 });
 
   const [sessionNotes, setSessionNotes] = useState(() => {
     try {
@@ -230,27 +222,6 @@ export default function GmToolboxPage() {
 
   const questTypes = questLayout.types?.length ? questLayout.types : [];
   const questCols = questLayout.columns?.length ? questLayout.columns : [];
-
-  const startDiffEdit = (idx: number) => {
-    setEditingDiffIdx(idx);
-    setDiffDraft({ labelPl: difficultyPresets[idx].labelPl, modifier: difficultyPresets[idx].modifier });
-  };
-
-  const saveDiffEdit = () => {
-    if (editingDiffIdx === null) return;
-    setDifficultyPresets((prev) =>
-      prev.map((d, i) => (i === editingDiffIdx ? { ...d, labelPl: diffDraft.labelPl, modifier: diffDraft.modifier } : d)),
-    );
-    setEditingDiffIdx(null);
-  };
-
-  const addDiffPreset = () => {
-    setDifficultyPresets((prev) => [...prev, { label: `custom-${Date.now()}`, labelPl: "Nowy poziom", modifier: 0 }]);
-  };
-
-  const removeDiffPreset = (idx: number) => {
-    setDifficultyPresets((prev) => prev.filter((_, i) => i !== idx));
-  };
 
   const enemyAlive = combatants.filter((c) => c.isEnemy && c.resource.current > 0).length;
   const combatActive = enemyAlive > 0 && combatants.length > 1;
@@ -547,64 +518,13 @@ export default function GmToolboxPage() {
       </section>
 
       <section>
-        <div className="flex items-center justify-between mb-2">
-          <label className="field-label">Poziomy trudności</label>
-          <Button size="sm" variant="ghost" className="h-6 text-xs gap-1" onClick={addDiffPreset}>
-            <Plus className="h-3 w-3" />
-            Dodaj
-          </Button>
-        </div>
-        <div className="space-y-1">
-          {difficultyPresets.map((d, idx) =>
-            editingDiffIdx === idx ? (
-              <div key={idx} className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-card border">
-                <Input
-                  value={diffDraft.labelPl}
-                  onChange={(e) => setDiffDraft({ ...diffDraft, labelPl: e.target.value })}
-                  className="h-7 text-xs flex-1"
-                />
-                <NumberInput
-                  value={diffDraft.modifier}
-                  onChange={(v) => setDiffDraft({ ...diffDraft, modifier: v })}
-                  className="h-7 w-16 text-xs text-center"
-                />
-                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={saveDiffEdit}>
-                  <Check className="h-3 w-3" />
-                </Button>
-                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditingDiffIdx(null)}>
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-            ) : (
-              <div key={idx} className="flex items-center justify-between text-sm px-3 py-1.5 rounded-md bg-card border group">
-                <span className="text-muted-foreground">{d.labelPl}</span>
-                <div className="flex items-center gap-1">
-                  <span
-                    className={`font-bold ${d.modifier > 0 ? "text-success" : d.modifier < 0 ? "text-destructive" : "text-foreground"}`}
-                  >
-                    {d.modifier > 0 ? `+${d.modifier}` : d.modifier}
-                  </span>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => startDiffEdit(idx)}
-                  >
-                    <Edit2 className="h-2.5 w-2.5" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground"
-                    onClick={() => removeDiffPreset(idx)}
-                  >
-                    <Trash2 className="h-2.5 w-2.5" />
-                  </Button>
-                </div>
-              </div>
-            ),
-          )}
-        </div>
+        <Link
+          to="/settings?tab=testy"
+          className="flex items-center justify-between rounded-md border bg-card px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
+        >
+          Rodzaje testów i poziomy trudności
+          <Settings2 className="h-4 w-4" />
+        </Link>
       </section>
 
       <section className="space-y-3">
