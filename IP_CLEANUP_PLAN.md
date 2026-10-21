@@ -1,9 +1,17 @@
 # IP_CLEANUP_PLAN — usunięcie zależności od IP Warhammer / WFRP
 
-> **Status:** audyt, kod nie był modyfikowany.
+> **Status:** audyt z 2026-10-15; kod na `feat/campaigns` posprzątany (aktualizacja 2026-10-22, patrz niżej). Pozostają punkty po stronie właściciela repo.
 > **Data:** 2026-10-15 · **Gałąź:** `feat/campaigns` (`e79ebea`) + niezacommitowane zmiany w drzewie roboczym.
 > **Zakres:** `src/`, `public/`, `index.html`, `docs/`, pliki `.md` w katalogu głównym, historia gita, gałęzie `origin/main` i `origin/gh-pages`, wdrożona strona.
 > **Zastrzeżenie:** to audyt techniczny, nie opinia prawna. Mechaniki gier (np. rzut k100 „pod wartość”) z zasady nie podlegają prawu autorskiemu, ale konkretny tekst, tłumaczenia, nazwy, znaki towarowe i rozpoznawalny układ karty już tak. Przed startem komercyjnym listę z sekcji 4 i 8 powinien przejrzeć prawnik od IP.
+
+---
+
+## Aktualizacja 2026-10-22: stan wykonania
+
+Na `feat/campaigns` zrobione: P1-1…P1-7 (testy, walka, atak, `gmEnemy`, symulacje i słownik cech usunięte lub przepisane na system kampanii; test „IP guard” w `src/test/ipGuard.test.ts`), P2-1…P2-6 i P2-8 (arkusz WFRP, migracja legacy, generator NPC, waluta, stany), P0-4 (tło logowania zastąpione gradientem CSS, `og:image` usunięty; własnej grafiki jeszcze brak), P0-5 (`raport-projektu-dla-konsultanta.md` usunięty), P3-1 i P3-2.
+
+**Otwarte:** P0-1 (push i merge `chore/ip-cleanup-p0`), P0-2 (`gh-pages`), P0-3 (widoczność repo i historia gita), P2-7 (import/eksport `*.magnus-rules.json`), P3-3…P3-6 (ADR o polityce IP, marka „Magnus”, regulamin, licencje assetów). Szczegóły w `CONTINUE.md`.
 
 ---
 
