@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { readJson, writeJson } from "@/lib/storage";
@@ -124,6 +125,28 @@ export async function deleteSharedCampaign(id: string): Promise<void> {
 }
 
 // ─── Player ───────────────────────────────────────────────────────────────────
+
+/** The campaign's name for a valid invite, readable before signing in; null for a dead link. */
+export async function invitePreview(token: string): Promise<string | null> {
+  return (await run(supabase.rpc("invite_preview", { invite_token: token }))) as string | null;
+}
+
+/** undefined while loading. */
+export function useInvitePreview(token: string | null): string | null | undefined {
+  const [name, setName] = useState<string | null | undefined>(undefined);
+  useEffect(() => {
+    if (!token) return setName(null);
+    setName(undefined);
+    invitePreview(token).then(setName, () => setName(null));
+  }, [token]);
+  return name;
+}
+
+/** Where sign-in and e-mail confirmation return: the invite itself, so it survives another window. */
+export function authReturnPath(): string {
+  const token = readPendingInvite();
+  return token ? `join/${token}` : "";
+}
 
 export async function joinCampaign(token: string, name: string): Promise<{ campaign_id: string; campaign_name: string }> {
   const rows = await run(supabase.rpc("join_campaign", { invite_token: token, name }));

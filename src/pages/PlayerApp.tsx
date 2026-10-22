@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Navigate } from "react-router-dom";
 import { ArrowLeft, Crown, DoorOpen, Loader2, LogOut, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
@@ -6,6 +7,7 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 import {
   type Material,
   type Membership,
+  useInvitePreview,
   imageUrls,
   isFreshShow,
   joinCampaign,
@@ -19,17 +21,15 @@ import {
   usePendingInvite,
 } from "@/lib/sharedCampaigns";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { MaterialViewer } from "@/components/materials/MaterialViewer";
 import Logo from "@/components/Logo";
+import { AuthCard, AuthHeader, AuthShell, GoldButton } from "@/pages/AuthPage";
 
 const fail = (e: unknown) => toast.error(e instanceof Error ? e.message : "Coś poszło nie tak");
 
 /** What a player sees: the campaigns they joined and the materials their GM shared with them. */
 export default function PlayerApp() {
-  const { user, signOut } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const [, setRole] = useAppRole();
   const [pending] = usePendingInvite();
   const [memberships, setMemberships] = useState<Membership[] | null>(null);
@@ -48,6 +48,22 @@ export default function PlayerApp() {
 
   const open = memberships?.find((m) => m.campaign_id === openId) ?? null;
 
+  // Players always sign in first, also where the dev build lets the GM app through without it.
+  if (!loading && !user) return <Navigate to="/auth" replace />;
+  if (pending && user) {
+    return (
+      <InviteJoinScreen
+        token={pending}
+        suggestedName={(user.user_metadata?.full_name as string | undefined) ?? user.email?.split("@")[0] ?? ""}
+        onJoined={async (id) => {
+          setRole("player");
+          await reload();
+          setOpenId(id);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="flex h-14 items-center gap-2 border-b border-border px-4">
@@ -62,30 +78,14 @@ export default function PlayerApp() {
       </header>
 
       <main className="mx-auto max-w-5xl space-y-4 p-4">
-        {pending && user && (
-          <JoinCard
-            token={pending}
-            suggestedName={(user.user_metadata?.full_name as string | undefined) ?? user.email?.split("@")[0] ?? ""}
-            onJoined={async (id) => {
-              setRole("player");
-              await reload();
-              setOpenId(id);
-            }}
-          />
-        )}
-
-        {!user ? (
-          <p className="text-sm text-muted-foreground">Zaloguj się, aby zobaczyć swoje kampanie.</p>
-        ) : open ? (
+        {!user ? null : open ? (
           <CampaignGallery key={open.campaign_id} membership={open} userId={user.id} onBack={() => setOpenId(null)} onLeft={reload} />
         ) : memberships === null ? (
           <p className="text-sm text-muted-foreground">Wczytuję…</p>
         ) : memberships.length === 0 ? (
-          !pending && (
-            <p className="rounded-md border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
-              Nie należysz jeszcze do żadnej kampanii. Poproś Mistrza gry o link zaproszenia i otwórz go w tej przeglądarce.
-            </p>
-          )
+          <p className="rounded-md border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
+            Nie należysz jeszcze do żadnej kampanii. Poproś Mistrza gry o link zaproszenia i otwórz go.
+          </p>
         ) : (
           <section className="space-y-2">
             <h1 className="text-lg font-semibold">Twoje kampanie</h1>
@@ -110,56 +110,70 @@ export default function PlayerApp() {
   );
 }
 
-function JoinCard({ token, suggestedName, onJoined }: { token: string; suggestedName: string; onJoined: (campaignId: string) => Promise<void> }) {
+/** The step after signing in from an invite, in the same look as the sign-in screen. */
+function InviteJoinScreen({ token, suggestedName, onJoined }: { token: string; suggestedName: string; onJoined: (campaignId: string) => Promise<void> }) {
+  const campaign = useInvitePreview(token);
   const [name, setName] = useState(suggestedName);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const dead = campaign === null;
 
   return (
-    <Card className="border-primary/50">
-      <CardContent className="space-y-3 p-4">
-        <h2 className="font-medium">Dołączasz do kampanii</h2>
-        <form
-          className="space-y-3"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            setBusy(true);
-            setError(null);
-            try {
-              const joined = await joinCampaign(token, name.trim());
-              setPendingInvite(null);
-              toast.success(`Dołączono do kampanii „${joined.campaign_name}”`);
-              await onJoined(joined.campaign_id);
-            } catch (err) {
-              const message = err instanceof Error ? err.message : "";
-              setError(
-                message.includes("invalid invite")
-                  ? "Ten link zaproszenia jest nieważny. Poproś Mistrza gry o nowy."
-                  : message.includes("owner")
-                    ? "To Twoja własna kampania, prowadzisz ją jako Mistrz gry."
-                    : message || "Nie udało się dołączyć.",
-              );
-            } finally {
-              setBusy(false);
-            }
-          }}
-        >
-          <div className="space-y-1.5">
-            <Label htmlFor="player-name">Jak ma Cię widzieć Mistrz gry?</Label>
-            <Input id="player-name" required maxLength={60} value={name} onChange={(e) => setName(e.target.value)} placeholder="Imię albo imię postaci" />
-          </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <div className="flex gap-2">
-            <Button type="submit" disabled={busy || !name.trim()} className="gap-2">
-              {busy && <Loader2 className="h-4 w-4 animate-spin" />} Dołącz
-            </Button>
-            <Button type="button" variant="ghost" onClick={() => setPendingInvite(null)}>
-              Odrzuć zaproszenie
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+    <AuthShell features={false}>
+      <AuthCard>
+        <AuthHeader subtitle={dead ? "— Link zaproszenia jest nieważny —" : `— Zaproszenie do kampanii${campaign ? ` „${campaign}”` : ""} —`} />
+        {dead ? (
+          <p className="mb-5 text-center text-sm text-white/70">Ten link już nie działa. Poproś Mistrza gry o nowy.</p>
+        ) : (
+          <form
+            className="space-y-4"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setBusy(true);
+              setError(null);
+              try {
+                const joined = await joinCampaign(token, name.trim());
+                setPendingInvite(null);
+                toast.success(`Dołączono do kampanii „${joined.campaign_name}”`);
+                await onJoined(joined.campaign_id);
+              } catch (err) {
+                const message = err instanceof Error ? err.message : "";
+                setError(
+                  message.includes("invalid invite")
+                    ? "Ten link zaproszenia jest nieważny. Poproś Mistrza gry o nowy."
+                    : message.includes("owner")
+                      ? "To Twoja własna kampania, prowadzisz ją jako Mistrz gry."
+                      : message || "Nie udało się dołączyć.",
+                );
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            <p className="text-center text-sm text-white/70">Ostatni krok: podaj nazwę, pod którą zobaczy Cię Mistrz gry.</p>
+            <div className="space-y-1.5">
+              <label htmlFor="player-name" className="block text-xs font-medium text-white/90 sm:text-sm">
+                Imię albo imię postaci
+              </label>
+              <input
+                id="player-name"
+                required
+                autoFocus
+                maxLength={60}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="h-9 w-full rounded-md border border-white/15 bg-black/40 px-3 text-sm text-white placeholder:text-white/40 focus:border-[#c5a059] focus:outline-none sm:h-[--h-control] sm:rounded-lg"
+              />
+            </div>
+            {error && <p className="text-sm text-red-400">{error}</p>}
+            <GoldButton disabled={busy || !name.trim()}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Dołącz do kampanii</GoldButton>
+          </form>
+        )}
+        <button type="button" onClick={() => setPendingInvite(null)} className="mt-4 w-full text-center text-xs text-white/50 hover:text-white/80">
+          {dead ? "Przejdź do Panelu gracza" : "Nie teraz"}
+        </button>
+      </AuthCard>
+    </AuthShell>
   );
 }
 

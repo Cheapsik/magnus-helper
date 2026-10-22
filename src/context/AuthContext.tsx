@@ -10,6 +10,7 @@ import {
 import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
+import { authReturnPath } from "@/lib/sharedCampaigns";
 import { getAppUrl, isAuthPath } from "@/lib/authUrls";
 
 interface AuthContextValue {
@@ -82,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [navigate]);
 
   const signUp = useCallback((email: string, password: string) => {
-    return supabase.auth.signUp({ email, password });
+    return supabase.auth.signUp({ email, password, options: { emailRedirectTo: getAppUrl(authReturnPath()) } });
   }, []);
 
   const signIn = useCallback((email: string, password: string) => {
@@ -92,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInWithGoogle = useCallback(() => {
     return supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: getAppUrl() },
+      options: { redirectTo: getAppUrl(authReturnPath()) },
     });
   }, []);
 
