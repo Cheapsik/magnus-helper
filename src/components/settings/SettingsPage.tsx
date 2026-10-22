@@ -1,6 +1,8 @@
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CampaignManager from "./CampaignManager";
+import { useAppRole } from "@/lib/sharedCampaigns";
+import { Button } from "@/components/ui/button";
 import DataManager from "./DataManager";
 import { CardStructureEditor } from "@/components/system/CardStructureEditor";
 import { TestTypesEditor } from "@/components/system/TestTypesEditor";
@@ -33,6 +35,7 @@ export default function SettingsPage() {
         ))}
       </TabsList>
       <TabsContent value="kampanie" className="space-y-6">
+        <RoleSwitch />
         <CampaignManager />
         <DataManager />
       </TabsContent>
@@ -52,5 +55,26 @@ export default function SettingsPage() {
         <CurrencyEditor />
       </TabsContent>
     </Tabs>
+  );
+}
+
+/** shortcut: the role is picked by hand on each device; access itself is checked by the server. */
+function RoleSwitch() {
+  const [role, setRole] = useAppRole();
+  return (
+    <section className="space-y-2">
+      <h2 className="text-sm font-medium">Tryb aplikacji</h2>
+      <div className="flex gap-2">
+        <Button variant={role === "gm" ? "default" : "outline"} size="sm" onClick={() => setRole("gm")}>
+          Mistrz gry
+        </Button>
+        <Button variant={role === "player" ? "default" : "outline"} size="sm" onClick={() => setRole("player")}>
+          Gracz
+        </Button>
+      </div>
+      <p className="text-[length:--fs-meta] text-muted-foreground">
+        W trybie Gracz widzisz tylko kampanie, do których dołączyłeś przez link, i materiały od Mistrza gry.
+      </p>
+    </section>
   );
 }

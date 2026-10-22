@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { deleteSharedCampaign, getSharedCampaign } from "@/lib/sharedCampaigns";
 import { Archive, ArchiveRestore, Check, Pencil, Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCampaigns } from "@/context/CampaignContext";
@@ -25,6 +27,14 @@ export default function CampaignManager() {
   const [renameValue, setRenameValue] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Campaign | null>(null);
   const [deleteInput, setDeleteInput] = useState("");
+  /** null: not shared with players, so there is nothing in the cloud to ask about. */
+  const [deleteCloud, setDeleteCloud] = useState<boolean | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    setDeleteCloud(null);
+    if (deleteTarget) getSharedCampaign(deleteTarget.id).then((shared) => setDeleteCloud(shared ? true : null), () => setDeleteCloud(null));
+  }, [deleteTarget]);
 
   const active = campaigns.filter((c) => !c.archivedAt);
   const archived = campaigns.filter((c) => c.archivedAt);
@@ -41,8 +51,20 @@ export default function CampaignManager() {
     setRenaming(null);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleteTarget || deleteInput.trim() !== deleteTarget.name) return;
+    if (deleteCloud) {
+      setDeleting(true);
+      try {
+        await deleteSharedCampaign(deleteTarget.id);
+      } catch (e) {
+        // Keep the local campaign so the GM can retry; nothing is half-deleted on this device.
+        toast.error(`Nie udało się usunąć danych w chmurze: ${e instanceof Error ? e.message : "błąd"}`);
+        setDeleting(false);
+        return;
+      }
+      setDeleting(false);
+    }
     deleteCampaign(deleteTarget.id);
     setDeleteTarget(null);
     setDeleteInput("");
@@ -181,14 +203,20 @@ export default function CampaignManager() {
             placeholder={deleteTarget?.name}
             onChange={(e) => setDeleteInput(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") confirmDelete();
+              if (e.key === "Enter") void confirmDelete();
             }}
           />
+          {deleteCloud !== null && (
+            <label className="flex items-start gap-2 text-sm">
+              <input type="checkbox" className="mt-1" checked={deleteCloud} onChange={(e) => setDeleteCloud(e.target.checked)} />
+              Usuń też dane udostępnione graczom w chmurze (lista graczy, link zaproszenia, materiały i obrazy)
+            </label>
+          )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteTarget(null)}>
               Anuluj
             </Button>
-            <Button variant="destructive" disabled={deleteInput.trim() !== deleteTarget?.name} onClick={confirmDelete}>
+            <Button variant="destructive" disabled={deleting || deleteInput.trim() !== deleteTarget?.name} onClick={() => void confirmDelete()}>
               Usuń kampanię
             </Button>
           </DialogFooter>
