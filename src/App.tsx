@@ -52,7 +52,8 @@ import SafetyPage from "@/pages/SafetyPage";
 import DungeonGeneratorPage from "@/pages/DungeonGeneratorPage";
 import MaterialsPage from "@/pages/MaterialsPage";
 import PlayerApp from "@/pages/PlayerApp";
-import { setPendingInvite, useAppRole, usePendingInvite } from "@/lib/sharedCampaigns";
+import { setPendingInvite, useAppRole, useMemberships, usePendingInvite } from "@/lib/sharedCampaigns";
+import { useAuth } from "@/context/AuthContext";
 
 function ProtectedApp() {
   return (
@@ -74,9 +75,16 @@ function JoinLink() {
 /** Every GM screen reads campaign data, so nothing renders until a campaign exists; players need none. */
 function CampaignGate() {
   const { campaigns } = useCampaigns();
+  const { user } = useAuth();
   const [role] = useAppRole();
   const [pendingInvite] = usePendingInvite();
+  const decideByMemberships = role === null && !pendingInvite && campaigns.length === 0;
+  const memberships = useMemberships(decideByMemberships ? user?.id : undefined);
   if (role === "player" || pendingInvite) return <PlayerApp />;
+  if (decideByMemberships) {
+    if (memberships === undefined) return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Wczytuję…</div>;
+    if (memberships.length > 0) return <PlayerApp />;
+  }
   if (campaigns.length === 0) return <FirstCampaignScreen />;
   return (
     <Routes>

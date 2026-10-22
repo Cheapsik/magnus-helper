@@ -65,6 +65,9 @@ function RoleSwitch() {
     <section className="space-y-2">
       <h2 className="text-sm font-medium">Tryb aplikacji</h2>
       <div className="flex gap-2">
+        <Button variant={role === null ? "default" : "outline"} size="sm" onClick={() => setRole(null)}>
+          Automatycznie
+        </Button>
         <Button variant={role === "gm" ? "default" : "outline"} size="sm" onClick={() => setRole("gm")}>
           Mistrz gry
         </Button>
@@ -73,7 +76,8 @@ function RoleSwitch() {
         </Button>
       </div>
       <p className="text-[length:--fs-meta] text-muted-foreground">
-        W trybie Gracz widzisz tylko kampanie, do których dołączyłeś przez link, i materiały od Mistrza gry.
+        Automatycznie: masz własne kampanie, to prowadzisz je jako Mistrz gry; należysz tylko do cudzych, to widzisz Panel gracza.
+        W trybie Gracz widzisz kampanie, do których dołączyłeś przez link, i materiały od Mistrza gry.
       </p>
     </section>
   );
