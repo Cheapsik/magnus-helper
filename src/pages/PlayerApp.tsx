@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { ArrowLeft, Crown, DoorOpen, Loader2, LogOut, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
@@ -33,6 +33,7 @@ const fail = (e: unknown) => toast.error(e instanceof Error ? e.message : "Coś 
 export default function PlayerApp() {
   const { user, loading, signOut } = useAuth();
   const [, setRole] = useAppRole();
+  const navigate = useNavigate();
   const [pending] = usePendingInvite();
   const [memberships, setMemberships] = useState<Membership[] | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -65,6 +66,7 @@ export default function PlayerApp() {
             setOpenId(campaignId);
           }
           setPendingInvite(null);
+          if (role === "gm") navigate("/", { replace: true });
         }}
       />
     );
@@ -75,7 +77,12 @@ export default function PlayerApp() {
       <header className="flex h-14 items-center gap-2 border-b border-border px-4">
         <Logo className="h-6 w-6" />
         <span className="font-app-brand flex-1 truncate text-[1.0625rem]">Magnus Helper · Panel gracza</span>
-        <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => setRole("gm")} title="Przełącz na tryb Mistrza gry">
+        <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => {
+            setRole("gm");
+            navigate("/");
+          }}
+          title="Przełącz na tryb Mistrza gry"
+        >
           <Crown className="h-4 w-4" /> <span className="hidden sm:inline">Tryb MG</span>
         </Button>
         <Button variant="ghost" size="icon" aria-label="Wyloguj" onClick={() => void signOut()}>
