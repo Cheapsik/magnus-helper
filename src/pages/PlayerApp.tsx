@@ -5,9 +5,11 @@ import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import {
+  type AppRole,
+  type InviteStatus,
   type Material,
   type Membership,
-  useInvitePreview,
+  inviteStatus,
   imageUrls,
   isFreshShow,
   joinCampaign,
@@ -55,10 +57,14 @@ export default function PlayerApp() {
       <InviteJoinScreen
         token={pending}
         suggestedName={(user.user_metadata?.full_name as string | undefined) ?? user.email?.split("@")[0] ?? ""}
-        onJoined={async (id) => {
-          setRole("player");
-          await reload();
-          setOpenId(id);
+        onResolved={async (campaignId, role) => {
+          // Role first, invite last: the gate must never see "no invite, no role" in between.
+          setRole(role);
+          if (role === "player") {
+            await reload();
+            setOpenId(campaignId);
+          }
+          setPendingInvite(null);
         }}
       />
     );
@@ -110,20 +116,54 @@ export default function PlayerApp() {
   );
 }
 
-/** The step after signing in from an invite, in the same look as the sign-in screen. */
-function InviteJoinScreen({ token, suggestedName, onJoined }: { token: string; suggestedName: string; onJoined: (campaignId: string) => Promise<void> }) {
-  const campaign = useInvitePreview(token);
+/**
+ * The step after signing in from an invite, in the same look as the sign-in screen. An invite is
+ * resolved once: a member is taken straight to the campaign and the owner back to the GM view;
+ * only a newcomer is asked for a name.
+ */
+function InviteJoinScreen({
+  token,
+  suggestedName,
+  onResolved,
+}: {
+  token: string;
+  suggestedName: string;
+  onResolved: (campaignId: string | null, role: AppRole) => Promise<void>;
+}) {
+  const [status, setStatus] = useState<InviteStatus | null | undefined>(undefined);
   const [name, setName] = useState(suggestedName);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const dead = campaign === null;
+
+  useEffect(() => {
+    inviteStatus(token).then(setStatus, () => setStatus(null));
+  }, [token]);
+
+  useEffect(() => {
+    if (!status) return;
+    if (status.is_owner) {
+      toast(`„${status.campaign_name}” to Twoja kampania. Prowadzisz ją jako Mistrz gry.`);
+      void onResolved(null, "gm");
+    } else if (status.is_member) {
+      toast(`Już należysz do kampanii „${status.campaign_name}”.`);
+      void onResolved(status.campaign_id, "player");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
+
+  const dead = status === null;
+  const newcomer = status && !status.is_member && !status.is_owner;
 
   return (
     <AuthShell features={false}>
       <AuthCard>
-        <AuthHeader subtitle={dead ? "— Link zaproszenia jest nieważny —" : `— Zaproszenie do kampanii${campaign ? ` „${campaign}”` : ""} —`} />
+        <AuthHeader subtitle={dead ? "— Link zaproszenia jest nieważny —" : `— Zaproszenie do kampanii${status ? ` „${status.campaign_name}”` : ""} —`} />
         {dead ? (
           <p className="mb-5 text-center text-sm text-white/70">Ten link już nie działa. Poproś Mistrza gry o nowy.</p>
+        ) : !newcomer ? (
+          <p className="flex items-center justify-center gap-2 py-4 text-sm text-white/70">
+            <Loader2 className="h-4 w-4 animate-spin" /> {status ? "Otwieram kampanię…" : "Sprawdzam zaproszenie…"}
+          </p>
         ) : (
           <form
             className="space-y-4"
@@ -133,12 +173,10 @@ function InviteJoinScreen({ token, suggestedName, onJoined }: { token: string; s
               setError(null);
               try {
                 const joined = await joinCampaign(token, name.trim());
-                setPendingInvite(null);
                 toast.success(`Dołączono do kampanii „${joined.campaign_name}”`);
-                await onJoined(joined.campaign_id);
+                await onResolved(joined.campaign_id, "player");
               } catch (err) {
                 setError(err instanceof Error ? err.message : "Nie udało się dołączyć.");
-              } finally {
                 setBusy(false);
               }
             }}
@@ -162,9 +200,11 @@ function InviteJoinScreen({ token, suggestedName, onJoined }: { token: string; s
             <GoldButton disabled={busy || !name.trim()}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Dołącz do kampanii</GoldButton>
           </form>
         )}
-        <button type="button" onClick={() => setPendingInvite(null)} className="mt-4 w-full text-center text-xs text-white/50 hover:text-white/80">
-          {dead ? "Przejdź do Panelu gracza" : "Nie teraz"}
-        </button>
+        {(dead || newcomer) && (
+          <button type="button" onClick={() => setPendingInvite(null)} className="mt-4 w-full text-center text-xs text-white/50 hover:text-white/80">
+            {dead ? "Dalej" : "Nie teraz"}
+          </button>
+        )}
       </AuthCard>
     </AuthShell>
   );

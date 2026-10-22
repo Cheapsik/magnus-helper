@@ -12,8 +12,8 @@ import { canvasToJpeg, shrinkImage } from "@/lib/images";
 
 export type AppRole = "gm" | "player";
 
-/** Device setting, shared by every campaign. */
-export const useAppRole = () => useLocalStorage<AppRole>("magnus_role", "gm", { global: true });
+/** Device setting, shared by every campaign. null: automatic — a player with no campaigns of their own lands in the player panel. */
+export const useAppRole = () => useLocalStorage<AppRole | null>("magnus_role", null, { global: true });
 
 /** An invite opened before signing in, kept until the player has joined. */
 const PENDING_INVITE_KEY = "magnus_pending_invite";
@@ -165,6 +165,25 @@ export function useInvitePreview(token: string | null): string | null | undefine
     invitePreview(token).then(setName, () => setName(null));
   }, [token]);
   return name;
+}
+
+export type InviteStatus = { campaign_id: string; campaign_name: string; is_member: boolean; is_owner: boolean };
+
+/** null for a dead link. Needs a signed-in user. */
+export async function inviteStatus(token: string): Promise<InviteStatus | null> {
+  const rows = (await run(supabase.rpc("invite_status", { invite_token: token }))) as InviteStatus[];
+  return rows[0] ?? null;
+}
+
+/** The signed-in player's campaigns; [] without a user, undefined while loading. */
+export function useMemberships(userId: string | undefined): Membership[] | undefined {
+  const [list, setList] = useState<Membership[] | undefined>(undefined);
+  useEffect(() => {
+    if (!userId) return setList([]);
+    setList(undefined);
+    myMemberships(userId).then(setList, () => setList([]));
+  }, [userId]);
+  return list;
 }
 
 /** Where sign-in and e-mail confirmation return: the invite itself, so it survives another window. */
