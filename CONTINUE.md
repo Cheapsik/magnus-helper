@@ -27,6 +27,8 @@ Stan: `tsc` 0 błędów, testy 149/149 (w tym „IP guard”), `vite build` OK, 
 
    - `/chronicle` kronika sesji (dziennik zdarzeń `src/lib/chronicle.ts`, do którego zapisują zegary, kalendarz, walka, sekrety, frakcje i podróże), `/maps` mapy z pinezkami (obrazy w IndexedDB), `/gm-screen` ekran MG z kafelków, `/travel` podróże, `/safety` granice, zasłony i pauza (karta X) na ekranie graczy.
 
+   - **Gracze i materiały (Supabase)**: migracje w `supabase/migrations/` (wgrane do projektu `emrwiedgpxdccgcgqncz` przez `supabase db push`), dane w `src/lib/sharedCampaigns.ts`, strona MG `/materials`, `src/pages/PlayerApp.tsx` (tryb Gracz w Ustawieniach albo oczekujące zaproszenie z `/join/:token`). Do chmury trafia tylko kampania, gracze, zaproszenie i materiały; dostęp pilnuje RLS. Ścieżka gracza (dołączenie, galeria, „Pokaż teraz” na żywo) nie była testowana na drugim koncie.
+
 ## Do zrobienia
 1. **Ścieżka karta → atak w UI**: silnik ma testy jednostkowe, ale panel z uczestnikami z kart (źródła z `testType.sources`, obrona z karty, kości broni z tabeli) nie był jeszcze przeklikany w przeglądarce.
 2. **Import/eksport systemu kampanii** (`*.magnus-rules.json`, `IP_CLEANUP_PLAN.md` §6): schemat Zod, limity rozmiaru, `rightsAttestation`, UI w `settings/DataManager.tsx`. Bez tego nie da się przenieść własnego systemu między kampaniami ani go udostępnić.
