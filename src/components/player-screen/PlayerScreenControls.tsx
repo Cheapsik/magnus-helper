@@ -8,32 +8,14 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { DEFAULT_PLAYER_SCREEN, openPlayerScreenWindow, usePlayerScreen, type PlayerScreenState } from "@/lib/playerScreen";
 import { setPlayerScreenPaused } from "@/lib/safety";
+import { shrinkImage } from "@/lib/images";
 import { PlayerScreenView } from "./PlayerScreenView";
 import { ShowToPlayersButton } from "./ShowToPlayersButton";
 
 const MAX_IMAGE_SIDE = 1600;
 
 /** Downscales an uploaded image to a JPEG data URL small enough for localStorage. */
-function readImage(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const image = new Image();
-    image.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error("Nie udało się wczytać obrazu"));
-    };
-    image.onload = () => {
-      URL.revokeObjectURL(url);
-      const scale = Math.min(1, MAX_IMAGE_SIDE / Math.max(image.width, image.height));
-      const canvas = document.createElement("canvas");
-      canvas.width = Math.round(image.width * scale);
-      canvas.height = Math.round(image.height * scale);
-      canvas.getContext("2d")?.drawImage(image, 0, 0, canvas.width, canvas.height);
-      resolve(canvas.toDataURL("image/jpeg", 0.85));
-    };
-    image.src = url;
-  });
-}
+const readImage = async (file: File) => (await shrinkImage(file, MAX_IMAGE_SIDE)).toDataURL("image/jpeg", 0.85);
 
 const TOGGLES: {
   key: keyof Pick<PlayerScreenState, "showInitiative" | "hideEnemyResources" | "showClocks" | "showSafety">;

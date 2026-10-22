@@ -5,7 +5,7 @@ import {
   Swords, Activity, Package, StickyNote, Wrench, Users, Gem, Timer, MessageSquare, Music, Network, ScrollText,
   MapPin, Skull, SlidersHorizontal, Settings as SettingsIcon, LogOut,
   type LucideIcon,
-  Waypoints, Lightbulb, PieChart, Flag, Shuffle, CalendarDays, LayoutDashboard, BookMarked, Map as MapIcon, Route, ShieldCheck, Castle,
+  Waypoints, Lightbulb, PieChart, Flag, Shuffle, CalendarDays, LayoutDashboard, BookMarked, Map as MapIcon, Route, ShieldCheck, Castle, Presentation,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useScene } from "@/context/SceneContext";
@@ -78,6 +78,7 @@ const SIDEBAR_GROUPS: { label: string; items: { path: string; label: string; ico
     label: "MG",
     items: [
       { path: "/gm-toolbox", label: "Skrzynka MG", icon: Wrench },
+      { path: "/materials", label: "Materiały dla graczy", icon: Presentation },
       { path: "/settings?tab=karty", label: "System kampanii", icon: SlidersHorizontal },
       { path: "/maps", label: "Mapy", icon: MapIcon },
       { path: "/dungeon", label: "Generator podziemi", icon: Castle },

@@ -1,5 +1,5 @@
 import { ThemeProvider } from "next-themes";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useParams } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
@@ -50,6 +50,9 @@ import GmScreenPage from "@/pages/GmScreenPage";
 import TravelPage from "@/pages/TravelPage";
 import SafetyPage from "@/pages/SafetyPage";
 import DungeonGeneratorPage from "@/pages/DungeonGeneratorPage";
+import MaterialsPage from "@/pages/MaterialsPage";
+import PlayerApp from "@/pages/PlayerApp";
+import { setPendingInvite, useAppRole, usePendingInvite } from "@/lib/sharedCampaigns";
 
 function ProtectedApp() {
   return (
@@ -59,9 +62,19 @@ function ProtectedApp() {
   );
 }
 
-/** Every screen reads campaign data, so nothing renders until a campaign exists. */
+/** An invite link works before signing in: the token waits until the player can join. */
+function JoinLink() {
+  const { token } = useParams();
+  if (token) setPendingInvite(token);
+  return <Navigate to="/" replace />;
+}
+
+/** Every GM screen reads campaign data, so nothing renders until a campaign exists; players need none. */
 function CampaignGate() {
   const { campaigns } = useCampaigns();
+  const [role] = useAppRole();
+  const [pendingInvite] = usePendingInvite();
+  if (role === "player" || pendingInvite) return <PlayerApp />;
   if (campaigns.length === 0) return <FirstCampaignScreen />;
   return (
     <Routes>
@@ -108,6 +121,7 @@ function GmApp() {
           <Route path="/travel" element={<TravelPage />} />
           <Route path="/safety" element={<SafetyPage />} />
           <Route path="/dungeon" element={<DungeonGeneratorPage />} />
+          <Route path="/materials" element={<MaterialsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -135,6 +149,7 @@ const App = () => (
                           <Routes>
                             <Route path="/auth" element={<AuthPage />} />
                             <Route path="/reset-password" element={<AuthPage />} />
+                            <Route path="/join/:token" element={<JoinLink />} />
                             <Route path="/*" element={<ProtectedApp />} />
                           </Routes>
                         </AuthProvider>
