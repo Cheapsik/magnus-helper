@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { isRecoveryAuthCallback } from "@/lib/authUrls";
+import { useInvitePreview, usePendingInvite } from "@/lib/sharedCampaigns";
 import { cn } from "@/lib/utils";
 
 const AUTH_FAVICON = `${import.meta.env.BASE_URL}favicon.png`;
@@ -125,7 +126,8 @@ function AuthField({
   );
 }
 
-function AuthShell({ children }: { children: ReactNode }) {
+/** `features`: the GM-oriented feature strip; hidden for players arriving with an invite. */
+export function AuthShell({ children, features = true }: { children: ReactNode; features?: boolean }) {
   return (
     <div className="auth-page relative flex min-h-screen flex-col text-white">
       <div
@@ -144,7 +146,7 @@ function AuthShell({ children }: { children: ReactNode }) {
       </div>
 
       <footer className="relative z-10 shrink-0 px-3 pb-3 sm:px-4 sm:pb-6">
-        <div className="mx-auto hidden max-w-5xl rounded-xl border border-white/10 bg-black/50 px-8 py-4 backdrop-blur-md sm:block">
+        {features && <div className="mx-auto hidden max-w-5xl rounded-xl border border-white/10 bg-black/50 px-8 py-4 backdrop-blur-md sm:block">
           <div className="grid grid-cols-4 gap-6">
             {FEATURES.map(({ icon: Icon, title, subtitle }) => (
               <div key={title} className="flex items-center gap-3">
@@ -158,7 +160,7 @@ function AuthShell({ children }: { children: ReactNode }) {
               </div>
             ))}
           </div>
-        </div>
+        </div>}
         <p className="text-center text-[10px] text-white/40 sm:mt-4 sm:text-xs">
           © 2026 Magnus Helper. Wszystkie prawa zastrzeżone.
         </p>
@@ -167,7 +169,7 @@ function AuthShell({ children }: { children: ReactNode }) {
   );
 }
 
-function AuthCard({ children }: { children: ReactNode }) {
+export function AuthCard({ children }: { children: ReactNode }) {
   return (
     <div
       className={cn(
@@ -180,7 +182,7 @@ function AuthCard({ children }: { children: ReactNode }) {
   );
 }
 
-function AuthHeader({ subtitle }: { subtitle?: string }) {
+export function AuthHeader({ subtitle }: { subtitle?: string }) {
   return (
     <div className="mb-4 flex flex-col items-center text-center sm:mb-6">
       <AppLogo className="mb-2 sm:mb-3" />
@@ -192,7 +194,7 @@ function AuthHeader({ subtitle }: { subtitle?: string }) {
   );
 }
 
-function GoldButton({
+export function GoldButton({
   children,
   disabled,
   type = "submit",
@@ -280,6 +282,8 @@ export default function AuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [pendingInvite] = usePendingInvite();
+  const inviteCampaign = useInvitePreview(pendingInvite);
 
   useEffect(() => {
     if (isRecoveryAuthCallback()) {
@@ -403,10 +407,18 @@ export default function AuthPage() {
     "new-password": "— Ustaw nowe hasło —",
   };
 
+  const inviteSubtitle =
+    inviteCampaign === null ? "— Link zaproszenia jest nieważny —" : `— Zaproszenie do kampanii${inviteCampaign ? ` „${inviteCampaign}”` : ""} —`;
+
   return (
-    <AuthShell>
+    <AuthShell features={!pendingInvite}>
       <AuthCard>
-        <AuthHeader subtitle={viewSubtitles[view]} />
+        <AuthHeader subtitle={pendingInvite && view !== "new-password" ? inviteSubtitle : viewSubtitles[view]} />
+        {pendingInvite && inviteCampaign !== null && (view === "login" || view === "register") && (
+          <p className="-mt-2 mb-4 text-center text-sm text-white/70 sm:mb-5">
+            Mistrz gry zaprasza Cię do gry. {view === "login" ? "Zaloguj się" : "Załóż konto"}, a zaraz potem dołączysz jako gracz.
+          </p>
+        )}
         <AuthAlert error={error} success={success} />
 
         {view === "login" && (
