@@ -43,10 +43,35 @@ export type Material = {
 };
 export type Membership = { campaign_id: string; display_name: string; campaign_name: string };
 
+/** Known server and network failures in words a player understands; anything else stays generic. */
+const FRIENDLY: [RegExp, string][] = [
+  [/invalid invite/i, "Ten link zaproszenia jest nieważny. Poproś Mistrza gry o nowy."],
+  [/owner cannot join/i, "To Twoja własna kampania, prowadzisz ją jako Mistrz gry."],
+  [/invalid name|display_name_check|violates check constraint/i, "Nazwa jest za długa albo pusta."],
+  [/not signed in|jwt|session/i, "Sesja wygasła. Zaloguj się ponownie."],
+  [/failed to fetch|networkerror|load failed/i, "Brak połączenia z serwerem. Sprawdź internet i spróbuj ponownie."],
+  [/duplicate key/i, "To już istnieje."],
+  [/maximum allowed size|payload too large|exceeded/i, "Plik jest za duży (maks. 10 MB)."],
+  [/mime type|invalid_mime_type/i, "Nieobsługiwany format obrazu. Użyj JPG, PNG albo WebP."],
+  [/permission denied|row-level security|42501/i, "Nie masz uprawnień do tej operacji."],
+];
+
+export function friendlyError(message: string): string {
+  return FRIENDLY.find(([pattern]) => pattern.test(message))?.[1] ?? "Coś poszło nie tak. Spróbuj ponownie.";
+}
+
 async function run<T>(query: PromiseLike<{ data: T; error: { message: string } | null }>): Promise<T> {
-  const { data, error } = await query;
-  if (error) throw new Error(error.message);
-  return data;
+  let result: { data: T; error: { message: string } | null };
+  try {
+    result = await query;
+  } catch (e) {
+    result = { data: null as T, error: { message: e instanceof Error ? e.message : String(e) } };
+  }
+  if (result.error) {
+    console.error("[Magnus Helper] cloud error:", result.error.message);
+    throw new Error(friendlyError(result.error.message));
+  }
+  return result.data;
 }
 
 export const inviteUrl = (token: string) => `${window.location.origin}${import.meta.env.BASE_URL}join/${token}`;
