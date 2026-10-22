@@ -1,5 +1,5 @@
 import { ThemeProvider } from "next-themes";
-import { BrowserRouter, Navigate, Route, Routes, useParams } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
@@ -65,8 +65,10 @@ function ProtectedApp() {
 /** An invite link works before signing in: the token waits until the player can join. */
 function JoinLink() {
   const { token } = useParams();
+  const { search, hash } = useLocation();
   if (token) setPendingInvite(token);
-  return <Navigate to="/" replace />;
+  // Google and e-mail sign-in return here with the session in the hash; keep it for supabase-js to read.
+  return <Navigate to={{ pathname: "/", search, hash }} replace />;
 }
 
 /** Every GM screen reads campaign data, so nothing renders until a campaign exists; players need none. */
