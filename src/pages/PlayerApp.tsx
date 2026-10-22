@@ -137,14 +137,7 @@ function InviteJoinScreen({ token, suggestedName, onJoined }: { token: string; s
                 toast.success(`Dołączono do kampanii „${joined.campaign_name}”`);
                 await onJoined(joined.campaign_id);
               } catch (err) {
-                const message = err instanceof Error ? err.message : "";
-                setError(
-                  message.includes("invalid invite")
-                    ? "Ten link zaproszenia jest nieważny. Poproś Mistrza gry o nowy."
-                    : message.includes("owner")
-                      ? "To Twoja własna kampania, prowadzisz ją jako Mistrz gry."
-                      : message || "Nie udało się dołączyć.",
-                );
+                setError(err instanceof Error ? err.message : "Nie udało się dołączyć.");
               } finally {
                 setBusy(false);
               }
