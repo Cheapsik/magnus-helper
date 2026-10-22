@@ -69,21 +69,35 @@ function JoinLink() {
   const { search, hash } = useLocation();
   if (token) setPendingInvite(token);
   // Google and e-mail sign-in return here with the session in the hash; keep it for supabase-js to read.
-  return <Navigate to={{ pathname: "/", search, hash }} replace />;
+  return <Navigate to={{ pathname: "/player", search, hash }} replace />;
 }
 
-/** Every GM screen reads campaign data, so nothing renders until a campaign exists; players need none. */
+/** Players live under /player, whatever this device's role says; everything else is the GM app. */
 function CampaignGate() {
+  return (
+    <Routes>
+      <Route path="/player/*" element={<PlayerApp />} />
+      <Route path="*" element={<GmEntry />} />
+    </Routes>
+  );
+}
+
+/**
+ * Every GM screen reads campaign data, so nothing renders until a campaign exists. Someone with no
+ * campaigns of their own who plays in others' is sent to the player panel instead of being asked to
+ * create one.
+ */
+function GmEntry() {
   const { campaigns } = useCampaigns();
   const { user } = useAuth();
   const [role] = useAppRole();
   const [pendingInvite] = usePendingInvite();
-  const decideByMemberships = role === null && !pendingInvite && campaigns.length === 0;
-  const memberships = useMemberships(decideByMemberships ? user?.id : undefined);
-  if (role === "player" || pendingInvite) return <PlayerApp />;
-  if (decideByMemberships) {
+  const checkMemberships = role !== "gm" && campaigns.length === 0;
+  const memberships = useMemberships(checkMemberships ? user?.id : undefined);
+  if (pendingInvite || role === "player") return <Navigate to="/player" replace />;
+  if (checkMemberships) {
     if (memberships === undefined) return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Wczytuję…</div>;
-    if (memberships.length > 0) return <PlayerApp />;
+    if (memberships.length > 0) return <Navigate to="/player" replace />;
   }
   if (campaigns.length === 0) return <FirstCampaignScreen />;
   return (

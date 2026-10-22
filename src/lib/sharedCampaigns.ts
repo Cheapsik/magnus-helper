@@ -13,7 +13,8 @@ import { canvasToJpeg, shrinkImage } from "@/lib/images";
 export type AppRole = "gm" | "player";
 
 /** Device setting, shared by every campaign. null: automatic — a player with no campaigns of their own lands in the player panel. */
-export const useAppRole = () => useLocalStorage<AppRole | null>("magnus_role", null, { global: true });
+// A new key: values saved by earlier builds, which defaulted to "gm", must not decide anything now.
+export const useAppRole = () => useLocalStorage<AppRole | null>("magnus_app_role", null, { global: true });
 
 /** An invite opened before signing in, kept until the player has joined. */
 const PENDING_INVITE_KEY = "magnus_pending_invite";
