@@ -16,7 +16,9 @@ import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import StatusBar from "@/components/StatusBar";
+import LiveBar from "@/components/LiveBar";
+import SyncIndicator from "@/components/SyncIndicator";
+import { useCampaignDate } from "@/components/calendar/useCampaignDate";
 import CampaignSwitcher from "@/components/CampaignSwitcher";
 import Logo from "./Logo";
 
@@ -126,6 +128,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const palette = useCommandPalette();
   const { activeScene } = useScene();
   const { signOut } = useAuth();
+  const worldDate = useCampaignDate();
   const [nav, setNav] = useLocalStorage<NavPrefs>(NAV_STORAGE_KEY, DEFAULT_NAV, { global: true });
   const pinned = ALL_ITEMS.filter((it) => nav.pinned?.includes(it.path));
   const togglePin = (path: string) =>
@@ -314,6 +317,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               >
                 <Search className="h-4 w-4" />
               </button>
+              <SyncIndicator compact />
               <CampaignSwitcher className="!px-2" />
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -356,6 +360,15 @@ export default function Layout({ children }: { children: ReactNode }) {
             </kbd>
           </button>
           <div className="flex items-center gap-2">
+            <SyncIndicator />
+            <Link
+              to="/calendar"
+              className="flex items-center gap-1.5 whitespace-nowrap px-2 text-[length:--fs-sm] text-muted-foreground transition-colors hover:text-foreground"
+              title="Data w świecie gry — otwórz kalendarz"
+            >
+              <CalendarDays className="h-4 w-4" aria-hidden />
+              {worldDate}
+            </Link>
             <CampaignSwitcher />
             <Tooltip>
               <TooltipTrigger asChild>
@@ -396,13 +409,13 @@ export default function Layout({ children }: { children: ReactNode }) {
               "w-full max-w-none min-w-0",
               isDicePage
                 ? "flex min-h-0 flex-1 flex-col overflow-hidden p-0 pb-20 md:pb-0"
-                : "px-5 pb-20 md:px-8 md:pb-6",
+                : "px-5 pb-32 md:px-8 md:pb-6",
             )}
           >
             {isDicePage ? children : <PageFrame title={pageTitle}>{children}</PageFrame>}
           </div>
         </main>
-        <StatusBar />
+        <LiveBar />
       </div>
 
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-md safe-area-pb">
