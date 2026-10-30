@@ -40,7 +40,7 @@ import type { DiceRoll } from "@/lib/dice";
 import { formatTimerMs } from "@/lib/rpgTimersStorage";
 import { appendQuestToStorage, type QuestLayoutRaw } from "@/lib/gmAppendQuest";
 import { useGmTimersMirror } from "@/hooks/useGmTimersMirror";
-import { getStorageKey } from "@/lib/campaignStorage";
+import { getStorageKey, markKeyDirty } from "@/lib/campaignStorage";
 import { readJson } from "@/lib/storage";
 
 const SESSION_NOTES_KEY = "mg_session_notes";
@@ -150,6 +150,7 @@ export default function GmToolboxPage() {
     notesDebounce.current = setTimeout(() => {
       try {
         localStorage.setItem(getStorageKey(SESSION_NOTES_KEY), sessionNotes);
+        markKeyDirty(getStorageKey(SESSION_NOTES_KEY));
         setNotesSaved(true);
         window.setTimeout(() => setNotesSaved(false), 2000);
       } catch {

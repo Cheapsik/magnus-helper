@@ -1,5 +1,5 @@
 import type { SessionNote, SessionNoteScope, NamedNoteSession, NoteSessionCatalog } from "@/lib/sessionNoteModel";
-import { getStorageKey } from "@/lib/campaignStorage";
+import { getStorageKey, markKeyDirty } from "@/lib/campaignStorage";
 
 export const DEFAULT_NOTE_CATEGORY_IDS = ["general", "npc", "location", "objective", "clue"] as const;
 
@@ -168,6 +168,7 @@ export function reviveNoteSessionCatalog(parsed: unknown): NoteSessionCatalog {
             getStorageKey("rpg_notes_session_catalog"),
             JSON.stringify({ sessions, activeSessionId }),
           );
+          markKeyDirty(getStorageKey("rpg_notes_session_catalog"));
         } catch {
                   }
       }
@@ -211,6 +212,7 @@ export function reviveNoteSessionCatalog(parsed: unknown): NoteSessionCatalog {
 
   try {
     window.localStorage.removeItem(getStorageKey("rpg_notes_active_session"));
+    markKeyDirty(getStorageKey("rpg_notes_active_session"));
   } catch {
       }
 
@@ -224,6 +226,7 @@ export function reviveNoteSessionCatalog(parsed: unknown): NoteSessionCatalog {
       getStorageKey("rpg_notes_session_catalog"),
       JSON.stringify({ sessions: finalSessions, activeSessionId: finalActive }),
     );
+    markKeyDirty(getStorageKey("rpg_notes_session_catalog"));
   } catch {
       }
 

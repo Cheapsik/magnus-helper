@@ -2,6 +2,8 @@
  * Data written before the configurable campaign system has the shape of one
  * hardcoded game. It is not migrated (docs/adr/0008): the first run of this
  * version removes every piece of app data except device/UI preferences.
+ * Since docs/adr/0010 the cloud holds the data too: a future bump has to clear
+ * or migrate it there as well, or the next pull brings the old data back.
  */
 
 export const DATA_VERSION_KEY = "magnus_data_version";
