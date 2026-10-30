@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useNavigate } from "react-router-dom";
-import { Swords, Timer as TimerIcon, Volume2, MapPin, CalendarDays } from "lucide-react";
+import { Swords, Timer as TimerIcon, Volume2, MapPin, CalendarDays, Cloud, CloudUpload, CloudOff } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { useAmbient } from "@/context/AmbientContext";
 import { useScene } from "@/context/SceneContext";
@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { RPG_TIMERS_STORAGE_KEY } from "@/lib/rpgTimersStorage";
 import { useCampaignDate } from "@/components/calendar/useCampaignDate";
+import { getSyncStatus, onSyncStatus } from "@/lib/cloudSync";
 
 interface TimerLite { id: string; label: string; mode: "stopwatch" | "countdown"; countdownSet: number; }
 
@@ -108,7 +109,30 @@ export default function StatusBar() {
         {combatActive && firstTimer && sep}
         {firstTimer && <TimerIcon className="h-3 w-3 inline" />}
       </div>
+      <SyncIndicator />
       <span className="hidden">{tick}</span>
     </div>
+  );
+}
+
+const waitingChanges = (n: number) =>
+  n === 1 ? "1 zmiana czeka" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? `${n} zmiany czekają` : `${n} zmian czeka`;
+
+/** Whether the campaign reached the cloud (lib/cloudSync). */
+function SyncIndicator() {
+  const sync = useSyncExternalStore(onSyncStatus, getSyncStatus);
+  if (!sync.active) return null;
+  const [Icon, label, title, tone] =
+    sync.stalled && sync.pending > 0
+      ? [CloudOff, `Offline: ${waitingChanges(sync.pending)}`, "Nie udało się wysłać zmian. Są zapisane na tym urządzeniu i pójdą do chmury, gdy wróci połączenie.", "text-primary"] as const
+      : sync.sending || sync.pending > 0
+        ? [CloudUpload, "Zapisuję…", "Wysyłam zmiany do chmury.", ""] as const
+        : [Cloud, "Zapisano", "Wszystkie zmiany są w chmurze.", ""] as const;
+  return (
+    <span className={cn("absolute right-3 flex items-center gap-1.5", tone)} title={title} role="status">
+      <Icon className="h-3.5 w-3.5" aria-hidden />
+      <span className="hidden md:inline">{label}</span>
+      <span className="sr-only md:hidden">{label}</span>
+    </span>
   );
 }
