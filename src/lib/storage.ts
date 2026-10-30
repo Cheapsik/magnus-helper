@@ -82,14 +82,18 @@ export function writeJson<T>(key: string, value: T, options?: StorageOptions<T>)
   const resolved = resolveStorageKey(key, options);
   snapshots.set(resolved, value);
   let persisted = true;
+  let changed = true;
   try {
-    window.localStorage.setItem(resolved, JSON.stringify(value));
+    const json = JSON.stringify(value);
+    // Pages that save their state on open would otherwise queue a cloud push for every visit.
+    changed = window.localStorage.getItem(resolved) !== json;
+    if (changed) window.localStorage.setItem(resolved, json);
   } catch {
     // Keep the in-memory value so the UI stays consistent for this session,
     // matching the previous behaviour, but tell the caller it did not stick.
     persisted = false;
   }
-  if (persisted) markKeyDirty(resolved);
+  if (persisted && changed) markKeyDirty(resolved);
   notify(resolved);
   return persisted;
 }
