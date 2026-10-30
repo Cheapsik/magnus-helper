@@ -11,7 +11,7 @@ export function ClockDial({ clock, size, className }: { clock: Clock; size: numb
       width={size}
       height={size}
       role="img"
-      aria-label={`${clock.name || "Zegar"}: ${clock.filled} z ${clock.segments}${done ? ", pełny" : ""}`}
+      aria-label={`${clock.name || "Koło postępu"}: ${clock.filled} z ${clock.segments}${done ? ", pełne" : ""}`}
       className={cn("shrink-0", className)}
     >
       {Array.from({ length: clock.segments }, (_, i) => (

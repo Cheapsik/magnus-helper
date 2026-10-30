@@ -19,7 +19,8 @@ export interface LootDbItem {
   description: string;
   /** In the smallest denomination. */
   price: number;
-  /** @deprecated Prices are in the campaign's smallest denomination; nothing reads this. */
+  /** Structured tags: subtype, damage stats, special traits, range, material, etc. */
+  tags?: string[];
 }
 
 export interface LootRank {

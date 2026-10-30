@@ -1,5 +1,5 @@
 import type { Difficulty, OutcomeBand, TestType } from "@/lib/campaignSystem";
-import { type DieRoller, isDiceNotation, rollDiceNotation } from "@/lib/diceNotation";
+import { type DiceRollResult, type DieRoller, isDiceNotation, rollDiceNotation } from "@/lib/diceNotation";
 import { rollDie } from "@/lib/dice";
 
 /**
@@ -7,6 +7,8 @@ import { rollDie } from "@/lib/dice";
  * Pure: every rule comes from the `TestType` the GM defined, and the die
  * roller is injected. See `TestMode` for what each mode compares.
  */
+
+export type RollMode = "normal" | "advantage" | "disadvantage";
 
 export type TestInput = {
   /** The source value — read off a card or typed in by the GM. */
@@ -17,6 +19,8 @@ export type TestInput = {
   difficultyValue?: number;
   /** Situational bonus or penalty, applied on the value's side. */
   modifier?: number;
+  /** Advantage: roll twice, keep better. Disadvantage: keep worse. */
+  rollMode?: RollMode;
 };
 
 export type Critical = "success" | "failure" | null;
@@ -34,6 +38,8 @@ type Rolled = {
   natural: number;
   /** Every face rolled, in notation order. */
   faces: number[];
+  /** When advantage/disadvantage was used, the discarded roll's total. */
+  discardedRoll?: number;
 };
 
 /** A single roll compared against a number. */
@@ -48,6 +54,8 @@ type Compared = Common &
     degreesLabel: string | null;
     /** Read off the natural roll; a critical decides success on its own. */
     critical: Critical;
+    /** The highest success level achieved, e.g. "Trudny" or "Ekstremalny". */
+    successLevel?: string;
   };
 
 export type TestOutcome =
@@ -67,6 +75,12 @@ export type TestOutcome =
       ones: number;
       required: number;
       success: boolean;
+      /** The first die's result when it's a special die (Wrath Die). */
+      specialDieResult?: number;
+      /** Complication: special die rolled a 1. */
+      complication?: boolean;
+      /** Glory: special die rolled max. */
+      glory?: boolean;
     })
   | (Common &
       Rolled & {
@@ -137,10 +151,20 @@ export function resolveTest(testType: TestType, input: TestInput, roller: DieRol
 
   if (testType.mode === "pool") return resolvePool(testType, base, adjusted + difficultyValue, roller);
 
-  const rolled = rollDiceNotation(testType.dice, roller)!;
+  const rollMode = input.rollMode ?? "normal";
+  const pickRoll = (a: DiceRollResult, b: DiceRollResult): DiceRollResult => {
+    if (rollMode === "normal") return a;
+    const better = testType.mode === "rollUnder" ? a.total <= b.total : a.total >= b.total;
+    return (rollMode === "advantage") === better ? a : b;
+  };
+  const roll1 = rollDiceNotation(testType.dice, roller)!;
+  const roll2 = rollMode !== "normal" ? rollDiceNotation(testType.dice, roller)! : roll1;
+  const rolled = pickRoll(roll1, roll2);
+  const discarded = rollMode !== "normal" ? (rolled === roll1 ? roll2 : roll1) : undefined;
   const dice: Rolled = {
     natural: rolled.total - rolled.modifier,
     faces: rolled.dice.flatMap((group) => group.results),
+    ...(discarded ? { discardedRoll: discarded.total } : {}),
   };
 
   if (testType.mode === "bands") {
@@ -152,15 +176,32 @@ export function resolveTest(testType: TestType, input: TestInput, roller: DieRol
     return { kind: "bands", ...base, ...dice, total, band, bandIndex, summary };
   }
 
-  const critical = criticalOf(testType, dice.natural);
+  let critical = criticalOf(testType, dice.natural);
+  // Skill-dependent critical failure: for rollUnder, high-skill (≥50) fails at threshold, low-skill (<50) fails when roll > value
+  if (testType.skillDependentCritFailure && testType.mode === "rollUnder" && critical === null) {
+    const target = adjusted + difficultyValue;
+    if (target < 50 && dice.natural > target && dice.natural >= 96) critical = "failure";
+  }
   const compare = (rollLabel: string, rolledNumber: number, target: number, passed: boolean): Compared => {
     const success = critical ? critical === "success" : passed;
     const margin = Math.abs(rolledNumber - target);
     const divisor = testType.margin?.divisor;
     const degrees = divisor && divisor > 0 ? Math.floor(margin / divisor) : null;
     const degreesLabel = degrees === null ? null : testType.margin?.label.trim() || "Stopnie";
+    // Success levels (rollUnder): check from hardest to easiest
+    let successLevel: string | undefined;
+    if (success && testType.successLevels?.length && testType.mode === "rollUnder") {
+      const sorted = [...testType.successLevels].sort((a, b) => b.divisor - a.divisor);
+      for (const level of sorted) {
+        if (level.divisor > 0 && rolledNumber <= Math.floor(target / level.divisor)) {
+          successLevel = level.label;
+          break;
+        }
+      }
+    }
     const parts = [`${rollLabel} ${rolledNumber}`, `cel ${target}`, `margines ${margin}`];
     if (degrees !== null) parts.push(`${degreesLabel}: ${degrees}`);
+    if (successLevel) parts.push(successLevel);
     return {
       ...base,
       ...dice,
@@ -170,6 +211,7 @@ export function resolveTest(testType: TestType, input: TestInput, roller: DieRol
       degrees,
       degreesLabel,
       critical,
+      successLevel,
       summary: `${verdict(success, critical)}: ${parts.join(", ")}`,
     };
   };
@@ -201,9 +243,21 @@ function resolvePool(
     }
   }
   const ones = faces.filter((face) => face === 1).length;
-  const hits = faces.filter((face) => face >= settings.successAt).length;
+  let hits = 0;
+  for (const face of faces) {
+    if (settings.doubleAt !== undefined && face >= settings.doubleAt) hits += 2;
+    else if (face >= settings.successAt) hits += 1;
+  }
   const successes = settings.onesCancel ? Math.max(0, hits - ones) : hits;
   const success = successes >= settings.required;
+  const specialDie = settings.specialDie && faces.length > 0;
+  const specialDieResult = specialDie ? faces[0] : undefined;
+  const complication = specialDie ? faces[0] === 1 : undefined;
+  const glory = specialDie ? faces[0] === sides : undefined;
+  const extras: string[] = [];
+  if (complication) extras.push("komplikacja!");
+  if (glory) extras.push("chwała!");
+  const summaryExtra = extras.length ? ` · ${extras.join(", ")}` : "";
   return {
     kind: "pool",
     ...base,
@@ -214,6 +268,7 @@ function resolvePool(
     ones,
     required: settings.required,
     success,
-    summary: `${verdict(success)}: sukcesów ${successes}, wymagane ${settings.required}`,
+    ...(specialDieResult !== undefined ? { specialDieResult, complication, glory } : {}),
+    summary: `${verdict(success)}: sukcesów ${successes}, wymagane ${settings.required}${summaryExtra}`,
   };
 }

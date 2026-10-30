@@ -172,7 +172,7 @@ function SharedCampaignView({ campaignId }: { campaignId: string }) {
                       <Share2 className="h-3.5 w-3.5" /> Udostępnij…
                     </Button>
                     {m.shared && (
-                      <Button size="sm" variant="ghost" className="gap-1.5" onClick={() => act(() => hideMaterial(m.id), "Ukryto przed graczami")}>
+                      <Button size="sm" variant="ghost" className="gap-1.5" onClick={() => act(() => hideMaterial(m.id, m.campaign_id), "Ukryto przed graczami")}>
                         <EyeOff className="h-3.5 w-3.5" /> Ukryj
                       </Button>
                     )}
@@ -199,7 +199,7 @@ function SharedCampaignView({ campaignId }: { campaignId: string }) {
         onClose={() => setSharing(null)}
         onShare={async (audience, show) => {
           if (!sharing) return;
-          await act(() => shareMaterial(sharing.id, audience, show), show ? "Pokazano graczom" : "Udostępniono");
+          await act(() => shareMaterial(sharing.id, audience, show, sharing.campaign_id), show ? "Pokazano graczom" : "Udostępniono");
           setSharing(null);
         }}
       />

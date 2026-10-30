@@ -105,6 +105,8 @@ function newFieldDef(id: string, type: FieldType, name: string): FieldDef {
     case "select":
     case "multiselect":
       return { id, name, type, options: [] };
+    case "computed":
+      return { id, name, type, formula: "" };
     default:
       return { id, name, type };
   }
@@ -293,6 +295,7 @@ export function listRefTargets(type: CardTypeDef): RefTarget[] {
       case "number":
       case "track":
       case "text":
+      case "computed":
         targets.push({ ref: { fieldId: field.id }, label: field.name });
         break;
       case "currentMax":
@@ -324,7 +327,7 @@ export function numericRefTargets(cardType: CardTypeDef): RefTarget[] {
     const field = findField(cardType, ref.fieldId);
     if (!field) return false;
     if (field.type === "table") return field.columns?.find((column) => column.id === ref.columnId)?.type === "number";
-    return field.type === "number" || field.type === "track" || field.type === "currentMax";
+    return field.type === "number" || field.type === "track" || field.type === "currentMax" || field.type === "computed";
   });
 }
 
@@ -345,7 +348,8 @@ export function coerceValue(field: FieldDef, value: FieldValue | undefined): Fie
   if (value === undefined) return defaultValueForField(field);
   switch (field.type) {
     case "number":
-    case "track": {
+    case "track":
+    case "computed": {
       if (typeof value === "number") return value;
       const parsed = typeof value === "string" ? Number(value) : NaN;
       return Number.isFinite(parsed) ? parsed : 0;

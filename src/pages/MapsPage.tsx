@@ -1,14 +1,18 @@
 import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ImagePlus, MapPinPlus, Pencil, Search, Trash2 } from "lucide-react";
+import { ArrowLeft, ImagePlus, Loader2, MapPinPlus, MonitorUp, MonitorX, Pencil, Search, Share2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useDrawer } from "@/context/DrawerContext";
-import { deleteImage, IMAGE_ACCEPT, isImageFile, putImage } from "@/lib/imageStore";
+import { useAuth } from "@/context/AuthContext";
+import { useCampaigns } from "@/context/CampaignContext";
+import { getImage, deleteImage, IMAGE_ACCEPT, isImageFile, putImage } from "@/lib/imageStore";
 import { MAPS_KEY, newMap, newPin, removeMap, updatePin, type CampaignMap, type MapPin } from "@/lib/maps";
 import { MapCanvas, PIN_ICON_COMPONENTS } from "@/components/maps/MapCanvas";
 import { linkKey, PinEditorDialog, PinPopover, useLinkTargets, type LinkTarget } from "@/components/maps/PinPanels";
 import { useMapImage } from "@/components/maps/useMapImage";
+import { showMapToPlayers, usePlayerScreen } from "@/lib/playerScreen";
+import { shareMapAsMaterial } from "@/lib/sharedCampaigns";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -36,7 +40,11 @@ export default function MapsPage() {
   const [stack, setStack] = useState<string[]>([]);
   const [newName, setNewName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [screen] = usePlayerScreen();
+  const { activeCampaign } = useCampaigns();
+  const { user } = useAuth();
 
   const [addMode, setAddMode] = useState(false);
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
@@ -101,6 +109,27 @@ export default function MapsPage() {
     else openDrawer(link.kind, link.id, link.name);
   };
 
+  const handleShareWithPlayers = async () => {
+    if (!current) return;
+    if (!activeCampaign) { toast.error("Brak aktywnej kampanii"); return; }
+    if (!user) {
+      toast.error("Aby udostępniać graczom, zaloguj się przez zakładkę Materiały");
+      return;
+    }
+    setSharing(true);
+    try {
+      const blob = await getImage(current.id);
+      if (!blob) { toast.error("Nie znaleziono obrazu mapy w pamięci przeglądarki"); return; }
+      await shareMapAsMaterial(activeCampaign.id, activeCampaign.name, current.name, blob);
+      toast.success(`Mapa „${current.name}" udostępniona — pojawi się u graczy`);
+    } catch (e) {
+      console.error("[Magnus] shareMap error:", e);
+      toast.error(e instanceof Error ? e.message : "Coś poszło nie tak");
+    } finally {
+      setSharing(false);
+    }
+  };
+
   if (!current) {
     return (
       <div className="space-y-5 animate-fade-in">
@@ -152,6 +181,44 @@ export default function MapsPage() {
         <Button size="sm" variant={addMode ? "default" : "outline"} className="gap-1" onClick={() => setAddMode((v) => !v)}>
           <MapPinPlus className="h-3.5 w-3.5" />{addMode ? "Kliknij na mapie…" : "Dodaj pinezkę"}
         </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          className="gap-1"
+          disabled={sharing}
+          onClick={() => void handleShareWithPlayers()}
+          aria-label="Udostępnij mapę graczom (chmura)"
+        >
+          {sharing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Share2 className="h-3.5 w-3.5" />}
+          Udostępnij graczom
+        </Button>
+        {screen.mapId === current.id ? (
+          <Button
+            size="sm"
+            variant="secondary"
+            className="gap-1"
+            onClick={() => {
+              showMapToPlayers(null);
+              toast.success("Mapa zdjęta z ekranu graczy");
+            }}
+            aria-label="Zdejmij mapę z lokalnego ekranu graczy"
+          >
+            <MonitorX className="h-3.5 w-3.5" />Zdejmij z ekranu
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1"
+            onClick={() => {
+              if (showMapToPlayers(current.id)) toast.success("Mapa pokazana na ekranie graczy");
+              else toast.error("Nie udało się zapisać — za mało miejsca");
+            }}
+            aria-label="Pokaż mapę na lokalnym ekranie graczy"
+          >
+            <MonitorUp className="h-3.5 w-3.5" />Ekran graczy
+          </Button>
+        )}
         <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => renameMap(current)} aria-label="Zmień nazwę"><Pencil className="h-4 w-4" /></Button>
         <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => deleteMap(current)} aria-label="Usuń mapę"><Trash2 className="h-4 w-4" /></Button>
       </div>

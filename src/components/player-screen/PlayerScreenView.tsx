@@ -1,11 +1,66 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { cardTitle } from "@/lib/cardSchema";
+import { useCards } from "@/lib/cardStore";
+import { usePlayerVisibility } from "@/lib/playerPanel";
+import { PlayerCardView } from "./PlayerCardView";
+import { PlayerDiceRoller } from "./PlayerDiceRoller";
+import { PlayerNotes } from "./PlayerNotes";
 import { useApp } from "@/context/AppContext";
 import { getActiveFight } from "@/lib/combatSessions";
 import { segmentPath, useClocks } from "@/lib/clocks";
 import { toPlayerInitiative, usePlayerScreen } from "@/lib/playerScreen";
 import { useSafety } from "@/lib/safety";
+import { useMapImage } from "@/components/maps/useMapImage";
+import { FogOverlay } from "@/components/maps/FogOverlay";
+import { useMapFog } from "@/lib/mapFog";
 import Logo from "@/components/Logo";
 import { cn } from "@/lib/utils";
+
+/** The shared map with every unrevealed cell blacked out. */
+function PlayerMap({ mapId, compact }: { mapId: string; compact: boolean }) {
+  const url = useMapImage(mapId);
+  const [fog] = useMapFog(mapId);
+  if (!url) return null;
+  return (
+    <section className="flex-1 min-w-0 flex items-center justify-center">
+      <div className="relative inline-block">
+        <img src={url} alt="" className={cn("block rounded-lg", compact ? "max-h-40" : "max-h-[85vh] max-w-full")} />
+        <FogOverlay cells={fog.cells} opaque />
+      </div>
+    </section>
+  );
+}
+
+/** Interactive panel under the TV content; the GM switches it on in the controls. */
+function PlayerPanel() {
+  const [vis] = usePlayerVisibility();
+  const [heroes] = useCards("hero");
+  const [picked, setPicked] = useState("");
+  const heroId = vis.heroId || picked;
+  const name = heroes.find((h) => h.id === heroId)?.name ?? "";
+  return (
+    <div className="mt-8 rounded-xl bg-background text-foreground p-4 text-base space-y-6">
+      {!vis.heroId && (
+        <select
+          aria-label="Bohater"
+          className="w-full rounded-md border bg-background px-2 py-1.5"
+          value={picked}
+          onChange={(e) => setPicked(e.target.value)}
+        >
+          <option value="">Wybierz bohatera…</option>
+          {heroes.map((h) => (
+            <option key={h.id} value={h.id}>
+              {cardTitle(h)}
+            </option>
+          ))}
+        </select>
+      )}
+      <PlayerCardView heroId={heroId} visibility={vis} />
+      {vis.dice && <PlayerDiceRoller playerName={name} />}
+      {vis.notes && <PlayerNotes />}
+    </div>
+  );
+}
 
 /**
  * The player-facing view, shared by the second window and the GM's inline
@@ -17,6 +72,7 @@ export function PlayerScreenView({ compact = false }: { compact?: boolean }) {
   const { combatSessions } = useApp();
   const [clocks] = useClocks();
   const [safety] = useSafety();
+  const [vis] = usePlayerVisibility();
 
   const initiative = useMemo(
     () => toPlayerInitiative(getActiveFight(combatSessions), screen.hideEnemyResources),
@@ -28,7 +84,7 @@ export function PlayerScreenView({ compact = false }: { compact?: boolean }) {
   const showClocks = screen.showClocks && visibleClocks.length > 0;
   const handout = screen.handout;
   const showSafety = screen.showSafety && (safety.lines.length > 0 || safety.veils.length > 0);
-  const empty = screen.blank || (!showInitiative && !showClocks && !handout && !showSafety);
+  const empty = screen.blank || (!showInitiative && !showClocks && !handout && !showSafety && !screen.mapId);
 
   return (
     <div
@@ -63,6 +119,8 @@ export function PlayerScreenView({ compact = false }: { compact?: boolean }) {
               {handout.text && <p className="whitespace-pre-wrap leading-relaxed max-w-4xl">{handout.text}</p>}
             </section>
           )}
+
+          {screen.mapId && <PlayerMap mapId={screen.mapId} compact={compact} />}
 
           {showSafety && (
             <section className={cn("flex-1 min-w-0 flex flex-col", compact ? "gap-2" : "gap-8")}>
@@ -151,6 +209,7 @@ export function PlayerScreenView({ compact = false }: { compact?: boolean }) {
           )}
         </div>
       )}
+      {vis.panel && !compact && <PlayerPanel />}
     </div>
   );
 }

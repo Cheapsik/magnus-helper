@@ -13,7 +13,7 @@ import {
   defaultValueForField,
   visibleFields,
 } from "@/lib/cardSchema";
-import type { DieRoller } from "@/lib/diceNotation";
+import { type DieRoller, rollDiceNotation } from "@/lib/diceNotation";
 import { rollDie } from "@/lib/dice";
 
 /** A whole number from min to max inclusive, rolled on a single die of the range's size. */
@@ -27,9 +27,25 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
+/** Roll a dice notation with optional drop lowest/highest. */
+function rollDiceRule(rule: Extract<RandomRule, { kind: "dice" }>, roll: DieRoller): number {
+  const result = rollDiceNotation(rule.notation, roll);
+  if (!result) return 0;
+  const allFaces = result.dice.flatMap((g) => g.results);
+  if ((rule.dropLowest ?? 0) > 0 || (rule.dropHighest ?? 0) > 0) {
+    const sorted = [...allFaces].sort((a, b) => a - b);
+    const lo = rule.dropLowest ?? 0;
+    const hi = rule.dropHighest ?? 0;
+    const kept = sorted.slice(lo, sorted.length - hi);
+    return kept.reduce((s, v) => s + v, 0) + result.modifier;
+  }
+  return result.total;
+}
+
 /** A text-like value: a list entry, or a range result written out. Undefined for an empty list. */
 function pickString(rule: RandomRule, roll: DieRoller): string | undefined {
   if (rule.kind === "range") return String(pickRange(rule, roll));
+  if (rule.kind === "dice") return String(rollDiceRule(rule, roll));
   if (rule.values.length === 0) return undefined;
   return rule.values[roll(rule.values.length) - 1];
 }
@@ -38,16 +54,18 @@ function generateField(field: FieldDef, roll: DieRoller): FieldValue {
   if (field.type === "table") return generateTable(field, roll);
   const rule = field.random;
   if (!rule) return defaultValueForField(field);
+  const numericRoll = (): number =>
+    rule.kind === "range" ? pickRange(rule, roll) : rule.kind === "dice" ? rollDiceRule(rule, roll) : 0;
   switch (field.type) {
     case "number":
-      return rule.kind === "range" ? pickRange(rule, roll) : defaultValueForField(field);
+      return rule.kind === "range" || rule.kind === "dice" ? numericRoll() : defaultValueForField(field);
     case "track":
-      return rule.kind === "range"
-        ? clamp(pickRange(rule, roll), 0, field.trackMax ?? Number.POSITIVE_INFINITY)
+      return rule.kind === "range" || rule.kind === "dice"
+        ? clamp(numericRoll(), 0, field.trackMax ?? Number.POSITIVE_INFINITY)
         : defaultValueForField(field);
     case "currentMax": {
-      if (rule.kind !== "range") return defaultValueForField(field);
-      const max = pickRange(rule, roll);
+      if (rule.kind !== "range" && rule.kind !== "dice") return defaultValueForField(field);
+      const max = numericRoll();
       return { current: max, max };
     }
     case "text":
@@ -65,7 +83,7 @@ function generateCell(column: ColumnDef, roll: DieRoller): CellValue | undefined
   if (!rule) return undefined;
   switch (column.type) {
     case "number":
-      return rule.kind === "range" ? pickRange(rule, roll) : undefined;
+      return rule.kind === "range" ? pickRange(rule, roll) : rule.kind === "dice" ? rollDiceRule(rule, roll) : undefined;
     case "text":
     case "select":
     case "dice":

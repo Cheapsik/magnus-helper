@@ -91,9 +91,8 @@ export function CombatantCard({
           </div>
         ) : (
           <>
-            <div className="px-3 pb-1.5 pt-2">
+            <button type="button" onClick={onToggleExpand} className="w-full text-left px-3 pb-1.5 pt-2">
               <div className="flex items-center gap-2">
-                
                 <span
                   className={cn(
                     "min-w-0 flex-1 truncate text-[length:--fs-section] font-semibold leading-tight",
@@ -102,122 +101,94 @@ export function CombatantCard({
                 >
                   {c.name}
                 </span>
-                <Button size="sm" variant="default" className="shrink-0" onClick={onAction}>
-                  <Crosshair className="h-3.5 w-3.5" />
-                  Akcja
-                </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button size="icon" variant="ghost" className="shrink-0" title="Więcej opcji">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-44">
-                    <DropdownMenuItem onClick={onStartEdit}>
-                      <Edit2 className="mr-2 h-4 w-4" />
-                      Edytuj
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={onDuplicate}>
-                      <Copy className="mr-2 h-4 w-4" />
-                      Duplikuj
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={onRemove}>
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Usuń
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
 
-              <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px]">
-                <span className="text-muted-foreground">
-                  Inicjatywa <span className="font-bold text-foreground">{c.initiative}</span>
+                <span className="text-[11px] text-muted-foreground tabular-nums">
+                  <span className="font-bold text-foreground">{c.initiative}</span>
                 </span>
-                {c.stats.map((stat) => (
-                  <span key={stat.label} className="text-muted-foreground">
-                    {stat.label} <span className="font-bold text-foreground">{stat.value}</span>
+
+                {c.resource.max > 0 && (
+                  <span className={cn(
+                    "text-[11px] font-bold tabular-nums",
+                    hpPercent > 50 ? "text-success" : hpPercent > 25 ? "text-primary" : "text-destructive",
+                  )}>
+                    {c.resource.current}/{c.resource.max}
                   </span>
-                ))}
-              </div>
-            </div>
+                )}
 
-            <div className="px-3 pb-2">
-              <div className="flex max-w-lg items-center gap-2">
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="secondary"
-                  className="shrink-0"
-                  onClick={() => onAdjustHp(-1)}
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <div className="min-w-0 flex-1">
-                  <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className={cn(
-                        "h-full rounded-full transition-all duration-300",
-                        hpPercent > 50 ? "bg-success" : hpPercent > 25 ? "bg-primary" : "bg-destructive",
-                      )}
-                      style={{ width: `${hpPercent}%` }}
-                    />
-                  </div>
-                </div>
-                <span className="flex shrink-0 items-baseline gap-1 text-sm font-bold tabular-nums">
-                  {c.resourceLabel && <span className="text-[10px] font-normal text-muted-foreground">{c.resourceLabel}</span>}
-                  {c.resource.current}/{c.resource.max}
-                </span>
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="secondary"
-                  className="shrink-0"
-                  onClick={() => onAdjustHp(1)}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+                {c.statuses.length > 0 && (
+                  <span className="text-[10px] text-destructive font-medium">{c.statuses.length} stan{c.statuses.length > 1 ? "y" : ""}</span>
+                )}
 
-            {c.statuses.length > 0 && (
-              <div className="px-3 pb-2">
-                <div className="flex flex-wrap gap-1">
-                  {c.statuses.map((s) => (
-                    <Badge
-                      key={s}
-                      variant="destructive"
-                      className="h-5 cursor-pointer gap-0.5 px-1.5 py-0 text-[9px]"
-                      onClick={() => onToggleStatus(s)}
-                    >
-                      {s} ×
-                    </Badge>
-                  ))}
-                </div>
+                {isExpanded ? <ChevronUp className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
               </div>
-            )}
-
-            <button
-              type="button"
-              onClick={onToggleExpand}
-              className="flex h-10 w-full items-center justify-center gap-1 border-t border-border/50 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
-              aria-expanded={isExpanded}
-            >
-              {isExpanded ? (
-                <>
-                  <ChevronUp className="h-4 w-4" />
-                  <span className="text-xs">Zwiń</span>
-                </>
-              ) : (
-                <>
-                  <ChevronDown className="h-4 w-4" />
-                  <span className="text-xs">Więcej (zasób, stany)</span>
-                </>
-              )}
             </button>
 
             {isExpanded && (
               <div className="space-y-2 border-t border-border/50 px-3 pb-3 pt-2">
+                <div className="flex items-center justify-end gap-1.5">
+                  <Button size="sm" variant="default" className="shrink-0" onClick={onAction}>
+                    <Crosshair className="h-3.5 w-3.5" />
+                    Akcja
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="icon" variant="ghost" className="shrink-0" title="Więcej opcji">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-44">
+                      <DropdownMenuItem onClick={onStartEdit}>
+                        <Edit2 className="mr-2 h-4 w-4" />
+                        Edytuj
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={onDuplicate}>
+                        <Copy className="mr-2 h-4 w-4" />
+                        Duplikuj
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={onRemove}>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Usuń
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px]">
+                  <span className="text-muted-foreground">
+                    Inicjatywa <span className="font-bold text-foreground">{c.initiative}</span>
+                  </span>
+                  {c.stats.map((stat) => (
+                    <span key={stat.label} className="text-muted-foreground">
+                      {stat.label} <span className="font-bold text-foreground">{stat.value}</span>
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex max-w-lg items-center gap-2">
+                  <Button type="button" size="icon" variant="secondary" className="shrink-0" onClick={() => onAdjustHp(-1)}>
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <div className="min-w-0 flex-1">
+                    <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className={cn(
+                          "h-full rounded-full transition-all duration-300",
+                          hpPercent > 50 ? "bg-success" : hpPercent > 25 ? "bg-primary" : "bg-destructive",
+                        )}
+                        style={{ width: `${hpPercent}%` }}
+                      />
+                    </div>
+                  </div>
+                  <span className="flex shrink-0 items-baseline gap-1 text-sm font-bold tabular-nums">
+                    {c.resourceLabel && <span className="text-[10px] font-normal text-muted-foreground">{c.resourceLabel}</span>}
+                    {c.resource.current}/{c.resource.max}
+                  </span>
+                  <Button type="button" size="icon" variant="secondary" className="shrink-0" onClick={() => onAdjustHp(1)}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+
                 <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-6">
                   {[-5, -3, -1, 1, 3, 5].map((delta) => (
                     <Button
@@ -232,6 +203,21 @@ export function CombatantCard({
                     </Button>
                   ))}
                 </div>
+
+                {c.statuses.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {c.statuses.map((s) => (
+                      <Badge
+                        key={s}
+                        variant="destructive"
+                        className="h-5 cursor-pointer gap-0.5 px-1.5 py-0 text-[9px]"
+                        onClick={() => onToggleStatus(s)}
+                      >
+                        {s} ×
+                      </Badge>
+                    ))}
+                  </div>
+                )}
 
                 <div>
                   <label className="mb-1 block text-[10px] font-medium text-muted-foreground">Stany</label>
@@ -263,11 +249,6 @@ export function CombatantCard({
                     <p className="whitespace-pre-line text-xs text-muted-foreground">{c.notes}</p>
                   </div>
                 )}
-
-                <Button type="button" size="sm" className="h-10 w-full gap-1.5 text-xs" onClick={onAction}>
-                  <Crosshair className="h-3.5 w-3.5" />
-                  Rozwiąż akcję bojową
-                </Button>
               </div>
             )}
           </>

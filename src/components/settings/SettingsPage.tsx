@@ -8,6 +8,7 @@ import { CardStructureEditor } from "@/components/system/CardStructureEditor";
 import { TestTypesEditor } from "@/components/system/TestTypesEditor";
 import { CombatSettingsEditor } from "@/components/system/CombatSettingsEditor";
 import { ConditionsEditor } from "@/components/system/ConditionsEditor";
+import { ProgressionSettings } from "@/components/progression/ProgressionSettings";
 import { CurrencyEditor } from "@/components/system/CurrencyEditor";
 
 const TABS = [
@@ -17,6 +18,7 @@ const TABS = [
   { value: "walka", label: "Walka" },
   { value: "stany", label: "Stany" },
   { value: "waluta", label: "Waluta" },
+  { value: "rozwoj", label: "Rozwój" },
 ] as const;
 type Tab = (typeof TABS)[number]["value"];
 
@@ -53,6 +55,9 @@ export default function SettingsPage() {
       </TabsContent>
       <TabsContent value="waluta">
         <CurrencyEditor />
+      </TabsContent>
+      <TabsContent value="rozwoj">
+        <ProgressionSettings />
       </TabsContent>
     </Tabs>
   );

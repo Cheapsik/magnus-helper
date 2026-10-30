@@ -1,4 +1,4 @@
-import { ChevronLeft, Eye, EyeOff, RotateCcw, Swords } from "lucide-react";
+import { ChevronLeft, Dices, Eye, EyeOff, RotateCcw, Swords } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -9,6 +9,7 @@ interface CombatTurnBarProps {
   showDead: boolean;
   onToggleShowDead: () => void;
   onReset: () => void;
+  onRollAllInitiative?: () => void;
   onPrevTurn: () => void;
   onNextTurn: () => void;
   prevDisabled: boolean;
@@ -22,6 +23,7 @@ export function CombatTurnBar({
   showDead,
   onToggleShowDead,
   onReset,
+  onRollAllInitiative,
   onPrevTurn,
   onNextTurn,
   prevDisabled,
@@ -63,6 +65,11 @@ export function CombatTurnBar({
           >
             {showDead ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
           </Button>
+          {onRollAllInitiative && (
+            <Button type="button" size="icon" variant="ghost" className="h-9 w-9" onClick={onRollAllInitiative} title="Rzuć inicjatywę wszystkim">
+              <Dices className="h-4 w-4" />
+            </Button>
+          )}
           <Button type="button" size="icon" variant="ghost" className="h-9 w-9" onClick={onReset} title="Reset rund i tur">
             <RotateCcw className="h-4 w-4" />
           </Button>

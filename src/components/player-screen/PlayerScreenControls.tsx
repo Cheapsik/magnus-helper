@@ -1,5 +1,8 @@
 import { useRef, useState } from "react";
 import { Eraser, ExternalLink, ImagePlus, Pause, Play } from "lucide-react";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { MAPS_KEY, type CampaignMap } from "@/lib/maps";
+import { showMapToPlayers } from "@/lib/playerScreen";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +13,7 @@ import { DEFAULT_PLAYER_SCREEN, openPlayerScreenWindow, usePlayerScreen, type Pl
 import { setPlayerScreenPaused } from "@/lib/safety";
 import { shrinkImage } from "@/lib/images";
 import { PlayerScreenView } from "./PlayerScreenView";
+import { PlayerVisibilitySettings } from "./PlayerVisibilitySettings";
 import { ShowToPlayersButton } from "./ShowToPlayersButton";
 
 const MAX_IMAGE_SIDE = 1600;
@@ -23,13 +27,15 @@ const TOGGLES: {
 }[] = [
   { key: "showInitiative", label: "Inicjatywa (aktywna walka)" },
   { key: "hideEnemyResources", label: "Ukryj zasoby wrogów" },
-  { key: "showClocks", label: "Zegary oznaczone jako widoczne" },
+  { key: "showClocks", label: "Koła postępu oznaczone jako widoczne" },
   { key: "showSafety", label: "Ustalenia bezpieczeństwa (granice i zasłony)" },
 ];
 
 /** GM-side controls for the second-window player screen. */
 export function PlayerScreenControls() {
   const [screen, setScreen] = usePlayerScreen();
+  const [maps] = useLocalStorage<CampaignMap[]>(MAPS_KEY, []);
+  const shownMap = maps.find((m) => m.id === screen.mapId);
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
   const [image, setImage] = useState("");
@@ -96,6 +102,16 @@ export function PlayerScreenControls() {
             </Button>
           </div>
         )}
+        {shownMap && (
+          <div className="flex items-center justify-between gap-3 text-sm">
+            <span className="truncate text-muted-foreground">
+              Mapa na ekranie: <span className="text-foreground">{shownMap.name}</span>
+            </span>
+            <Button type="button" variant="ghost" size="sm" onClick={() => showMapToPlayers(null)}>
+              Zdejmij
+            </Button>
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -142,6 +158,11 @@ export function PlayerScreenControls() {
             <PlayerScreenView compact />
           </div>
         )}
+      </div>
+
+      <div className="space-y-2 border-t pt-4">
+        <h3 className="text-sm font-semibold">Panel gracza</h3>
+        <PlayerVisibilitySettings />
       </div>
     </div>
   );

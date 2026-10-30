@@ -28,6 +28,7 @@ import {
   iconBtn,
   inputCls,
 } from "@/components/system/controls";
+import { formulaRefTargets } from "@/lib/formulaEngine";
 
 const COLUMN_TYPE_LABELS: Record<ColumnType, string> = {
   text: "Tekst",
@@ -121,6 +122,9 @@ export function FieldEditor({
                 onChange={(e) => patch({ trackMax: Math.max(1, Math.min(30, Number(e.target.value) || 1)) })}
               />
             </Labeled>
+          )}
+          {field.type === "computed" && (
+            <FormulaEditor type={type} formula={field.formula ?? ""} onChange={(formula) => patch({ formula })} />
           )}
           {field.type === "table" && <TableStructureEditor type={type} field={field} onChange={onChange} />}
           {RANDOMISABLE.includes(field.type) && (
@@ -292,6 +296,52 @@ function TableStructureEditor({
             onChange={(e) => onChange(updateField(type, field.id, { rowMode: { kind: "dynamic", addLabel: e.target.value } }))}
           />
         </Labeled>
+      )}
+    </div>
+  );
+}
+
+function FormulaEditor({
+  type,
+  formula,
+  onChange,
+}: {
+  type: CardTypeDef;
+  formula: string;
+  onChange: (formula: string) => void;
+}) {
+  const refs = formulaRefTargets(type);
+  return (
+    <div className="space-y-1.5">
+      <Labeled label="Formuła" className="w-full">
+        <input
+          className={cn(inputCls, "font-mono text-sm")}
+          value={formula}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="np. {zdrowie.max} * 2 + {ochrona}"
+        />
+      </Labeled>
+      <p className="text-[length:--fs-meta] text-muted-foreground">
+        Wstaw pole w nawiasach klamrowych. Operatory: + − * / i nawiasy. Funkcje: floor(), ceil(), abs().
+      </p>
+      {refs.length > 0 && (
+        <details className="text-[length:--fs-meta]">
+          <summary className="cursor-pointer text-muted-foreground hover:text-foreground">Dostępne pola</summary>
+          <ul className="mt-1 space-y-0.5 pl-2">
+            {refs.map((r) => (
+              <li key={r.token}>
+                <button
+                  type="button"
+                  className="font-mono text-primary hover:underline"
+                  onClick={() => onChange(formula + r.token)}
+                >
+                  {r.token}
+                </button>
+                <span className="ml-1.5 text-muted-foreground">{r.label}</span>
+              </li>
+            ))}
+          </ul>
+        </details>
       )}
     </div>
   );

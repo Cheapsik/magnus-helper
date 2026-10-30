@@ -22,12 +22,12 @@ export function ClocksPanel({ wide = false }: { wide?: boolean }) {
   const save = (c: Clock) =>
     setClocks((prev) => (prev.some((p) => p.id === c.id) ? prev.map((p) => (p.id === c.id ? c : p)) : [...prev, c]));
   const remove = (c: Clock) => {
-    if (!confirm(`Czy na pewno usunąć zegar '${c.name}'?`)) return;
+    if (!confirm(`Czy na pewno usunąć koło postępu '${c.name}'?`)) return;
     setClocks((prev) => prev.filter((p) => p.id !== c.id));
   };
   const tickLogged = (c: Clock, delta: number) => {
     const next = tick(c, delta);
-    logChronicleEvent({ kind: "clock", text: isDone(next) ? `Zegar „${c.name}” zapełniony` : `Zegar „${c.name}”: ${next.filled}/${next.segments}` });
+    logChronicleEvent({ kind: "clock", text: isDone(next) ? `Koło postępu „${c.name}” zapełnione` : `Koło postępu „${c.name}”: ${next.filled}/${next.segments}` });
     update(c.id, () => next);
   };
   const questTitle = (id: string | null) => (id ? quests.find((q) => q.id === id)?.title : undefined);
@@ -38,17 +38,29 @@ export function ClocksPanel({ wide = false }: { wide?: boolean }) {
     <div className="space-y-3">
       {wide && (
         <p className="max-w-2xl text-sm text-muted-foreground">
-          Zegar pokazuje, jak blisko jest coś, co się stanie, jeśli gracze nie zareagują: pościg straży, rytuał kultu, burza
+          Koło postępu pokazuje, jak blisko jest coś, co się stanie, jeśli gracze nie zareagują: pościg straży, rytuał kultu, burza
           nad przełęczą. Gdy bohaterowie zwlekają albo coś pójdzie nie tak, zamaluj segment (kliknij tarczę lub „+”).
-          Pełny zegar oznacza, że zdarzenie właśnie następuje. Zegar oznaczony okiem widzą gracze na ekranie graczy.
+          Pełne koło oznacza, że zdarzenie właśnie następuje. Koło oznaczone okiem widzą gracze na ekranie graczy.
         </p>
       )}
       <Button size="sm" onClick={() => setEditing(normalizeClock({ segments: 4 }))}>
-        <Plus className="h-4 w-4 mr-1" /> Dodaj zegar
+        <Plus className="h-4 w-4 mr-1" /> Dodaj koło
       </Button>
 
       {clocks.length === 0 ? (
-        <p className="text-muted-foreground text-center text-sm py-6">Brak zegarów. Dodaj pierwszy przyciskiem powyżej.</p>
+        <div className="text-center py-6 space-y-2">
+          <p className="text-muted-foreground text-sm">Brak kół postępu. Dodaj pierwsze przyciskiem powyżej.</p>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              const example = normalizeClock({ name: "Pościg straży", segments: 6, filled: 2, note: "Straż miejska szuka drużyny po bójce w karczmie." });
+              setClocks([example]);
+            }}
+          >
+            Wstaw przykładowe koło
+          </Button>
+        </div>
       ) : (
         <ul className={cn(wide ? "grid grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-4" : "space-y-2")}>
           {clocks.map((c, i) => {

@@ -49,7 +49,7 @@ export function CombatSidePanel({
             { id: "potwory" as const, label: "Potwory" },
             { id: "postacie" as const, label: "Postacie" },
             { id: "presety" as const, label: "Presety" },
-            { id: "zegary" as const, label: "Zegary" },
+            { id: "zegary" as const, label: "Koła postępu" },
             { id: "ekran" as const, label: "Ekran" },
           ] as const
         ).map(({ id, label }) => (

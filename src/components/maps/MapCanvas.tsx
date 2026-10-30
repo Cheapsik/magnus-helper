@@ -14,7 +14,7 @@ export const PIN_ICON_COMPONENTS: Record<PinIcon, LucideIcon> = {
 };
 
 type Drag = {
-  kind: "pan" | "pin";
+  kind: "pan" | "pin" | "fog";
   pinId?: string;
   pointerId: number;
   startX: number;
@@ -32,11 +32,18 @@ interface MapCanvasProps {
   onAddPin: (x: number, y: number) => void;
   onMovePin: (pinId: string, x: number, y: number) => void;
   renderPopover: (pin: Pin) => ReactNode;
+  /** Drawn between the image and the pins (fog, travel paths). */
+  renderOverlay?: (ctx: { view: MapView; size: { w: number; h: number } }) => ReactNode;
+  /** While set, dragging on empty map paints fog instead of panning. */
+  fogTool?: "reveal" | "hide" | null;
+  onPaintFog?: (x: number, y: number) => void;
+  /** Short text on a pin (e.g. linked clock progress). */
+  pinBadge?: (pin: Pin) => string | null;
 }
 
 const POPOVER_WIDTH = 256;
 
-export function MapCanvas({ imageUrl, pins, addMode, selectedPinId, onSelect, onAddPin, onMovePin, renderPopover }: MapCanvasProps) {
+export function MapCanvas({ imageUrl, pins, addMode, selectedPinId, onSelect, onAddPin, onMovePin, renderPopover, renderOverlay, fogTool, onPaintFog, pinBadge }: MapCanvasProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<Drag | null>(null);
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
@@ -73,13 +80,22 @@ export function MapCanvas({ imageUrl, pins, addMode, selectedPinId, onSelect, on
     const target = e.target as HTMLElement;
     if (dragRef.current || !size || target.closest("[data-map-ui]")) return;
     const pinId = target.closest<HTMLElement>("[data-pin-id]")?.dataset.pinId;
-    dragRef.current = { kind: pinId ? "pin" : "pan", pinId, pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, startView: view, moved: false };
+    const kind = pinId ? "pin" : fogTool ? "fog" : "pan";
+    dragRef.current = { kind, pinId, pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, startView: view, moved: false };
     e.currentTarget.setPointerCapture(e.pointerId);
+    if (kind === "fog") paintAt(e);
+  };
+
+  const paintAt = (e: PointerEvent) => {
+    const p = local(e);
+    const f = toFraction(p.x, p.y, view, size!.w, size!.h);
+    onPaintFog?.(f.x, f.y);
   };
 
   const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
     const d = dragRef.current;
     if (!d || d.pointerId !== e.pointerId || !size) return;
+    if (d.kind === "fog") { paintAt(e); return; }
     const dx = e.clientX - d.startX;
     const dy = e.clientY - d.startY;
     if (!d.moved && Math.hypot(dx, dy) < 4) return;
@@ -95,6 +111,7 @@ export function MapCanvas({ imageUrl, pins, addMode, selectedPinId, onSelect, on
     const d = dragRef.current;
     if (!d || d.pointerId !== e.pointerId || !size) return;
     dragRef.current = null;
+    if (d.kind === "fog") return;
     if (d.kind === "pin") {
       if (d.moved && dragPin) onMovePin(dragPin.id, dragPin.x, dragPin.y);
       else onSelect(d.pinId!);
@@ -129,7 +146,7 @@ export function MapCanvas({ imageUrl, pins, addMode, selectedPinId, onSelect, on
   return (
     <div
       ref={viewportRef}
-      className={cn("relative h-full w-full overflow-hidden rounded-md border bg-muted/40 select-none", addMode ? "cursor-crosshair" : "cursor-grab")}
+      className={cn("relative h-full w-full overflow-hidden rounded-md border bg-muted/40 select-none", addMode || fogTool ? "cursor-crosshair" : "cursor-grab")}
       style={{ touchAction: "none" }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
@@ -148,6 +165,8 @@ export function MapCanvas({ imageUrl, pins, addMode, selectedPinId, onSelect, on
           fit(w, h);
         }}
       />
+
+      {size && renderOverlay?.({ view, size })}
 
       {size &&
         pins.map((pin) => {
@@ -168,6 +187,7 @@ export function MapCanvas({ imageUrl, pins, addMode, selectedPinId, onSelect, on
               >
                 <Icon className="h-3.5 w-3.5" />
               </span>
+              {pinBadge?.(pin) && <span className="absolute -right-3 -top-2 rounded-full bg-amber-500 px-1 text-[9px] font-bold leading-tight text-black">{pinBadge(pin)}</span>}
               <span className="mt-0.5 max-w-32 truncate rounded bg-background/80 px-1 text-[10px] font-medium leading-tight">{pin.label}</span>
             </div>
           );

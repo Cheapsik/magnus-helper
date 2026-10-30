@@ -6,6 +6,50 @@ export interface Secret {
   /** May contain @[type:id:label] mentions of cards and quests. */
   text: string;
   revealedInSessionId?: string;
+  /** Short title; falls back to the start of `text`. */
+  name?: string;
+  /** How the party can find out, e.g. "Test Percepcji ST 15 w krypcie". */
+  conditions?: string;
+  category?: SecretCategory;
+  /** Related NPC cards. */
+  npcIds?: string[];
+  /** Free text for related places and quests. */
+  links?: string;
+}
+
+export type SecretCategory = "plot" | "lore" | "character" | "location";
+export const SECRET_CATEGORY_LABELS: Record<SecretCategory, string> = {
+  plot: "Fabuła",
+  lore: "Wiedza",
+  character: "Postać",
+  location: "Miejsce",
+};
+
+export const SECRETS_KEY = "rpg_secrets";
+export const KNOWLEDGE_KEY = "rpg_knowledge";
+
+/** secretId -> heroId -> how and when the hero learned it. */
+export type Knowledge = Record<string, Record<string, { at: number; how: string }>>;
+
+export const secretName = (s: Secret): string => s.name?.trim() || s.text.slice(0, 40) || "Sekret";
+
+export function reviveKnowledge(parsed: unknown): Knowledge {
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+  const out: Knowledge = {};
+  for (const [sid, heroes] of Object.entries(parsed as Record<string, unknown>)) {
+    if (!heroes || typeof heroes !== "object") continue;
+    out[sid] = {};
+    for (const [hid, e] of Object.entries(heroes as Record<string, unknown>)) {
+      const r = (e ?? {}) as Record<string, unknown>;
+      out[sid][hid] = { at: typeof r.at === "number" ? r.at : 0, how: typeof r.how === "string" ? r.how : "" };
+    }
+  }
+  return out;
+}
+
+export function setKnown(k: Knowledge, secretId: string, heroId: string, known: boolean, how = ""): Knowledge {
+  const { [heroId]: _drop, ...rest } = k[secretId] ?? {};
+  return { ...k, [secretId]: known ? { ...rest, [heroId]: { at: Date.now(), how } } : rest };
 }
 
 export interface SessionPrep {
@@ -24,7 +68,19 @@ export function reviveSecrets(parsed: unknown): Secret[] {
     const r = row as Record<string, unknown>;
     if (typeof r.id !== "string" || typeof r.text !== "string") continue;
     const revealed = typeof r.revealedInSessionId === "string" && r.revealedInSessionId ? r.revealedInSessionId : undefined;
-    out.push({ id: r.id, text: r.text, revealedInSessionId: revealed });
+    const category = ["plot", "lore", "character", "location"].includes(r.category as string)
+      ? (r.category as SecretCategory)
+      : undefined;
+    out.push({
+      id: r.id,
+      text: r.text,
+      revealedInSessionId: revealed,
+      name: typeof r.name === "string" ? r.name : undefined,
+      conditions: typeof r.conditions === "string" ? r.conditions : undefined,
+      category,
+      npcIds: Array.isArray(r.npcIds) ? r.npcIds.filter((x): x is string => typeof x === "string") : undefined,
+      links: typeof r.links === "string" ? r.links : undefined,
+    });
   }
   return out;
 }

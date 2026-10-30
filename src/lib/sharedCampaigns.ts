@@ -127,19 +127,50 @@ export async function saveMaterial(
   await run(supabase.from("materials").update({ image_path: path }).eq("id", id));
 }
 
+/**
+ * Uploads a map image blob as a material and immediately shares it with all players.
+ * Enables sharing for the campaign first if it's not already enabled.
+ */
+export async function shareMapAsMaterial(campaignId: string, campaignName: string, title: string, blob: Blob): Promise<void> {
+  // Auto-enable sharing if not set up yet
+  const existing = await run(supabase.from("shared_campaigns").select("id").eq("id", campaignId).maybeSingle());
+  if (!existing) {
+    await run(supabase.from("shared_campaigns").insert({ id: campaignId, name: campaignName }));
+    await run(supabase.from("campaign_invites").insert({ campaign_id: campaignId }));
+  }
+
+  const now = new Date().toISOString();
+  const { id } = await run(
+    supabase
+      .from("materials")
+      .insert({ campaign_id: campaignId, title, body: "", shared: true, shared_at: now, audience: null })
+      .select("id")
+      .single(),
+  );
+  const uploadBlob = await canvasToJpeg(await shrinkImage(blob, MAX_IMAGE_SIDE));
+  const path = `${campaignId}/${id}.jpg`;
+  await run(supabase.storage.from(BUCKET).upload(path, uploadBlob, { upsert: true, contentType: "image/jpeg" }));
+  await run(supabase.from("materials").update({ image_path: path }).eq("id", id));
+  // Notify players — fire-and-forget so a timeout doesn't undo a successful upload
+  notifyPlayers(campaignId).catch((e) => console.warn("[Magnus] player notify failed:", e));
+}
+
 export async function deleteMaterial(material: Material): Promise<void> {
   if (material.image_path) await run(supabase.storage.from(BUCKET).remove([material.image_path]));
   await run(supabase.from("materials").delete().eq("id", material.id));
+  await notifyPlayers(material.campaign_id);
 }
 
 /** `show`: also opens it full screen for players who have the app open. */
-export async function shareMaterial(id: string, audience: string[] | null, show: boolean): Promise<void> {
+export async function shareMaterial(id: string, audience: string[] | null, show: boolean, campaignId: string): Promise<void> {
   const now = new Date().toISOString();
   await run(supabase.from("materials").update({ shared: true, audience, shared_at: now, ...(show ? { shown_at: now } : {}) }).eq("id", id));
+  await notifyPlayers(campaignId);
 }
 
-export async function hideMaterial(id: string): Promise<void> {
+export async function hideMaterial(id: string, campaignId: string): Promise<void> {
   await run(supabase.from("materials").update({ shared: false, shown_at: null }).eq("id", id));
+  await notifyPlayers(campaignId);
 }
 
 /** Removes the campaign's players, invite, materials and their images from the cloud. */
@@ -226,16 +257,63 @@ export async function imageUrls(paths: string[]): Promise<Record<string, string>
   return Object.fromEntries(rows.filter((r) => r.signedUrl && r.path).map((r) => [r.path as string, r.signedUrl]));
 }
 
+const REFRESH_EVENT = "refresh";
+
+/** Public on purpose: the payload is empty. Realtime already drops a materials update once the
+ *  player can no longer select the row, which is exactly what "Ukryj" does. */
+function refreshTopic(campaignId: string) {
+  return `materials-refresh:${campaignId}`;
+}
+
+/** Tells open player apps to refetch. A failed ping still leaves the row saved. */
+async function notifyPlayers(campaignId: string): Promise<void> {
+  const channel = supabase.channel(refreshTopic(campaignId), {
+    config: { private: false, broadcast: { ack: true } },
+  });
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    await new Promise<void>((resolve, reject) => {
+      timer = setTimeout(() => reject(new Error("timeout")), 2500);
+      channel.subscribe((status) => {
+        if (status === "SUBSCRIBED") resolve();
+        else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") reject(new Error(status));
+      });
+    });
+    const status = await channel.send({ type: "broadcast", event: REFRESH_EVENT, payload: {} });
+    if (status !== "ok") throw new Error(status);
+  } catch (e) {
+    console.error("[Magnus Helper] player refresh ping failed:", e instanceof Error ? e.message : e);
+  } finally {
+    if (timer) clearTimeout(timer);
+    void supabase.removeChannel(channel);
+  }
+}
+
 /** Refreshes on any change to the campaign's materials that the signed-in user may see. */
 export function subscribeMaterials(campaignId: string, onChange: (material: Material | null) => void): () => void {
-  const channel = supabase
+  const changes = supabase
     .channel(`materials:${campaignId}`)
     .on("postgres_changes", { event: "*", schema: "public", table: "materials", filter: `campaign_id=eq.${campaignId}` }, (payload) =>
-      onChange((payload.new as Material) ?? null),
+      onChange(payload.eventType === "DELETE" ? null : ((payload.new as Material | null) ?? null)),
     )
     .subscribe();
-  return () => void supabase.removeChannel(channel);
+  const refresh = supabase
+    .channel(refreshTopic(campaignId), { config: { private: false } })
+    .on("broadcast", { event: REFRESH_EVENT }, () => onChange(null))
+    .subscribe();
+  return () => {
+    void supabase.removeChannel(changes);
+    void supabase.removeChannel(refresh);
+  };
 }
 
 /** A "Pokaż teraz" that just happened, not one replayed from an old row. */
 export const isFreshShow = (m: Material, now = Date.now()) => Boolean(m.shared && m.shown_at && now - Date.parse(m.shown_at) < 2 * 60 * 1000);
+
+/** What stays on the player's screen after a refetch. A hidden material leaves the list, so an open preview closes. */
+export function nextViewing(open: Material | null, list: Material[], show?: Material | null, now = Date.now()): Material | null {
+  const shown = show?.id ? list.find((m) => m.id === show.id) : undefined;
+  if (shown && isFreshShow(shown, now)) return shown;
+  if (!open) return null;
+  return list.find((m) => m.id === open.id) ?? null;
+}

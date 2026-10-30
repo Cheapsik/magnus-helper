@@ -7,7 +7,9 @@ import { AlertTriangle, Dices, Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { isDiceNotation } from "@/lib/diceNotation";
-import { entryLabel, parseTableText, rollTable, tableDice, type RandomTable, type TableRoll } from "@/lib/randomTables";
+import { entryLabel, parseTableText, rollTable, tableDice, type EntryMeta, type RandomTable, type TableRoll } from "@/lib/randomTables";
+import TableConditionEditor from "@/components/tables/TableConditionEditor";
+import { useTableContext } from "@/components/tables/useTableContext";
 
 type HistoryItem = TableRoll & { id: string; at: number };
 
@@ -17,6 +19,8 @@ export default function RandomTablesPage() {
   const [tables, setTables] = useLocalStorage<RandomTable[]>("rpg_random_tables", []);
   const [history, setHistory] = useLocalStorage<HistoryItem[]>("rpg_random_tables_history", []);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const { context } = useTableContext();
 
   const selected = tables.find((t) => t.id === selectedId) ?? tables[0] ?? null;
   const parsed = selected ? parseTableText(selected.text) : null;
@@ -43,9 +47,18 @@ export default function RandomTablesPage() {
 
   const roll = () => {
     if (!selected) return;
-    const result = rollTable(selected, tables);
+    const result = rollTable(selected, tables, undefined, context);
     if (!result) return;
     setHistory((prev) => [{ ...result, id: crypto.randomUUID(), at: Date.now() }, ...prev].slice(0, HISTORY_LIMIT));
+  };
+
+  const updateMeta = (text: string, patch: Partial<EntryMeta>) => {
+    if (!selected) return;
+    const merged = { ...selected.entryMeta?.[text], ...patch };
+    const meta = { ...selected.entryMeta };
+    if (merged.weight === undefined && !merged.conditions) delete meta[text];
+    else meta[text] = merged;
+    update({ entryMeta: meta });
   };
 
   const diceInvalid = !!selected && selected.dice.trim() !== "" && !isDiceNotation(selected.dice);
@@ -104,6 +117,10 @@ export default function RandomTablesPage() {
               <p className="text-xs text-muted-foreground">
                 {parsed.entries.length} wpisów · <code>[[Nazwa tabeli]]</code> losuje z innej tabeli
               </p>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Cała tabela losuje się tylko, gdy:</p>
+                <TableConditionEditor value={selected.conditions} onChange={(conditions) => update({ conditions })} context={context} />
+              </div>
               {(diceInvalid || parsed.issues.length > 0) && (
                 <ul className="text-xs text-destructive space-y-0.5">
                   {diceInvalid && <li>Nieprawidłowy zapis kości: {selected.dice}</li>}
@@ -130,13 +147,31 @@ export default function RandomTablesPage() {
             <summary className="text-sm font-medium text-muted-foreground cursor-pointer">
               Wpisy ({parsed.entries.length})
             </summary>
-            <ol className="mt-2 text-sm space-y-0.5">
-              {parsed.entries.map((e, i) => (
-                <li key={i} className="flex gap-3">
-                  <span className="w-14 shrink-0 text-right tabular-nums text-muted-foreground">{entryLabel(e)}</span>
-                  <span>{e.text}</span>
-                </li>
-              ))}
+            <ol className="mt-2 text-sm space-y-2">
+              {parsed.entries.map((e, i) => {
+                const meta = selected.entryMeta?.[e.text];
+                return (
+                  <li key={i} className="space-y-1">
+                    <div className="flex gap-3 items-center">
+                      <span className="w-14 shrink-0 text-right tabular-nums text-muted-foreground">{entryLabel(e)}</span>
+                      <span className="flex-1">{e.text}</span>
+                      <Input
+                        type="number"
+                        min={1}
+                        aria-label={`Waga: ${e.text}`}
+                        title="Waga (puste = zwykłe losowanie)"
+                        placeholder="waga"
+                        className="h-7 w-20 text-xs"
+                        value={meta?.weight ?? ""}
+                        onChange={(ev) => updateMeta(e.text, { weight: ev.target.value === "" ? undefined : Math.max(1, Number(ev.target.value)) })}
+                      />
+                    </div>
+                    <div className="pl-[68px]">
+                      <TableConditionEditor value={meta?.conditions} onChange={(conditions) => updateMeta(e.text, { conditions })} context={context} />
+                    </div>
+                  </li>
+                );
+              })}
             </ol>
           </details>
 

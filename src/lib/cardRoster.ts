@@ -1,5 +1,6 @@
 import type { Combatant } from "@/context/AppContext";
 import { type Card, type CardTypeDef, cardSubtitle, cardTitle, findField, getCardCombatStats } from "@/lib/cardSchema";
+import { resolveComputedValues } from "@/lib/formulaEngine";
 
 /**
  * Turns a card into a tracker participant using only what the campaign's roles
@@ -8,7 +9,8 @@ import { type Card, type CardTypeDef, cardSubtitle, cardTitle, findField, getCar
  * attack needs is read from the card itself through `card`.
  */
 export function cardToCombatant(card: Card, cardType: CardTypeDef, isEnemy: boolean): Combatant {
-  const combat = getCardCombatStats(cardType, card.values);
+  const resolved = resolveComputedValues(cardType, card.values);
+  const combat = getCardCombatStats(cardType, resolved);
   const resourceField = cardType.roles.mainResource
     ? findField(cardType, cardType.roles.mainResource.current.fieldId)
     : undefined;

@@ -21,7 +21,7 @@ interface CampaignContextValue {
    * Creates a campaign with its system copied from the starting point
    * (neutral template by default). Does not switch to it — see Decyzja 1.
    */
-  createCampaign: (name: string, start?: StartingPoint) => Campaign;
+  createCampaign: (name: string, start?: StartingPoint, copyFromCampaignId?: string) => Campaign;
   renameCampaign: (campaignId: string, name: string) => void;
   archiveCampaign: (campaignId: string) => void;
   unarchiveCampaign: (campaignId: string) => void;
@@ -45,9 +45,9 @@ export function CampaignProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(() => setRegistry(readCampaignsRegistry()), []);
 
   const createCampaign = useCallback(
-    (name: string, start: StartingPoint = "template") => {
+    (name: string, start: StartingPoint = "template", copyFromCampaignId?: string) => {
       const campaign = createCampaignInStorage(name);
-      initializeCampaignSystem(campaign.id, start);
+      initializeCampaignSystem(campaign.id, start, copyFromCampaignId);
       refresh();
       return campaign;
     },

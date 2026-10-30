@@ -40,7 +40,7 @@ describe("buildRecap", () => {
 
   it("flattens mentions and formats text and counts", () => {
     expect(groups.find((g) => g.kind === "note")!.lines).toEqual(["Karczma: Spotkali Borysa"]);
-    expect(recapCounts(groups)).toBe("Czas w świecie: 1 · Zegary: 1 · Ujawnione sekrety: 1 · Frakcje: 1 · Notatki: 1");
+    expect(recapCounts(groups)).toBe("Czas w świecie: 1 · Koła postępu: 1 · Ujawnione sekrety: 1 · Frakcje: 1 · Notatki: 1");
     expect(recapCounts([])).toBe("Brak wpisów");
     expect(recapToText("Sesja 1", groups.slice(0, 1), " Podsumowanie ")).toBe(
       "Sesja 1\n\nPodsumowanie\n\nCzas w świecie:\n- Czas w świecie: +1 dni",

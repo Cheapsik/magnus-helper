@@ -6,7 +6,8 @@ import { type Card as CampaignCard, type CardKind, CARD_KINDS, CARD_KIND_LABELS,
 import { type TestMode, type TestType } from "@/lib/campaignSystem";
 import { useCampaignSystem, useCards } from "@/lib/cardStore";
 import { refKey } from "@/lib/structureOps";
-import { type TestOutcome, diceIssue, pickDifficulty, resolveTest } from "@/lib/testEngine";
+import { type RollMode, type TestOutcome, diceIssue, pickDifficulty, resolveTest } from "@/lib/testEngine";
+import { resolveComputedValues } from "@/lib/formulaEngine";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { NumberInput } from "@/components/ui/number-input";
@@ -81,6 +82,7 @@ export default function TestsPage() {
   const [manualValue, setManualValue] = useState(0);
   const [difficultyId, setDifficultyId] = useState<string>();
   const [modifier, setModifier] = useState(0);
+  const [rollMode, setRollMode] = useState<RollMode>("normal");
   const [result, setResult] = useState<HistoryEntry | null>(null);
 
   const testTypes = system.testTypes;
@@ -112,14 +114,15 @@ export default function TestsPage() {
   const source = sources.find((s) => refKey(s.ref) === sourceKey) ?? sources[0];
   const fromCard = sourceMode === "card";
   const cardReady = Boolean(card && source);
-  const value = fromCard ? (card && source ? readNumberRef(card.values, source.ref) : 0) : manualValue;
+  const resolvedValues = card ? resolveComputedValues(system.cards[kind], card.values) : {};
+  const value = fromCard ? (card && source ? readNumberRef(resolvedValues, source.ref) : 0) : manualValue;
   const issue = diceIssue(testType);
   const canRoll = !issue && (!fromCard || cardReady);
   const stakes = preview(testType, value, modifier, difficulty?.value ?? 0);
 
   const roll = () => {
     if (!canRoll) return;
-    const outcome = resolveTest(testType, { value, difficultyId: difficulty?.id, modifier });
+    const outcome = resolveTest(testType, { value, difficultyId: difficulty?.id, modifier, rollMode });
     const entry: HistoryEntry = {
       id: newId(),
       at: Date.now(),
@@ -247,7 +250,7 @@ export default function TestsPage() {
               {sources.map((s) => (
                 <option key={refKey(s.ref)} value={refKey(s.ref)}>
                   {s.label}
-                  {card ? ` (${readNumberRef(card.values, s.ref)})` : ""}
+                  {card ? ` (${readNumberRef(resolvedValues, s.ref)})` : ""}
                 </option>
               ))}
             </select>
@@ -295,6 +298,31 @@ export default function TestsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {(testType.mode === "rollUnder" || testType.mode === "rollOver") && (
+        <section>
+          <label className="field-label mb-1.5 block">Tryb rzutu</label>
+          <div className="flex flex-wrap gap-1.5">
+            {(
+              [
+                ["normal", "Normalny"],
+                ["advantage", "Przewaga (2×, lepszy)"],
+                ["disadvantage", "Utrudnienie (2×, gorszy)"],
+              ] as const
+            ).map(([mode, label]) => (
+              <Button
+                key={mode}
+                size="sm"
+                variant={rollMode === mode ? "default" : "outline"}
+                className="text-xs"
+                onClick={() => setRollMode(mode)}
+              >
+                {label}
+              </Button>
+            ))}
+          </div>
+        </section>
+      )}
 
       <Button onClick={roll} disabled={!canRoll} className="h-12 w-full gap-2 text-base font-semibold">
         <Target className="h-5 w-5" /> Rzuć
@@ -429,6 +457,14 @@ function OutcomeDetails({ outcome }: { outcome: TestOutcome }) {
           <div className="text-sm text-muted-foreground">
             {comparison} · margines {of}: {outcome.margin}
           </div>
+          {outcome.successLevel && (
+            <div className="text-sm font-medium text-primary">{outcome.successLevel}</div>
+          )}
+          {outcome.discardedRoll !== undefined && (
+            <div className="text-xs text-muted-foreground">
+              odrzucony rzut: {outcome.discardedRoll}
+            </div>
+          )}
           {outcome.degrees !== null && (
             <div className="text-xs text-muted-foreground">
               {outcome.degreesLabel}: {outcome.degrees}
@@ -445,6 +481,8 @@ function OutcomeDetails({ outcome }: { outcome: TestOutcome }) {
             sukcesów {outcome.successes} z wymaganych {outcome.required} · kości {outcome.diceCount}
             {outcome.faces.length > outcome.diceCount ? ` (+${outcome.faces.length - outcome.diceCount} dodatkowe)` : ""}
           </div>
+          {outcome.complication && <div className="text-sm font-medium text-destructive">Komplikacja! (kość specjalna: 1)</div>}
+          {outcome.glory && <div className="text-sm font-medium text-success">Chwała! (kość specjalna: {outcome.specialDieResult})</div>}
           <Faces
             faces={outcome.faces}
             good={(face) => face >= (outcome.faces.length ? successAtOf(outcome) : Infinity)}

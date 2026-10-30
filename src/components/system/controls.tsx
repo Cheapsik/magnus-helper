@@ -92,11 +92,13 @@ export function RandomRuleEditor({
             const next = e.target.value;
             if (next === "range") onChange({ kind: "range", min: 1, max: 6 });
             else if (next === "list") onChange({ kind: "list", values: [] });
+            else if (next === "dice") onChange({ kind: "dice", notation: "4k6", dropLowest: 1 });
             else onChange(undefined);
           }}
         >
           <option value="none">Bez losowania</option>
           <option value="range">Zakres liczb</option>
+          <option value="dice">Rzut kośćmi</option>
           {allowList && <option value="list">Lista wartości</option>}
         </select>
       </Labeled>
@@ -116,6 +118,36 @@ export function RandomRuleEditor({
               className={inputCls}
               value={value.max}
               onChange={(e) => onChange({ ...value, max: Number(e.target.value) || 0 })}
+            />
+          </Labeled>
+        </>
+      )}
+      {value?.kind === "dice" && (
+        <>
+          <Labeled label="Notacja" className="w-28">
+            <input
+              className={inputCls}
+              value={value.notation}
+              placeholder="np. 4k6"
+              onChange={(e) => onChange({ ...value, notation: e.target.value })}
+            />
+          </Labeled>
+          <Labeled label="Odrzuć najniższe" className="w-28">
+            <input
+              type="number"
+              min={0}
+              className={inputCls}
+              value={value.dropLowest ?? 0}
+              onChange={(e) => onChange({ ...value, dropLowest: Number(e.target.value) || 0 })}
+            />
+          </Labeled>
+          <Labeled label="Odrzuć najwyższe" className="w-28">
+            <input
+              type="number"
+              min={0}
+              className={inputCls}
+              value={value.dropHighest ?? 0}
+              onChange={(e) => onChange({ ...value, dropHighest: Number(e.target.value) || 0 })}
             />
           </Labeled>
         </>
