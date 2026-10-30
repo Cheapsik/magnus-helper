@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { CalendarPlus, ChevronRight, ExternalLink } from "lucide-react";
+import { CalendarPlus, ChevronRight, ExternalLink, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -12,6 +12,9 @@ import { useApp } from "@/context/AppContext";
 import { useScene } from "@/context/SceneContext";
 import { rollDiceNotation, type DiceRollResult } from "@/lib/diceNotation";
 import { advanceTurn, type GmTile, type TileType } from "@/lib/gmScreen";
+import { randomNpcLine } from "@/lib/npcGenerator";
+import { RPG_TIMERS_STORAGE_KEY, dataToRuntime, formatTimerMs, type TimerData } from "@/lib/rpgTimersStorage";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { cn } from "@/lib/utils";
 import { RefPicker } from "./RefPicker";
 import { TableRollTile } from "./TableRollTile";
@@ -26,6 +29,8 @@ export const TILE_LABELS: Record<TileType, string> = {
   scene: "Scena",
   date: "Data świata",
   players: "Ekran graczy",
+  timers: "Timery",
+  npc: "Losowy NPC",
 };
 
 const empty = (text: string) => <p className="text-sm text-muted-foreground">{text}</p>;
@@ -161,6 +166,51 @@ function SceneTile() {
   );
 }
 
+function TimersTile() {
+  const [timers] = useLocalStorage<TimerData[]>(RPG_TIMERS_STORAGE_KEY, []);
+  const list = timers.map(dataToRuntime);
+  const anyRunning = list.some((t) => t.running);
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (!anyRunning) return;
+    const i = setInterval(() => setTick((t) => t + 1), 1000);
+    return () => clearInterval(i);
+  }, [anyRunning]);
+  return (
+    <div className="space-y-2">
+      {list.length === 0 ? (
+        empty("Brak timerów.")
+      ) : (
+        <ul className="divide-y divide-border">
+          {list.map((t) => (
+            <li key={t.id} className="flex items-center justify-between gap-2 py-1.5">
+              <span className={cn("truncate", !t.running && "text-muted-foreground")}>{t.label || "Timer"}</span>
+              <span className={cn("readout", t.finished && "text-destructive")}>{t.finished ? "koniec" : formatTimerMs(t.displayMs)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      <Button variant="ghost" size="sm" asChild>
+        <Link to="/timers">
+          <ExternalLink /> Otwórz timery
+        </Link>
+      </Button>
+    </div>
+  );
+}
+
+function NpcTile() {
+  const [line, setLine] = useState(randomNpcLine);
+  return (
+    <div className="flex items-start justify-between gap-2">
+      <p className="font-display text-[length:--fs-section]">{line}</p>
+      <Button size="icon-sm" variant="ghost" onClick={() => setLine(randomNpcLine())} aria-label="Losuj innego NPC" title="Losuj innego">
+        <RefreshCw />
+      </Button>
+    </div>
+  );
+}
+
 function DateTile() {
   const date = useCampaignDate();
   const [, setState] = useCalendarState();
@@ -210,5 +260,9 @@ export function TileBody({
       return <DateTile />;
     case "players":
       return <PlayerScreenControls />;
+    case "timers":
+      return <TimersTile />;
+    case "npc":
+      return <NpcTile />;
   }
 }

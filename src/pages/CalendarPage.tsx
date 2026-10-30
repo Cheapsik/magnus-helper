@@ -103,11 +103,6 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-4">
-      <p className="max-w-2xl text-sm text-muted-foreground">
-        Kalendarz odmierza czas w świecie gry, niezależnie od prawdziwych dat sesji. Ustaw własne miesiące i dni tygodnia
-        (albo zacznij od zwykłego kalendarza), przesuwaj „dziś” w miarę upływu czasu w grze i wpisuj wydarzenia: święta,
-        terminy, ultimatum. Aktualna data świata jest zawsze widoczna na dolnym pasku.
-      </p>
       <Card>
         <CardContent className="space-y-3 p-4">
           <div className="flex flex-wrap items-start justify-between gap-2">

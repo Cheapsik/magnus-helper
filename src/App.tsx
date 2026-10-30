@@ -24,7 +24,6 @@ import CheatSheetsPage from "@/pages/CheatSheetsPage";
 import CombatPage from "@/pages/CombatPage";
 import ConditionsPage from "@/pages/ConditionsPage";
 import SessionNotesPage from "@/pages/SessionNotesPage";
-import GmToolboxPage from "@/pages/GmToolboxPage";
 import InventoryPage from "@/pages/InventoryPage";
 import LootGeneratorPage from "@/pages/LootGeneratorPage";
 import TimersPage from "@/pages/TimersPage";
@@ -53,7 +52,6 @@ import SafetyPage from "@/pages/SafetyPage";
 import DungeonGeneratorPage from "@/pages/DungeonGeneratorPage";
 import MaterialsPage from "@/pages/MaterialsPage";
 import EncounterBuilderPage from "@/pages/EncounterBuilderPage";
-import NarrativePage from "@/pages/NarrativePage";
 import SecretsPage from "@/pages/SecretsPage";
 import PlayerApp from "@/pages/PlayerApp";
 import { setPendingInvite, useAppRole, useMemberships, usePendingInvite } from "@/lib/sharedCampaigns";
@@ -130,7 +128,7 @@ function GmApp() {
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/notes" element={<SessionNotesPage />} />
           <Route path="/relations" element={<RelationsMapPage />} />
-          <Route path="/gm-toolbox" element={<GmToolboxPage />} />
+          <Route path="/gm-toolbox" element={<Navigate to="/gm-screen" replace />} />
           <Route path="/heroes" element={<CardsPage key="hero" kind="hero" />} />
           <Route path="/npcs" element={<CardsPage key="npc" kind="npc" />} />
           <Route path="/monsters" element={<CardsPage key="monster" kind="monster" />} />
@@ -151,7 +149,7 @@ function GmApp() {
           <Route path="/dungeon" element={<DungeonGeneratorPage />} />
           <Route path="/materials" element={<MaterialsPage />} />
           <Route path="/encounters" element={<EncounterBuilderPage />} />
-          <Route path="/narrative" element={<NarrativePage />} />
+          <Route path="/narrative" element={<Navigate to="/prep?tab=fabula" replace />} />
           <Route path="/secrets" element={<SecretsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFound />} />

@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SceneEditor } from "@/components/narrative/SceneEditor";
 import { StoryFlowView } from "@/components/narrative/StoryFlowView";
-import { SessionRecap } from "@/components/narrative/SessionRecap";
 import {
   EMPTY_STATE, EMPTY_STRUCTURE, NARRATIVE_STATE_KEY, NARRATIVE_STRUCTURE_KEY,
   addDecision, enterScene, hasTag, newId, pendingTags, removeAct, removeScene, resolveSceneId, takeBranch,
@@ -19,13 +18,13 @@ import { confirmDialog } from "@/components/ui/dialogs";
 
 const selectCls = "field";
 
+/** The story graph: acts, scenes with branches, decisions that change later scenes. Lives under Przygotowanie → Fabuła. */
 export default function NarrativePage() {
   const { noteSessionCatalog } = useApp();
   const sessionId = noteSessionCatalog.activeSessionId;
   const [structure, setStructure] = useLocalStorage<NarrativeStructure>(NARRATIVE_STRUCTURE_KEY, EMPTY_STRUCTURE);
   const [state, setState] = useLocalStorage<NarrativeState>(NARRATIVE_STATE_KEY, EMPTY_STATE);
   const [newTag, setNewTag] = useState("");
-  const [recapSessionId, setRecapSessionId] = useState(sessionId);
 
   const scenes = structure.scenes;
   const active = scenes.find((s) => s.id === state.activeSceneId);
@@ -44,7 +43,6 @@ export default function NarrativePage() {
         <TabsTrigger value="play">Przebieg sesji</TabsTrigger>
         <TabsTrigger value="structure">Akty i sceny</TabsTrigger>
         <TabsTrigger value="consequences">Konsekwencje</TabsTrigger>
-        <TabsTrigger value="recap">Podsumowanie</TabsTrigger>
       </TabsList>
 
       <TabsContent value="play" className="grid gap-4 lg:grid-cols-2">
@@ -199,13 +197,6 @@ export default function NarrativePage() {
             {pending.length > 0 && <p className="text-xs text-muted-foreground">Oczekują na decyzję: {pending.join(", ")}</p>}
           </CardContent>
         </Card>
-      </TabsContent>
-
-      <TabsContent value="recap" className="space-y-3">
-        <select className={selectCls} value={recapSessionId} onChange={(e) => setRecapSessionId(e.target.value)} aria-label="Sesja">
-          {noteSessionCatalog.sessions.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-        </select>
-        <SessionRecap structure={structure} state={state} sessionId={recapSessionId} />
       </TabsContent>
     </Tabs>
   );

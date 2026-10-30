@@ -37,10 +37,6 @@ export default function TravelPage() {
 
   return (
     <div className="space-y-4">
-      <p className="max-w-2xl text-sm text-muted-foreground">
-        Zaplanuj trasę jako etapy z liczbą dni, dodaj własne zapasy i wybierz tabele losowe pogody i zdarzeń. Każdy
-        „Kolejny dzień podróży” przesuwa kalendarz kampanii i trafia do dziennika oraz kroniki.
-      </p>
       <div className="grid gap-4 md:grid-cols-[16rem_1fr]">
         <div className="space-y-2">
           <Button size="sm" onClick={add}>

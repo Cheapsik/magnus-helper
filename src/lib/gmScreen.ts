@@ -1,6 +1,6 @@
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 
-export const TILE_TYPES = ["initiative", "clocks", "table", "dice", "codex", "note", "scene", "date", "players"] as const;
+export const TILE_TYPES = ["initiative", "clocks", "table", "dice", "codex", "note", "scene", "date", "players", "timers", "npc"] as const;
 export type TileType = (typeof TILE_TYPES)[number];
 export type TileSize = "s" | "m" | "l";
 

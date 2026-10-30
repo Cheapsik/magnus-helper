@@ -2,11 +2,11 @@ import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Home, Dice5, Target, BookOpen, MoreHorizontal, Search,
-  Swords, Activity, Package, StickyNote, Wrench, Users, Gem, Timer, MessageSquare, Music, Network, ScrollText,
+  Swords, Activity, Package, StickyNote, Users, Gem, Timer, MessageSquare, Music, Network, ScrollText,
   MapPin, Skull, SlidersHorizontal, Settings as SettingsIcon, LogOut,
   type LucideIcon,
-  Waypoints, Lightbulb, PieChart, Flag, Shuffle, CalendarDays, LayoutDashboard, BookMarked, Map as MapIcon, Route, ShieldCheck, Castle, Presentation,
-  Crosshair, KeyRound, Drama, ChevronRight, Pin, PinOff,
+  Waypoints, Lightbulb, PieChart, Flag, Shuffle, CalendarDays, LayoutDashboard, BookMarked, Map as MapIcon, Route, ShieldCheck, Castle, Presentation, Store,
+  Crosshair, KeyRound, ChevronRight, Pin, PinOff, HelpCircle,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useScene } from "@/context/SceneContext";
@@ -15,6 +15,8 @@ import { usePageHeaderSlots } from "@/context/PageHeaderContext";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import LiveBar from "@/components/LiveBar";
 import SyncIndicator from "@/components/SyncIndicator";
@@ -33,7 +35,6 @@ const clampSidebarWidth = (w: number) =>
 
 const EXTRA_TITLES: Record<string, string> = {
   "/settings": "Ustawienia",
-  "/shop": "Sklep",
 };
 
 const NAV_TABS = [
@@ -73,7 +74,6 @@ const SIDEBAR_GROUPS: { label: string; items: NavItem[] }[] = [
     items: [
       { path: "/prep", label: "Przygotowanie sesji", icon: Lightbulb },
       { path: "/encounters", label: "Kreator spotkań", icon: Crosshair },
-      { path: "/narrative", label: "Narracja", icon: Drama },
       { path: "/quests", label: "Wątki", icon: Network },
       { path: "/loot", label: "Generator łupu", icon: Gem },
       { path: "/dungeon", label: "Generator podziemi", icon: Castle },
@@ -87,6 +87,7 @@ const SIDEBAR_GROUPS: { label: string; items: NavItem[] }[] = [
       { path: "/npcs", label: "NPC", icon: Users },
       { path: "/monsters", label: "Potwory", icon: Skull },
       { path: "/inventory", label: "Ekwipunek", icon: Package },
+      { path: "/shop", label: "Sklep", icon: Store },
       { path: "/factions", label: "Frakcje", icon: Flag },
       { path: "/relations", label: "Mapa relacji", icon: Waypoints },
       { path: "/maps", label: "Mapy", icon: MapIcon },
@@ -107,7 +108,6 @@ const SIDEBAR_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: "Kampania",
     items: [
-      { path: "/gm-toolbox", label: "Skrzynka MG", icon: Wrench },
       { path: "/settings?tab=karty", label: "System kampanii", icon: SlidersHorizontal },
       { path: "/safety", label: "Bezpieczeństwo", icon: ShieldCheck },
     ],
@@ -119,6 +119,20 @@ const ALL_ITEMS = SIDEBAR_GROUPS.flatMap((g) => g.items);
 /** Device preference: what the GM pinned on top and which groups are unfolded. */
 type NavPrefs = { pinned: string[]; open: string[] };
 const DEFAULT_NAV: NavPrefs = { pinned: [], open: ["Przy stole"] };
+
+/** What a page is for, behind the "?" beside its title — read once, not on every visit. */
+const PAGE_HELP: Record<string, string> = {
+  "/clocks":
+    "Koło postępu pokazuje, jak blisko jest coś, co się stanie, jeśli gracze nie zareagują: pościg, rytuał, burza. Zamaluj segment, gdy bohaterowie zwlekają. Pełne koło: zdarzenie następuje. Koło z okiem widzą gracze.",
+  "/calendar":
+    "Czas w świecie gry, niezależny od dat sesji. Własne miesiące i dni tygodnia ustawisz w ustawieniach kalendarza. Przesuwaj „dziś” w miarę upływu czasu i wpisuj wydarzenia: święta, terminy, ultimatum.",
+  "/chronicle":
+    "Kronika sama zbiera, co wydarzyło się na sesji: upływ czasu, walki, koła postępu, ujawnione sekrety, reputację frakcji, odwiedzone sceny i decyzje. Dopisz podsumowanie i skopiuj je dla graczy.",
+  "/travel":
+    "Trasa to etapy z liczbą dni. Każdy „Kolejny dzień podróży” zużywa zapasy, losuje pogodę i zdarzenia z wybranych tabel, przesuwa kalendarz i trafia do dziennika oraz kroniki.",
+  "/dungeon":
+    "To samo ziarno zawsze daje tę samą mapę, więc zapisane ustawienia odtwarzają ją po powrocie. Kliknij mapę, aby otworzyć ją na pełnym ekranie.",
+};
 
 const MORE_LINKS = ALL_ITEMS.filter((l) => !NAV_TABS.some((n) => n.path === l.path));
 
@@ -565,15 +579,30 @@ function SidebarLink({ item, active, activeScene, pinned, onTogglePin }: {
  */
 function PageFrame({ title, children }: { title: string; children: ReactNode }) {
   const { actions, meta } = usePageHeaderSlots();
+  const help = PAGE_HELP[useLocation().pathname];
   const shownMeta = meta.filter(Boolean);
 
   return (
     <div className="mx-auto w-full max-w-[86rem]">
       <header className="pb-4 pt-8">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-3">
-          <h1 className="font-display text-[length:--fs-title] font-medium leading-none tracking-[-0.01em]">
-            {title}
-          </h1>
+          <div className="flex items-baseline gap-2">
+            <h1 className="font-display text-[length:--fs-title] font-medium leading-none tracking-[-0.01em]">
+              {title}
+            </h1>
+            {help && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button size="icon-sm" variant="ghost" aria-label="Jak to działa?" title="Jak to działa?">
+                    <HelpCircle />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="max-w-sm text-sm leading-relaxed">
+                  {help}
+                </PopoverContent>
+              </Popover>
+            )}
+          </div>
           {actions && <div className="flex shrink-0 items-center gap-1.5">{actions}</div>}
         </div>
         {shownMeta.length > 0 && (

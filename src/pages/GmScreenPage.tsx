@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,10 @@ import {
   type TileSize,
 } from "@/lib/gmScreen";
 import { cn } from "@/lib/utils";
+import { getStorageKey, markKeyDirty } from "@/lib/campaignStorage";
+
+/** The removed "Skrzynka MG" kept a private note under this key; it moves into a note tile. */
+const OLD_TOOLBOX_NOTE_KEY = "mg_session_notes";
 
 const SPAN: Record<TileSize, string> = {
   s: "col-span-1",
@@ -28,6 +32,15 @@ export default function GmScreenPage() {
   const [tiles, setTiles] = useGmScreenLayout();
   const [editing, setEditing] = useState(false);
   const [picking, setPicking] = useState(false);
+
+  useEffect(() => {
+    const key = getStorageKey(OLD_TOOLBOX_NOTE_KEY);
+    const text = window.localStorage.getItem(key);
+    if (text === null) return;
+    if (text.trim()) setTiles((prev) => addTile(prev, { ...newTile("note"), config: { text } }));
+    window.localStorage.removeItem(key);
+    markKeyDirty(key);
+  }, [setTiles]);
 
   return (
     <div className="space-y-4">

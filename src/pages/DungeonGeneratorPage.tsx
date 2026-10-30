@@ -172,10 +172,6 @@ export default function DungeonGeneratorPage() {
 
   return (
     <div className="space-y-4">
-      <p className="max-w-2xl text-sm text-muted-foreground">
-        Generator rysuje mapę podziemi według ustawień poniżej. To samo ziarno zawsze daje tę samą mapę, więc zapisane
-        ustawienia odtwarzają ją po powrocie. Kliknij mapę, aby otworzyć ją na pełnym ekranie.
-      </p>
 
       <div className="grid gap-4 lg:grid-cols-[22rem_minmax(0,1fr)]">
         <Card>
