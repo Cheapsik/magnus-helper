@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { getStorageKey } from "@/lib/campaignStorage";
 import { writeJson } from "@/lib/storage";
@@ -22,6 +23,20 @@ export interface LootDbItem {
   /** Structured tags: subtype, damage stats, special traits, range, material, etc. */
   tags?: string[];
 }
+
+/** An item file to import: an array of items exactly as the base stores them. */
+// The cast: without strictNullChecks zod infers every field as optional.
+export const lootItemsFileSchema = z.array(
+  z.object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+    type: z.string(),
+    rankName: z.string(),
+    description: z.string(),
+    price: z.number().int().nonnegative(),
+    tags: z.array(z.string()).optional(),
+  }),
+) as unknown as z.ZodType<LootDbItem[]>;
 
 export interface LootRank {
   id: string;
