@@ -163,7 +163,7 @@ function InviteJoinScreen({
   const newcomer = status && !status.is_member && !status.is_owner;
 
   return (
-    <AuthShell features={false}>
+    <AuthShell>
       <AuthCard>
         <AuthHeader subtitle={dead ? "— Link zaproszenia jest nieważny —" : `— Zaproszenie do kampanii${status ? ` „${status.campaign_name}”` : ""} —`} />
         {dead ? (
