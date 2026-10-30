@@ -33,7 +33,7 @@ const NUM = "h-8 w-20";
 function Field({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-px">
-      <label htmlFor={id} className="block text-[10px] leading-tight text-muted-foreground">
+      <label htmlFor={id} className="block text-[11px] leading-tight text-muted-foreground">
         {label}
       </label>
       {children}
@@ -124,7 +124,7 @@ export function CombatantFormFields({
       </div>
 
       <div className="space-y-1">
-        <span className="block text-[10px] leading-tight text-muted-foreground">Inne wartości widoczne w trackerze</span>
+        <span className="block text-[11px] leading-tight text-muted-foreground">Inne wartości widoczne w trackerze</span>
         {d.stats.map((stat, index) => (
           <div key={index} className="flex items-center gap-1.5">
             <Input
@@ -173,7 +173,7 @@ export function CombatantFormFields({
 
 export function CombatantStatLine({ c }: { c: Combatant }) {
   return (
-    <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-muted-foreground">
+    <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
       <span>
         Inicjatywa <span className="font-bold text-foreground">{c.initiative}</span>
       </span>

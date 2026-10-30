@@ -53,7 +53,7 @@ export function DetailPanel() {
             <h2 className="font-display text-lg truncate text-foreground">
               {editingEntity?.name || "Szczegóły"}
             </h2>
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-[11px] text-muted-foreground">
               {editingNode
                 ? editingNode.type === "npc"
                   ? "Karta NPC"
@@ -91,7 +91,7 @@ export function DetailPanel() {
               suggestions={allTags}
             />
             {(lastChange || currentSession) && (
-              <div className="mt-2 text-[10px] text-muted-foreground border-t border-border/60 pt-2">
+              <div className="mt-2 text-[11px] text-muted-foreground border-t border-border/60 pt-2">
                 {lastChange?.changedSince && (
                   <div>Ostatnia zmiana relacji: sesja oznaczona NEW</div>
                 )}
@@ -109,13 +109,13 @@ export function DetailPanel() {
       ) : (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0 px-4 pb-4">
           <TabsList className="grid grid-cols-3 h-8 shrink-0 mt-2">
-            <TabsTrigger value="opis" className="text-[10px]">
+            <TabsTrigger value="opis" className="text-[11px]">
               Opis
             </TabsTrigger>
-            <TabsTrigger value="relacje" className="text-[10px]">
+            <TabsTrigger value="relacje" className="text-[11px]">
               Relacje
             </TabsTrigger>
-            <TabsTrigger value="mg" className="text-[10px]">
+            <TabsTrigger value="mg" className="text-[11px]">
               MG
             </TabsTrigger>
           </TabsList>
@@ -169,7 +169,7 @@ export function DetailPanel() {
                       </button>
                     </div>
                     <div className="text-sm">→ {other?.name || "?"}</div>
-                    <div className="text-[10px] text-muted-foreground">
+                    <div className="text-[11px] text-muted-foreground">
                       {statusLabel[e.status ?? "aktywna"]} · siła {e.strength ?? 3}/5
                     </div>
                     {e.description && (
@@ -227,7 +227,7 @@ export function DetailPanel() {
                   .reverse()
                   .map((h) => (
                     <div key={h.id} className="border-l-2 border-primary/60 pl-2 py-1 mb-1">
-                      <div className="text-[10px] text-muted-foreground">
+                      <div className="text-[11px] text-muted-foreground">
                         {new Date(h.ts).toLocaleString()}
                         {h.session && ` · ${h.session}`}
                       </div>

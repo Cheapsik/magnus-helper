@@ -14,7 +14,7 @@ export function TravelPathLines({ paths, pins, view, size }: { paths: TravelPath
         if (!a || !b) return null;
         const s = toScreen(a.x, a.y, view, size.w, size.h);
         const e = toScreen(b.x, b.y, view, size.w, size.h);
-        return <line key={t.id} x1={s.x} y1={s.y} x2={e.x} y2={e.y} stroke="#f59e0b" strokeWidth={3} strokeDasharray="8 6" strokeLinecap="round" />;
+        return <line key={t.id} x1={s.x} y1={s.y} x2={e.x} y2={e.y} style={{ stroke: "hsl(var(--primary))" }} strokeWidth={3} strokeDasharray="8 6" strokeLinecap="round" />;
       })}
     </svg>
   );

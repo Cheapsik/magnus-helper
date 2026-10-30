@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { readJson, writeJson } from "@/lib/storage";
+import { confirmDialog } from "@/components/ui/dialogs";
 
 interface RumorSegment {
   id: string;
@@ -428,10 +429,10 @@ export default function RumorsPage() {
     setMobileView("editor");
   };
 
-  const removeTemplate = (id: string) => {
+  const removeTemplate = async (id: string) => {
     const tpl = config.templates.find((t) => t.id === id);
     if (!tpl) return;
-    if (!confirm(`Czy na pewno usunąć szablon '${tpl.name}'?`)) return;
+    if (!(await confirmDialog(`Usunąć szablon „${tpl.name}”?`, { confirmLabel: "Usuń", destructive: true }))) return;
     setConfig((c) => ({
       ...c,
       templates: c.templates.filter((t) => t.id !== id),

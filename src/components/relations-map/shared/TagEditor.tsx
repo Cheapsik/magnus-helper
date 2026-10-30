@@ -39,7 +39,7 @@ export function TagEditor({
         <PopoverTrigger asChild>
           <button
             type="button"
-            className="text-[9px] px-1.5 py-0.5 border border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary"
+            className="text-[11px] px-1.5 py-0.5 border border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary"
           >
             + tag
           </button>
@@ -78,7 +78,7 @@ export function TagEditor({
                   key={s}
                   type="button"
                   onClick={() => onAdd(s)}
-                  className="text-[9px] px-1 py-0.5 border border-border hover:border-primary"
+                  className="text-[11px] px-1 py-0.5 border border-border hover:border-primary"
                 >
                   {s}
                 </button>

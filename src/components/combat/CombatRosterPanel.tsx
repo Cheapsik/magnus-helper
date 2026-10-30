@@ -69,7 +69,7 @@ export function CombatRosterPanel({ kinds, setCombatants, dragKey, onDragStart, 
               type="button"
               onClick={() => setKind(k)}
               className={cn(
-                "flex-1 rounded-md py-1.5 text-[10px] font-semibold transition-colors",
+                "flex-1 rounded-md py-1.5 text-[11px] font-semibold transition-colors",
                 kind === k ? "bg-primary/15 text-primary" : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
               )}
             >
@@ -92,7 +92,7 @@ export function CombatRosterPanel({ kinds, setCombatants, dragKey, onDragStart, 
         </div>
       </div>
 
-      <p className="shrink-0 px-3 pt-2 text-[10px] leading-snug text-muted-foreground">
+      <p className="shrink-0 px-3 pt-2 text-[11px] leading-snug text-muted-foreground">
         {finePointer ? "Przeciągnij na walkę po lewej lub użyj „+ Do walki”." : "Dotknij „+ Do walki”, aby dodać uczestnika."}
       </p>
 

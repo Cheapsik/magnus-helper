@@ -23,7 +23,7 @@ export function FiltersPanel({ embedded }: { embedded?: boolean }) {
           <button
             type="button"
             onClick={resetFilters}
-            className="text-[10px] text-muted-foreground hover:text-primary"
+            className="text-[11px] text-muted-foreground hover:text-primary"
           >
             Reset
           </button>
@@ -34,7 +34,7 @@ export function FiltersPanel({ embedded }: { embedded?: boolean }) {
           <button
             type="button"
             onClick={resetFilters}
-            className="text-[10px] text-muted-foreground hover:text-primary"
+            className="text-[11px] text-muted-foreground hover:text-primary"
           >
             Reset
           </button>

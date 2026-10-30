@@ -38,6 +38,7 @@ import { useCardType, useCards } from "@/lib/cardStore";
 import { MentionTextarea } from "@/components/mention/MentionTextarea";
 import { readJson, writeJson } from "@/lib/storage";
 import { Link } from "react-router-dom";
+import { confirmDialog } from "@/components/ui/dialogs";
 
 const STORAGE_QUEST_LAYOUT = "rpg_quests_layout";
 const STORAGE_QUESTS = "rpg_quests";
@@ -463,7 +464,7 @@ function QuestCard({
                   )}
                 </div>
               </div>
-              <div className="mt-0.5 pl-10 pr-10 text-[10px] text-muted-foreground">{type?.label ?? "Typ"}</div>
+              <div className="mt-0.5 pl-10 pr-10 text-[11px] text-muted-foreground">{type?.label ?? "Typ"}</div>
             </>
           )}
           <Button
@@ -496,7 +497,7 @@ function QuestCard({
                   {linkedNpcsObjs.map((npc) => (
                     <span
                       key={npc.id}
-                      className="inline-flex items-center gap-1 rounded bg-secondary px-1.5 py-0.5 text-[11px] text-secondary-foreground"
+                      className="inline-flex items-center gap-1 rounded bg-secondary px-1.5 py-0.5 text-[length:--fs-meta] text-secondary-foreground"
                     >
                       <button
                         onClick={(e) => {
@@ -529,7 +530,7 @@ function QuestCard({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 text-[11px] text-muted-foreground hover:text-foreground"
+                    className="h-7 px-2 text-[length:--fs-meta] text-muted-foreground hover:text-foreground"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Plus className="mr-1 h-3 w-3" /> NPC
@@ -572,7 +573,7 @@ function QuestCard({
               {linkedQuestsObjs.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {linkedQuestsObjs.map((q) => (
-                    <span key={q.id} className="inline-flex items-center gap-1 rounded bg-accent px-1.5 py-0.5 text-[11px]">
+                    <span key={q.id} className="inline-flex items-center gap-1 rounded bg-accent px-1.5 py-0.5 text-[length:--fs-meta]">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -604,7 +605,7 @@ function QuestCard({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 text-[11px] text-muted-foreground hover:text-foreground"
+                    className="h-7 px-2 text-[length:--fs-meta] text-muted-foreground hover:text-foreground"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Plus className="mr-1 h-3 w-3" /> Powiąż wątek
@@ -674,8 +675,8 @@ function QuestCard({
                   variant="ghost"
                   size="sm"
                   className={cn("h-9 px-2 text-xs text-muted-foreground hover:text-destructive", finePointer && "ml-auto")}
-                  onClick={() => {
-                    if (confirm(`Usunąć wątek '${quest.title}'?`)) onDelete();
+                  onClick={async () => {
+                    if (await confirmDialog(`Usunąć wątek „${quest.title}”?`, { confirmLabel: "Usuń", destructive: true })) onDelete();
                   }}
                   title="Usuń wątek"
                 >
@@ -1194,7 +1195,7 @@ export default function QuestsPage() {
                           )
                         }
                       />
-                      <label className="flex shrink-0 items-center gap-1 text-[10px] text-muted-foreground">
+                      <label className="flex shrink-0 items-center gap-1 text-[11px] text-muted-foreground">
                         Kolor
                         <input
                           type="color"
@@ -1265,7 +1266,7 @@ export default function QuestsPage() {
                           )
                         }
                       />
-                      <label className="flex shrink-0 items-center gap-1 text-[10px] text-muted-foreground">
+                      <label className="flex shrink-0 items-center gap-1 text-[11px] text-muted-foreground">
                         Kolor
                         <input
                           type="color"
@@ -1332,7 +1333,7 @@ export default function QuestsPage() {
                     type="button"
                     onClick={() => setDraftType(t.id)}
                     className={cn(
-                      "flex min-h-[60px] flex-col items-center gap-1 rounded-md border p-2 text-[10px] transition-colors",
+                      "flex min-h-[60px] flex-col items-center gap-1 rounded-md border p-2 text-[11px] transition-colors",
                       draftType === t.id
                         ? "border-primary bg-primary/10 text-foreground"
                         : "border-border text-muted-foreground hover:bg-accent",

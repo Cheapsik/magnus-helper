@@ -168,7 +168,7 @@ function PresetCombatantEditor({
       {addingNew ? (
         <Card className="border-dashed border-primary/40">
           <CardContent className="space-y-2 p-2.5">
-            <p className="text-[10px] font-medium text-muted-foreground">Nowy uczestnik w presecie</p>
+            <p className="text-[11px] font-medium text-muted-foreground">Nowy uczestnik w presecie</p>
             <CombatantFormFields combatant={newDraft} onChange={setNewDraft} idPrefix="preset-new" />
             <div className="flex gap-2">
               <Button size="sm" className="h-9 flex-1" onClick={addNewCombatant} disabled={!newDraft.name.trim()}>
@@ -353,7 +353,7 @@ function CombatPresetsFull({
             <CardContent className="flex items-center justify-between gap-2 p-2.5">
               <div className="min-w-0">
                 <span className="block truncate text-sm font-semibold">{preset.name}</span>
-                <Badge variant="secondary" className="mt-0.5 text-[10px]">
+                <Badge variant="secondary" className="mt-0.5 text-[11px]">
                   {preset.combatants.length} uczestników
                 </Badge>
               </div>
@@ -426,7 +426,7 @@ function CombatPresetsCompact({
           presets.map((preset) => (
             <div key={preset.id} className="rounded-lg border border-border/80 bg-card px-2.5 py-2">
               <span className="block truncate text-sm font-semibold">{preset.name}</span>
-              <Badge variant="secondary" className="mt-1 text-[10px]">
+              <Badge variant="secondary" className="mt-1 text-[11px]">
                 {preset.combatants.length} uczestników
               </Badge>
             </div>
@@ -448,7 +448,7 @@ function CombatPresetsCompact({
 
   return (
     <>
-      <p className="shrink-0 px-3 pt-2 text-[10px] leading-snug text-muted-foreground">
+      <p className="shrink-0 px-3 pt-2 text-[11px] leading-snug text-muted-foreground">
         Presety wczytujesz przy „+ Nowa walka”. Pełna edycja w szufladzie poniżej.
       </p>
       {list}

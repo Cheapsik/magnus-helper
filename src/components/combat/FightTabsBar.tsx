@@ -135,7 +135,7 @@ export function FightTabsBar({
                   >
                     {fight.name}
                   </span>
-                  <span className="text-[10px] font-medium text-muted-foreground">
+                  <span className="text-[11px] font-medium text-muted-foreground">
                     Runda {fight.combatRound}
                     {fight.combatants.length > 0 && ` · ${fight.combatants.length} ucz.`}
                   </span>
@@ -208,7 +208,7 @@ export function FightTabsBar({
             </div>
             {presets.length > 0 && (
               <div className="space-y-1">
-                <label className="text-[11px] font-medium text-muted-foreground">Zacznij od</label>
+                <label className="text-[length:--fs-meta] font-medium text-muted-foreground">Zacznij od</label>
                 <select
                   value={selectedPresetId}
                   onChange={(e) => setSelectedPresetId(e.target.value)}
@@ -226,13 +226,13 @@ export function FightTabsBar({
             <Button className="h-10 w-full text-sm" onClick={handleNewFight}>
               {selectedPresetId ? "Utwórz z presetu" : "Utwórz pustą walkę"}
             </Button>
-            <p className="text-center text-[10px] text-muted-foreground">
+            <p className="text-center text-[11px] text-muted-foreground">
               {fights.length} / {MAX_COMBAT_FIGHTS} walk
             </p>
           </PopoverContent>
         </Popover>
       ) : (
-        <div className="flex min-h-[48px] shrink-0 items-center self-start rounded-lg border border-dashed border-border px-3 text-[10px] font-medium text-muted-foreground">
+        <div className="flex min-h-[48px] shrink-0 items-center self-start rounded-lg border border-dashed border-border px-3 text-[11px] font-medium text-muted-foreground">
           Limit {MAX_COMBAT_FIGHTS}
         </div>
       )}

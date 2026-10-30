@@ -268,12 +268,12 @@ export function AbilitiesReference() {
                   </span>
                   <Badge
                     variant={active ? "default" : "secondary"}
-                    className="h-5 min-w-5 justify-center px-1.5 text-[10px] font-normal tabular-nums"
+                    className="h-5 min-w-5 justify-center px-1.5 text-[11px] font-normal tabular-nums"
                   >
                     {counts[id]}
                   </Badge>
                 </span>
-                <span className="mt-0.5 text-[11px] leading-tight opacity-80">{hint}</span>
+                <span className="mt-0.5 text-[length:--fs-meta] leading-tight opacity-80">{hint}</span>
               </button>
             );
           })}
@@ -312,7 +312,7 @@ export function AbilitiesReference() {
                         {entry.nazwa}
                       </span>
                       {entry.cecha && (
-                        <Badge variant="outline" className="text-[10px] font-normal">
+                        <Badge variant="outline" className="text-[11px] font-normal">
                           {entry.cecha}
                         </Badge>
                       )}

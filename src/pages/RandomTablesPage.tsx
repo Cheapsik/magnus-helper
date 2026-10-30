@@ -12,6 +12,7 @@ import { entryLabel, parseTableText, randomTablesFileSchema, rollTable, tableDic
 import { mergeById, readJsonFile } from "@/lib/jsonImport";
 import TableConditionEditor from "@/components/tables/TableConditionEditor";
 import { useTableContext } from "@/components/tables/useTableContext";
+import { confirmDialog } from "@/components/ui/dialogs";
 
 type HistoryItem = TableRoll & { id: string; at: number };
 
@@ -52,8 +53,8 @@ export default function RandomTablesPage() {
     setTables((prev) => prev.map((t) => (t.id === selected.id ? { ...t, ...patch } : t)));
   };
 
-  const remove = () => {
-    if (!selected || !confirm(`Usunąć tabelę '${selected.name}'?`)) return;
+  const remove = async () => {
+    if (!selected || !(await confirmDialog(`Usunąć tabelę „${selected.name}”?`, { confirmLabel: "Usuń", destructive: true }))) return;
     setTables((prev) => prev.filter((t) => t.id !== selected.id));
     setSelectedId(null);
   };

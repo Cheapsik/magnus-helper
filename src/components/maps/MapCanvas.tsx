@@ -187,8 +187,8 @@ export function MapCanvas({ imageUrl, pins, addMode, selectedPinId, onSelect, on
               >
                 <Icon className="h-3.5 w-3.5" />
               </span>
-              {pinBadge?.(pin) && <span className="absolute -right-3 -top-2 rounded-full bg-amber-500 px-1 text-[9px] font-bold leading-tight text-black">{pinBadge(pin)}</span>}
-              <span className="mt-0.5 max-w-32 truncate rounded bg-background/80 px-1 text-[10px] font-medium leading-tight">{pin.label}</span>
+              {pinBadge?.(pin) && <span className="absolute -right-3 -top-2 rounded-full bg-amber-500 px-1 text-[11px] font-bold leading-tight text-black">{pinBadge(pin)}</span>}
+              <span className="mt-0.5 max-w-32 truncate rounded bg-background/80 px-1 text-[11px] font-medium leading-tight">{pin.label}</span>
             </div>
           );
         })}

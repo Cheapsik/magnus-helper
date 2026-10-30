@@ -58,7 +58,7 @@ export function CombatSidePanel({
             type="button"
             onClick={() => setTab(id)}
             className={cn(
-              "flex-1 py-2.5 text-[10px] sm:text-xs font-semibold transition-colors",
+              "flex-1 py-2.5 text-[11px] sm:text-xs font-semibold transition-colors",
               tab === id
                 ? "bg-card text-primary border-b-2 border-primary -mb-px"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/30",

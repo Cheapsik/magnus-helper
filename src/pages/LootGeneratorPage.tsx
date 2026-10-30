@@ -361,7 +361,7 @@ export default function LootGeneratorPage() {
               <label className="text-xs text-muted-foreground font-medium">Ilość przedmiotów</label>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-[9px] text-muted-foreground">Min</label>
+                  <label className="text-[11px] text-muted-foreground">Min</label>
                   <NumberInput
                     value={lootConfig.itemCount.min}
                     onChange={(v) => setLootConfig((p) => ({ ...p, itemCount: { ...p.itemCount, min: v } }))}
@@ -371,7 +371,7 @@ export default function LootGeneratorPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-[9px] text-muted-foreground">Max</label>
+                  <label className="text-[11px] text-muted-foreground">Max</label>
                   <NumberInput
                     value={lootConfig.itemCount.max}
                     onChange={(v) => setLootConfig((p) => ({ ...p, itemCount: { ...p.itemCount, max: v } }))}
@@ -405,7 +405,7 @@ export default function LootGeneratorPage() {
                       }));
                     return (
                       <div key={denomination.id}>
-                        <label className="text-[9px] text-muted-foreground">
+                        <label className="text-[11px] text-muted-foreground">
                           {denomination.name} ({denomination.short})
                         </label>
                         <div className="flex gap-0.5">
@@ -413,14 +413,14 @@ export default function LootGeneratorPage() {
                             value={range.min}
                             min={0}
                             onChange={(v) => setRange({ min: v })}
-                            className="h-7 text-[10px] text-center"
+                            className="h-7 text-[11px] text-center"
                             aria-label={`${denomination.name}: od`}
                           />
                           <NumberInput
                             value={range.max}
                             min={0}
                             onChange={(v) => setRange({ max: v })}
-                            className="h-7 text-[10px] text-center"
+                            className="h-7 text-[11px] text-center"
                             aria-label={`${denomination.name}: do`}
                           />
                         </div>
@@ -450,15 +450,15 @@ export default function LootGeneratorPage() {
                         <div className="min-w-0">
                           <span className="font-semibold">{item.name}</span>
                           <div className="flex flex-wrap gap-1 mt-0.5">
-                            <Badge variant="outline" className="text-[9px] px-1 py-0 h-4">
+                            <Badge variant="outline" className="text-[11px] px-1 py-0 h-4">
                               {item.rankName}
                             </Badge>
-                            <Badge variant="secondary" className="text-[9px] px-1 py-0 h-4">
+                            <Badge variant="secondary" className="text-[11px] px-1 py-0 h-4">
                               {item.type}
                             </Badge>
                           </div>
                           {item.description ? <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p> : null}
-                          <p className="text-[10px] text-muted-foreground mt-1">
+                          <p className="text-[11px] text-muted-foreground mt-1">
                             Wartość: {priceLabel(item.price)}
                           </p>
                         </div>
@@ -543,7 +543,7 @@ export default function LootGeneratorPage() {
                         onChange={(v) => updateRank(rank.id, { chance: v })}
                         className="h-[--h-control] text-xs w-20 text-center"
                       />
-                      <span className="text-[10px] text-muted-foreground">%</span>
+                      <span className="text-[11px] text-muted-foreground">%</span>
                       <Button size="icon" variant="ghost" className="min-h-[--h-control] min-w-[--h-control] shrink-0" onClick={() => setEditingRankId(null)}>
                         <Check className="h-3 w-3" />
                       </Button>
@@ -693,7 +693,7 @@ export default function LootGeneratorPage() {
                       {(item.tags?.length ?? 0) > 0 && (
                         <div className="flex flex-wrap gap-1 mb-1.5">
                           {item.tags!.map((tag) => (
-                            <span key={tag} className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium bg-muted text-muted-foreground border border-border/60">
+                            <span key={tag} className="inline-flex items-center rounded px-1.5 py-0.5 text-[11px] font-medium bg-muted text-muted-foreground border border-border/60">
                               {tag}
                             </span>
                           ))}
@@ -745,7 +745,7 @@ export default function LootGeneratorPage() {
                       <p className="font-bold text-sm leading-tight">{item.name}</p>
                       <Badge
                         variant="outline"
-                        className={cn("mt-1.5 text-[10px] font-normal", rankBadgeClass(item.rankName, rankNames))}
+                        className={cn("mt-1.5 text-[11px] font-normal", rankBadgeClass(item.rankName, rankNames))}
                       >
                         {item.rankName}
                       </Badge>
@@ -759,7 +759,7 @@ export default function LootGeneratorPage() {
                   {(item.tags?.length ?? 0) > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {item.tags!.map((tag) => (
-                        <span key={tag} className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium bg-muted text-muted-foreground border border-border/60">
+                        <span key={tag} className="inline-flex items-center rounded px-1.5 py-0.5 text-[11px] font-medium bg-muted text-muted-foreground border border-border/60">
                           {tag}
                         </span>
                       ))}
@@ -853,7 +853,7 @@ export default function LootGeneratorPage() {
                     className="min-h-[--h-control]"
                     placeholder="np. Fast, Obrażenia: SB+2, Zasięg: krótki"
                   />
-                  <p className="text-[11px] text-muted-foreground">Oddziel przecinkami. Wyświetlane jako plakietki.</p>
+                  <p className="text-[length:--fs-meta] text-muted-foreground">Oddziel przecinkami. Wyświetlane jako plakietki.</p>
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="f-description">Uwagi (MG)</Label>

@@ -71,7 +71,7 @@ export function MapToolbar({ onAutoLayout }: MapToolbarProps) {
             {linkingBanner || `Podgląd sesji: ${previewSessionName} (read-only)`}
           </span>
           {previewSessionName && (
-            <button type="button" className="underline text-[10px]" onClick={exitPreview}>
+            <button type="button" className="underline text-[11px]" onClick={exitPreview}>
               Wyjdź
             </button>
           )}
@@ -87,7 +87,7 @@ export function MapToolbar({ onAutoLayout }: MapToolbarProps) {
           <Sparkles className="h-3 w-3 text-primary shrink-0" />
           <span className="font-display">{currentSessionName || "Tryb sesji"}</span>
           {changedCount > 0 && (
-            <span className="text-primary text-[10px]">· {changedCount} NEW</span>
+            <span className="text-primary text-[11px]">· {changedCount} NEW</span>
           )}
           {pinnedNodes.map((n) => {
             const name = lookup.get(n.entityId)?.name ?? "?";
@@ -96,7 +96,7 @@ export function MapToolbar({ onAutoLayout }: MapToolbarProps) {
                 key={n.id}
                 type="button"
                 onClick={() => onOpenDetail(n.id)}
-                className="text-[10px] px-1.5 py-0.5 border border-primary/40 hover:bg-primary/10 truncate max-w-[100px]"
+                className="text-[11px] px-1.5 py-0.5 border border-primary/40 hover:bg-primary/10 truncate max-w-[100px]"
               >
                 {name}
               </button>

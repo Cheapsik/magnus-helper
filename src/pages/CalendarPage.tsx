@@ -18,6 +18,7 @@ import {
   eventDayIndex, formatDate, fromDayIndex, moonPhase, toDayIndex,
   type CalendarDate, type CalendarEvent,
 } from "@/lib/campaignCalendar";
+import { confirmDialog } from "@/components/ui/dialogs";
 
 function relative(days: number): string {
   if (days === 0) return "dziś";
@@ -81,8 +82,8 @@ export default function CalendarPage() {
             variant="ghost"
             size="icon"
             aria-label="Usuń wydarzenie"
-            onClick={() => {
-              if (confirm(`Usunąć wydarzenie '${event.title}'?`)) {
+            onClick={async () => {
+              if (await confirmDialog(`Usunąć wydarzenie „${event.title}”?`, { confirmLabel: "Usuń", destructive: true })) {
                 setState((s) => ({ ...s, events: s.events.filter((e) => e.id !== event.id) }));
               }
             }}

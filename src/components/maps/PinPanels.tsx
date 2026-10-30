@@ -73,7 +73,7 @@ export function PinPopover({ pin, targets, onOpenLink, onEdit, onDelete, onClose
                 key={linkKey(l)}
                 type="button"
                 onClick={() => onOpenLink(l)}
-                className="rounded border bg-muted px-1.5 py-0.5 text-[11px] hover:bg-accent"
+                className="rounded border bg-muted px-1.5 py-0.5 text-[length:--fs-meta] hover:bg-accent"
               >
                 <span className="text-muted-foreground">{LINK_KIND_LABEL[l.kind]}:</span> {l.name}
               </button>

@@ -308,7 +308,7 @@ export default function DicePage() {
                     type="button"
                     variant="secondary"
                     onClick={() => setSides(d)}
-                    className={`flex min-h-[2.75rem] items-center justify-center rounded-lg border-2 p-1.5 text-xs font-bold tabular-nums leading-none transition-colors active:scale-[0.98] sm:aspect-square sm:min-h-0 sm:text-[11px] ${
+                    className={`flex min-h-[2.75rem] items-center justify-center rounded-lg border-2 p-1.5 text-xs font-bold tabular-nums leading-none transition-colors active:scale-[0.98] sm:aspect-square sm:min-h-0 sm:text-[length:--fs-meta] ${
                       selected
                         ? "border-primary bg-primary/15 text-primary ring-2 ring-primary/30"
                         : isPrimary
@@ -331,7 +331,7 @@ export default function DicePage() {
                   type="button"
                   size="sm"
                   variant="ghost"
-                  className="h-7 gap-1 px-2 text-[10px] text-muted-foreground touch-manipulation"
+                  className="h-7 gap-1 px-2 text-[11px] text-muted-foreground touch-manipulation"
                   onClick={() => setCount(DICE_COUNT_MIN)}
                   title="Wyzeruj do 1 kości"
                   aria-label="Wyzeruj ilość do 1"
@@ -375,7 +375,7 @@ export default function DicePage() {
                   type="button"
                   size="sm"
                   variant="ghost"
-                  className="h-7 gap-1 px-2 text-[10px] text-muted-foreground touch-manipulation"
+                  className="h-7 gap-1 px-2 text-[11px] text-muted-foreground touch-manipulation"
                   onClick={() => setModifier(0)}
                   title="Wyzeruj do 0"
                   aria-label="Wyzeruj modyfikator do 0"

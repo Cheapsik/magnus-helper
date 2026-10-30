@@ -172,7 +172,7 @@ function SessionEditRow({
         </div>
       </div>
       {noteCount > 0 && (
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-[length:--fs-meta] text-muted-foreground">
           {noteCount} {noteCount === 1 ? "notatka przypisana" : "notatek przypisanych"} do tej sesji.
         </p>
       )}
@@ -487,7 +487,7 @@ export default function SessionNotesPage() {
 
       <div className="flex flex-col gap-2 rounded-md border border-border/60 bg-card/50 px-2.5 py-2">
         <div className="flex flex-col gap-1.5">
-          <Label className="text-[11px] text-muted-foreground">Aktywna sesja</Label>
+          <Label className="text-[length:--fs-meta] text-muted-foreground">Aktywna sesja</Label>
           <div className="flex gap-1.5">
             <Select value={activeSessionId} onValueChange={setActiveSessionId}>
               <SelectTrigger className="h-8 min-w-0 flex-1 text-xs">
@@ -523,7 +523,7 @@ export default function SessionNotesPage() {
             </Button>
           </div>
         </div>
-        <button type="button" className="self-start text-left text-[11px] text-primary hover:underline" onClick={handleTodaySession}>
+        <button type="button" className="self-start text-left text-[length:--fs-meta] text-primary hover:underline" onClick={handleTodaySession}>
           Dziś ta sesja (filtr + ostatnia not. sesyjna)
         </button>
         <div className="flex gap-1">
@@ -539,7 +539,7 @@ export default function SessionNotesPage() {
               type="button"
               size="sm"
               variant={scopeFilter === key ? "secondary" : "ghost"}
-              className={cn("h-7 flex-1 px-1.5 text-[11px] font-normal", scopeFilter === key && "bg-secondary ring-1 ring-border")}
+              className={cn("h-7 flex-1 px-1.5 text-[length:--fs-meta] font-normal", scopeFilter === key && "bg-secondary ring-1 ring-border")}
               onClick={() => setScopeFilter(key)}
             >
               {label}
@@ -582,7 +582,7 @@ export default function SessionNotesPage() {
                 {note.pinned ? <Pin className="h-3.5 w-3.5 text-primary" /> : <PinOff className="h-3.5 w-3.5 opacity-60" />}
               </button>
               <button type="button" className="min-w-0 flex-1 text-left" onClick={() => openEditNote(note)}>
-                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                   <Icon className="h-3 w-3 shrink-0" />
                   <span>{formatNoteTime(note.timestamp)}</span>
                   <span>·</span>
@@ -603,7 +603,7 @@ export default function SessionNotesPage() {
                           key={id}
                           role="button"
                           tabIndex={0}
-                          className="cursor-pointer rounded bg-muted/80 px-1.5 py-0 text-[10px] text-foreground/90"
+                          className="cursor-pointer rounded bg-muted/80 px-1.5 py-0 text-[11px] text-foreground/90"
                           onClick={(e) => {
                             e.stopPropagation();
                             setOpenNpcId(id);
@@ -752,7 +752,7 @@ export default function SessionNotesPage() {
                   {editorDraft.linkedNpcIds.map((id) => {
                     const npc = npcCards.find((n) => n.id === id);
                     return (
-                      <span key={id} className="inline-flex items-center gap-0.5 rounded-full border bg-muted/40 px-2 py-0.5 text-[11px]">
+                      <span key={id} className="inline-flex items-center gap-0.5 rounded-full border bg-muted/40 px-2 py-0.5 text-[length:--fs-meta]">
                         <button type="button" className="truncate max-w-[120px]" onClick={() => setOpenNpcId(id)}>
                           {npc ? cardTitle(npc) : id.slice(0, 6)}
                         </button>
@@ -940,7 +940,7 @@ export default function SessionNotesPage() {
           <div className="space-y-4 px-4 py-3">
             <section className="space-y-2">
               <h3 className="text-xs font-medium text-muted-foreground">Sesje</h3>
-              <p className="text-[11px] text-muted-foreground">Wybór aktywnej sesji jest na górze strony. Zmiana nazwy i usuwanie — ikona ołówka lub przycisk poniżej.</p>
+              <p className="text-[length:--fs-meta] text-muted-foreground">Wybór aktywnej sesji jest na górze strony. Zmiana nazwy i usuwanie — ikona ołówka lub przycisk poniżej.</p>
               <div className="flex flex-col gap-1.5">
                 <Button
                   type="button"
@@ -994,7 +994,7 @@ export default function SessionNotesPage() {
 
             <section className="space-y-2 border-t border-border/60 pt-3">
               <h3 className="text-xs font-medium text-muted-foreground">Kategorie</h3>
-              <p className="text-[11px] text-muted-foreground">Wielkość liter jest zachowana.</p>
+              <p className="text-[length:--fs-meta] text-muted-foreground">Wielkość liter jest zachowana.</p>
               <div className="flex gap-2">
                 <Input value={newCategoryId} onChange={(e) => setNewCategoryId(e.target.value)} placeholder="Nowa kategoria" className="h-8 text-xs" />
                 <Button type="button" size="sm" className="h-8 shrink-0 text-xs" onClick={addCustomCategory}>
@@ -1003,7 +1003,7 @@ export default function SessionNotesPage() {
               </div>
               <div className="flex flex-wrap gap-1">
                 {noteCategories.map((id) => (
-                  <span key={id} className="inline-flex items-center gap-1 rounded-md border bg-background px-2 py-0.5 text-[11px]">
+                  <span key={id} className="inline-flex items-center gap-1 rounded-md border bg-background px-2 py-0.5 text-[length:--fs-meta]">
                     {categoryLabel(id)}
                     {!(DEFAULT_NOTE_CATEGORY_IDS as readonly string[]).includes(id.toLowerCase()) && (
                       <button type="button" className="text-muted-foreground hover:text-foreground" onClick={() => removeCategory(id)} aria-label={`Usuń ${id}`}>

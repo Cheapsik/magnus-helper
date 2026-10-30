@@ -11,7 +11,7 @@ type Props = {
 };
 
 const SELECT_CLASS = "h-8 rounded-md border border-input bg-background px-2 text-sm";
-const EDGE_COLOR: Record<RelationKind, string> = { ally: "#22c55e", enemy: "#ef4444", neutral: "#9ca3af" };
+const EDGE_COLOR: Record<RelationKind, string> = { ally: "hsl(var(--success))", enemy: "hsl(var(--destructive))", neutral: "hsl(var(--muted-foreground))" };
 const SIZE = 300;
 
 export function FactionRelationsGraph({ factions, relations, onChange }: Props) {
@@ -36,7 +36,7 @@ export function FactionRelationsGraph({ factions, relations, onChange }: Props) 
             <line
               key={r.id}
               x1={a.x} y1={a.y} x2={b.x} y2={b.y}
-              stroke={EDGE_COLOR[r.kind]}
+              style={{ stroke: EDGE_COLOR[r.kind] }}
               strokeWidth={1 + Math.min(Math.abs(r.factor), 1) * 3}
               strokeDasharray={r.kind === "neutral" ? "4 4" : undefined}
             />

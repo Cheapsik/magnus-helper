@@ -63,11 +63,11 @@ export function CharacterPoolPanel() {
               <div className="flex-1 min-w-0">
                 <div className="text-xs font-medium text-foreground truncate">{e.name}</div>
                 {e.desc && (
-                  <div className="text-[10px] text-muted-foreground truncate">{e.desc}</div>
+                  <div className="text-[11px] text-muted-foreground truncate">{e.desc}</div>
                 )}
               </div>
               {placed ? (
-                <Badge variant="outline" className="text-[9px] px-1 py-0">
+                <Badge variant="outline" className="text-[11px] px-1 py-0">
                   ✓
                 </Badge>
               ) : (

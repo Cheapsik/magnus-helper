@@ -85,7 +85,7 @@ export default function CampaignManager() {
             {isActive && <Check className="h-3.5 w-3.5 text-primary shrink-0" />}
             <span className="text-sm text-foreground truncate">{campaign.name}</span>
           </div>
-          {isActive && <span className="text-[11px] text-muted-foreground">Aktywna</span>}
+          {isActive && <span className="text-[length:--fs-meta] text-muted-foreground">Aktywna</span>}
         </div>
         {!isActive && !campaign.archivedAt && (
           <Button size="sm" variant="ghost" onClick={() => switchCampaign(campaign.id)}>

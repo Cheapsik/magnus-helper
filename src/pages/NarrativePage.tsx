@@ -15,6 +15,7 @@ import {
   addDecision, enterScene, hasTag, newId, pendingTags, removeAct, removeScene, resolveSceneId, takeBranch,
   type Consequence, type NarrativeState, type NarrativeStructure, type Scene,
 } from "@/lib/narrativeEngine";
+import { confirmDialog } from "@/components/ui/dialogs";
 
 const selectCls = "h-9 rounded-md border border-input bg-background px-2 text-sm";
 
@@ -117,7 +118,7 @@ export default function NarrativePage() {
                 size="icon"
                 variant="ghost"
                 aria-label="Usuń akt"
-                onClick={() => confirm(`Usunąć akt „${act.name}” wraz ze scenami?`) && setStructure((s) => removeAct(s, act.id))}
+                onClick={async () => (await confirmDialog(`Usunąć akt „${act.name}” wraz ze scenami?`, { confirmLabel: "Usuń", destructive: true })) && setStructure((s) => removeAct(s, act.id))}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

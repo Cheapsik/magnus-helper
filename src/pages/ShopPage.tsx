@@ -349,7 +349,7 @@ export default function ShopPage() {
 
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Zakres cen per ranga</Label>
-          <p className="text-[11px] text-muted-foreground leading-snug">
+          <p className="text-[length:--fs-meta] text-muted-foreground leading-snug">
             Jeśli przedmiot ma cenę bazową, losowane jest 0,8–1,2× tej ceny. Przedmiot bez ceny dostaje cenę z zakresu jego rangi.
             Kwoty w walucie kampanii
             {currency.length === 0 ? (
@@ -418,7 +418,7 @@ export default function ShopPage() {
                 >
                   <div className="min-w-0">
                     <div className="font-medium truncate">{snap.snapshotName}</div>
-                    <div className="text-[11px] text-muted-foreground">
+                    <div className="text-[length:--fs-meta] text-muted-foreground">
                       {new Date(snap.savedAt).toLocaleString("pl-PL")} · {snap.lines.length} poz.
                     </div>
                   </div>
@@ -501,7 +501,7 @@ export default function ShopPage() {
               <TableCell className="font-medium">{line.name}</TableCell>
               <TableCell>{line.type}</TableCell>
               <TableCell>
-                <Badge variant="outline" className={cn("text-[10px]", rankBadgeClass(line.rankName, rankNames))}>
+                <Badge variant="outline" className={cn("text-[11px]", rankBadgeClass(line.rankName, rankNames))}>
                   {line.rankName}
                 </Badge>
               </TableCell>
@@ -564,7 +564,7 @@ export default function ShopPage() {
           <CardContent className="p-3 space-y-2">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <span className="font-bold leading-tight">{line.name}</span>
-              <Badge variant="outline" className={cn("text-[10px] shrink-0", rankBadgeClass(line.rankName, rankNames))}>
+              <Badge variant="outline" className={cn("text-[11px] shrink-0", rankBadgeClass(line.rankName, rankNames))}>
                 {line.rankName}
               </Badge>
             </div>

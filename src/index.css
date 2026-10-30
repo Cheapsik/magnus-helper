@@ -4,73 +4,75 @@
 
 
 /**
- * Magnus — one theme, one lamp.
+ * Magnus — one theme, one candle.
  *
  * The console is operated live at a table, in a dim room, glanced at between
  * players' turns. Two rules carry the whole look:
  *
  *   1. Light comes from above and there are no shadows anywhere. A raised
- *      surface is marked by a hairline highlight on its TOP edge only.
- *   2. The palette is near-monochrome. Gold is pale metal and carries
- *      interaction; crimson is the single saturated colour in the product and
- *      is spent only on live state — whose turn it is, an enemy, a deletion.
+ *      surface is marked by a warm hairline highlight on its TOP edge only.
+ *   2. The palette is near-monochrome warm graphite. Candle gold (the same as
+ *      on the sign-in page) carries interaction; crimson is the single
+ *      saturated colour in the product and is spent only on live state —
+ *      whose turn it is, an enemy, a deletion.
  *
  * Everything else is spacing and type. Change values here, not in pages.
+ * Text is sized to be read at arm's length in low light: nothing below 11px.
  */
 @layer base {
   :root {
     /* Surfaces, darkest to lightest. */
-    --background: 222 22% 6%;
-    --card: 222 20% 9%;
-    --popover: 222 19% 11%;
-    --secondary: 222 17% 13%;
-    --muted: 222 15% 15%;
-    --accent: 222 16% 18%;
-    --border: 222 14% 17%;
-    --input: 222 14% 22%;
+    --background: 28 16% 6%;
+    --card: 28 14% 9%;
+    --popover: 28 13% 11%;
+    --secondary: 28 12% 13%;
+    --muted: 28 10% 15%;
+    --accent: 28 11% 18%;
+    --border: 28 10% 18%;
+    --input: 28 10% 23%;
 
-    --foreground: 220 20% 93%;
-    --card-foreground: 220 20% 93%;
-    --popover-foreground: 220 20% 93%;
-    --secondary-foreground: 220 12% 80%;
-    --muted-foreground: 220 10% 56%;
-    --accent-foreground: 220 20% 93%;
+    --foreground: 38 28% 91%;
+    --card-foreground: 38 28% 91%;
+    --popover-foreground: 38 28% 91%;
+    --secondary-foreground: 36 14% 80%;
+    --muted-foreground: 34 9% 60%;
+    --accent-foreground: 38 28% 91%;
 
-    /* Pale metal, not fantasy gold. */
-    --primary: 42 34% 62%;
-    --primary-foreground: 222 25% 8%;
-    --ring: 42 34% 62%;
+    /* Candle gold. */
+    --primary: 39 47% 56%;
+    --primary-foreground: 28 25% 8%;
+    --ring: 39 47% 56%;
 
-    --destructive: 352 72% 54%;
+    --destructive: 354 68% 54%;
     --destructive-foreground: 0 0% 100%;
-    --success: 152 38% 44%;
-    --success-foreground: 152 20% 96%;
+    --success: 140 30% 46%;
+    --success-foreground: 140 20% 96%;
 
-    --sidebar-background: 222 24% 5%;
-    --sidebar-foreground: 220 10% 62%;
-    --sidebar-primary: 42 34% 62%;
-    --sidebar-primary-foreground: 222 25% 8%;
-    --sidebar-accent: 222 17% 12%;
-    --sidebar-accent-foreground: 220 20% 93%;
-    --sidebar-border: 222 14% 14%;
-    --sidebar-ring: 42 34% 62%;
+    --sidebar-background: 28 18% 5%;
+    --sidebar-foreground: 34 9% 64%;
+    --sidebar-primary: 39 47% 56%;
+    --sidebar-primary-foreground: 28 25% 8%;
+    --sidebar-accent: 28 12% 12%;
+    --sidebar-accent-foreground: 38 28% 91%;
+    --sidebar-border: 28 10% 14%;
+    --sidebar-ring: 39 47% 56%;
 
-    /* The lamp. A top edge catches light; nothing else does. */
-    --lit-edge: 220 40% 90%;
-    --lit-edge-strength: 0.055;
+    /* The candle. A top edge catches its light; nothing else does. */
+    --lit-edge: 38 80% 78%;
+    --lit-edge-strength: 0.07;
 
     /* Control geometry; pointer-coarse devices get real touch targets below. */
-    --h-control: 1.875rem;
-    --h-control-sm: 1.625rem;
-    --h-control-lg: 2.25rem;
-    --h-row: 2rem;
+    --h-control: 2.25rem;
+    --h-control-sm: 2rem;
+    --h-control-lg: 2.5rem;
+    --h-row: 2.25rem;
 
     /* Type scale. Families are fixed; only size, weight and colour vary. */
-    --fs-meta: 0.71875rem;
-    --fs-sm: 0.8125rem;
-    --fs-base: 0.84375rem;
-    --fs-section: 0.9375rem;
-    --fs-title: 1.625rem;
+    --fs-meta: 0.75rem;
+    --fs-sm: 0.875rem;
+    --fs-base: 0.9375rem;
+    --fs-section: 1.0625rem;
+    --fs-title: 1.75rem;
 
     --radius: 0.375rem;
   }
@@ -500,12 +502,4 @@
   .paper-topbar {
     border-bottom-color: #000;
   }
-}
-
-/* ── Auth page (login) ── */
-.auth-page {
-  --auth-gold: #c5a059;
-  --auth-gold-hover: #b8924f;
-  --auth-card: rgba(22, 22, 26, 0.88);
-  --auth-input: rgba(0, 0, 0, 0.45);
 }

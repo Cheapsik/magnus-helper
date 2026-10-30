@@ -1,6 +1,7 @@
 import { ThemeProvider } from "next-themes";
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
+import { DialogHost } from "@/components/ui/dialogs";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
 import { AmbientProvider } from "@/context/AmbientContext";
@@ -167,6 +168,7 @@ const App = () => (
     <SettingsProvider>
       <TooltipProvider>
         <Toaster />
+        <DialogHost />
         <CampaignProvider>
           <AppProvider>
             <AmbientProvider>

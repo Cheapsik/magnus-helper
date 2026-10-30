@@ -7,6 +7,7 @@ import { logChronicleEvent } from "@/lib/chronicle";
 import { cn } from "@/lib/utils";
 import { ClockDial } from "./ClockDial";
 import { ClockEditor, useQuestTitles } from "./ClockEditor";
+import { confirmDialog } from "@/components/ui/dialogs";
 
 /**
  * Self-contained clock list: reads and writes campaign storage itself, so it
@@ -21,8 +22,8 @@ export function ClocksPanel({ wide = false }: { wide?: boolean }) {
   const update = (id: string, fn: (c: Clock) => Clock) => setClocks((prev) => prev.map((c) => (c.id === id ? fn(c) : c)));
   const save = (c: Clock) =>
     setClocks((prev) => (prev.some((p) => p.id === c.id) ? prev.map((p) => (p.id === c.id ? c : p)) : [...prev, c]));
-  const remove = (c: Clock) => {
-    if (!confirm(`Czy na pewno usunąć koło postępu '${c.name}'?`)) return;
+  const remove = async (c: Clock) => {
+    if (!(await confirmDialog(`Usunąć koło postępu „${c.name}”?`, { confirmLabel: "Usuń", destructive: true }))) return;
     setClocks((prev) => prev.filter((p) => p.id !== c.id));
   };
   const tickLogged = (c: Clock, delta: number) => {

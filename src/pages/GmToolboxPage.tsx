@@ -455,7 +455,7 @@ export default function GmToolboxPage() {
                         <div className="font-medium truncate">{t.label || "Timer"}</div>
                         <div className="font-mono text-muted-foreground">{formatTimerMs(t.displayMs)}</div>
                       </div>
-                      <Button size="sm" variant="outline" className="h-7 shrink-0 text-[10px] px-2" onClick={() => gmTick(t.id)}>
+                      <Button size="sm" variant="outline" className="h-7 shrink-0 text-[11px] px-2" onClick={() => gmTick(t.id)}>
                         Tick
                       </Button>
                     </li>
@@ -507,7 +507,7 @@ export default function GmToolboxPage() {
       <section className="space-y-2">
         <div className="flex items-center justify-between gap-2">
           <h2 className="field-label">Notatki MG (prywatne)</h2>
-          {notesSaved && <span className="text-[10px] text-muted-foreground">Zapisano</span>}
+          {notesSaved && <span className="text-[11px] text-muted-foreground">Zapisano</span>}
         </div>
         <Textarea
           value={sessionNotes}
@@ -515,7 +515,7 @@ export default function GmToolboxPage() {
           placeholder="Szybkie notatki tylko dla Ciebie — gracze tego nie widzą"
           className="min-h-[140px] text-sm resize-y bg-card/80 border-border"
         />
-        <p className="text-[10px] text-muted-foreground">Autosave co ok. 3 s do pamięci przeglądarki.</p>
+        <p className="text-[11px] text-muted-foreground">Autosave co ok. 3 s do pamięci przeglądarki.</p>
       </section>
 
       <section>
@@ -673,7 +673,7 @@ export default function GmToolboxPage() {
                       type="button"
                       onClick={() => setQuestDraft((d) => ({ ...d, typeId: t.id }))}
                       className={cn(
-                        "flex min-h-[56px] flex-col items-center gap-1 rounded-md border p-2 text-[10px] transition-colors",
+                        "flex min-h-[56px] flex-col items-center gap-1 rounded-md border p-2 text-[11px] transition-colors",
                         questDraft.typeId === t.id
                           ? "border-primary bg-primary/10 text-foreground"
                           : "border-border text-muted-foreground hover:bg-accent",
@@ -718,7 +718,7 @@ export default function GmToolboxPage() {
                     >
                       <span
                         className="h-2.5 w-2.5 shrink-0 rounded-full border border-white/30"
-                        style={{ backgroundColor: c.color ?? "#6b7280" }}
+                        style={{ backgroundColor: c.color ?? "hsl(var(--muted-foreground))" }}
                       />
                       {c.label ?? c.id}
                     </button>

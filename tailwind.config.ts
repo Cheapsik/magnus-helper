@@ -63,6 +63,11 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
       },
+      // Read in low light at arm's length (src/index.css): the two smallest steps sit above Tailwind's defaults.
+      fontSize: {
+        xs: ["0.8125rem", { lineHeight: "1.125rem" }],
+        sm: ["0.9375rem", { lineHeight: "1.375rem" }],
+      },
       fontFamily: {
 
         "app-brand": ['"MedievalSharp"', "cursive"],

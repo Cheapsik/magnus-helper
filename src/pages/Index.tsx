@@ -12,9 +12,9 @@ interface QuestLite { id: string; title: string; column: string; type: string; u
 interface TimerLite { id: string; label: string; mode: "stopwatch" | "countdown"; countdownSet: number; }
 
 function hpColor(pct: number): string {
-  if (pct > 60) return "#4A7C59";
-  if (pct >= 30) return "#A0892A";
-  return "#8A1C1C";
+  if (pct > 60) return "hsl(var(--success))";
+  if (pct >= 30) return "hsl(var(--primary))";
+  return "hsl(var(--destructive))";
 }
 
 interface LastRoll { type: string; result: number | string; label?: string; timestamp?: string; }

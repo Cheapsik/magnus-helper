@@ -28,6 +28,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MaterialViewer } from "@/components/materials/MaterialViewer";
+import { confirmDialog } from "@/components/ui/dialogs";
 
 /** Rejects photos straight off a camera that would only be downscaled anyway after a long upload. */
 const MAX_SOURCE_BYTES = 25 * 1024 * 1024;
@@ -161,7 +162,7 @@ function SharedCampaignView({ campaignId }: { campaignId: string }) {
                       size="icon"
                       className="h-7 w-7 text-destructive"
                       aria-label="Usuń"
-                      onClick={() => confirm(`Usunąć materiał „${m.title}”? Gracze też go stracą.`) && act(() => deleteMaterial(m))}
+                      onClick={async () => (await confirmDialog(`Usunąć materiał „${m.title}”?`, { description: "Gracze też go stracą.", confirmLabel: "Usuń", destructive: true })) && act(() => deleteMaterial(m))}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
@@ -236,7 +237,7 @@ function PlayersPanel({ campaignId, members, onRemove }: { campaignId: string; m
             size="sm"
             className="h-7 gap-1.5 px-2 text-xs text-muted-foreground"
             onClick={async () => {
-              if (!confirm("Wygenerować nowy link? Stary przestanie działać; gracze, którzy już dołączyli, zostają.")) return;
+              if (!(await confirmDialog("Wygenerować nowy link?", { description: "Stary przestanie działać; gracze, którzy już dołączyli, zostają.", confirmLabel: "Wygeneruj" }))) return;
               try {
                 setToken(await regenerateInvite(campaignId));
               } catch (e) {
@@ -260,7 +261,7 @@ function PlayersPanel({ campaignId, members, onRemove }: { campaignId: string; m
                 size="icon"
                 className="h-7 w-7 text-muted-foreground hover:text-destructive"
                 aria-label={`Usuń gracza ${m.display_name}`}
-                onClick={() => confirm(`Usunąć gracza „${m.display_name}” z kampanii?`) && onRemove(m)}
+                onClick={async () => (await confirmDialog(`Usunąć gracza „${m.display_name}” z kampanii?`, { confirmLabel: "Usuń", destructive: true })) && onRemove(m)}
               >
                 <UserMinus className="h-3.5 w-3.5" />
               </Button>

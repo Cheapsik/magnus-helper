@@ -17,6 +17,7 @@ import { useAmbient, type SoundItem, type Category } from "@/context/AmbientCont
 import { unlockMobileAudio } from "@/lib/mobileAudioUnlock";
 import { EmojiPickerButton } from "@/components/emoji/EmojiPickerButton";
 import { AUDIO_ACCEPT, AUDIO_FILE_WARN_BYTES, deleteAudio, formatBytes, isAudioFile, putAudio } from "@/lib/audioStore";
+import { confirmDialog } from "@/components/ui/dialogs";
 
 function genId() { return Math.random().toString(36).slice(2, 10); }
 
@@ -128,9 +129,9 @@ export default function AmbientPage() {
   const moveToCategory = (soundId: string, catId: string) => { save((c) => ({ ...c, sounds: c.sounds.map((s) => s.id === soundId ? { ...s, categoryId: catId } : s) })); };
   const toggleCollapse = (catId: string) => { save((c) => ({ ...c, categories: c.categories.map((cat) => cat.id === catId ? { ...cat, collapsed: !cat.collapsed } : cat) })); };
   const renameCategory = (catId: string, name: string) => { save((c) => ({ ...c, categories: c.categories.map((cat) => cat.id === catId ? { ...cat, name } : cat) })); };
-  const deleteCategory = (cat: Category) => {
+  const deleteCategory = async (cat: Category) => {
     if (cat.id === "__uncategorized__") return;
-    if (!confirm(`Usunąć kategorię '${cat.name}'? Dźwięki zostaną przeniesione do 'Bez kategorii'`)) return;
+    if (!(await confirmDialog(`Usunąć kategorię „${cat.name}”?`, { description: "Dźwięki trafią do „Bez kategorii”.", confirmLabel: "Usuń", destructive: true }))) return;
     save((c) => {
       const cats = c.categories.filter((ct) => ct.id !== cat.id);
       const sounds = c.sounds.map((s) => s.categoryId === cat.id ? { ...s, categoryId: "__uncategorized__" } : s);
@@ -413,7 +414,7 @@ function SoundTile({
         <span className="text-2xl leading-none">{sound.emoji}</span>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium leading-tight line-clamp-2">{sound.name}</p>
-          <Badge variant="secondary" className="text-[10px] mt-1">{sound.type === "loop" ? "pętla" : "efekt"}</Badge>
+          <Badge variant="secondary" className="text-[11px] mt-1">{sound.type === "loop" ? "pętla" : "efekt"}</Badge>
         </div>
       </div>
 

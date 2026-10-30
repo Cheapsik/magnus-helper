@@ -78,9 +78,9 @@ export default function ConditionsPage() {
                   {c.rounds !== undefined ? (
                     <div className="flex items-center gap-1 mr-1">
                       <Timer className="h-3 w-3 text-muted-foreground" />
-                      <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => updateRounds(c.id, -1)}><span className="text-[10px]">-</span></Button>
+                      <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => updateRounds(c.id, -1)}><span className="text-[11px]">-</span></Button>
                       <span className="text-xs font-bold min-w-[1.5ch] text-center">{c.rounds}</span>
-                      <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => updateRounds(c.id, 1)}><span className="text-[10px]">+</span></Button>
+                      <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => updateRounds(c.id, 1)}><span className="text-[11px]">+</span></Button>
                     </div>
                   ) : (
                     <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => updateRounds(c.id, 0)} title="Dodaj licznik rund">

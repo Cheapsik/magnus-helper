@@ -11,6 +11,7 @@ import { JourneyView } from "@/components/travel/JourneyView";
 import type { RandomTable } from "@/lib/randomTables";
 import { daysTravelled, normalizeJourney, STATUS_LABELS, totalDays, useJourneys, type Journey } from "@/lib/travel";
 import { cn } from "@/lib/utils";
+import { confirmDialog } from "@/components/ui/dialogs";
 
 export default function TravelPage() {
   const [journeys, setJourneys] = useJourneys();
@@ -25,12 +26,12 @@ export default function TravelPage() {
     setJourneys((prev) => [...prev, j]);
     setSelectedId(j.id);
   };
-  const remove = (j: Journey) => {
-    if (!confirm(`Czy na pewno usunąć podróż '${j.name}'?`)) return;
+  const remove = async (j: Journey) => {
+    if (!(await confirmDialog(`Usunąć podróż „${j.name}”?`, { confirmLabel: "Usuń", destructive: true }))) return;
     setJourneys((prev) => prev.filter((p) => p.id !== j.id));
   };
-  const restart = (j: Journey) => {
-    if (!confirm("Wrócić na początek trasy i wyczyścić dziennik? Zapasy i kalendarz nie zostaną cofnięte.")) return;
+  const restart = async (j: Journey) => {
+    if (!(await confirmDialog("Wrócić na początek trasy i wyczyścić dziennik?", { description: "Zapasy i kalendarz nie zostaną cofnięte.", confirmLabel: "Wróć na początek" }))) return;
     update(j.id)((x) => ({ ...x, status: "planned", stageIndex: 0, dayInStage: 0, log: [] }));
   };
 

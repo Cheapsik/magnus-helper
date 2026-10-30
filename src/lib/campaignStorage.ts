@@ -29,6 +29,7 @@ const GLOBAL_KEYS = new Set<string>([
   "magnus_settings",
   "rpg_theme",
   "magnus_sidebar_width",
+  "magnus_nav",
   "magnus-dice-3d-visual",
   "magnus_app_role",
   "magnus_pending_invite",
