@@ -10,6 +10,11 @@ Magnus Helper is built on the open-source software and assets listed below. Each
 
 ## 1. Bundled assets
 
+### Sign-in background
+
+- Files: `public/assets/images/auth-desktop.jpg` and `public/assets/images/auth-mobile.jpg`.
+- Made for Magnus Helper with an AI image generator (ChatGPT) from a prompt that excludes text, logos and the style of any artist, game or publisher. Owned by the project; no third-party license.
+
 ### 3D dice: textures and sounds
 
 - Files: `public/assets/dice-box/textures/*` and `public/assets/dice-box/sounds/*`
