@@ -55,7 +55,7 @@ function EntityNodeComponent({ data, id }: NodeProps) {
           {isNpc ? "NPC" : "BH"}
         </span>
       </div>
-      <p className="px-2 py-1 text-[11px] text-muted-foreground truncate leading-tight min-h-[1.25rem]">
+      <p className="px-2 py-1 text-[12px] text-muted-foreground truncate leading-tight min-h-[1.25rem]">
         {d.missing ? "Usunięta" : d.subtitle || "—"}
       </p>
       <div className="px-2 pb-1.5 flex gap-1">
@@ -66,7 +66,7 @@ function EntityNodeComponent({ data, id }: NodeProps) {
             onOpenDetail(id);
           }}
           disabled={d.missing}
-          className="flex-1 text-[11px] py-0.5 border border-border hover:border-primary hover:text-primary transition-colors disabled:opacity-40"
+          className="flex-1 text-[12px] py-0.5 border border-border hover:border-primary hover:text-primary transition-colors disabled:opacity-40"
         >
           Karta
         </button>
@@ -77,7 +77,7 @@ function EntityNodeComponent({ data, id }: NodeProps) {
             onStartQuickLink(id);
           }}
           disabled={d.missing}
-          className="text-[11px] py-0.5 px-1.5 border border-border hover:border-primary hover:text-primary transition-colors disabled:opacity-40"
+          className="text-[12px] py-0.5 px-1.5 border border-border hover:border-primary hover:text-primary transition-colors disabled:opacity-40"
           title="Dodaj relację"
         >
           <Plus className="h-3 w-3" />

@@ -22,7 +22,7 @@ export function TableRollTile({ refId, editing, onPick }: { refId?: string; edit
 
   return (
     <div className="space-y-3">
-      <Button className="h-12 w-full text-base" onClick={roll}>
+      <Button size="lg" className="w-full text-base" onClick={roll}>
         <Dices className="mr-2 h-5 w-5" /> Losuj: {table.name}
       </Button>
       {result && (

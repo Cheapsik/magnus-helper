@@ -8,7 +8,7 @@ export const iconBtn =
   "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-foreground disabled:pointer-events-none disabled:opacity-30";
 
 export const inputCls =
-  "h-8 w-full min-w-0 rounded-md border border-input bg-background px-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+  "field field-sm w-full";
 
 export function MoveButtons({
   onMove,

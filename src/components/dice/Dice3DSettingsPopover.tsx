@@ -104,7 +104,7 @@ export function Dice3DSettingsPopover({ value, onChange, disabled, triggerClassN
             onValueChange={(v) => patch({ themeMaterial: v as Dice3DVisualConfig["themeMaterial"] })}
             disabled={disabled}
           >
-            <SelectTrigger className="h-9 text-xs">
+            <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="z-[100]">
@@ -145,7 +145,7 @@ export function Dice3DSettingsPopover({ value, onChange, disabled, triggerClassN
           type="button"
           variant="secondary"
           size="sm"
-          className="w-full text-xs"
+          className="w-full"
           disabled={disabled}
           onClick={() => onChange({ ...DEFAULT_DICE_3D_VISUAL })}
         >

@@ -59,7 +59,7 @@ export function JourneySetup({ journey, tables, months, onChange }: {
               <Trash2 className="h-4 w-4" />
             </Button>
             <Input
-              className="col-span-3 h-8 text-xs"
+              className="field-sm col-span-3"
               placeholder="Notatka do etapu (opcjonalnie)"
               aria-label="Notatka do etapu"
               value={s.note}

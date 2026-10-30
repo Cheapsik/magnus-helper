@@ -30,7 +30,7 @@ export function MentionDropdown({ isOpen, items, activeIndex, onSelect }: Mentio
           >
             <span>{item.icon}</span>
             <span className="truncate">{item.title}</span>
-            <span className="ml-auto text-[11px] uppercase text-muted-foreground">{item.typeLabel}</span>
+            <span className="ml-auto text-[12px] uppercase text-muted-foreground">{item.typeLabel}</span>
           </button>
         ))
       )}

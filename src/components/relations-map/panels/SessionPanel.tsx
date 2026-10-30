@@ -20,13 +20,13 @@ export function SessionPanel({ embedded }: { embedded?: boolean }) {
   return (
     <div className={embedded ? "space-y-2" : "border-t border-border px-3 py-3 shrink-0 max-h-[180px] overflow-y-auto"}>
       <div className="flex items-center justify-end gap-1 mb-1">
-        <Button size="sm" variant="ghost" className="h-6 px-1.5" onClick={startNewSession} title="Nowa sesja">
+        <Button size="sm" variant="ghost" className="px-1.5" onClick={startNewSession} title="Nowa sesja">
           <Plus className="h-3 w-3" />
         </Button>
         <Button
           size="sm"
           variant="ghost"
-          className="h-6 px-1.5 disabled:opacity-30"
+          className="px-1.5 disabled:opacity-30"
           onClick={clearChangedFlags}
           disabled={!hasChangedFlags}
           title="Wyczyść znaczniki NEW"
@@ -35,12 +35,12 @@ export function SessionPanel({ embedded }: { embedded?: boolean }) {
         </Button>
       </div>
       {previewSessionId && (
-        <div className="mb-2 p-2 border border-primary/40 bg-primary/5 text-[11px]">
+        <div className="mb-2 p-2 border border-primary/40 bg-primary/5 text-[12px]">
           <div className="text-primary font-medium mb-1">Podgląd sesji</div>
           <Button
             size="sm"
             variant="outline"
-            className="h-6 text-[11px] w-full"
+            className="w-full"
             onClick={() => setPreviewSessionId(null)}
           >
             Wróć do bieżącego
@@ -48,7 +48,7 @@ export function SessionPanel({ embedded }: { embedded?: boolean }) {
         </div>
       )}
       {records.length === 0 && (
-        <p className="text-[11px] text-muted-foreground">Brak zapisanych sesji.</p>
+        <p className="text-[12px] text-muted-foreground">Brak zapisanych sesji.</p>
       )}
       <div className="space-y-1">
         {records.map((s) => (
@@ -66,7 +66,7 @@ export function SessionPanel({ embedded }: { embedded?: boolean }) {
             )}
           >
             <div className="font-medium truncate">{s.name}</div>
-            <div className="text-[11px] text-muted-foreground">
+            <div className="text-[12px] text-muted-foreground">
               {new Date(s.startedAt).toLocaleDateString()}
               {s.endedAt ? ` · zakończona` : persisted.currentSessionId === s.id ? " · aktywna" : ""}
               {" · "}
@@ -86,7 +86,7 @@ export function SessionPanel({ embedded }: { embedded?: boolean }) {
             .map((t, i) => (
               <div
                 key={i}
-                className="text-[11px] text-muted-foreground py-0.5 border-l border-primary/30 pl-1.5 mb-1"
+                className="text-[12px] text-muted-foreground py-0.5 border-l border-primary/30 pl-1.5 mb-1"
               >
                 <div className="truncate">{t.message}</div>
               </div>

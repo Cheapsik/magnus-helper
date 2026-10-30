@@ -73,7 +73,7 @@ function InitiativeTile() {
           ))}
         </ul>
       )}
-      <Button className="h-12 w-full text-base" onClick={next} disabled={sorted.length === 0}>
+      <Button size="lg" className="w-full text-base" onClick={next} disabled={sorted.length === 0}>
         Następna tura <ChevronRight className="ml-1 h-5 w-5" />
       </Button>
     </div>
@@ -90,7 +90,7 @@ function DiceTile() {
     <div className="space-y-3">
       <div className="grid grid-cols-4 gap-2">
         {QUICK_DICE.map((d) => (
-          <Button key={d} variant="outline" className="h-12 font-mono" onClick={() => roll(`1k${d}`)}>
+          <Button size="lg" key={d} variant="outline" className="font-mono" onClick={() => roll(`1k${d}`)}>
             k{d}
           </Button>
         ))}
@@ -102,8 +102,8 @@ function DiceTile() {
           if (notation.trim()) roll(notation.trim());
         }}
       >
-        <Input className="h-12" value={notation} onChange={(e) => setNotation(e.target.value)} placeholder="np. 2k6+3" />
-        <Button type="submit" className="h-12">
+        <Input className="field-lg" value={notation} onChange={(e) => setNotation(e.target.value)} placeholder="np. 2k6+3" />
+        <Button size="lg" type="submit">
           Rzuć
         </Button>
       </form>
@@ -167,7 +167,7 @@ function DateTile() {
   return (
     <div className="space-y-3">
       <p className="text-lg font-semibold">{date}</p>
-      <Button variant="outline" className="h-12 w-full" onClick={() => setState((s) => ({ ...s, today: s.today + 1 }))}>
+      <Button size="lg" variant="outline" className="w-full" onClick={() => setState((s) => ({ ...s, today: s.today + 1 }))}>
         <CalendarPlus className="mr-2 h-5 w-5" /> +1 dzień
       </Button>
     </div>

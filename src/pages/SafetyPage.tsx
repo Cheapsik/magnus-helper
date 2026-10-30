@@ -131,8 +131,8 @@ export default function SafetyPage() {
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 shrink-0"
+                  size="icon-sm"
+                  className="shrink-0"
                   aria-label={`Usuń temat: ${topic.text}`}
                   onClick={() => update({ topics: safety.topics.filter((t) => t.id !== topic.id) })}
                 >

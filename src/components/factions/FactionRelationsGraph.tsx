@@ -10,7 +10,7 @@ type Props = {
   onChange: (next: FactionRelation[]) => void;
 };
 
-const SELECT_CLASS = "h-8 rounded-md border border-input bg-background px-2 text-sm";
+const SELECT_CLASS = "field field-sm";
 const EDGE_COLOR: Record<RelationKind, string> = { ally: "hsl(var(--success))", enemy: "hsl(var(--destructive))", neutral: "hsl(var(--muted-foreground))" };
 const SIZE = 300;
 
@@ -70,7 +70,7 @@ export function FactionRelationsGraph({ factions, relations, onChange }: Props) 
               <NumberInput className="h-8 w-16" aria-label="Współczynnik przenoszenia reputacji" value={r.factor} onChange={(v) => update(r.id, { factor: v })} />
               ×
             </label>
-            <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Usuń relację" onClick={() => onChange(relations.filter((x) => x.id !== r.id))}>
+            <Button size="icon-sm" variant="ghost" aria-label="Usuń relację" onClick={() => onChange(relations.filter((x) => x.id !== r.id))}>
               <X className="h-3.5 w-3.5" />
             </Button>
           </div>

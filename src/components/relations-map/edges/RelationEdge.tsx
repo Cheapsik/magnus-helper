@@ -93,7 +93,7 @@ function RelationEdgeComponent(props: EdgeProps) {
                       onEditEdge(id);
                     }}
                     className={cn(
-                      "px-1.5 py-0.5 text-[11px] uppercase tracking-wide border bg-card/90 backdrop-blur-sm hover:border-primary transition-colors max-w-[120px] truncate",
+                      "px-1.5 py-0.5 text-[12px] uppercase tracking-wide border bg-card/90 backdrop-blur-sm hover:border-primary transition-colors max-w-[120px] truncate",
                       d.changed && "ring-1 ring-primary",
                       d.highlighted && "border-primary/60"
                     )}

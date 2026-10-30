@@ -352,7 +352,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           >
             <Search className="h-3.5 w-3.5" />
             <span className="flex-1 text-left">Szukaj wszędzie…</span>
-            <kbd className="text-[11px] px-1.5 py-0.5 border border-border bg-secondary/40 font-sans tracking-tight">
+            <kbd className="text-[12px] px-1.5 py-0.5 border border-border bg-secondary/40 font-sans tracking-tight">
               {isMac ? "⌘" : "Ctrl"}K
             </kbd>
           </button>
@@ -488,13 +488,13 @@ function NavGroup({ label, open = true, locked, onToggle, children }: {
             onClick={onToggle}
             disabled={locked}
             aria-expanded={open}
-            className="flex h-7 w-full items-center gap-1 rounded-[--radius] px-3 text-[length:--fs-meta] font-medium text-muted-foreground transition-colors hover:text-foreground disabled:cursor-default disabled:hover:text-muted-foreground"
+            className="flex h-7 w-full items-center gap-1 rounded-[--radius] px-3 font-caps text-[length:--fs-sm] font-medium tracking-[0.02em] text-muted-foreground transition-colors hover:text-foreground disabled:cursor-default disabled:hover:text-muted-foreground"
           >
             <span className="flex-1 text-left">{label}</span>
             {!locked && <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-90")} aria-hidden />}
           </button>
         ) : (
-          <div className="flex h-7 items-center px-3 text-[length:--fs-meta] font-medium text-muted-foreground">{label}</div>
+          <div className="flex h-7 items-center px-3 font-caps text-[length:--fs-sm] font-medium tracking-[0.02em] text-muted-foreground">{label}</div>
         ))}
       {open && <ul>{children}</ul>}
     </div>
@@ -560,7 +560,7 @@ function PageFrame({ title, children }: { title: string; children: ReactNode }) 
     <div className="mx-auto w-full max-w-[86rem]">
       <header className="pb-4 pt-8">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-3">
-          <h1 className="text-[length:--fs-title] font-semibold leading-none tracking-[-0.02em]">
+          <h1 className="font-display text-[length:--fs-title] font-medium leading-none tracking-[-0.01em]">
             {title}
           </h1>
           {actions && <div className="flex shrink-0 items-center gap-1.5">{actions}</div>}

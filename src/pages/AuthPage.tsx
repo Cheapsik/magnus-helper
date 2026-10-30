@@ -140,7 +140,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
       </div>
 
       <footer className="relative z-10 shrink-0 px-3 pb-3 sm:px-4 sm:pb-6">
-        <p className="text-center text-[11px] text-white/40 sm:text-xs">
+        <p className="text-center text-[12px] text-white/40 sm:text-xs">
           © 2026 Magnus Helper. Wszystkie prawa zastrzeżone.
         </p>
       </footer>

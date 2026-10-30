@@ -65,12 +65,15 @@ export default {
       },
       // Read in low light at arm's length (src/index.css): the two smallest steps sit above Tailwind's defaults.
       fontSize: {
-        xs: ["0.8125rem", { lineHeight: "1.125rem" }],
-        sm: ["0.9375rem", { lineHeight: "1.375rem" }],
+        xs: ["0.875rem", { lineHeight: "1.25rem" }],
+        sm: ["1rem", { lineHeight: "1.5rem" }],
       },
+      // Alegreya: a book face for names and titles, its sans for the console, its small caps for labels.
       fontFamily: {
-
-        "app-brand": ['"MedievalSharp"', "cursive"],
+        sans: ['"Alegreya Sans"', "system-ui", "sans-serif"],
+        display: ["Alegreya", "Georgia", "serif"],
+        caps: ['"Alegreya Sans SC"', '"Alegreya Sans"', "sans-serif"],
+        "app-brand": ["Alegreya", "Georgia", "serif"],
       },
       borderRadius: {
         lg: "var(--radius)",

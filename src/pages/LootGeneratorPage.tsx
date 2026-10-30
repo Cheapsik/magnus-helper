@@ -343,7 +343,7 @@ export default function LootGeneratorPage() {
 
       <div className="flex flex-wrap gap-1.5">
         {(["generate", "ranks", "items", "carry"] as const).map((t) => (
-          <Button key={t} size="sm" variant={tab === t ? "default" : "outline"} className="text-xs flex-1 min-w-[4.25rem]" onClick={() => setTab(t)}>
+          <Button key={t} size="sm" variant={tab === t ? "default" : "outline"} className="flex-1 min-w-[4.25rem]" onClick={() => setTab(t)}>
             {t === "generate" ? "Generuj" : t === "ranks" ? "Rangi" : t === "items" ? "Przedmioty" : "Ekwipunek"}
           </Button>
         ))}
@@ -361,7 +361,7 @@ export default function LootGeneratorPage() {
               <label className="text-xs text-muted-foreground font-medium">Ilość przedmiotów</label>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-[11px] text-muted-foreground">Min</label>
+                  <label className="text-[12px] text-muted-foreground">Min</label>
                   <NumberInput
                     value={lootConfig.itemCount.min}
                     onChange={(v) => setLootConfig((p) => ({ ...p, itemCount: { ...p.itemCount, min: v } }))}
@@ -371,7 +371,7 @@ export default function LootGeneratorPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] text-muted-foreground">Max</label>
+                  <label className="text-[12px] text-muted-foreground">Max</label>
                   <NumberInput
                     value={lootConfig.itemCount.max}
                     onChange={(v) => setLootConfig((p) => ({ ...p, itemCount: { ...p.itemCount, max: v } }))}
@@ -405,7 +405,7 @@ export default function LootGeneratorPage() {
                       }));
                     return (
                       <div key={denomination.id}>
-                        <label className="text-[11px] text-muted-foreground">
+                        <label className="text-[12px] text-muted-foreground">
                           {denomination.name} ({denomination.short})
                         </label>
                         <div className="flex gap-0.5">
@@ -413,14 +413,14 @@ export default function LootGeneratorPage() {
                             value={range.min}
                             min={0}
                             onChange={(v) => setRange({ min: v })}
-                            className="h-7 text-[11px] text-center"
+                            className="h-7 text-[12px] text-center"
                             aria-label={`${denomination.name}: od`}
                           />
                           <NumberInput
                             value={range.max}
                             min={0}
                             onChange={(v) => setRange({ max: v })}
-                            className="h-7 text-[11px] text-center"
+                            className="h-7 text-[12px] text-center"
                             aria-label={`${denomination.name}: do`}
                           />
                         </div>
@@ -450,15 +450,15 @@ export default function LootGeneratorPage() {
                         <div className="min-w-0">
                           <span className="font-semibold">{item.name}</span>
                           <div className="flex flex-wrap gap-1 mt-0.5">
-                            <Badge variant="outline" className="text-[11px] px-1 py-0 h-4">
+                            <Badge variant="outline" className="text-[12px] px-1 py-0 h-4">
                               {item.rankName}
                             </Badge>
-                            <Badge variant="secondary" className="text-[11px] px-1 py-0 h-4">
+                            <Badge variant="secondary" className="text-[12px] px-1 py-0 h-4">
                               {item.type}
                             </Badge>
                           </div>
                           {item.description ? <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p> : null}
-                          <p className="text-[11px] text-muted-foreground mt-1">
+                          <p className="text-[12px] text-muted-foreground mt-1">
                             Wartość: {priceLabel(item.price)}
                           </p>
                         </div>
@@ -478,7 +478,7 @@ export default function LootGeneratorPage() {
                   )}
                 </div>
 
-                <Button onClick={generateLoot} variant="secondary" className="w-full text-xs min-h-[--h-control] gap-1">
+                <Button onClick={generateLoot} variant="secondary" className="w-full min-h-[--h-control] gap-1">
                   <Dice5 className="h-3 w-3" /> Generuj ponownie
                 </Button>
               </CardContent>
@@ -496,7 +496,7 @@ export default function LootGeneratorPage() {
                 {totalChance.toFixed(1)}%
               </span>
             </div>
-            <Button size="sm" className="text-xs gap-1 min-h-[--h-control] shrink-0" onClick={() => setAddingRank(true)}>
+            <Button size="sm" className="gap-1 min-h-[--h-control] shrink-0" onClick={() => setAddingRank(true)}>
               <Plus className="h-3 w-3" />
               Dodaj rangę
             </Button>
@@ -510,15 +510,15 @@ export default function LootGeneratorPage() {
                     value={newRank.name}
                     onChange={(e) => setNewRank({ ...newRank, name: e.target.value })}
                     placeholder="Nazwa rangi"
-                    className="h-8 text-xs"
+                    className="field-sm"
                   />
                   <NumberInput value={newRank.chance} onChange={(v) => setNewRank({ ...newRank, chance: v })} className="h-8 text-xs text-center" />
                 </div>
                 <div className="flex gap-1.5">
-                  <Button size="sm" className="h-[--h-control] text-xs flex-1" onClick={addRank}>
+                  <Button size="sm" className="h-[--h-control] flex-1" onClick={addRank}>
                     Dodaj
                   </Button>
-                  <Button size="sm" variant="ghost" className="h-[--h-control] text-xs" onClick={() => setAddingRank(false)}>
+                  <Button size="sm" variant="ghost" className="h-[--h-control]" onClick={() => setAddingRank(false)}>
                     Anuluj
                   </Button>
                 </div>
@@ -536,14 +536,14 @@ export default function LootGeneratorPage() {
                       <Input
                         value={rank.name}
                         onChange={(e) => updateRank(rank.id, { name: e.target.value })}
-                        className="h-[--h-control] text-xs flex-1"
+                        className="h-[--h-control] flex-1"
                       />
                       <NumberInput
                         value={rank.chance}
                         onChange={(v) => updateRank(rank.id, { chance: v })}
                         className="h-[--h-control] text-xs w-20 text-center"
                       />
-                      <span className="text-[11px] text-muted-foreground">%</span>
+                      <span className="text-[12px] text-muted-foreground">%</span>
                       <Button size="icon" variant="ghost" className="min-h-[--h-control] min-w-[--h-control] shrink-0" onClick={() => setEditingRankId(null)}>
                         <Check className="h-3 w-3" />
                       </Button>
@@ -693,7 +693,7 @@ export default function LootGeneratorPage() {
                       {(item.tags?.length ?? 0) > 0 && (
                         <div className="flex flex-wrap gap-1 mb-1.5">
                           {item.tags!.map((tag) => (
-                            <span key={tag} className="inline-flex items-center rounded px-1.5 py-0.5 text-[11px] font-medium bg-muted text-muted-foreground border border-border/60">
+                            <span key={tag} className="inline-flex items-center rounded px-1.5 py-0.5 text-[12px] font-medium bg-muted text-muted-foreground border border-border/60">
                               {tag}
                             </span>
                           ))}
@@ -745,7 +745,7 @@ export default function LootGeneratorPage() {
                       <p className="font-bold text-sm leading-tight">{item.name}</p>
                       <Badge
                         variant="outline"
-                        className={cn("mt-1.5 text-[11px] font-normal", rankBadgeClass(item.rankName, rankNames))}
+                        className={cn("mt-1.5 text-[12px] font-normal", rankBadgeClass(item.rankName, rankNames))}
                       >
                         {item.rankName}
                       </Badge>
@@ -759,7 +759,7 @@ export default function LootGeneratorPage() {
                   {(item.tags?.length ?? 0) > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {item.tags!.map((tag) => (
-                        <span key={tag} className="inline-flex items-center rounded px-1.5 py-0.5 text-[11px] font-medium bg-muted text-muted-foreground border border-border/60">
+                        <span key={tag} className="inline-flex items-center rounded px-1.5 py-0.5 text-[12px] font-medium bg-muted text-muted-foreground border border-border/60">
                           {tag}
                         </span>
                       ))}
@@ -905,7 +905,7 @@ export default function LootGeneratorPage() {
           <h2 className="text-sm font-semibold text-muted-foreground">Szybki ekwipunek postaci</h2>
 
           <div className="flex flex-wrap gap-1.5">
-            <Button size="sm" variant={activeCarryCategory === "all" ? "default" : "secondary"} className="text-xs" onClick={() => setActiveCarryCategory("all")}>
+            <Button size="sm" variant={activeCarryCategory === "all" ? "default" : "secondary"} onClick={() => setActiveCarryCategory("all")}>
               Wszystko
             </Button>
             {CARRY_CATEGORIES.map((cat) => (
@@ -913,7 +913,7 @@ export default function LootGeneratorPage() {
                 key={cat.id}
                 size="sm"
                 variant={activeCarryCategory === cat.id ? "default" : "secondary"}
-                className="text-xs gap-1"
+                className="gap-1"
                 onClick={() => setActiveCarryCategory(cat.id)}
               >
                 <cat.icon className="h-3 w-3" />
@@ -936,17 +936,17 @@ export default function LootGeneratorPage() {
                     <span className={`text-sm font-medium truncate ${item.quantity === 0 ? "text-muted-foreground line-through" : ""}`}>{item.name}</span>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
-                    <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => updateCarryQuantity(item.id, -1)}>
+                    <Button size="icon-sm" variant="ghost" onClick={() => updateCarryQuantity(item.id, -1)}>
                       <Minus className="h-3 w-3" />
                     </Button>
                     <span className={`text-sm font-bold min-w-[2ch] text-center ${isLow ? "text-destructive" : ""}`}>
                       {item.quantity}
                       {item.maxQuantity && <span className="text-muted-foreground font-normal">/{item.maxQuantity}</span>}
                     </span>
-                    <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => updateCarryQuantity(item.id, 1)}>
+                    <Button size="icon-sm" variant="ghost" onClick={() => updateCarryQuantity(item.id, 1)}>
                       <Plus className="h-3 w-3" />
                     </Button>
-                    <Button size="icon" variant="ghost" className="h-6 w-6 text-muted-foreground" onClick={() => removeCarryItem(item.id)}>
+                    <Button size="icon-sm" variant="ghost" className="text-muted-foreground" onClick={() => removeCarryItem(item.id)}>
                       <X className="h-3 w-3" />
                     </Button>
                   </div>
@@ -969,12 +969,12 @@ export default function LootGeneratorPage() {
                 onChange={(e) => setNewCarryName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addCarryItem()}
                 placeholder="Nazwa…"
-                className="flex-1 h-9"
+                className="flex-1"
               />
               <select
                 value={newCarryCategory}
                 onChange={(e) => setNewCarryCategory(e.target.value)}
-                className="h-9 px-2 text-xs rounded-md border bg-card text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                className="field"
               >
                 {CARRY_CATEGORIES.map((c) => (
                   <option key={c.id} value={c.id}>

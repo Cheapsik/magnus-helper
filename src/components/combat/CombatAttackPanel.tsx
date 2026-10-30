@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 const MANUAL = "manual";
 
 const selectCls =
-  "h-9 w-full min-w-0 rounded-md border border-input bg-background px-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+  "field w-full";
 
 type SetCombatants = (fn: Combatant[] | ((prev: Combatant[]) => Combatant[])) => void;
 
@@ -323,7 +323,7 @@ function AttackForm({
                   value={notation}
                   onChange={(e) => setWeaponNotation(e.target.value)}
                   placeholder="np. 1k8+2"
-                  className="h-9 w-32"
+                  className="w-32"
                   aria-label="Kości obrażeń"
                 />
               </div>

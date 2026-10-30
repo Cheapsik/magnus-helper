@@ -116,7 +116,7 @@ export function CombatantCard({
                 )}
 
                 {c.statuses.length > 0 && (
-                  <span className="text-[11px] text-destructive font-medium">{c.statuses.length} stan{c.statuses.length > 1 ? "y" : ""}</span>
+                  <span className="text-[12px] text-destructive font-medium">{c.statuses.length} stan{c.statuses.length > 1 ? "y" : ""}</span>
                 )}
 
                 {isExpanded ? <ChevronUp className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
@@ -181,7 +181,7 @@ export function CombatantCard({
                     </div>
                   </div>
                   <span className="flex shrink-0 items-baseline gap-1 text-sm font-bold tabular-nums">
-                    {c.resourceLabel && <span className="text-[11px] font-normal text-muted-foreground">{c.resourceLabel}</span>}
+                    {c.resourceLabel && <span className="text-[12px] font-normal text-muted-foreground">{c.resourceLabel}</span>}
                     {c.resource.current}/{c.resource.max}
                   </span>
                   <Button type="button" size="icon" variant="secondary" className="shrink-0" onClick={() => onAdjustHp(1)}>
@@ -196,7 +196,7 @@ export function CombatantCard({
                       type="button"
                       size="sm"
                       variant={delta < 0 ? "destructive" : "secondary"}
-                      className="h-[--h-control] text-sm font-semibold"
+                      className="h-[--h-control] font-semibold"
                       onClick={() => onAdjustHp(delta)}
                     >
                       {delta > 0 ? `+${delta}` : delta}
@@ -210,7 +210,7 @@ export function CombatantCard({
                       <Badge
                         key={s}
                         variant="destructive"
-                        className="h-5 cursor-pointer gap-0.5 px-1.5 py-0 text-[11px]"
+                        className="h-5 cursor-pointer gap-0.5 px-1.5 py-0 text-[12px]"
                         onClick={() => onToggleStatus(s)}
                       >
                         {s} ×
@@ -220,10 +220,10 @@ export function CombatantCard({
                 )}
 
                 <div>
-                  <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Stany</label>
+                  <label className="mb-1 block text-[12px] font-medium text-muted-foreground">Stany</label>
                   <div className="flex flex-wrap gap-1">
                     {conditionNames.length === 0 && (
-                      <span className="text-[11px] text-muted-foreground">Kampania nie ma zdefiniowanych stanów.</span>
+                      <span className="text-[12px] text-muted-foreground">Kampania nie ma zdefiniowanych stanów.</span>
                     )}
                     {conditionNames.map((s) => (
                       <button
@@ -231,7 +231,7 @@ export function CombatantCard({
                         type="button"
                         onClick={() => onToggleStatus(s)}
                         className={cn(
-                          "rounded border px-2 py-1 text-[11px] transition-colors",
+                          "rounded border px-2 py-1 text-[12px] transition-colors",
                           c.statuses.includes(s)
                             ? "border-destructive/30 bg-destructive/20 text-destructive"
                             : "border-border text-muted-foreground hover:border-muted-foreground",
@@ -245,7 +245,7 @@ export function CombatantCard({
 
                 {c.notes && (
                   <div>
-                    <label className="mb-0.5 block text-[11px] font-medium text-muted-foreground">Notatki</label>
+                    <label className="mb-0.5 block text-[12px] font-medium text-muted-foreground">Notatki</label>
                     <p className="whitespace-pre-line text-xs text-muted-foreground">{c.notes}</p>
                   </div>
                 )}

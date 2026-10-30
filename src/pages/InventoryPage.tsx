@@ -38,9 +38,9 @@ export default function InventoryPage() {
     <div className="space-y-4 animate-fade-in">
 
       <div className="flex flex-wrap gap-1.5">
-        <Button size="sm" variant={activeCategory === "all" ? "default" : "secondary"} className="text-xs" onClick={() => setActiveCategory("all")}>Wszystko</Button>
+        <Button size="sm" variant={activeCategory === "all" ? "default" : "secondary"} onClick={() => setActiveCategory("all")}>Wszystko</Button>
         {CATEGORIES.map((cat) => (
-          <Button key={cat.id} size="sm" variant={activeCategory === cat.id ? "default" : "secondary"} className="text-xs gap-1" onClick={() => setActiveCategory(cat.id)}>
+          <Button key={cat.id} size="sm" variant={activeCategory === cat.id ? "default" : "secondary"} className="gap-1" onClick={() => setActiveCategory(cat.id)}>
             <cat.icon className="h-3 w-3" />{cat.label}
           </Button>
         ))}
@@ -57,12 +57,12 @@ export default function InventoryPage() {
                 <span className={`text-sm font-medium truncate ${item.quantity === 0 ? "text-muted-foreground line-through" : ""}`}>{item.name}</span>
               </div>
               <div className="flex items-center gap-1 shrink-0">
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => updateQuantity(item.id, -1)}><Minus className="h-3 w-3" /></Button>
+                <Button size="icon-sm" variant="ghost" onClick={() => updateQuantity(item.id, -1)}><Minus className="h-3 w-3" /></Button>
                 <span className={`text-sm font-bold min-w-[2ch] text-center ${isLow ? "text-destructive" : ""}`}>
                   {item.quantity}{item.maxQuantity && <span className="text-muted-foreground font-normal">/{item.maxQuantity}</span>}
                 </span>
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => updateQuantity(item.id, 1)}><Plus className="h-3 w-3" /></Button>
-                <Button size="icon" variant="ghost" className="h-6 w-6 text-muted-foreground" onClick={() => removeItem(item.id)}><X className="h-3 w-3" /></Button>
+                <Button size="icon-sm" variant="ghost" onClick={() => updateQuantity(item.id, 1)}><Plus className="h-3 w-3" /></Button>
+                <Button size="icon-sm" variant="ghost" className="text-muted-foreground" onClick={() => removeItem(item.id)}><X className="h-3 w-3" /></Button>
               </div>
             </div>
           );
@@ -81,12 +81,12 @@ export default function InventoryPage() {
             onChange={(e) => setNewItemName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addItem()}
             placeholder="Nazwa…"
-            className="flex-1 h-9 px-3 text-sm rounded-md border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            className="field flex-1"
           />
           <select
             value={newItemCategory}
             onChange={(e) => setNewItemCategory(e.target.value)}
-            className="h-9 px-2 text-xs rounded-md border bg-card text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            className="field"
           >
             {CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
           </select>

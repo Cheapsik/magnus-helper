@@ -191,7 +191,7 @@ export default function DungeonGeneratorPage() {
                 <Labeled label="Ziarno losowania">
                   <div className="flex gap-1.5">
                     <input className={inputCls} inputMode="numeric" maxLength={10} value={form.seed} onChange={(e) => set("seed", e.target.value)} />
-                    <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0" onClick={() => set("seed", randomSeed())} aria-label="Losuj ziarno">
+                    <Button type="button" variant="outline" size="icon-sm" className="shrink-0" onClick={() => set("seed", randomSeed())} aria-label="Losuj ziarno">
                       <Dices className="h-4 w-4" />
                     </Button>
                   </div>

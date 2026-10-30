@@ -60,7 +60,7 @@ export function ConditionsEditor() {
           {conditions.map((condition, index) => (
             <li key={condition.id} className="flex items-center gap-1.5 rounded-md border border-border/70 px-2 py-1">
               <input
-                className={cn(inputCls, "flex-1 border-transparent bg-transparent hover:border-input")}
+                className={cn(inputCls, "flex-1 field-inline")}
                 value={condition.name}
                 onChange={(e) =>
                   update((prev) => prev.map((c) => (c.id === condition.id ? { ...c, name: e.target.value } : c)))

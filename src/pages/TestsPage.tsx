@@ -28,7 +28,7 @@ type HistoryEntry = {
 type SourceMode = "card" | "manual";
 
 const selectCls =
-  "h-9 w-full min-w-0 rounded-md border border-input bg-background px-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+  "field w-full";
 
 function signed(n: number): string {
   return n > 0 ? `+${n}` : String(n);
@@ -154,7 +154,7 @@ export default function TestsPage() {
               key={t.id}
               size="sm"
               variant={t.id === testType.id ? "default" : "outline"}
-              className="text-xs"
+             
               onClick={() => {
                 setTestTypeId(t.id);
                 setDifficultyId(undefined);
@@ -276,7 +276,7 @@ export default function TestsPage() {
                 key={d.id}
                 size="sm"
                 variant={difficulty?.id === d.id ? "default" : "outline"}
-                className="text-xs"
+               
                 onClick={() => setDifficultyId(d.id)}
               >
                 {d.name} ({difficultyValueText(testType.mode, d.value)})
@@ -314,7 +314,7 @@ export default function TestsPage() {
                 key={mode}
                 size="sm"
                 variant={rollMode === mode ? "default" : "outline"}
-                className="text-xs"
+               
                 onClick={() => setRollMode(mode)}
               >
                 {label}
@@ -324,7 +324,7 @@ export default function TestsPage() {
         </section>
       )}
 
-      <Button onClick={roll} disabled={!canRoll} className="h-12 w-full gap-2 text-base font-semibold">
+      <Button size="lg" onClick={roll} disabled={!canRoll} className="w-full gap-2 text-base font-semibold">
         <Target className="h-5 w-5" /> Rzuć
       </Button>
 
@@ -334,7 +334,7 @@ export default function TestsPage() {
         <section>
           <div className="mb-2 flex items-center justify-between">
             <label className="field-label">Ostatnie testy</label>
-            <Button size="sm" variant="ghost" className="h-7 gap-1 text-xs text-muted-foreground" onClick={clearHistory}>
+            <Button size="sm" variant="ghost" className="gap-1 text-muted-foreground" onClick={clearHistory}>
               <Trash2 className="h-3 w-3" /> Wyczyść
             </Button>
           </div>

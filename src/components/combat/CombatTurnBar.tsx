@@ -36,10 +36,10 @@ export function CombatTurnBar({
 
   return (
     <div className="flex items-stretch gap-2 rounded-lg border border-border bg-card p-1.5">
-      <Button
+      <Button size="icon"
         type="button"
         variant="ghost"
-        className="h-12 w-12 shrink-0 px-0"
+        className="shrink-0 px-0"
         onClick={onPrevTurn}
         disabled={prevDisabled}
         title="Poprzednia tura"
@@ -59,18 +59,18 @@ export function CombatTurnBar({
             type="button"
             size="icon"
             variant="ghost"
-            className="h-9 w-9"
+           
             onClick={onToggleShowDead}
             title={showDead ? "Ukryj poległych" : "Pokaż poległych"}
           >
             {showDead ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
           </Button>
           {onRollAllInitiative && (
-            <Button type="button" size="icon" variant="ghost" className="h-9 w-9" onClick={onRollAllInitiative} title="Rzuć inicjatywę wszystkim">
+            <Button type="button" size="icon" variant="ghost" onClick={onRollAllInitiative} title="Rzuć inicjatywę wszystkim">
               <Dices className="h-4 w-4" />
             </Button>
           )}
-          <Button type="button" size="icon" variant="ghost" className="h-9 w-9" onClick={onReset} title="Reset rund i tur">
+          <Button type="button" size="icon" variant="ghost" onClick={onReset} title="Reset rund i tur">
             <RotateCcw className="h-4 w-4" />
           </Button>
         </div>

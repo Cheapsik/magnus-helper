@@ -417,7 +417,7 @@ export default function GmToolboxPage() {
                       Stop
                     </Button>
                   </div>
-                  <Button size="sm" variant="ghost" className="w-full text-xs h-8" onClick={() => navigate("/ambient")}>
+                  <Button size="sm" variant="ghost" className="w-full" onClick={() => navigate("/ambient")}>
                     Moduł Ambient
                   </Button>
                 </>
@@ -455,7 +455,7 @@ export default function GmToolboxPage() {
                         <div className="font-medium truncate">{t.label || "Timer"}</div>
                         <div className="font-mono text-muted-foreground">{formatTimerMs(t.displayMs)}</div>
                       </div>
-                      <Button size="sm" variant="outline" className="h-7 shrink-0 text-[11px] px-2" onClick={() => gmTick(t.id)}>
+                      <Button size="sm" variant="outline" className="shrink-0 px-2" onClick={() => gmTick(t.id)}>
                         Tick
                       </Button>
                     </li>
@@ -463,7 +463,7 @@ export default function GmToolboxPage() {
                 </ul>
               )}
               {runningTimers.length > 0 && (
-                <Button size="sm" variant="ghost" className="w-full text-xs h-8" onClick={() => navigate("/timers")}>
+                <Button size="sm" variant="ghost" className="w-full" onClick={() => navigate("/timers")}>
                   Wszystkie timery
                 </Button>
               )}
@@ -507,15 +507,15 @@ export default function GmToolboxPage() {
       <section className="space-y-2">
         <div className="flex items-center justify-between gap-2">
           <h2 className="field-label">Notatki MG (prywatne)</h2>
-          {notesSaved && <span className="text-[11px] text-muted-foreground">Zapisano</span>}
+          {notesSaved && <span className="text-[12px] text-muted-foreground">Zapisano</span>}
         </div>
         <Textarea
           value={sessionNotes}
           onChange={(e) => setSessionNotes(e.target.value)}
           placeholder="Szybkie notatki tylko dla Ciebie — gracze tego nie widzą"
-          className="min-h-[140px] text-sm resize-y bg-card/80 border-border"
+          className="min-h-[140px] resize-y border-border"
         />
-        <p className="text-[11px] text-muted-foreground">Autosave co ok. 3 s do pamięci przeglądarki.</p>
+        <p className="text-[12px] text-muted-foreground">Autosave co ok. 3 s do pamięci przeglądarki.</p>
       </section>
 
       <section>
@@ -673,7 +673,7 @@ export default function GmToolboxPage() {
                       type="button"
                       onClick={() => setQuestDraft((d) => ({ ...d, typeId: t.id }))}
                       className={cn(
-                        "flex min-h-[56px] flex-col items-center gap-1 rounded-md border p-2 text-[11px] transition-colors",
+                        "flex min-h-[56px] flex-col items-center gap-1 rounded-md border p-2 text-[12px] transition-colors",
                         questDraft.typeId === t.id
                           ? "border-primary bg-primary/10 text-foreground"
                           : "border-border text-muted-foreground hover:bg-accent",
@@ -731,7 +731,7 @@ export default function GmToolboxPage() {
               <Textarea
                 value={questDraft.notes}
                 onChange={(e) => setQuestDraft((d) => ({ ...d, notes: e.target.value }))}
-                className="min-h-[80px] text-sm"
+                className="min-h-[80px]"
                 placeholder="Pierwsze przemyślenia…"
               />
             </div>

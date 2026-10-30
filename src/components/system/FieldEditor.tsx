@@ -65,7 +65,7 @@ export function FieldEditor({
     <li className="rounded-md border border-border bg-white/[0.02]">
       <div className="flex items-center gap-1.5 px-2 py-1.5">
         <input
-          className={cn(inputCls, "flex-1 border-transparent bg-transparent hover:border-input")}
+          className={cn(inputCls, "flex-1 field-inline")}
           value={field.name}
           onChange={(e) => patch({ name: e.target.value })}
           aria-label="Nazwa pola"
@@ -315,7 +315,7 @@ function FormulaEditor({
     <div className="space-y-1.5">
       <Labeled label="Formuła" className="w-full">
         <input
-          className={cn(inputCls, "font-mono text-sm")}
+          className={cn(inputCls, "font-mono")}
           value={formula}
           onChange={(e) => onChange(e.target.value)}
           placeholder="np. {zdrowie.max} * 2 + {ochrona}"

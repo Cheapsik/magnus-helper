@@ -74,10 +74,10 @@ export default function TravelPage() {
               <div className="flex items-start gap-2">
                 <h2 className="text-lg font-semibold flex-1 truncate">{selected.name || "Bez nazwy"}</h2>
                 {selected.status === "done" && <Badge variant="secondary">zakończona</Badge>}
-                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Zacznij od nowa" title="Zacznij od nowa" onClick={() => restart(selected)}>
+                <Button variant="ghost" size="icon-sm" aria-label="Zacznij od nowa" title="Zacznij od nowa" onClick={() => restart(selected)}>
                   <RotateCcw className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" aria-label="Usuń podróż" onClick={() => remove(selected)}>
+                <Button variant="ghost" size="icon-sm" className="text-destructive" aria-label="Usuń podróż" onClick={() => remove(selected)}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>

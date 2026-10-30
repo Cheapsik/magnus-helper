@@ -13,7 +13,7 @@ export function RefPicker({
 }) {
   return (
     <Select value={value} onValueChange={onPick}>
-      <SelectTrigger className="h-12">
+      <SelectTrigger className="field-lg">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>

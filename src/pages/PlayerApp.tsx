@@ -360,7 +360,7 @@ function CampaignGallery({
                 </div>
                 <div className="flex items-center gap-2 px-3 py-2">
                   <span className="flex-1 truncate font-medium">{m.title}</span>
-                  {isNew(m) && <span className="rounded bg-primary px-1.5 py-0.5 text-[11px] font-semibold text-primary-foreground">Nowe</span>}
+                  {isNew(m) && <span className="rounded bg-primary px-1.5 py-0.5 text-[12px] font-semibold text-primary-foreground">Nowe</span>}
                 </div>
               </button>
             </li>

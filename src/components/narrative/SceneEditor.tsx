@@ -6,7 +6,7 @@ import { newId, type Branch, type NarrativeStructure, type Scene } from "@/lib/n
 
 type Props = { scene: Scene; structure: NarrativeStructure; onChange: (scene: Scene) => void; onDelete: () => void };
 
-const selectCls = "h-9 rounded-md border border-input bg-background px-2 text-sm";
+const selectCls = "field";
 
 export function SceneEditor({ scene, structure, onChange, onDelete }: Props) {
   const set = (patch: Partial<Scene>) => onChange({ ...scene, ...patch });

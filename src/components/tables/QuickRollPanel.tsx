@@ -30,7 +30,7 @@ export default function QuickRollPanel() {
 
   if (!open) {
     return (
-      <Button onClick={() => setOpen(true)} size="icon" aria-label="Szybkie losowanie" className="fixed bottom-24 right-4 z-40 h-12 w-12 rounded-full shadow-lg md:bottom-6">
+      <Button onClick={() => setOpen(true)} size="icon" aria-label="Szybkie losowanie" className="fixed bottom-24 right-4 z-40 rounded-full shadow-lg md:bottom-6">
         <Dices className="h-5 w-5" />
       </Button>
     );
@@ -40,7 +40,7 @@ export default function QuickRollPanel() {
     <aside aria-label="Szybkie losowanie" className="fixed bottom-24 right-4 z-40 flex max-h-[70vh] w-72 flex-col gap-2 rounded-lg border border-border bg-card p-3 shadow-xl md:bottom-6">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold">Szybkie losowanie</h2>
-        <Button variant="ghost" size="icon" className="h-6 w-6" aria-label="Zamknij" onClick={() => setOpen(false)}>
+        <Button variant="ghost" size="icon-sm" aria-label="Zamknij" onClick={() => setOpen(false)}>
           <X className="h-4 w-4" />
         </Button>
       </div>
@@ -58,7 +58,7 @@ export default function QuickRollPanel() {
             </button>
           ))}
         </div>
-        <Input aria-label="Miejsce" placeholder="Miejsce" className="h-8 text-xs" value={location} onChange={(e) => setLocation(e.target.value)} />
+        <Input aria-label="Miejsce" placeholder="Miejsce" className="field-sm" value={location} onChange={(e) => setLocation(e.target.value)} />
         <p className="text-muted-foreground">Pora roku z kalendarza: {context.season ?? "brak"}</p>
       </div>
       {last && (

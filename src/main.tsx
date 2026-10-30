@@ -1,4 +1,10 @@
 import { createRoot } from "react-dom/client";
+import "@fontsource/alegreya/500.css";
+import "@fontsource/alegreya/600.css";
+import "@fontsource/alegreya-sans/400.css";
+import "@fontsource/alegreya-sans/500.css";
+import "@fontsource/alegreya-sans/700.css";
+import "@fontsource/alegreya-sans-sc/500.css";
 import "./index.css";
 import App from "./App";
 import LoadingDie from "./components/LoadingDie";

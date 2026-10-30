@@ -107,16 +107,16 @@ export default function CheatSheetsPage() {
     <div className="space-y-4 animate-fade-in">
 
       <Tabs defaultValue="kodeks" className="space-y-4">
-        <TabsList className="flex h-9 w-full items-stretch gap-0.5 rounded-lg bg-muted p-0.5">
+        <TabsList className="flex w-full">
           <TabsTrigger
             value="kodeks"
-            className="flex-1 basis-0 min-w-0 rounded-md px-2 py-0 text-sm font-medium shadow-none data-[state=active]:shadow-sm"
+            className="flex-1 basis-0 min-w-0 px-2"
           >
             Kodeks
           </TabsTrigger>
           <TabsTrigger
             value="zdolnosci"
-            className="flex-1 basis-0 min-w-0 rounded-md px-2 py-0 text-sm font-medium shadow-none data-[state=active]:shadow-sm"
+            className="flex-1 basis-0 min-w-0 px-2"
           >
             Zdolności
           </TabsTrigger>
@@ -124,7 +124,7 @@ export default function CheatSheetsPage() {
 
         <TabsContent value="kodeks" className="mt-0 space-y-4">
             <div className="flex justify-end">
-              <Button size="sm" className="h-7 gap-1 text-xs" onClick={() => setAdding(true)}>
+              <Button size="sm" className="gap-1" onClick={() => setAdding(true)}>
                 <Plus className="h-3 w-3" /> Dodaj wpis
               </Button>
             </div>
@@ -133,12 +133,12 @@ export default function CheatSheetsPage() {
         <Card className="border-primary/30">
           <CardContent className="p-3 space-y-2">
             <h3 className="text-xs font-semibold">Nowy wpis</h3>
-            <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Tytuł" className="h-8 text-xs" />
-            <Input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="Kategoria" className="h-8 text-xs" />
+            <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Tytuł" className="field-sm" />
+            <Input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="Kategoria" className="field-sm" />
             <MentionTextarea value={newContent} onChange={setNewContent} placeholder="Treść…" className="min-h-[100px] text-xs" />
             <div className="flex gap-1.5">
-              <Button size="sm" className="h-7 text-xs flex-1 gap-1" onClick={addEntry}><Check className="h-3 w-3" />Dodaj</Button>
-              <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setAdding(false)}>Anuluj</Button>
+              <Button size="sm" className="flex-1 gap-1" onClick={addEntry}><Check className="h-3 w-3" />Dodaj</Button>
+              <Button size="sm" variant="ghost" onClick={() => setAdding(false)}>Anuluj</Button>
             </div>
           </CardContent>
         </Card>
@@ -151,7 +151,7 @@ export default function CheatSheetsPage() {
 
       <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
         {allCategories.map((cat) => (
-          <Button key={cat} size="sm" variant={activeCategory === cat ? "default" : "outline"} className="shrink-0 text-xs" onClick={() => setActiveCategory(cat)}>
+          <Button key={cat} size="sm" variant={activeCategory === cat ? "default" : "outline"} className="shrink-0" onClick={() => setActiveCategory(cat)}>
             {cat}
           </Button>
         ))}
@@ -240,28 +240,28 @@ function CodexCardActions({
       role="toolbar"
       aria-label="Akcje wpisu"
     >
-      <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground" onClick={onStartEdit} aria-label="Edytuj">
+      <Button type="button" size="icon-sm" variant="ghost" className="text-muted-foreground" onClick={onStartEdit} aria-label="Edytuj">
         <Edit2 className="h-3.5 w-3.5" />
       </Button>
       {deleteConfirm === sheetId ? (
         <>
-          <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={onConfirmDelete} aria-label="Potwierdź usunięcie">
+          <Button type="button" size="icon-sm" variant="ghost" className="text-destructive" onClick={onConfirmDelete} aria-label="Potwierdź usunięcie">
             <Check className="h-3.5 w-3.5" />
           </Button>
-          <Button type="button" size="icon" variant="ghost" className="h-8 w-8" onClick={onCancelDelete} aria-label="Anuluj">
+          <Button type="button" size="icon-sm" variant="ghost" onClick={onCancelDelete} aria-label="Anuluj">
             <X className="h-3.5 w-3.5" />
           </Button>
         </>
       ) : (
-        <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={onDelete} aria-label="Usuń">
+        <Button type="button" size="icon-sm" variant="ghost" className="text-muted-foreground hover:text-destructive" onClick={onDelete} aria-label="Usuń">
           <Trash2 className="h-3.5 w-3.5" />
         </Button>
       )}
       <Button
         type="button"
-        size="icon"
+        size="icon-sm"
         variant={isPinned ? "secondary" : "ghost"}
-        className="h-8 w-8"
+       
         onClick={onTogglePin}
         aria-label={isPinned ? "Odepnij" : "Przypnij"}
       >
@@ -343,12 +343,12 @@ function SheetAccordion({
           >
             {isEditing ? (
               <div className="space-y-2 p-4">
-                <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="h-8 text-xs" placeholder="Tytuł" />
-                <Input value={editCategory} onChange={(e) => setEditCategory(e.target.value)} className="h-8 text-xs" placeholder="Kategoria" />
+                <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="field-sm" placeholder="Tytuł" />
+                <Input value={editCategory} onChange={(e) => setEditCategory(e.target.value)} className="field-sm" placeholder="Kategoria" />
                 <MentionTextarea value={editContent} onChange={setEditContent} className="min-h-[100px] text-xs" placeholder="Treść…" />
                 <div className="flex gap-1.5">
-                  <Button size="sm" className="h-7 flex-1 gap-1 text-xs" onClick={onSaveEdit}><Check className="h-3 w-3" />Zapisz</Button>
-                  <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={onCancelEdit}>Anuluj</Button>
+                  <Button size="sm" className="flex-1 gap-1" onClick={onSaveEdit}><Check className="h-3 w-3" />Zapisz</Button>
+                  <Button size="sm" variant="ghost" onClick={onCancelEdit}>Anuluj</Button>
                 </div>
               </div>
             ) : (

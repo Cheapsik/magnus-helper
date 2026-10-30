@@ -40,17 +40,17 @@ export function TravelPanel({ paths, pins, tables, onChange, onDelete }: TravelP
           <div className="flex items-center gap-1">
             <Route className="h-3.5 w-3.5 shrink-0 text-amber-500" />
             <span className="flex-1 truncate font-medium">{label(t.fromPinId)} → {label(t.toPinId)}</span>
-            <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive" onClick={() => onDelete(t.id)} aria-label="Usuń szlak"><Trash2 className="h-3 w-3" /></Button>
+            <Button size="icon-sm" variant="ghost" className="text-destructive" onClick={() => onDelete(t.id)} aria-label="Usuń szlak"><Trash2 className="h-3 w-3" /></Button>
           </div>
           <div className="flex gap-1">
-            <select value={t.tableId ?? ""} onChange={(e) => onChange(t.id, { tableId: e.target.value || null })} className="h-7 min-w-0 flex-1 rounded border bg-card px-1">
+            <select value={t.tableId ?? ""} onChange={(e) => onChange(t.id, { tableId: e.target.value || null })} className="field field-sm flex-1">
               <option value="">Bez spotkań</option>
               {tables.map((tb) => <option key={tb.id} value={tb.id}>{tb.name}</option>)}
             </select>
             <Button
               size="sm"
               variant="outline"
-              className="h-7 gap-1 px-2"
+              className="gap-1 px-2"
               onClick={() => {
                 const table = tables.find((x) => x.id === t.tableId);
                 const r = table && rollTable(table, tables);

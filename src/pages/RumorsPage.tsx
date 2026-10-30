@@ -132,7 +132,7 @@ function SegmentEditor({
               onBlur={commitName}
               onKeyDown={(e) => { e.stopPropagation(); if (e.key === "Enter") commitName(); }}
               onClick={(e) => e.stopPropagation()}
-              className="h-8 text-sm font-medium max-w-[200px]"
+              className="field-sm font-medium max-w-[200px]"
             />
           ) : (
             <span className="text-sm font-medium text-foreground truncate">{segment.name}</span>
@@ -196,7 +196,7 @@ function SegmentEditor({
               onChange={(e) => setNewEntry(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addEntry()}
               placeholder="Nowy wpis..."
-              className="text-sm h-9 flex-1"
+              className="flex-1"
             />
             <Button onClick={addEntry} size="sm" variant="outline" className="min-h-[36px] shrink-0">
               <Plus className="h-4 w-4" />
@@ -312,7 +312,7 @@ function TemplateEditor({
             value={template.prefix}
             onChange={(e) => onUpdate({ ...template, prefix: e.target.value })}
             placeholder='np. "Podobno ", "Mówi się, że "'
-            className="text-sm"
+           
           />
         </div>
 
@@ -340,7 +340,7 @@ function TemplateEditor({
           readOnly
           value={result}
           placeholder="Naciśnij Generuj aby stworzyć plotkę..."
-          className="text-sm min-h-[60px] resize-none"
+          className="min-h-[60px] resize-none"
         />
         <div className="flex gap-2">
           <Button
@@ -353,7 +353,7 @@ function TemplateEditor({
           <Button
             onClick={() => result && copyText(result, "main")}
             variant="outline"
-            className=""
+           
             disabled={!result}
           >
             {copiedId === "main" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -509,7 +509,7 @@ export default function RumorsPage() {
                 onClick={() => setMobileView("editor")}
                 variant="ghost"
                 size="sm"
-                className=""
+               
               >
                 Edytuj szablon <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
@@ -523,7 +523,7 @@ export default function RumorsPage() {
             onClick={() => setMobileView("list")}
             variant="ghost"
             size="sm"
-            className=""
+           
           >
             <ChevronLeft className="h-4 w-4 mr-1" /> Szablony
           </Button>

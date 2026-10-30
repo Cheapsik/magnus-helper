@@ -178,7 +178,7 @@ function AttackSection({
           {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </button>
         <input
-          className={cn(inputCls, "flex-1 border-transparent bg-transparent font-medium hover:border-input")}
+          className={cn(inputCls, "flex-1 field-inline font-medium")}
           value={attack.name}
           onChange={(e) => onChange((a) => ({ ...a, name: e.target.value }))}
           aria-label="Nazwa rodzaju ataku"
@@ -393,7 +393,7 @@ function DefenseTypes({ system, setSystem }: SectionProps) {
           {defenses.map((defense, index) => (
             <li key={defense.id} className="flex items-center gap-1.5 rounded-md border border-border/70 px-2 py-1">
               <input
-                className={cn(inputCls, "flex-1 border-transparent bg-transparent hover:border-input")}
+                className={cn(inputCls, "flex-1 field-inline")}
                 value={defense.name}
                 onChange={(e) => setDefenses((prev) => prev.map((d) => (d.id === defense.id ? { ...d, name: e.target.value } : d)))}
                 aria-label="Nazwa typu obrony"
@@ -507,7 +507,7 @@ function HitLocations({ system, setSystem }: SectionProps) {
         {table.locations.map((location: HitLocation) => (
           <li key={location.id} className="flex items-center gap-1.5 rounded-md border border-border/70 px-2 py-1">
             <input
-              className={cn(inputCls, "flex-1 border-transparent bg-transparent hover:border-input")}
+              className={cn(inputCls, "flex-1 field-inline")}
               value={location.name}
               onChange={(e) =>
                 setTable((t) => ({ ...t, locations: t.locations.map((l) => (l.id === location.id ? { ...l, name: e.target.value } : l)) }))

@@ -223,7 +223,7 @@ export default function ScenePage() {
                       {checked && (
                         <div className="flex items-center gap-2 mt-1.5 pl-6">
                           <Slider value={[draft.ambientVolumes[s.id] ?? 70]} onValueChange={([v]) => setDraft({ ...draft, ambientVolumes: { ...draft.ambientVolumes, [s.id]: v } })} min={0} max={100} step={1} className="flex-1" />
-                          <span className="text-[11px] tabular-nums text-muted-foreground w-8 text-right">{draft.ambientVolumes[s.id] ?? 70}%</span>
+                          <span className="text-[12px] tabular-nums text-muted-foreground w-8 text-right">{draft.ambientVolumes[s.id] ?? 70}%</span>
                         </div>
                       )}
                     </div>
@@ -248,7 +248,7 @@ export default function ScenePage() {
                 <div className="flex flex-wrap gap-1 pt-1">
                   {draft.linkedNpcIds.map((id) => {
                     const n = npcSummaries.find((x) => x.id === id);
-                    return n ? <span key={id} className="text-[11px] px-1.5 py-0.5 border border-primary/40 text-primary">{n.name}</span> : null;
+                    return n ? <span key={id} className="text-[12px] px-1.5 py-0.5 border border-primary/40 text-primary">{n.name}</span> : null;
                   })}
                 </div>
               )}
@@ -315,11 +315,11 @@ function SceneCard({ scene, ambientNames, onActivate, onEdit, onDelete }: {
             {scene.name}
           </h3>
           <div className="flex items-center gap-1 shrink-0">
-            <Button size="sm" variant={scene.isActive ? "ghost" : "default"} className="h-7 text-xs" onClick={onActivate}>
+            <Button size="sm" variant={scene.isActive ? "ghost" : "default"} onClick={onActivate}>
               {scene.isActive ? "Dezaktywuj" : "Aktywuj"}
             </Button>
             <div className="relative">
-              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setMenuOpen((v) => !v)}><MoreVertical className="h-3.5 w-3.5" /></Button>
+              <Button size="icon-sm" variant="ghost" onClick={() => setMenuOpen((v) => !v)}><MoreVertical className="h-3.5 w-3.5" /></Button>
               {menuOpen && (
                 <div className="absolute right-0 top-8 z-20 border border-border bg-popover py-1 min-w-[120px] shadow-lg">
                   <button onClick={() => { setMenuOpen(false); onEdit(); }} className="w-full text-left px-3 py-1.5 text-xs hover:bg-white/5 flex items-center gap-2"><Edit2 className="h-3 w-3" /> Edytuj</button>
@@ -384,7 +384,7 @@ function ActiveSceneView({ scene, onEdit, onDeactivate, ambient, npcSummaries, q
                   <div className="flex items-center gap-1.5 text-sm">
                     <span className={cn("h-1.5 w-1.5 rounded-full", playing ? "bg-primary" : "bg-muted-foreground/40")} />
                     <span className="flex-1 truncate">{sound.emoji} {sound.name}</span>
-                    <span className="text-[11px] text-muted-foreground tabular-nums">{vol}%</span>
+                    <span className="text-[12px] text-muted-foreground tabular-nums">{vol}%</span>
                   </div>
                   <Slider value={[vol]} onValueChange={([v]) => ambient.changeVolume(id, v)} min={0} max={100} step={1} className="mt-1.5" />
                 </div>
@@ -400,7 +400,7 @@ function ActiveSceneView({ scene, onEdit, onDeactivate, ambient, npcSummaries, q
             {npcs.map((n) => (
               <Link key={n.id} to={`${CARD_KIND_ROUTES.npc}?id=${encodeURIComponent(n.id)}`} className="block px-2 py-1.5 border border-border/60 hover:border-primary/50 transition-colors">
                 <div className="text-sm">{n.name}</div>
-                {n.subtitle && <div className="text-[11px] text-muted-foreground">{n.subtitle}</div>}
+                {n.subtitle && <div className="text-[12px] text-muted-foreground">{n.subtitle}</div>}
               </Link>
             ))}
           </CardContent>
@@ -426,7 +426,7 @@ function ActiveSceneView({ scene, onEdit, onDeactivate, ambient, npcSummaries, q
             <h3 className="field-label mb-1.5 flex items-center gap-1.5"><Zap className="h-3.5 w-3.5" /> Szybkie akcje</h3>
             <div className="flex flex-wrap gap-2">
               {scene.quickActions.map((a: QuickAction) => (
-                <Button key={a.id} size="sm" variant="outline" className="text-xs" onClick={() => runQuickAction(a)}>
+                <Button key={a.id} size="sm" variant="outline" onClick={() => runQuickAction(a)}>
                   {a.label}
                 </Button>
               ))}
@@ -441,7 +441,7 @@ function ActiveSceneView({ scene, onEdit, onDeactivate, ambient, npcSummaries, q
             <CardContent className="p-6 space-y-3">
               <div className="flex items-start justify-between">
                 <p className="text-base">{quickResult}</p>
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={clearQuick}><X className="h-4 w-4" /></Button>
+                <Button size="icon-sm" variant="ghost" onClick={clearQuick}><X className="h-4 w-4" /></Button>
               </div>
             </CardContent>
           </Card>

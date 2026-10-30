@@ -170,10 +170,10 @@ export default function AmbientPage() {
 
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={stopAll} className="" disabled={!anyPlaying}>
+          <Button size="sm" variant="outline" onClick={stopAll} disabled={!anyPlaying}>
             <Square className="h-4 w-4 mr-1" /> Zatrzymaj wszystko
           </Button>
-          <Button size="sm" onClick={openAddModal} className="">
+          <Button size="sm" onClick={openAddModal}>
             <Plus className="h-4 w-4 mr-1" /> Dodaj dźwięk
           </Button>
         </div>
@@ -235,7 +235,7 @@ export default function AmbientPage() {
         </section>
       ))}
 
-      <Button variant="outline" size="sm" onClick={addCategory} className="">
+      <Button variant="outline" size="sm" onClick={addCategory}>
         <Plus className="h-4 w-4 mr-1" /> Dodaj kategorię
       </Button>
 
@@ -335,8 +335,8 @@ export default function AmbientPage() {
             </div>
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setModalOpen(false)} className="">Anuluj</Button>
-            <Button onClick={saveModal} disabled={saving} className="">{saving ? "Zapisywanie…" : "Zapisz"}</Button>
+            <Button variant="outline" onClick={() => setModalOpen(false)}>Anuluj</Button>
+            <Button onClick={saveModal} disabled={saving}>{saving ? "Zapisywanie…" : "Zapisz"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -354,7 +354,7 @@ function CategoryName({ name, onRename }: { name: string; onRename: (n: string) 
         onChange={(e) => setVal(e.target.value)}
         onBlur={() => { onRename(val.trim() || name); setEditing(false); }}
         onKeyDown={(e) => { if (e.key === "Enter") { onRename(val.trim() || name); setEditing(false); } }}
-        className="h-8 text-sm font-semibold w-40"
+        className="field-sm font-semibold w-40"
       />
     );
   }
@@ -414,7 +414,7 @@ function SoundTile({
         <span className="text-2xl leading-none">{sound.emoji}</span>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium leading-tight line-clamp-2">{sound.name}</p>
-          <Badge variant="secondary" className="text-[11px] mt-1">{sound.type === "loop" ? "pętla" : "efekt"}</Badge>
+          <Badge variant="secondary" className="text-[12px] mt-1">{sound.type === "loop" ? "pętla" : "efekt"}</Badge>
         </div>
       </div>
 

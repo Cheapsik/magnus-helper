@@ -23,7 +23,7 @@ export function FiltersPanel({ embedded }: { embedded?: boolean }) {
           <button
             type="button"
             onClick={resetFilters}
-            className="text-[11px] text-muted-foreground hover:text-primary"
+            className="text-[12px] text-muted-foreground hover:text-primary"
           >
             Reset
           </button>
@@ -34,7 +34,7 @@ export function FiltersPanel({ embedded }: { embedded?: boolean }) {
           <button
             type="button"
             onClick={resetFilters}
-            className="text-[11px] text-muted-foreground hover:text-primary"
+            className="text-[12px] text-muted-foreground hover:text-primary"
           >
             Reset
           </button>
@@ -45,7 +45,7 @@ export function FiltersPanel({ embedded }: { embedded?: boolean }) {
           value={filters.kind}
           onValueChange={(v) => setFilters((f) => ({ ...f, kind: v as FilterState["kind"] }))}
         >
-          <SelectTrigger className="h-7 text-xs">
+          <SelectTrigger className="field-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -60,7 +60,7 @@ export function FiltersPanel({ embedded }: { embedded?: boolean }) {
           value={filters.faction}
           onValueChange={(v) => setFilters((f) => ({ ...f, faction: v }))}
         >
-          <SelectTrigger className="h-7 text-xs">
+          <SelectTrigger className="field-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -78,7 +78,7 @@ export function FiltersPanel({ embedded }: { embedded?: boolean }) {
           value={filters.status}
           onValueChange={(v) => setFilters((f) => ({ ...f, status: v as FilterState["status"] }))}
         >
-          <SelectTrigger className="h-7 text-xs">
+          <SelectTrigger className="field-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -96,7 +96,7 @@ export function FiltersPanel({ embedded }: { embedded?: boolean }) {
           value={filters.relationType}
           onValueChange={(v) => setFilters((f) => ({ ...f, relationType: v }))}
         >
-          <SelectTrigger className="h-7 text-xs">
+          <SelectTrigger className="field-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

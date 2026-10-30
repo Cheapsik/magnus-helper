@@ -147,7 +147,7 @@ export default function RandomTablesPage() {
                 onChange={(e) => update({ text: e.target.value })}
                 placeholder={"Jeden wpis na linię. Można wkleić gotową tabelę:\n01-05 Wilki\n06-10 Bandyci\n11. Kupiec z [[Towary]]"}
                 aria-label="Wpisy"
-                className="min-h-[200px] font-mono text-sm"
+                className="min-h-[200px] font-mono"
               />
               <p className="text-xs text-muted-foreground">
                 {parsed.entries.length} wpisów · <code>[[Nazwa tabeli]]</code> losuje z innej tabeli
@@ -196,7 +196,7 @@ export default function RandomTablesPage() {
                         aria-label={`Waga: ${e.text}`}
                         title="Waga (puste = zwykłe losowanie)"
                         placeholder="waga"
-                        className="h-7 w-20 text-xs"
+                        className="field-sm w-20"
                         value={meta?.weight ?? ""}
                         onChange={(ev) => updateMeta(e.text, { weight: ev.target.value === "" ? undefined : Math.max(1, Number(ev.target.value)) })}
                       />

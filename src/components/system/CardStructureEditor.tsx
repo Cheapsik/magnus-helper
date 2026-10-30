@@ -221,7 +221,7 @@ function SectionEditor({
     <section className="rounded-md border border-border">
       <header className="flex items-center gap-1.5 border-b border-border bg-white/[0.03] px-2 py-1.5">
         <input
-          className={cn(inputCls, "flex-1 border-transparent bg-transparent font-medium hover:border-input")}
+          className={cn(inputCls, "flex-1 field-inline font-medium")}
           value={section.name}
           onChange={(e) => onChange(updateSection(type, sectionId, { name: e.target.value }))}
           aria-label="Nazwa sekcji"

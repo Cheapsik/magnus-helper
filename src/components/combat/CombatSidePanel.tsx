@@ -58,7 +58,7 @@ export function CombatSidePanel({
             type="button"
             onClick={() => setTab(id)}
             className={cn(
-              "flex-1 py-2.5 text-[11px] sm:text-xs font-semibold transition-colors",
+              "flex-1 py-2.5 text-[12px] sm:text-xs font-semibold transition-colors",
               tab === id
                 ? "bg-card text-primary border-b-2 border-primary -mb-px"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/30",
@@ -98,7 +98,7 @@ export function CombatSidePanel({
             <div className="shrink-0 border-t border-border p-2">
               <Sheet open={managePresetsOpen} onOpenChange={setManagePresetsOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-9 w-full gap-1.5 text-xs">
+                  <Button variant="outline" className="w-full gap-1.5">
                     <Settings2 className="h-3.5 w-3.5" />
                     Zarządzaj presetami
                   </Button>

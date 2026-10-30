@@ -17,7 +17,7 @@ import {
 } from "@/lib/narrativeEngine";
 import { confirmDialog } from "@/components/ui/dialogs";
 
-const selectCls = "h-9 rounded-md border border-input bg-background px-2 text-sm";
+const selectCls = "field";
 
 export default function NarrativePage() {
   const { noteSessionCatalog } = useApp();

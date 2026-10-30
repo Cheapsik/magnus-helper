@@ -164,7 +164,7 @@ function TimerCard({
             onBlur={commitLabel}
             onKeyDown={(e) => e.key === "Enter" && commitLabel()}
             placeholder="Nazwa timera..."
-            className="text-sm font-medium"
+            className="font-medium"
           />
         ) : (
           <button
@@ -223,7 +223,7 @@ function TimerCard({
                 setHhDraft(v);
                 commitCountdown(v, mmDraft, ssDraft);
               }}
-              className="w-16 text-center text-sm"
+              className="w-16 text-center"
               placeholder="GG"
             />
             <span className="text-muted-foreground font-bold">:</span>
@@ -237,7 +237,7 @@ function TimerCard({
                 setMmDraft(v);
                 commitCountdown(hhDraft, v, ssDraft);
               }}
-              className="w-16 text-center text-sm"
+              className="w-16 text-center"
               placeholder="MM"
             />
             <span className="text-muted-foreground font-bold">:</span>
@@ -251,7 +251,7 @@ function TimerCard({
                 setSsDraft(v);
                 commitCountdown(hhDraft, mmDraft, v);
               }}
-              className="w-16 text-center text-sm"
+              className="w-16 text-center"
               placeholder="SS"
             />
           </div>
@@ -271,7 +271,7 @@ function TimerCard({
               <Play className="h-4 w-4 mr-1" /> Start
             </Button>
           )}
-          <Button onClick={reset} variant="outline" className="">
+          <Button onClick={reset} variant="outline">
             <RotateCcw className="h-4 w-4" />
           </Button>
           <Button
@@ -382,7 +382,7 @@ export default function TimersPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Button onClick={addTimer} size="sm" className="">
+        <Button onClick={addTimer} size="sm">
           <Plus className="h-4 w-4 mr-1" /> Dodaj timer
         </Button>
       </div>

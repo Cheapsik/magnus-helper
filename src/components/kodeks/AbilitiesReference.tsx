@@ -90,26 +90,26 @@ function EntryForm({
           value={nazwa}
           onChange={(e) => onNazwa(e.target.value)}
           placeholder="Nazwa"
-          className="h-8 text-xs"
+          className="field-sm"
         />
         <Input
           value={cecha}
           onChange={(e) => onCecha(e.target.value)}
           placeholder="Cecha / test (opcjonalnie)"
-          className="h-8 text-xs"
+          className="field-sm"
         />
         <Textarea
           value={opis}
           onChange={(e) => onOpis(e.target.value)}
           placeholder="Opis…"
-          className="min-h-[100px] text-xs"
+          className="min-h-[100px]"
         />
         <div className="flex gap-1.5">
-          <Button size="sm" className="h-7 flex-1 gap-1 text-xs" onClick={onSave}>
+          <Button size="sm" className="flex-1 gap-1" onClick={onSave}>
             <Check className="h-3 w-3" />
             {saveLabel}
           </Button>
-          <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={onCancel}>
+          <Button size="sm" variant="ghost" onClick={onCancel}>
             Anuluj
           </Button>
         </div>
@@ -207,7 +207,7 @@ export function AbilitiesReference() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button size="sm" className="h-7 gap-1 text-xs" onClick={startAdd}>
+        <Button size="sm" className="gap-1" onClick={startAdd}>
           <Plus className="h-3 w-3" /> Dodaj wpis
         </Button>
       </div>
@@ -268,7 +268,7 @@ export function AbilitiesReference() {
                   </span>
                   <Badge
                     variant={active ? "default" : "secondary"}
-                    className="h-5 min-w-5 justify-center px-1.5 text-[11px] font-normal tabular-nums"
+                    className="h-5 min-w-5 justify-center px-1.5 text-[12px] font-normal tabular-nums"
                   >
                     {counts[id]}
                   </Badge>
@@ -312,7 +312,7 @@ export function AbilitiesReference() {
                         {entry.nazwa}
                       </span>
                       {entry.cecha && (
-                        <Badge variant="outline" className="text-[11px] font-normal">
+                        <Badge variant="outline" className="text-[12px] font-normal">
                           {entry.cecha}
                         </Badge>
                       )}
@@ -328,7 +328,7 @@ export function AbilitiesReference() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-7 gap-1 text-xs"
+                        className="gap-1"
                         onClick={() => startEdit(entry)}
                       >
                         <Edit2 className="h-3 w-3" /> Edytuj
@@ -338,7 +338,7 @@ export function AbilitiesReference() {
                           <Button
                             size="sm"
                             variant="destructive"
-                            className="h-7 gap-1 text-xs"
+                            className="gap-1"
                             onClick={() => remove(entry.id)}
                           >
                             <Check className="h-3 w-3" /> Potwierdź
@@ -346,7 +346,7 @@ export function AbilitiesReference() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="h-7 gap-1 text-xs"
+                            className="gap-1"
                             onClick={() => setDeleteConfirm(null)}
                           >
                             <X className="h-3 w-3" /> Anuluj
@@ -356,7 +356,7 @@ export function AbilitiesReference() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-7 gap-1 text-xs text-destructive"
+                          className="gap-1 text-destructive"
                           onClick={() => setDeleteConfirm(entry.id)}
                         >
                           <Trash2 className="h-3 w-3" /> Usuń

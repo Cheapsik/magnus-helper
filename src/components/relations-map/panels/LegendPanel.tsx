@@ -14,7 +14,7 @@ export function LegendPanel({ embedded }: { embedded?: boolean }) {
               className="inline-block w-3 h-0.5 shrink-0 rounded-full"
               style={{ background: typeColor(t) }}
             />
-            <span className="text-[11px] text-muted-foreground truncate">{t}</span>
+            <span className="text-[12px] text-muted-foreground truncate">{t}</span>
           </div>
         ))}
       </div>
@@ -32,7 +32,7 @@ export function LegendPanel({ embedded }: { embedded?: boolean }) {
                 strokeDasharray={statusStroke(s) === "0" ? undefined : statusStroke(s)}
               />
             </svg>
-            <span className="text-[11px] text-muted-foreground">{statusLabel[s]}</span>
+            <span className="text-[12px] text-muted-foreground">{statusLabel[s]}</span>
           </div>
         ))}
       </div>

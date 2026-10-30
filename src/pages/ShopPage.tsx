@@ -459,7 +459,7 @@ export default function ShopPage() {
         placeholder="Nazwa sklepu..."
         value={shopTitle}
         onChange={(e) => setShopTitle(e.target.value)}
-        className="min-h-[--h-control] text-base"
+        className="min-h-[--h-control]"
       />
       <div className="flex flex-col sm:flex-row gap-2">
         <Button type="button" className="min-h-12 flex-1 gap-2 text-base font-semibold" onClick={handleGenerate}>
@@ -501,7 +501,7 @@ export default function ShopPage() {
               <TableCell className="font-medium">{line.name}</TableCell>
               <TableCell>{line.type}</TableCell>
               <TableCell>
-                <Badge variant="outline" className={cn("text-[11px]", rankBadgeClass(line.rankName, rankNames))}>
+                <Badge variant="outline" className={cn("text-[12px]", rankBadgeClass(line.rankName, rankNames))}>
                   {line.rankName}
                 </Badge>
               </TableCell>
@@ -564,7 +564,7 @@ export default function ShopPage() {
           <CardContent className="p-3 space-y-2">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <span className="font-bold leading-tight">{line.name}</span>
-              <Badge variant="outline" className={cn("text-[11px] shrink-0", rankBadgeClass(line.rankName, rankNames))}>
+              <Badge variant="outline" className={cn("text-[12px] shrink-0", rankBadgeClass(line.rankName, rankNames))}>
                 {line.rankName}
               </Badge>
             </div>

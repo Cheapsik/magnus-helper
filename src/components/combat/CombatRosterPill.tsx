@@ -55,13 +55,13 @@ export function CombatRosterPill({
         <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
           <div className="min-w-0">
             <span className="block truncate text-sm font-semibold">{name}</span>
-            {subtitle && <span className="block truncate text-[11px] text-muted-foreground">{subtitle}</span>}
+            {subtitle && <span className="block truncate text-[12px] text-muted-foreground">{subtitle}</span>}
           </div>
           <Button
             type="button"
             size="sm"
             variant="secondary"
-            className="h-8 shrink-0 px-2 text-[11px]"
+            className="shrink-0 px-2"
             onClick={(ev) => {
               ev.stopPropagation();
               onAddToCombat();
@@ -72,7 +72,7 @@ export function CombatRosterPill({
         </div>
       </div>
       {details.length > 0 && (
-        <div className={cn("mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground", finePointer && "pl-5.5")}>
+        <div className={cn("mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[12px] text-muted-foreground", finePointer && "pl-5.5")}>
           {details.map((detail) => (
             <span key={detail}>{detail}</span>
           ))}

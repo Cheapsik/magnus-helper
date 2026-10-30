@@ -309,13 +309,13 @@ export default function CombatPage() {
           <CardContent className="space-y-2 p-2.5">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-sm font-semibold">Nowy uczestnik</h3>
-              <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => setShowAddForm(false)}>
+              <Button size="sm" variant="ghost" onClick={() => setShowAddForm(false)}>
                 Anuluj
               </Button>
             </div>
             <CombatantFormFields combatant={newCombatant} onChange={setNewCombatant} idPrefix="new" />
             <div className="flex justify-end">
-              <Button size="sm" onClick={addCombatant} disabled={!newCombatant.name.trim()} className="h-7 gap-1 text-xs">
+              <Button size="sm" onClick={addCombatant} disabled={!newCombatant.name.trim()} className="gap-1">
                 <Plus className="h-3 w-3" />
                 Dodaj
               </Button>

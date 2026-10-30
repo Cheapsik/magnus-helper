@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, X, Timer, AlertTriangle } from "lucide-react";
+import { Plus, Minus, X, Timer, AlertTriangle } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { useCampaignSystem } from "@/lib/cardStore";
 import type { ActiveCondition } from "@/context/AppContext";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
-const SEVERITY_STYLES = {
-  low: "bg-muted text-muted-foreground border-border",
-  medium: "bg-primary/10 text-primary border-primary/30",
-  high: "bg-destructive/15 text-destructive border-destructive/30",
+/** Severity reads in the tag beside the name; the row itself stays a plain line of the list. */
+const SEVERITY_TAG = {
+  low: "text-muted-foreground",
+  medium: "text-primary",
+  high: "text-destructive",
 };
 
 const SEVERITY_ORDER: ActiveCondition["severity"][] = ["low", "medium", "high"];
@@ -60,45 +61,44 @@ export default function ConditionsPage() {
           Aktywne ({conditions.length})
         </label>
         {conditions.length === 0 ? (
-          <Card><CardContent className="p-4 text-center text-sm text-muted-foreground">Brak aktywnych stanów</CardContent></Card>
+          <p className="rounded-[--radius] border border-dashed border-border px-4 py-3 text-sm text-muted-foreground">Nikt nie ma teraz żadnego stanu.</p>
         ) : (
-          <div className="space-y-1.5">
+          <ul className="surface divide-y divide-border border border-border">
             {conditions.map((c) => (
-              <div key={c.id} className={`flex items-center justify-between px-3 py-2.5 rounded-md border ${SEVERITY_STYLES[c.severity]}`}>
+              <li key={c.id} className="flex min-h-12 items-center gap-3 px-4 py-1.5">
+                <span className="min-w-0 flex-1 truncate font-display text-[length:--fs-section] font-medium">{c.name}</span>
                 <button
                   type="button"
-                  className="flex items-center gap-2 text-left"
+                  className={`flex items-center gap-1 rounded-[--radius] px-1.5 py-0.5 font-caps text-[length:--fs-sm] hover:bg-secondary ${SEVERITY_TAG[c.severity]}`}
                   onClick={() => cycleSeverity(c.id)}
-                  title={`Waga: ${SEVERITY_LABELS[c.severity]} — kliknij, aby zmienić`}
+                  title="Kliknij, aby zmienić wagę"
                 >
                   {c.severity === "high" && <AlertTriangle className="h-3.5 w-3.5" />}
-                  <span className="text-sm font-medium">{c.name}</span>
+                  {SEVERITY_LABELS[c.severity].toLowerCase()}
                 </button>
-                <div className="flex items-center gap-1.5">
-                  {c.rounds !== undefined ? (
-                    <div className="flex items-center gap-1 mr-1">
-                      <Timer className="h-3 w-3 text-muted-foreground" />
-                      <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => updateRounds(c.id, -1)}><span className="text-[11px]">-</span></Button>
-                      <span className="text-xs font-bold min-w-[1.5ch] text-center">{c.rounds}</span>
-                      <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => updateRounds(c.id, 1)}><span className="text-[11px]">+</span></Button>
-                    </div>
-                  ) : (
-                    <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => updateRounds(c.id, 0)} title="Dodaj licznik rund">
-                      <Timer className="h-3 w-3" />
-                    </Button>
-                  )}
-                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => removeCondition(c.id)}><X className="h-3.5 w-3.5" /></Button>
-                </div>
-              </div>
+                {c.rounds !== undefined ? (
+                  <div className="flex items-center gap-1" title="Pozostałe rundy">
+                    <Timer className="h-4 w-4 text-muted-foreground" />
+                    <Button size="icon-sm" variant="ghost" onClick={() => updateRounds(c.id, -1)} aria-label="Odejmij rundę"><Minus /></Button>
+                    <span className="readout min-w-[2ch] text-center">{c.rounds}</span>
+                    <Button size="icon-sm" variant="ghost" onClick={() => updateRounds(c.id, 1)} aria-label="Dodaj rundę"><Plus /></Button>
+                  </div>
+                ) : (
+                  <Button size="icon-sm" variant="ghost" onClick={() => updateRounds(c.id, 0)} title="Dodaj licznik rund" aria-label="Dodaj licznik rund">
+                    <Timer />
+                  </Button>
+                )}
+                <Button size="icon-sm" variant="ghost" className="hover:text-destructive" onClick={() => removeCondition(c.id)} aria-label={`Zdejmij stan ${c.name}`}><X /></Button>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
       </section>
 
       <section>
         <label className="field-label mb-1.5 block">Szybkie dodawanie</label>
         {system.conditions.length === 0 ? (
-          <p className="rounded-md border border-dashed px-3 py-3 text-sm text-muted-foreground">
+          <p className="rounded-[--radius] border border-dashed border-border px-4 py-3 text-sm text-muted-foreground">
             Kampania nie ma jeszcze listy stanów.{" "}
             <Link to="/settings?tab=stany" className="font-medium text-primary underline underline-offset-2">
               Dodaj stany w ustawieniach kampanii
@@ -110,7 +110,7 @@ export default function ConditionsPage() {
             {system.conditions.map((c) => {
               const active = conditions.find((a) => a.name === c.name);
               return (
-                <Button key={c.id} size="sm" variant={active ? "default" : "outline"} className="text-xs"
+                <Button key={c.id} size="sm" variant={active ? "default" : "outline"} aria-pressed={!!active}
                   onClick={() => active ? removeCondition(active.id) : addCondition(c.name)}>
                   {c.name}
                 </Button>
@@ -123,9 +123,9 @@ export default function ConditionsPage() {
       <section>
         <label className="field-label mb-1.5 block">Własny stan</label>
         <div className="flex gap-2">
-          <input type="text" value={customName} onChange={(e) => setCustomName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleCustomAdd()}
-            placeholder="Nazwa stanu…" className="flex-1 h-9 px-3 text-sm rounded-md border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring" />
-          <Button size="sm" onClick={handleCustomAdd} className="gap-1"><Plus className="h-3.5 w-3.5" />Dodaj</Button>
+          <Input value={customName} onChange={(e) => setCustomName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleCustomAdd()}
+            placeholder="Nazwa stanu…" className="flex-1" />
+          <Button onClick={handleCustomAdd}><Plus />Dodaj</Button>
         </div>
       </section>
     </div>

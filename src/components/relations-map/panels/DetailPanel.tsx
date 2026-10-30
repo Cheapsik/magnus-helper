@@ -53,7 +53,7 @@ export function DetailPanel() {
             <h2 className="font-display text-lg truncate text-foreground">
               {editingEntity?.name || "Szczegóły"}
             </h2>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-[12px] text-muted-foreground">
               {editingNode
                 ? editingNode.type === "npc"
                   ? "Karta NPC"
@@ -67,15 +67,15 @@ export function DetailPanel() {
                 size="sm"
                 variant={editingNode.pinned ? "default" : "outline"}
                 onClick={() => handleTogglePin(editingNode.id)}
-                className="h-7 px-2"
+                className="px-2"
               >
                 <Pin className="h-3 w-3" fill={editingNode.pinned ? "currentColor" : "none"} />
               </Button>
             )}
             <Button
-              size="sm"
+              size="icon-sm"
               variant="ghost"
-              className="h-7 w-7 p-0"
+              className="p-0"
               onClick={() => setDetailPanelOpen(false)}
             >
               <X className="h-3.5 w-3.5" />
@@ -91,7 +91,7 @@ export function DetailPanel() {
               suggestions={allTags}
             />
             {(lastChange || currentSession) && (
-              <div className="mt-2 text-[11px] text-muted-foreground border-t border-border/60 pt-2">
+              <div className="mt-2 text-[12px] text-muted-foreground border-t border-border/60 pt-2">
                 {lastChange?.changedSince && (
                   <div>Ostatnia zmiana relacji: sesja oznaczona NEW</div>
                 )}
@@ -108,14 +108,14 @@ export function DetailPanel() {
         </div>
       ) : (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0 px-4 pb-4">
-          <TabsList className="grid grid-cols-3 h-8 shrink-0 mt-2">
-            <TabsTrigger value="opis" className="text-[11px]">
+          <TabsList className="grid grid-cols-3 shrink-0 mt-2">
+            <TabsTrigger value="opis" className="text-[12px]">
               Opis
             </TabsTrigger>
-            <TabsTrigger value="relacje" className="text-[11px]">
+            <TabsTrigger value="relacje" className="text-[12px]">
               Relacje
             </TabsTrigger>
-            <TabsTrigger value="mg" className="text-[11px]">
+            <TabsTrigger value="mg" className="text-[12px]">
               MG
             </TabsTrigger>
           </TabsList>
@@ -137,7 +137,7 @@ export function DetailPanel() {
                     updateNodeMeta(editingNode.id, { description: e.target.value })
                   }
                   rows={3}
-                  className="text-xs mt-1"
+                  className="mt-1"
                 />
               </div>
             </TabsContent>
@@ -169,7 +169,7 @@ export function DetailPanel() {
                       </button>
                     </div>
                     <div className="text-sm">→ {other?.name || "?"}</div>
-                    <div className="text-[11px] text-muted-foreground">
+                    <div className="text-[12px] text-muted-foreground">
                       {statusLabel[e.status ?? "aktywna"]} · siła {e.strength ?? 3}/5
                     </div>
                     {e.description && (
@@ -189,7 +189,7 @@ export function DetailPanel() {
                   value={editingNode.meta?.secrets ?? ""}
                   onChange={(e) => updateNodeMeta(editingNode.id, { secrets: e.target.value })}
                   rows={4}
-                  className="text-xs mt-1"
+                  className="mt-1"
                 />
               </div>
               <div>
@@ -200,7 +200,7 @@ export function DetailPanel() {
                   value={editingNode.meta?.goals ?? ""}
                   onChange={(e) => updateNodeMeta(editingNode.id, { goals: e.target.value })}
                   rows={3}
-                  className="text-xs mt-1"
+                  className="mt-1"
                 />
               </div>
               <div>
@@ -211,7 +211,7 @@ export function DetailPanel() {
                   value={editingNode.meta?.notes ?? ""}
                   onChange={(e) => updateNodeMeta(editingNode.id, { notes: e.target.value })}
                   rows={3}
-                  className="text-xs mt-1"
+                  className="mt-1"
                 />
               </div>
               <div>
@@ -227,7 +227,7 @@ export function DetailPanel() {
                   .reverse()
                   .map((h) => (
                     <div key={h.id} className="border-l-2 border-primary/60 pl-2 py-1 mb-1">
-                      <div className="text-[11px] text-muted-foreground">
+                      <div className="text-[12px] text-muted-foreground">
                         {new Date(h.ts).toLocaleString()}
                         {h.session && ` · ${h.session}`}
                       </div>
