@@ -41,5 +41,4 @@ Tests live next to the code as `src/**/*.test.ts(x)`. `src/test/setup.ts` clears
 
 ## Local caveats
 
-- `src/components/AuthGuard.tsx` may carry an uncommitted dev-only auth bypass. Do not commit it.
 - Work happens on feature branches. The repo owner does all merges and pushes.

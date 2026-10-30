@@ -48,7 +48,6 @@ Stan: `tsc` 0 błędów, testy 149/149 (w tym „IP guard”), `vite build` OK, 
    - obrazy map i pliki audio (IndexedDB) nie trafiają do eksportu danych.
 
 ## Uwagi
-- `src/components/AuthGuard.tsx` ma **tymczasową, niezacommitowaną** zmianę (pomija logowanie w `npm run dev`). Nie commitować; cofnąć `git checkout src/components/AuthGuard.tsx`.
 - Gałąź `chore/ip-cleanup-p0` (commit `e5cb367`, od `main`) usuwa treści WFRP z `main`; czeka na decyzję o pushu/merge'u.
 - Przy pierwszym uruchomieniu nowej wersji dane w przeglądarce są czyszczone (ADR 0008).
 - Atak: `vsDefense` podstawia pole obrony celu w miejsce wartości stopnia trudności; `opposed` wymaga sukcesu atakującego i wyższego wyniku (margines / suma / sukcesy zależnie od trybu).
