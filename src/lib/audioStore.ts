@@ -1,6 +1,10 @@
-import { getStorageKey } from "@/lib/campaignStorage";
+import { getActiveCampaignId, getStorageKey } from "@/lib/campaignStorage";
+import { markDirty } from "@/lib/syncQueue";
 
-/** GM's own audio files live in IndexedDB: localStorage is far too small for them. */
+/**
+ * GM's own audio files: this device's copy in IndexedDB (localStorage is far too small for
+ * them), the lasting one in the cloud (lib/cloudSync).
+ */
 const DB_NAME = "magnus_audio";
 const STORE = "blobs";
 
@@ -42,20 +46,43 @@ async function run<T>(mode: IDBTransactionMode, fn: (s: IDBObjectStore) => IDBRe
   });
 }
 
-export async function putAudio(soundId: string, blob: Blob): Promise<void> {
-  await run("readwrite", (s) => s.put(blob, audioBlobKey(soundId)));
+function queueForCloud(soundId: string): void {
+  const campaignId = getActiveCampaignId();
+  if (campaignId) markDirty(["file", campaignId, "audio", soundId]);
 }
 
+export async function putAudio(soundId: string, blob: Blob): Promise<void> {
+  await run("readwrite", (s) => s.put(blob, audioBlobKey(soundId)));
+  queueForCloud(soundId);
+}
+
+/** This device's copy, or the cloud's (kept here for next time). */
 export async function getAudio(soundId: string): Promise<Blob | null> {
-  return ((await run("readonly", (s) => s.get(audioBlobKey(soundId)))) as Blob | undefined) ?? null;
+  const local = await localAudio(soundId);
+  if (local) return local;
+  const remote = await (await import("@/lib/cloudSync")).downloadFile("audio", soundId);
+  if (remote) await run("readwrite", (s) => s.put(remote, audioBlobKey(soundId))).catch(() => {});
+  return remote;
+}
+
+export async function localAudio(soundId: string, campaignId?: string): Promise<Blob | null> {
+  return ((await run("readonly", (s) => s.get(audioBlobKey(soundId, campaignId)))) as Blob | undefined) ?? null;
+}
+
+export async function localAudioIds(campaignId: string): Promise<string[]> {
+  const prefix = getStorageKey("rpg_ambient_audio:", campaignId);
+  const keys = await run("readonly", (s) => s.getAllKeys(IDBKeyRange.bound(prefix, `${prefix}\uffff`)));
+  return keys.map((key) => String(key).slice(prefix.length));
 }
 
 export async function hasAudio(soundId: string): Promise<boolean> {
-  return (await run("readonly", (s) => s.count(audioBlobKey(soundId)))) > 0;
+  if ((await run("readonly", (s) => s.count(audioBlobKey(soundId)))) > 0) return true;
+  return (await import("@/lib/cloudSync")).cloudFileExists("audio", soundId);
 }
 
 export async function deleteAudio(soundId: string): Promise<void> {
   await run("readwrite", (s) => s.delete(audioBlobKey(soundId)));
+  queueForCloud(soundId);
 }
 
 /** Drops every stored file of a campaign; called when the campaign is deleted. */

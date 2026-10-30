@@ -1,7 +1,10 @@
-import { getStorageKey } from "@/lib/campaignStorage";
+import { getStorageKey, markKeyDirty } from "@/lib/campaignStorage";
 
 /**
  * Single runtime entry point for campaign-scoped persistence.
+ *
+ * localStorage is this device's copy; every campaign key written here is also
+ * queued for the cloud (lib/syncQueue, lib/cloudSync).
  *
  * Every read and write the app performs while running goes through here, so
  * that React stays in sync when any module writes, and so that swapping
@@ -86,6 +89,7 @@ export function writeJson<T>(key: string, value: T, options?: StorageOptions<T>)
     // matching the previous behaviour, but tell the caller it did not stick.
     persisted = false;
   }
+  if (persisted) markKeyDirty(resolved);
   notify(resolved);
   return persisted;
 }
@@ -95,6 +99,7 @@ export function removeJson(key: string, options?: StorageScope): void {
   snapshots.delete(resolved);
   try {
     window.localStorage.removeItem(resolved);
+    markKeyDirty(resolved);
   } catch {
     // nothing to remove
   }

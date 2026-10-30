@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { getStorageKey } from "@/lib/campaignStorage";
+import { getStorageKey, markKeyDirty } from "@/lib/campaignStorage";
 import { type Card, type CardKind, type CardTypeDef, cardSubtitle, cardTitle } from "@/lib/cardSchema";
 import { type CampaignSystem, emptyCampaignSystem } from "@/lib/campaignSystem";
 import { type StartingPoint, systemForStartingPoint } from "@/lib/systemTemplates";
@@ -52,10 +52,9 @@ export function initializeCampaignSystem(campaignId: string, start: StartingPoin
       const raw = window.localStorage.getItem(getStorageKey(CAMPAIGN_SYSTEM_KEY, copyFromCampaignId));
       if (raw) system = JSON.parse(raw) as CampaignSystem;
     }
-    window.localStorage.setItem(
-      getStorageKey(CAMPAIGN_SYSTEM_KEY, campaignId),
-      JSON.stringify(system ?? systemForStartingPoint(start)),
-    );
+    const key = getStorageKey(CAMPAIGN_SYSTEM_KEY, campaignId);
+    window.localStorage.setItem(key, JSON.stringify(system ?? systemForStartingPoint(start)));
+    markKeyDirty(key);
   } catch {
     // storage unavailable/full — the campaign falls back to an empty system
   }

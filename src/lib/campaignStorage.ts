@@ -1,3 +1,5 @@
+import { markDirty, SYNC_BOOKKEEPING_KEYS } from "@/lib/syncQueue";
+
 export interface Campaign {
   id: string;
   name: string;
@@ -28,6 +30,10 @@ const GLOBAL_KEYS = new Set<string>([
   "rpg_theme",
   "magnus_sidebar_width",
   "magnus-dice-3d-visual",
+  "magnus_app_role",
+  "magnus_pending_invite",
+  "magnus_seen_materials",
+  ...SYNC_BOOKKEEPING_KEYS,
 ]);
 
 const LEGACY_DATA_PREFIXES = ["rpg_", "magnus_", "magnus-"] as const;
@@ -72,6 +78,7 @@ function absorbLegacyDataInto(campaignId: string): void {
       if (value === null) continue;
       window.localStorage.setItem(getStorageKey(key, campaignId), value);
       window.localStorage.removeItem(key);
+      markDirty(["data", campaignId, key]);
     }
   } catch {
     // storage unavailable — nothing to absorb
@@ -98,7 +105,7 @@ export function readCampaignsRegistry(): CampaignsRegistry {
   }
 }
 
-function writeCampaignsRegistry(registry: CampaignsRegistry): void {
+export function writeCampaignsRegistry(registry: CampaignsRegistry): void {
   try {
     window.localStorage.setItem(CAMPAIGNS_REGISTRY_KEY, JSON.stringify(registry));
   } catch {
@@ -139,6 +146,7 @@ export function createCampaign(name: string): Campaign {
     campaigns: [...registry.campaigns, campaign],
     activeCampaignId: becomesActive ? campaign.id : registry.activeCampaignId,
   });
+  markDirty(["campaign", campaign.id]);
   if (becomesActive) absorbLegacyDataInto(campaign.id);
   return campaign;
 }
@@ -149,6 +157,7 @@ export function renameCampaign(campaignId: string, name: string): void {
     ...registry,
     campaigns: registry.campaigns.map((c) => (c.id === campaignId ? { ...c, name } : c)),
   });
+  markDirty(["campaign", campaignId]);
 }
 
 export function archiveCampaign(campaignId: string): void {
@@ -159,6 +168,7 @@ export function archiveCampaign(campaignId: string): void {
       c.id === campaignId ? { ...c, archivedAt: new Date().toISOString() } : c,
     ),
   });
+  markDirty(["campaign", campaignId]);
 }
 
 export function unarchiveCampaign(campaignId: string): void {
@@ -167,6 +177,7 @@ export function unarchiveCampaign(campaignId: string): void {
     ...registry,
     campaigns: registry.campaigns.map((c) => (c.id === campaignId ? { ...c, archivedAt: null } : c)),
   });
+  markDirty(["campaign", campaignId]);
 }
 
 /** Removes a campaign and every piece of namespaced data that belongs to it. */
@@ -178,6 +189,13 @@ export function deleteCampaign(campaignId: string): void {
       ? (remaining[0]?.id ?? null)
       : registry.activeCampaignId;
 
+  removeCampaignLocally(campaignId);
+  writeCampaignsRegistry({ campaigns: remaining, activeCampaignId });
+  markDirty(["campaign", campaignId]);
+}
+
+/** Drops a campaign's data from this device only; the registry and the cloud are the caller's business. */
+export function removeCampaignLocally(campaignId: string): void {
   const prefix = `${NAMESPACE_PREFIX}${campaignId}:`;
   try {
     const keysToRemove: string[] = [];
@@ -192,8 +210,6 @@ export function deleteCampaign(campaignId: string): void {
   // Audio files and map images sit in IndexedDB; loaded lazily so storage code stays free of it.
   void import("@/lib/audioStore").then((m) => m.deleteCampaignAudio(campaignId)).catch(() => {});
   void import("@/lib/imageStore").then((m) => m.deleteCampaignImages(campaignId)).catch(() => {});
-
-  writeCampaignsRegistry({ campaigns: remaining, activeCampaignId });
 }
 
 /** Namespaces a raw storage key under a campaign. Defaults to the active campaign. */
@@ -205,4 +221,19 @@ export function getStorageKey(key: string, campaignId?: string): string {
 
 export function isNamespacedKey(key: string): boolean {
   return key.startsWith(NAMESPACE_PREFIX);
+}
+
+/** Splits a namespaced key back into its campaign and the key the app used; null for global keys. */
+export function parseStorageKey(storageKey: string): { campaignId: string; key: string } | null {
+  if (!isNamespacedKey(storageKey)) return null;
+  const rest = storageKey.slice(NAMESPACE_PREFIX.length);
+  const colon = rest.indexOf(":");
+  if (colon <= 0) return null;
+  return { campaignId: rest.slice(0, colon), key: rest.slice(colon + 1) };
+}
+
+/** Queues a campaign key written outside lib/storage for the cloud; global keys stay on the device. */
+export function markKeyDirty(storageKey: string): void {
+  const parsed = parseStorageKey(storageKey);
+  if (parsed) markDirty(["data", parsed.campaignId, parsed.key]);
 }

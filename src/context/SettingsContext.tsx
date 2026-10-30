@@ -1,10 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { SETTINGS_STORAGE_KEY } from "@/types/settings";
-import { isNamespacedKey } from "@/lib/campaignStorage";
+import { isNamespacedKey, markKeyDirty, readCampaignsRegistry } from "@/lib/campaignStorage";
 import { readJson, writeJson } from "@/lib/storage";
+import { markDirty, SYNC_BOOKKEEPING_KEYS } from "@/lib/syncQueue";
 
-const SETTINGS_KEYS_TO_PRESERVE = new Set<string>([SETTINGS_STORAGE_KEY]);
+const SETTINGS_KEYS_TO_PRESERVE = new Set<string>([SETTINGS_STORAGE_KEY, ...SYNC_BOOKKEEPING_KEYS]);
 const APP_DATA_PREFIXES = ["magnus_", "rpg_"] as const;
 
 function isAppDataKey(key: string): boolean {
@@ -20,6 +21,14 @@ function collectAppDataKeys(): string[] {
     if (k && isAppDataKey(k)) keys.push(k);
   }
   return keys;
+}
+
+const campaignIds = () => readCampaignsRegistry().campaigns.map((c) => c.id);
+
+/** Keys and campaigns replaced or removed wholesale have to reach the cloud too (lib/cloudSync). */
+function queueForCloud(keys: Iterable<string>, campaigns: Iterable<string>): void {
+  for (const key of keys) markKeyDirty(key);
+  for (const id of campaigns) markDirty(["campaign", id]);
 }
 
 function dateStamp(): string {
@@ -97,7 +106,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       throw new Error("no_app_keys");
     }
 
-            for (const k of collectAppDataKeys()) {
+    const previousKeys = collectAppDataKeys();
+    const previousCampaigns = campaignIds();
+    for (const k of previousKeys) {
       try { window.localStorage.removeItem(k); } catch {}
     }
     for (const k of appKeys) {
@@ -105,14 +116,18 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       const value = typeof raw === "string" ? raw : JSON.stringify(raw);
       try { window.localStorage.setItem(k, value); } catch {}
     }
+    queueForCloud(new Set([...previousKeys, ...appKeys]), new Set([...previousCampaigns, ...campaignIds()]));
     toast.success("Dane zaimportowane — przeładowuję…");
     window.setTimeout(() => window.location.reload(), 300);
   }, []);
 
   const resetData = useCallback(() => {
-    for (const k of collectAppDataKeys()) {
+    const keys = collectAppDataKeys();
+    const campaigns = campaignIds();
+    for (const k of keys) {
       try { window.localStorage.removeItem(k); } catch {}
     }
+    queueForCloud(keys, campaigns);
     window.setTimeout(() => window.location.reload(), 150);
   }, []);
 
