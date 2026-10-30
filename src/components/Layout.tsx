@@ -20,6 +20,7 @@ import StatusBar from "@/components/StatusBar";
 import QuickRollPanel from "@/components/tables/QuickRollPanel";
 import CampaignSwitcher from "@/components/CampaignSwitcher";
 import Logo from "./Logo";
+import CandleFlame from "./CandleFlame";
 
 const SIDEBAR_MIN_WIDTH = 200;
 const SIDEBAR_MAX_WIDTH = 420;
@@ -231,6 +232,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           <span className="font-app-brand min-w-0 truncate text-[1.0625rem] leading-none text-foreground">
             Magnus Helper
           </span>
+          <CandleFlame className="-mt-1" />
         </Link>
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
@@ -306,6 +308,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               <span className="font-app-brand text-base tracking-wide text-foreground truncate">
                 Magnus Helper
               </span>
+              <CandleFlame className="-mt-1" />
             </Link>
             <div className="flex items-center justify-end gap-0.5 min-w-0">
               <button
