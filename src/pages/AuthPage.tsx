@@ -1,15 +1,6 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  BookOpen,
-  Dice5,
-  Eye,
-  EyeOff,
-  Lock,
-  Mail,
-  NotebookPen,
-  Users,
-} from "lucide-react";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { isRecoveryAuthCallback } from "@/lib/authUrls";
 import { useInvitePreview, usePendingInvite } from "@/lib/sharedCampaigns";
@@ -18,13 +9,6 @@ import { cn } from "@/lib/utils";
 const AUTH_FAVICON = `${import.meta.env.BASE_URL}favicon.png`;
 
 type AuthView = "login" | "register" | "forgot" | "new-password";
-
-const FEATURES = [
-  { icon: BookOpen, title: "Sesje RPG", subtitle: "zarządzane bez wysiłku" },
-  { icon: NotebookPen, title: "Panel mistrza gry", subtitle: "notatki, wątki, muzyka" },
-  { icon: Users, title: "Bohaterowie i NPC", subtitle: "pełna kontrola nad światem" },
-  { icon: Dice5, title: "Inteligentne rzuty", subtitle: "bez przerywania gry" },
-] as const;
 
 function GoogleIcon() {
   return (
@@ -130,8 +114,7 @@ function AuthField({
 const authBackground = (file: string) =>
   `url(${import.meta.env.BASE_URL}assets/images/${file}), radial-gradient(ellipse at 50% 20%, #3a2a1c 0%, #1b1410 55%, #0c0a08 100%)`;
 
-/** `features`: the GM-oriented feature strip; hidden for players arriving with an invite. */
-export function AuthShell({ children, features = true }: { children: ReactNode; features?: boolean }) {
+export function AuthShell({ children }: { children: ReactNode }) {
   return (
     <div className="auth-page relative flex min-h-screen flex-col text-white">
       {/* Own AI-generated art (public/THIRD_PARTY_LICENSES.md); a tall screen gets the portrait version. */}
@@ -157,22 +140,7 @@ export function AuthShell({ children, features = true }: { children: ReactNode; 
       </div>
 
       <footer className="relative z-10 shrink-0 px-3 pb-3 sm:px-4 sm:pb-6">
-        {features && <div className="mx-auto hidden max-w-5xl rounded-xl border border-white/10 bg-black/50 px-8 py-4 backdrop-blur-md sm:block">
-          <div className="grid grid-cols-4 gap-6">
-            {FEATURES.map(({ icon: Icon, title, subtitle }) => (
-              <div key={title} className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#c5a059]/30 bg-[#c5a059]/10">
-                  <Icon className="h-5 w-5 text-[#c5a059]" strokeWidth={1.5} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-medium leading-tight text-white">{title}</p>
-                  <p className="text-xs text-white/50">{subtitle}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>}
-        <p className="text-center text-[10px] text-white/40 sm:mt-4 sm:text-xs">
+        <p className="text-center text-[10px] text-white/40 sm:text-xs">
           © 2026 Magnus Helper. Wszystkie prawa zastrzeżone.
         </p>
       </footer>
@@ -422,7 +390,7 @@ export default function AuthPage() {
     inviteCampaign === null ? "— Link zaproszenia jest nieważny —" : `— Zaproszenie do kampanii${inviteCampaign ? ` „${inviteCampaign}”` : ""} —`;
 
   return (
-    <AuthShell features={!pendingInvite}>
+    <AuthShell>
       <AuthCard>
         <AuthHeader subtitle={pendingInvite && view !== "new-password" ? inviteSubtitle : viewSubtitles[view]} />
         {pendingInvite && inviteCampaign !== null && (view === "login" || view === "register") && (
