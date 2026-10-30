@@ -140,6 +140,19 @@ export default function CombatPage() {
     setActionAttackerId(null);
   };
 
+  // N / Shift+N move the turn without reaching for the mouse; ignored while typing.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() !== "n" || e.ctrlKey || e.metaKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+      e.preventDefault();
+      (e.shiftKey ? prevTurn : nextTurn)();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
   const resetCombat = () => { setCombatTurn(0); setCombatRound(1); setActionAttackerId(null); };
 
   const rollAllInitiative = () => {

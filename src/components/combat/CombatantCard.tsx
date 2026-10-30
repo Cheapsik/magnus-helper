@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Plus,
   Trash2,
@@ -21,6 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { CombatantFormFields } from "@/components/combat/CombatantFormFields";
 import { cn } from "@/lib/utils";
 
@@ -189,20 +191,7 @@ export function CombatantCard({
                   </Button>
                 </div>
 
-                <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-6">
-                  {[-5, -3, -1, 1, 3, 5].map((delta) => (
-                    <Button
-                      key={delta}
-                      type="button"
-                      size="sm"
-                      variant={delta < 0 ? "destructive" : "secondary"}
-                      className="h-[--h-control] font-semibold"
-                      onClick={() => onAdjustHp(delta)}
-                    >
-                      {delta > 0 ? `+${delta}` : delta}
-                    </Button>
-                  ))}
-                </div>
+                <QuickAmount onApply={onAdjustHp} />
 
                 {c.statuses.length > 0 && (
                   <div className="flex flex-wrap gap-1">
@@ -255,5 +244,36 @@ export function CombatantCard({
         )}
       </CardContent>
     </Card>
+  );
+}
+
+/** Type the amount and press Enter to wound, or pick Leczenie to heal by it. */
+function QuickAmount({ onApply }: { onApply: (delta: number) => void }) {
+  const [value, setValue] = useState("");
+  const apply = (sign: 1 | -1) => {
+    const amount = Math.abs(Number.parseInt(value, 10));
+    if (!Number.isFinite(amount) || amount === 0) return;
+    onApply(sign * amount);
+    setValue("");
+  };
+  return (
+    <form
+      className="flex max-w-lg items-center gap-1.5"
+      onSubmit={(e) => {
+        e.preventDefault();
+        apply(-1);
+      }}
+    >
+      <Input
+        inputMode="numeric"
+        value={value}
+        onChange={(e) => setValue(e.target.value.replace(/[^0-9]/g, ""))}
+        placeholder="Ile? Enter = rana"
+        aria-label="Wartość rany lub leczenia"
+        className="w-40"
+      />
+      <Button type="submit" size="sm" variant="destructive">Rana</Button>
+      <Button type="button" size="sm" variant="secondary" onClick={() => apply(1)}>Leczenie</Button>
+    </form>
   );
 }
