@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertTriangle, Dices, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, Dices, Plus, Trash2, Upload } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { isDiceNotation } from "@/lib/diceNotation";
-import { entryLabel, parseTableText, rollTable, tableDice, type EntryMeta, type RandomTable, type TableRoll } from "@/lib/randomTables";
+import { entryLabel, parseTableText, randomTablesFileSchema, rollTable, tableDice, type EntryMeta, type RandomTable, type TableRoll } from "@/lib/randomTables";
+import { mergeById, readJsonFile } from "@/lib/jsonImport";
 import TableConditionEditor from "@/components/tables/TableConditionEditor";
 import { useTableContext } from "@/components/tables/useTableContext";
 
@@ -27,6 +29,17 @@ export default function RandomTablesPage() {
   const lastRoll = selected ? history.find((h) => h.tableName === selected.name) : undefined;
 
   const folders = [...new Set(tables.map((t) => t.folder.trim()))].sort((a, b) => a.localeCompare(b, "pl"));
+
+  const importFileRef = useRef<HTMLInputElement>(null);
+  const importTables = async (file: File) => {
+    try {
+      const imported = await readJsonFile(file, randomTablesFileSchema);
+      setTables((prev) => mergeById(prev, imported));
+      toast.success(`Zaimportowano tabele: ${imported.length}`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Nie udało się zaimportować pliku");
+    }
+  };
 
   const addTable = () => {
     const table: RandomTable = { id: crypto.randomUUID(), name: `Tabela ${tables.length + 1}`, folder: selected?.folder ?? "", dice: "", text: "" };
@@ -68,6 +81,27 @@ export default function RandomTablesPage() {
       <div className="space-y-3">
         <Button onClick={addTable} size="sm" className="w-full">
           <Plus className="h-4 w-4 mr-1" /> Nowa tabela
+        </Button>
+        <input
+          ref={importFileRef}
+          type="file"
+          accept=".json,application/json"
+          className="hidden"
+          aria-hidden
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = "";
+            if (file) void importTables(file);
+          }}
+        />
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full"
+          onClick={() => importFileRef.current?.click()}
+          title="Dodaje tabele z pliku JSON; tabele o tym samym id zastępuje"
+        >
+          <Upload className="h-4 w-4 mr-1" /> Importuj JSON
         </Button>
         {folders.map((folder) => (
           <div key={folder} className="space-y-1">

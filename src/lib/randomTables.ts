@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { rollDie } from "@/lib/dice";
 import { rollDiceNotation, type DieRoller } from "@/lib/diceNotation";
 import { conditionsHold, EMPTY_CONTEXT, type TableCondition, type TableContext } from "@/lib/tableConditions";
@@ -17,6 +18,14 @@ export type RandomTable = {
   conditions?: TableCondition[];
   entryMeta?: Record<string, EntryMeta>;
 };
+
+/** A table file to import: an array of tables exactly as the page stores them. */
+export const randomTablesFileSchema = z.array(
+  z
+    .object({ id: z.string().min(1), name: z.string(), folder: z.string(), dice: z.string(), text: z.string() })
+    // conditions and entryMeta come along as the page saved them
+    .passthrough(),
+) as unknown as z.ZodType<RandomTable[]>;
 
 export type TableEntry = { from: number; to: number; text: string };
 

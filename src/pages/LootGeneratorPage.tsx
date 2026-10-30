@@ -1,9 +1,10 @@
-import { useMemo, useState, useId } from "react";
+import { useMemo, useRef, useState, useId } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Plus, Trash2, Edit2, Check, Dice5, Pencil, Package, Sword, Shield, Flame, Coins, Minus, X } from "lucide-react";
+import { Plus, Trash2, Edit2, Check, Dice5, Pencil, Package, Sword, Shield, Flame, Coins, Minus, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { useApp } from "@/context/AppContext";
-import { type LootDbItem, type LootRank, NO_COINS, useLootConfig, useLootItems } from "@/lib/lootDb";
+import { type LootDbItem, type LootRank, lootItemsFileSchema, NO_COINS, useLootConfig, useLootItems } from "@/lib/lootDb";
+import { mergeById, readJsonFile } from "@/lib/jsonImport";
 import { useCampaignSystem } from "@/lib/cardStore";
 import { formatMoney } from "@/lib/currency";
 import { MoneyInput } from "@/components/money/MoneyInput";
@@ -232,6 +233,22 @@ export default function LootGeneratorPage() {
     setLootConfig((prev) => ({ ...prev, ranks: [...prev.ranks, { ...newRank, id: crypto.randomUUID() }] }));
     setNewRank({ name: "", chance: 10 });
     setAddingRank(false);
+  };
+
+  const importFileRef = useRef<HTMLInputElement>(null);
+  const importItems = async (file: File) => {
+    try {
+      const items = await readJsonFile(file, lootItemsFileSchema);
+      setLootItems((prev) => mergeById(prev, items));
+      // An item whose rank the generator doesn't know never drops; say so instead of failing silently.
+      const unknownRanks = [...new Set(items.map((i) => i.rankName))].filter((name) => !lootConfig.ranks.some((r) => r.name === name));
+      toast.success(
+        `Zaimportowano przedmioty: ${items.length}`,
+        unknownRanks.length ? { description: `Rangi spoza ustawień: ${unknownRanks.join(", ")}. Dodaj je, żeby te przedmioty wypadały w losowaniu.` } : undefined,
+      );
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Nie udało się zaimportować pliku");
+    }
   };
 
   const openAddItem = () => {
@@ -610,6 +627,28 @@ export default function LootGeneratorPage() {
                 </Select>
               </div>
             </div>
+            <input
+              ref={importFileRef}
+              type="file"
+              accept=".json,application/json"
+              className="hidden"
+              aria-hidden
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (file) void importItems(file);
+              }}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => importFileRef.current?.click()}
+              className="min-h-[--h-control] gap-1.5 w-full md:w-auto shrink-0"
+              title="Dodaje przedmioty z pliku JSON; przedmioty o tym samym id zastępuje"
+            >
+              <Upload className="h-4 w-4" />
+              Importuj JSON
+            </Button>
             <Button
               type="button"
               onClick={openAddItem}
