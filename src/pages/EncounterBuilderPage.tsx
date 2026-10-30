@@ -72,8 +72,7 @@ export default function EncounterBuilderPage() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-4">
-      <h1 className="text-2xl font-bold">Kreator spotkań</h1>
+    <div className="mx-auto max-w-5xl space-y-6">
 
       <div className="grid gap-6 md:grid-cols-2">
         <Picker title="Drużyna (bohaterowie)" cards={heroes} picks={party} onChange={setParty} />

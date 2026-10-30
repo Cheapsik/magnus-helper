@@ -432,8 +432,8 @@ export default function LootGeneratorPage() {
             </CardContent>
           </Card>
 
-          <Button onClick={generateLoot} className="w-full min-h-12 text-base font-semibold gap-2">
-            <Dice5 className="h-5 w-5" /> Generuj łup
+          <Button size="lg" onClick={generateLoot}>
+            <Dice5 /> Generuj łup
           </Button>
 
           {result && (

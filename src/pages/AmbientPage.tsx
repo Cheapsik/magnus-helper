@@ -183,7 +183,7 @@ export default function AmbientPage() {
         <Volume2 className="h-4 w-4 text-primary shrink-0" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
-            <Label className="field-label">Master Volume</Label>
+            <Label className="field-label">Głośność</Label>
             <span className="text-xs tabular-nums text-muted-foreground">{masterVolume}%</span>
           </div>
           <Slider value={[masterVolume]} onValueChange={([v]) => setMasterVolume(v)} min={0} max={100} step={1} />

@@ -45,9 +45,8 @@ export default function SecretsPage() {
   };
 
   return (
-    <div className="space-y-6 p-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Sekrety i wiedza</h1>
+    <div className="space-y-6">
+      <div className="flex items-center justify-end">
         <Button type="button" onClick={() => setEditing({ id: newId(), text: "", category: "plot" })}>
           <Plus className="h-4 w-4 mr-1.5" />
           Nowy sekret

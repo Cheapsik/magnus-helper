@@ -66,12 +66,13 @@ export function FactionCard({ faction, others, ladder, npcs, heroes, clocks, ses
   };
 
   return (
-    <Card style={{ borderLeftColor: faction.color, borderLeftWidth: 4 }}>
+    <Card>
       <CardContent className="space-y-3 p-3">
         <div className="flex items-center gap-2">
           <Button size="icon-sm" variant="ghost" aria-label={open ? "Zwiń" : "Rozwiń"} onClick={() => setOpen(!open)}>
             {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           </Button>
+          <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: faction.color }} aria-hidden />
           <button type="button" className="flex-1 truncate text-left font-medium" onClick={() => setOpen(!open)}>
             {faction.name || "Bez nazwy"}
           </button>

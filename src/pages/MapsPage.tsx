@@ -73,7 +73,7 @@ export default function MapsPage() {
 
   const createMap = async (file: File) => {
     if (!isImageFile(file)) { toast.error("Obsługiwane formaty: png, jpg, webp, gif"); return; }
-    const map = newMap(newName.trim() || file.name.replace(/\.[^.]+$/, ""));
+    const map = newMap(newName.trim() || file.name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").trim());
     setBusy(true);
     try {
       await putImage(map.id, file);

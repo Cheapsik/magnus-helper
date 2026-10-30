@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Settings2, Target, Trash2 } from "lucide-react";
+import { ScrollText, Settings2, Target, Trash2 } from "lucide-react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { type Card as CampaignCard, type CardKind, CARD_KINDS, CARD_KIND_LABELS, cardTitle, newId, readNumberRef } from "@/lib/cardSchema";
 import { type TestMode, type TestType } from "@/lib/campaignSystem";
@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { NumberInput } from "@/components/ui/number-input";
 import { cn } from "@/lib/utils";
+import { logChronicleEvent } from "@/lib/chronicle";
 
 const HISTORY_KEY = "rpg_test_history";
 const HISTORY_LIMIT = 50;
@@ -324,7 +325,7 @@ export default function TestsPage() {
         </section>
       )}
 
-      <Button size="lg" onClick={roll} disabled={!canRoll} className="w-full gap-2 text-base font-semibold">
+      <Button size="lg" onClick={roll} disabled={!canRoll} className="min-w-40">
         <Target className="h-5 w-5" /> Rzuć
       </Button>
 
@@ -381,6 +382,7 @@ function mainNumber(outcome: TestOutcome): string {
 
 function OutcomeCard({ entry }: { entry: HistoryEntry }) {
   const { outcome } = entry;
+  const [logged, setLogged] = useState(false);
   const positive = isPositive(outcome);
   const tone = positive === null ? "primary" : positive ? "success" : "destructive";
 
@@ -414,8 +416,22 @@ function OutcomeCard({ entry }: { entry: HistoryEntry }) {
         >
           {headline(outcome)}
         </div>
-        <div className="animate-dice-bounce text-4xl font-bold">{mainNumber(outcome)}</div>
+        <div className="animate-dice-bounce text-6xl font-bold">{mainNumber(outcome)}</div>
         <OutcomeDetails outcome={outcome} />
+        {outcome.kind !== "invalid" && (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="mt-2 text-muted-foreground"
+            disabled={logged}
+            onClick={() => {
+              logChronicleEvent({ kind: "other", text: `Test ${entry.testTypeName} · ${entry.source}: ${headline(outcome)} (${mainNumber(outcome)})` });
+              setLogged(true);
+            }}
+          >
+            <ScrollText /> {logged ? "Zapisano w kronice" : "Zapisz w kronice"}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
