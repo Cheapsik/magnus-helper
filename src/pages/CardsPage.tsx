@@ -17,6 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { PartyXPButton, XPPanel } from "@/components/progression/XPPanel";
 import { CardRenderer } from "@/components/card/CardRenderer";
 import { MentionTimeline } from "@/components/card/MentionTimeline";
 import { useCardType, useCards } from "@/lib/cardStore";
@@ -86,6 +87,7 @@ export default function CardsPage({ kind }: { kind: CardKind }) {
     {
       actions: activeCard ? null : (
         <div className="flex gap-2">
+          {kind === "hero" && <PartyXPButton />}
           <Button
             variant="outline"
             onClick={() => setGroups((prev) => [...prev, { id: newId(), name: "Nowa grupa", collapsed: false }])}
@@ -361,6 +363,7 @@ function CardSheet({
       <div className="paper-sheet">
         <CardRenderer cardType={cardType} card={draft} onChange={setDraft} />
       </div>
+      {card.kind === "hero" && <XPPanel cardId={card.id} cardName={cardTitle(draft, "Bohater")} />}
       <MentionTimeline cardId={card.id} className="mt-4 bg-card" />
     </div>
   );

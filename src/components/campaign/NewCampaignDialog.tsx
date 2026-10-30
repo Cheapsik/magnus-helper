@@ -17,8 +17,8 @@ export function NewCampaignDialog({ open, onOpenChange }: { open: boolean; onOpe
           <CampaignWizard
             onCancel={() => onOpenChange(false)}
             finishLabel="Utwórz i przejdź"
-            onFinish={({ name, start, refine }) => {
-              const campaign = createCampaign(name, start);
+            onFinish={({ name, start, refine, copyFromCampaignId }) => {
+              const campaign = createCampaign(name, start, copyFromCampaignId);
               switchCampaign(campaign.id, refine ? "settings?tab=karty" : "");
             }}
           />

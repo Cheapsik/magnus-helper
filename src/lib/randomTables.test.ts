@@ -84,3 +84,40 @@ describe("rollTable", () => {
     expect(rollTable(chain[0], chain, always(1))?.text).toBe("01234[[T5]]");
   });
 });
+
+describe("conditional and weighted rolling", () => {
+  const clockCtx = (filled: number) => ({
+    clocks: [{ id: "c", name: "Pościg", segments: 4, filled, note: "", questId: null, visibleToPlayers: false }],
+    factions: [],
+  });
+  const withMeta = (text: string, extra: Partial<RandomTable>): RandomTable => ({ ...table("T", text), ...extra });
+
+  it("skips entries whose conditions fail", () => {
+    const t = withMeta("Straż\nSpokój", { entryMeta: { Straż: { conditions: [{ type: "clock", clockId: "c", op: "full" }] } } });
+    expect(rollTable(t, [t], always(1), clockCtx(2))?.text).toBe("Spokój");
+    expect(rollTable(t, [t], always(1), clockCtx(4))?.text).toBe("Straż");
+  });
+
+  it("picks by weight", () => {
+    const t = withMeta("Rzadkie\nCzęste", { entryMeta: { Częste: { weight: 3 } } });
+    expect(rollTable(t, [t], always(1))?.text).toBe("Rzadkie");
+    expect(rollTable(t, [t], always(2))?.text).toBe("Częste");
+    expect(rollTable(t, [t], always(4))?.text).toBe("Częste");
+  });
+
+  it("reports when nothing is eligible and when the table itself is excluded", () => {
+    const cond: RandomTable["conditions"] = [{ type: "time", timesOfDay: ["noc"] }];
+    const t = withMeta("A", { entryMeta: { A: { conditions: cond } } });
+    expect(rollTable(t, [t], always(1))?.text).toMatch(/żaden wpis/);
+    const night = withMeta("A", { conditions: cond });
+    expect(rollTable(night, [night], always(1))?.roll).toBe(0);
+    expect(rollTable(night, [night], always(1), { clocks: [], factions: [], timeOfDay: "noc" })?.text).toBe("A");
+  });
+
+  it("passes context into referenced tables", () => {
+    const sub = { ...table("Sub", "Nocny\nDzienny"), entryMeta: { Nocny: { conditions: [{ type: "time" as const, timesOfDay: ["noc" as const] }] } } };
+    const root = table("Root", "Spotkanie: [[Sub]]");
+    expect(rollTable(root, [root, sub], always(1), { clocks: [], factions: [], timeOfDay: "noc" })?.text).toBe("Spotkanie: Nocny");
+    expect(rollTable(root, [root, sub], always(1), { clocks: [], factions: [], timeOfDay: "dzień" })?.text).toBe("Spotkanie: Dzienny");
+  });
+});

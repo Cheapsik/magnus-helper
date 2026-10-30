@@ -40,7 +40,7 @@ export default function ChroniclePage() {
   return (
     <div className="space-y-4">
       <p className="max-w-2xl text-sm text-muted-foreground">
-        Kronika sama zbiera, co wydarzyło się na sesji: upływ czasu w świecie, zakończone walki, ruchy zegarów, ujawnione
+        Kronika sama zbiera, co wydarzyło się na sesji: upływ czasu w świecie, zakończone walki, ruchy kół postępu, ujawnione
         sekrety, zmiany reputacji frakcji i notatki z tej sesji. Dopisz własne podsumowanie i skopiuj całość dla graczy.
       </p>
       <div className="grid gap-4 lg:grid-cols-[18rem_1fr]">

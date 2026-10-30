@@ -12,6 +12,7 @@ import {
   type CampaignSystem,
   type Difficulty,
   type OutcomeBand,
+  type SuccessLevel,
   type TestMode,
   type TestType,
   TEST_MODE_LABELS,
@@ -133,7 +134,7 @@ export function TestTypesEditor() {
 
       {types.length === 0 && (
         <p className="rounded-md border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
-          Kampania nie ma jeszcze rodzajów testów. Dodaj pierwszy, np. „Test cechy” albo „Test umiejętności”.
+          Kampania nie ma jeszcze rodzajów testów. Dodaj pierwszy, np. „Test cechy" albo „Test umiejętności".
         </p>
       )}
 
@@ -165,7 +166,7 @@ export function TestTypesEditor() {
       <AlertDialog open={deleteTarget !== null} onOpenChange={(isOpen) => !isOpen && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Usunąć rodzaj testu „{deleteTarget?.name}”?</AlertDialogTitle>
+            <AlertDialogTitle>Usunąć rodzaj testu „{deleteTarget?.name}"?</AlertDialogTitle>
             <AlertDialogDescription>
               Drabina trudności i ustawienia tego testu znikną.
               {usedBy.length > 0 &&
@@ -287,6 +288,8 @@ function TestTypeSection({
               <CriticalSettings type={type} onChange={onChange} />
             </div>
           )}
+
+          {type.mode === "rollUnder" && <SuccessLevelsEditor type={type} onChange={onChange} />}
 
           <SourcesEditor type={type} system={system} onChange={onChange} />
         </div>
@@ -514,9 +517,21 @@ function PoolSettings({ type, onChange }: SubEditorProps) {
         </Labeled>
         <label className="flex h-8 items-center gap-1.5 text-sm">
           <input type="checkbox" checked={pool.onesCancel === true} onChange={(e) => set({ onesCancel: e.target.checked })} />
-          Każda „1” kasuje jeden sukces
+          Każda „1" kasuje jeden sukces
         </label>
       </div>
+      <div className="flex flex-wrap items-end gap-2">
+        <Labeled label="Podwójny sukces od wyniku" className="w-44">
+          <OptionalNumber value={pool.doubleAt} onChange={(doubleAt) => set({ doubleAt })} label="Próg podwójnego sukcesu" />
+        </Labeled>
+        <label className="flex h-8 items-center gap-1.5 text-sm">
+          <input type="checkbox" checked={pool.specialDie === true} onChange={(e) => set({ specialDie: e.target.checked })} />
+          Kość specjalna (pierwsza w puli)
+        </label>
+      </div>
+      <p className="text-[length:--fs-meta] text-muted-foreground">
+        Kość specjalna: „1" = komplikacja, maksymalny wynik = chwała. Podwójny sukces: wynik ≥ progu liczy się za 2.
+      </p>
     </div>
   );
 }
@@ -586,6 +601,78 @@ function BandsEditor({ type, onChange }: SubEditorProps) {
           setNewLabel("");
         }}
       />
+    </div>
+  );
+}
+
+function SuccessLevelsEditor({ type, onChange }: SubEditorProps) {
+  const [newLabel, setNewLabel] = useState("");
+  const levels = type.successLevels ?? [];
+  const setLevels = (fn: (prev: SuccessLevel[]) => SuccessLevel[]) =>
+    onChange((t) => ({ ...t, successLevels: fn(t.successLevels ?? []) }));
+  const patch = (id: string, values: Partial<SuccessLevel>) =>
+    setLevels((prev) => prev.map((l) => (l.id === id ? { ...l, ...values } : l)));
+
+  return (
+    <div className="space-y-1.5">
+      <SubHeading
+        title="Poziomy sukcesu"
+        hint="Sukces na wyższym poziomie, gdy rzut ≤ wartość docelowa / dzielnik. Np. Trudny = wartość/2, Ekstremalny = wartość/5."
+      />
+      <ul className="space-y-1">
+        {levels.map((level, index) => (
+          <li key={level.id} className="flex items-center gap-1.5">
+            <input
+              className={cn(inputCls, "flex-1")}
+              value={level.label}
+              onChange={(e) => patch(level.id, { label: e.target.value })}
+              aria-label="Nazwa poziomu"
+            />
+            <span className="shrink-0 text-[length:--fs-meta] text-muted-foreground">wartość /</span>
+            <NumberInput
+              className={cn(inputCls, "w-16 shrink-0 text-right")}
+              value={level.divisor}
+              min={1}
+              onChange={(divisor) => patch(level.id, { divisor })}
+              aria-label="Dzielnik"
+            />
+            <MoveButtons
+              onMove={(direction) => setLevels((prev) => move(prev, index, direction))}
+              first={index === 0}
+              last={index === levels.length - 1}
+              label={level.label}
+            />
+            <button
+              type="button"
+              className={cn(iconBtn, "hover:text-destructive")}
+              onClick={() => setLevels((prev) => prev.filter((l) => l.id !== level.id))}
+              aria-label={`Usuń: ${level.label}`}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </li>
+        ))}
+      </ul>
+      <AddRow
+        placeholder="Nazwa poziomu, np. Trudny"
+        value={newLabel}
+        onValue={setNewLabel}
+        onAdd={() => {
+          setLevels((prev) => [...prev, { id: newId(), label: newLabel.trim(), divisor: 2 }]);
+          setNewLabel("");
+        }}
+      />
+      <label className="flex items-center gap-1.5 text-sm">
+        <input
+          type="checkbox"
+          checked={type.skillDependentCritFailure === true}
+          onChange={(e) => onChange((t) => ({ ...t, skillDependentCritFailure: e.target.checked || undefined }))}
+        />
+        Krytyczna porażka zależy od poziomu umiejętności
+      </label>
+      <p className="text-[length:--fs-meta] text-muted-foreground">
+        Gdy włączone: przy wartości &lt; 50 porażka krytyczna od 96+, niezależnie od progu w ustawieniach krytyków.
+      </p>
     </div>
   );
 }
@@ -677,7 +764,7 @@ function SourceList({
         })}
         {orphans.map((entry) => (
           <li key={refKey(entry.ref)} className="flex items-center gap-1.5 text-[length:--fs-meta] text-destructive">
-            <span className="min-w-0 flex-1 truncate">„{entry.label}”: pole niedostępne (ukryte lub usunięte)</span>
+            <span className="min-w-0 flex-1 truncate">„{entry.label}": pole niedostępne (ukryte lub usunięte)</span>
             <button
               type="button"
               className={cn(iconBtn, "hover:text-destructive")}

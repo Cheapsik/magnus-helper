@@ -18,7 +18,7 @@ import { TableRollTile } from "./TableRollTile";
 
 export const TILE_LABELS: Record<TileType, string> = {
   initiative: "Inicjatywa",
-  clocks: "Zegary",
+  clocks: "Koła postępu",
   table: "Tabela losowa",
   dice: "Kości",
   codex: "Wpis kodeksu",

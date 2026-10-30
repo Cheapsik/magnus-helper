@@ -21,7 +21,7 @@ const DENYLIST = [
   "middenland", "nordland", "wissenland", "talabecland", "drakwald", "kislev", "bretonia", "tilea", "estalia",
   // mechanics and terminology
   "punkty przeznaczenia", "punkty obłędu", "schemat rozwoju", "krzepa", "ogłada", "wiatry magii", "splatanie magii",
-  "skaven", "złot\\w+ koron\\w*", "srebrn\\w+ szyling\\w*", "mosiężn\\w+ pens\\w*",
+  "ww, us, sb", "skaven", "złot\\w+ koron\\w*", "srebrn\\w+ szyling\\w*", "mosiężn\\w+ pens\\w*",
 ];
 
 const PATTERN = new RegExp(`\\b(?:${DENYLIST.join("|")})`, "i");

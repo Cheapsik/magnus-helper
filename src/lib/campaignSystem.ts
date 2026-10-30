@@ -47,6 +47,8 @@ export type OutcomeBand = {
   atMost?: number;
 };
 
+export type SuccessLevel = { id: string; label: string; divisor: number };
+
 export type TestType = {
   id: string;
   name: string;
@@ -62,7 +64,20 @@ export type TestType = {
    * low roll is good; `successAtLeast` / `failureAtMost` those where a high one is.
    */
   critical?: { successAtMost?: number; failureAtLeast?: number; successAtLeast?: number; failureAtMost?: number };
-  pool?: { successAt: number; explodeAt?: number; onesCancel?: boolean; required: number };
+  /** rollUnder: success levels as fractions of the target value, e.g. Hard=1/2, Extreme=1/5. */
+  successLevels?: SuccessLevel[];
+  /** rollUnder: critical failure threshold depends on the skill value (e.g. ≥50 → fail at 96+, <50 → fail at roll > value). */
+  skillDependentCritFailure?: boolean;
+  pool?: {
+    successAt: number;
+    explodeAt?: number;
+    onesCancel?: boolean;
+    required: number;
+    /** Weighted successes: faces at or above this threshold count as 2 (e.g. 6=2 hits). */
+    doubleAt?: number;
+    /** First die in the pool is special (e.g. Wrath Die): triggers complication on 1, bonus on max. */
+    specialDie?: boolean;
+  };
   bands?: OutcomeBand[];
   /** Card fields the test may be rolled from, per card type. */
   sources: Record<CardKind, LabelledRef[]>;

@@ -11,7 +11,7 @@ const GROUPS: { kind: ChronicleKind; label: string }[] = [
   { kind: "calendar", label: "Czas w świecie" },
   { kind: "travel", label: "Podróże" },
   { kind: "combat", label: "Walki" },
-  { kind: "clock", label: "Zegary" },
+  { kind: "clock", label: "Koła postępu" },
   { kind: "secret", label: "Ujawnione sekrety" },
   { kind: "faction", label: "Frakcje" },
   { kind: "note", label: "Notatki" },
@@ -50,13 +50,13 @@ export function buildRecap(
 
 /** A clock ticked four times in a session reads as one line: where it ended. */
 function lastPerClock(clockLines: string[]): string[] {
-  const nameOf = (line: string) => /^Zegar „(.+?)”/.exec(line)?.[1] ?? line;
+  const nameOf = (line: string) => /^(?:Zegar|Koło postępu) „(.+?)”/.exec(line)?.[1] ?? line;
   const last = new Map<string, string>();
   for (const line of clockLines) last.set(nameOf(line), line);
   return [...last.values()];
 }
 
-/** One line for the session list, e.g. "Walki: 1 · Zegary: 3". */
+/** One line for the session list, e.g. "Walki: 1 · Koła postępu: 3". */
 export const recapCounts = (groups: RecapGroup[]) =>
   groups.map((g) => `${g.label}: ${g.lines.length}`).join(" · ") || "Brak wpisów";
 

@@ -30,6 +30,8 @@ export interface PlayerScreenState {
   paused: boolean;
   /** Show the campaign's table safety agreements (hard lines and veils). */
   showSafety: boolean;
+  /** Map shown with its fog of war (revealed areas only); null for none. */
+  mapId: string | null;
 }
 
 export const DEFAULT_PLAYER_SCREEN: PlayerScreenState = {
@@ -40,6 +42,7 @@ export const DEFAULT_PLAYER_SCREEN: PlayerScreenState = {
   handout: null,
   paused: false,
   showSafety: false,
+  mapId: null,
 };
 
 function str(v: unknown): string {
@@ -62,6 +65,7 @@ export function revivePlayerScreen(parsed: unknown): PlayerScreenState {
     handout,
     paused: Boolean(p.paused),
     showSafety: Boolean(p.showSafety),
+    mapId: str(p.mapId) || null,
   };
 }
 
@@ -118,6 +122,12 @@ export function usePlayerScreen() {
 export function showHandoutToPlayers(handout: PlayerHandout): boolean {
   const prev = readJson(PLAYER_SCREEN_STORAGE_KEY, DEFAULT_PLAYER_SCREEN, storageOptions);
   return writeJson(PLAYER_SCREEN_STORAGE_KEY, { ...prev, blank: false, handout }, storageOptions);
+}
+
+/** Shows a map (by id) on the player screen (leaving blank mode). */
+export function showMapToPlayers(mapId: string | null): boolean {
+  const prev = readJson(PLAYER_SCREEN_STORAGE_KEY, DEFAULT_PLAYER_SCREEN, storageOptions);
+  return writeJson(PLAYER_SCREEN_STORAGE_KEY, { ...prev, blank: mapId === null ? prev.blank : false, mapId }, storageOptions);
 }
 
 export function openPlayerScreenWindow(): void {

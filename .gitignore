@@ -28,3 +28,6 @@ dist-ssr
 # Agent skills
 .agents/skills/
 skills-lock.json
+
+# Claude Code agent worktrees
+.claude/

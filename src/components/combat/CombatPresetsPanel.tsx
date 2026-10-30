@@ -260,7 +260,7 @@ function CombatPresetsFull({
   return (
     <div className="space-y-3">
       <p className="text-xs text-muted-foreground">
-        Szablony walk z pełnymi statystykami uczestników (WW, US, SB, pancerz, wytrzymałość itd.). Wczytasz je przy
+        Szablony walk z pełnymi statystykami uczestników (pola kart, zdrowie, ochrona itd.). Wczytasz je przy
         tworzeniu nowej zakładki walki.
       </p>
 

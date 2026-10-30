@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { ArrowLeft, Crown, DoorOpen, Loader2, LogOut, Pencil } from "lucide-react";
+import { ArrowLeft, Crown, DoorOpen, Loader2, LogOut, Pencil, StickyNote } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -11,10 +11,10 @@ import {
   type Membership,
   inviteStatus,
   imageUrls,
-  isFreshShow,
   joinCampaign,
   leaveCampaign,
   listMaterials,
+  nextViewing,
   myMemberships,
   renameSelf,
   setPendingInvite,
@@ -23,6 +23,7 @@ import {
   usePendingInvite,
 } from "@/lib/sharedCampaigns";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { MaterialViewer } from "@/components/materials/MaterialViewer";
 import Logo from "@/components/Logo";
 import { AuthCard, AuthHeader, AuthShell, GoldButton } from "@/pages/AuthPage";
@@ -217,6 +218,11 @@ function InviteJoinScreen({
   );
 }
 
+/** Simple per-campaign notes hook for the player app. */
+function useCampaignNotes(campaignId: string) {
+  return useLocalStorage<string>(`magnus_player_notes_${campaignId}`, "", { global: true });
+}
+
 function CampaignGallery({
   membership,
   userId,
@@ -229,6 +235,8 @@ function CampaignGallery({
   onLeft: () => Promise<void>;
 }) {
   const cid = membership.campaign_id;
+  const [notes, setNotes] = useCampaignNotes(cid);
+  const [showNotes, setShowNotes] = useState(false);
   const [materials, setMaterials] = useState<Material[] | null>(null);
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [viewing, setViewing] = useState<Material | null>(null);
@@ -241,13 +249,11 @@ function CampaignGallery({
       const list = await listMaterials(cid);
       setMaterials(list);
       setUrls(await imageUrls(list.map((m) => m.image_path).filter((p): p is string => Boolean(p))));
-      // shortcut: only rows still visible reach the player, so a material the GM hid disappears on the next refresh.
       for (const m of list) {
         if (known.current.size && !known.current.has(m.id)) toast(`Nowy materiał: ${m.title}`);
       }
-      list.forEach((m) => known.current.add(m.id));
-      const fresh = show && list.find((m) => m.id === show.id);
-      if (fresh && isFreshShow(fresh)) setViewing(fresh);
+      known.current = new Set(list.map((m) => m.id));
+      setViewing((open) => nextViewing(open, list, show));
     } catch (e) {
       fail(e);
     }
@@ -293,6 +299,15 @@ function CampaignGallery({
           <Pencil className="h-3.5 w-3.5" /> {membership.display_name}
         </Button>
         <Button
+          variant={showNotes ? "secondary" : "ghost"}
+          size="sm"
+          className="gap-1.5"
+          onClick={() => setShowNotes((v) => !v)}
+          title="Moje notatki"
+        >
+          <StickyNote className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Notatki</span>
+        </Button>
+        <Button
           variant="ghost"
           size="sm"
           className="gap-1.5 text-destructive"
@@ -310,6 +325,19 @@ function CampaignGallery({
           <DoorOpen className="h-3.5 w-3.5" /> Opuść
         </Button>
       </div>
+
+      {showNotes && (
+        <div className="rounded-md border border-border bg-card p-3 space-y-2">
+          <p className="text-xs font-medium text-muted-foreground">Moje notatki — {membership.campaign_name}</p>
+          <Textarea
+            rows={6}
+            placeholder="Zapisz tu cokolwiek: wskazówki, imiona NPC, ważne miejsca…"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            className="resize-y"
+          />
+        </div>
+      )}
 
       {materials === null ? (
         <p className="text-sm text-muted-foreground">Wczytuję…</p>

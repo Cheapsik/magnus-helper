@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { cardTitle, newId, type Card as GameCard } from "@/lib/cardSchema";
 import type { Clock } from "@/lib/clocks";
 import { logChronicleEvent } from "@/lib/chronicle";
-import { reputationTier, reputationValue, type Faction, type ReputationTier } from "@/lib/factions";
+import { reputationTier, reputationValue, type Faction, type ReputationChange, type ReputationTier } from "@/lib/factions";
+import { ReputationHistory } from "@/components/factions/ReputationHistory";
 import type { NamedNoteSession } from "@/lib/sessionNoteModel";
 
 type Props = {
@@ -21,6 +22,8 @@ type Props = {
   sessions: NamedNoteSession[];
   activeSessionId: string;
   onChange: (patch: Partial<Faction>) => void;
+  /** Called after a change is logged, so the page can propagate it to linked factions. */
+  onLogged?: (change: ReputationChange) => void;
   onDelete: () => void;
 };
 
@@ -31,7 +34,7 @@ function signed(n: number): string {
   return n > 0 ? `+${n}` : String(n);
 }
 
-export function FactionCard({ faction, others, ladder, npcs, heroes, clocks, sessions, activeSessionId, onChange, onDelete }: Props) {
+export function FactionCard({ faction, others, ladder, npcs, heroes, clocks, sessions, activeSessionId, onChange, onLogged, onDelete }: Props) {
   const [open, setOpen] = useState(false);
   const [target, setTarget] = useState(PARTY);
   const [delta, setDelta] = useState(1);
@@ -48,7 +51,7 @@ export function FactionCard({ faction, others, ladder, npcs, heroes, clocks, ses
 
   const addChange = () => {
     if (!delta) return;
-    const change = {
+    const change: ReputationChange = {
       id: newId(),
       delta,
       reason: reason.trim(),
@@ -58,6 +61,7 @@ export function FactionCard({ faction, others, ladder, npcs, heroes, clocks, ses
     };
     logChronicleEvent({ kind: "faction", text: `Frakcja „${faction.name}”: reputacja ${signed(delta)}${change.reason ? ` (${change.reason})` : ""}` });
     onChange({ log: [...faction.log, change] });
+    onLogged?.(change);
     setReason("");
   };
 
@@ -93,7 +97,7 @@ export function FactionCard({ faction, others, ladder, npcs, heroes, clocks, ses
             <Input className="h-8" value={faction.goal ?? ""} placeholder="Cel frakcji (opcjonalnie)" onChange={(e) => onChange({ goal: e.target.value || undefined })} />
 
             <label className="flex items-center gap-2 text-xs text-muted-foreground">
-              Zegar postępu
+              Koło postępu
               <select
                 className={SELECT_CLASS}
                 value={faction.clockId ?? ""}
@@ -163,26 +167,12 @@ export function FactionCard({ faction, others, ladder, npcs, heroes, clocks, ses
               </div>
             </section>
 
-            {faction.log.length > 0 && (
-              <section className="space-y-1">
-                <label className="field-label block">Historia</label>
-                {[...faction.log].reverse().map((c) => (
-                  <div key={c.id} className="flex items-baseline gap-2 text-xs">
-                    <span className={`w-8 shrink-0 font-bold ${c.delta > 0 ? "text-primary" : "text-destructive"}`}>{signed(c.delta)}</span>
-                    <span className="flex-1">
-                      {c.heroId ? nameOf(heroes, c.heroId) : "Drużyna"}
-                      {c.reason && ` — ${c.reason}`}
-                    </span>
-                    <span className="shrink-0 text-muted-foreground">
-                      {sessions.find((s) => s.id === c.sessionId)?.name ?? ""} {new Date(c.timestamp).toLocaleDateString("pl-PL")}
-                    </span>
-                    <button type="button" aria-label="Usuń wpis" onClick={() => onChange({ log: faction.log.filter((x) => x.id !== c.id) })}>
-                      <X className="h-3 w-3 text-muted-foreground" />
-                    </button>
-                  </div>
-                ))}
-              </section>
-            )}
+            <ReputationHistory
+              log={faction.log}
+              heroes={heroes}
+              sessions={sessions}
+              onRemove={(id) => onChange({ log: faction.log.filter((x) => x.id !== id) })}
+            />
 
             {others.length > 0 && (
               <section className="space-y-1">

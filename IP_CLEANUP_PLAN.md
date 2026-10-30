@@ -368,9 +368,9 @@ Reguły walidacji:
 - [ ] **P3-1.** `ShopPage.tsx:891` „Westfall” → neutralna nazwa. Przejrzeć pozostałe placeholdery.
 - [ ] **P3-2.** `TableField.tsx:6` i inne komentarze z „WFRP” → „legacy sheet”.
 - [ ] **P3-3.** Dodać ADR 0006 „Polityka IP i treści użytkownika” (lista z 4.2, format z 6, zasady procesowe z 6.2).
-- [ ] **P3-4. Marka „Magnus”:** kontrola znaków (EUIPO/USPTO/UPRP, klasy 9/41/42) i decyzja o ewentualnym rebrandingu przed startem marketingu.
+- [x] **P3-4. Marka „Magnus”:** decyzja właściciela (2026-10-23): nazwa zostaje, skojarzenie z lore jest świadome. Kontrola znaków (EUIPO/USPTO/UPRP, klasy 9/41/42) pozostaje zalecana przed startem marketingu.
 - [ ] **P3-5.** Regulamin i polityka treści (rights attestation, notice-and-takedown, zakaz wgrywania podręczników) przygotowane z prawnikiem.
-- [ ] **P3-6.** Przegląd licencji zależności i assetów (tekstury i dźwięki `dice-box` są na MIT; potwierdzić pochodzenie `favicon` i dźwięków w `public/assets/dice-box/sounds`).
+- [~] **P3-6.** (Wygenerowano `public/THIRD_PARTY_LICENSES.md` 2026-10-23; pozostaje potwierdzenie pochodzenia `favicon`, ikon i dźwięków oraz podlinkowanie pliku w UI.) Przegląd licencji zależności i assetów (tekstury i dźwięki `dice-box` są na MIT; potwierdzić pochodzenie `favicon` i dźwięków w `public/assets/dice-box/sounds`).
 
 ### Kolejność i zależności
 

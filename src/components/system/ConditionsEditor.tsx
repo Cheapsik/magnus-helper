@@ -39,9 +39,22 @@ export function ConditionsEditor() {
       </p>
 
       {conditions.length === 0 ? (
-        <p className="rounded-md border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
-          Kampania nie ma jeszcze stanów. Dodaj pierwszy, np. „Ogłuszony” albo „Krwawienie”.
-        </p>
+        <div className="rounded-md border border-dashed border-border px-4 py-6 text-center space-y-2">
+          <p className="text-sm text-muted-foreground">
+            Kampania nie ma jeszcze stanów. Dodaj pierwszy, np. „Ogłuszony" albo „Krwawienie".
+          </p>
+          <button
+            type="button"
+            className="text-sm text-primary hover:underline"
+            onClick={() =>
+              update(() =>
+                ["Ogłuszony", "Krwawienie", "Zatruty", "Powalony", "Oślepiony", "Przerażony"].map((name) => ({ id: newId(), name })),
+              )
+            }
+          >
+            Wstaw przykładowe stany
+          </button>
+        </div>
       ) : (
         <ul className="space-y-1">
           {conditions.map((condition, index) => (

@@ -5,12 +5,15 @@ import { Input } from "@/components/ui/input";
 import { CardRenderer } from "@/components/card/CardRenderer";
 import { createEmptyCard } from "@/lib/cardSchema";
 import { type StartingPoint, systemForStartingPoint } from "@/lib/systemTemplates";
+import { type Campaign, listCampaigns, getActiveCampaignId } from "@/lib/campaignStorage";
 
-export type WizardResult = { name: string; start: StartingPoint; refine: boolean };
+export type WizardResult = { name: string; start: StartingPoint; refine: boolean; copyFromCampaignId?: string };
 
 const STEPS = ["Nazwa", "Punkt startowy", "Karta bohatera"] as const;
 
-const STARTING_POINTS: { value: StartingPoint; title: string; description: string }[] = [
+type WizardStartChoice = StartingPoint | "copy";
+
+const STARTING_POINTS: { value: WizardStartChoice; title: string; description: string }[] = [
   {
     value: "template",
     title: "Neutralny szablon",
@@ -22,6 +25,12 @@ const STARTING_POINTS: { value: StartingPoint; title: string; description: strin
     title: "Pusta struktura",
     description:
       "Karty mają tylko nazwę, portret i notatki. Resztę systemu budujesz sam, od zera. Dobre, jeśli prowadzisz system, który dobrze znasz.",
+  },
+  {
+    value: "copy",
+    title: "Kopiuj z innej kampanii",
+    description:
+      "Skopiuj cały system mechaniczny (karty, testy, ataki, stany, walutę) z istniejącej kampanii. Karty postaci nie są kopiowane.",
   },
 ];
 
@@ -41,15 +50,24 @@ export function CampaignWizard({
 }) {
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
-  const [start, setStart] = useState<StartingPoint>("template");
+  const [start, setStart] = useState<WizardStartChoice>("template");
+  const [copyFromId, setCopyFromId] = useState<string | null>(null);
+
+  const otherCampaigns = useMemo(() => {
+    const active = getActiveCampaignId();
+    return listCampaigns().filter((c) => c.id !== active && !c.archivedAt);
+  }, []);
+
+  const effectiveStart: StartingPoint = start === "copy" ? "template" : start;
 
   const preview = useMemo(() => {
-    const hero = systemForStartingPoint(start).cards.hero;
+    const hero = systemForStartingPoint(effectiveStart).cards.hero;
     return { hero, card: createEmptyCard("hero", hero, "Przykładowy bohater") };
-  }, [start]);
+  }, [effectiveStart]);
 
-  const canContinue = step !== 0 || name.trim() !== "";
-  const finish = (refine: boolean) => onFinish({ name: name.trim(), start, refine });
+  const canContinue = step === 0 ? name.trim() !== "" : step === 1 ? start !== "copy" || copyFromId !== null : true;
+  const finish = (refine: boolean) =>
+    onFinish({ name: name.trim(), start: effectiveStart, refine, copyFromCampaignId: start === "copy" && copyFromId ? copyFromId : undefined });
 
   return (
     <div className="flex min-h-0 flex-col gap-4">
@@ -93,7 +111,7 @@ export function CampaignWizard({
 
       {step === 1 && (
         <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Punkt startowy">
-          {STARTING_POINTS.map((option) => (
+          {STARTING_POINTS.filter((o) => o.value !== "copy" || otherCampaigns.length > 0).map((option) => (
             <button
               key={option.value}
               type="button"
@@ -111,6 +129,26 @@ export function CampaignWizard({
               </span>
             </button>
           ))}
+          {start === "copy" && (
+            <div className="sm:col-span-2 space-y-1">
+              <label className="text-sm text-muted-foreground">Wybierz kampanię źródłową:</label>
+              <div className="grid gap-1.5 sm:grid-cols-2">
+                {otherCampaigns.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setCopyFromId(c.id)}
+                    className={cn(
+                      "rounded-md border px-3 py-2 text-left text-sm transition-colors",
+                      copyFromId === c.id ? "border-primary bg-primary/[0.08]" : "border-border hover:border-primary/40",
+                    )}
+                  >
+                    {c.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <p className="text-[length:--fs-meta] text-muted-foreground sm:col-span-2">
             Punkt startowy wybierasz raz. Po utworzeniu kampania ma własną kopię systemu, którą możesz dowolnie zmieniać.
           </p>

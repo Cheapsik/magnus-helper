@@ -6,6 +6,7 @@ import {
   MapPin, Skull, SlidersHorizontal, Settings as SettingsIcon, LogOut,
   type LucideIcon,
   Waypoints, Lightbulb, PieChart, Flag, Shuffle, CalendarDays, LayoutDashboard, BookMarked, Map as MapIcon, Route, ShieldCheck, Castle, Presentation,
+  Crosshair, KeyRound, Drama,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useScene } from "@/context/SceneContext";
@@ -16,6 +17,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import StatusBar from "@/components/StatusBar";
+import QuickRollPanel from "@/components/tables/QuickRollPanel";
 import CampaignSwitcher from "@/components/CampaignSwitcher";
 import Logo from "./Logo";
 
@@ -58,11 +60,14 @@ const SIDEBAR_GROUPS: { label: string; items: { path: string; label: string; ico
       { path: "/scena", label: "Scena", icon: MapPin },
       { path: "/quests", label: "Wątki", icon: Network },
       { path: "/conditions", label: "Stany", icon: Activity },
-      { path: "/clocks", label: "Zegary", icon: PieChart },
+      { path: "/clocks", label: "Koła postępu", icon: PieChart },
       { path: "/calendar", label: "Kalendarz", icon: CalendarDays },
       { path: "/timers", label: "Timery", icon: Timer },
       { path: "/notes", label: "Notatki", icon: StickyNote },
       { path: "/chronicle", label: "Kronika", icon: BookMarked },
+      { path: "/narrative", label: "Narracja", icon: Drama },
+      { path: "/secrets", label: "Sekrety", icon: KeyRound },
+      { path: "/encounters", label: "Kreator spotkań", icon: Crosshair },
     ],
   },
   {
@@ -393,6 +398,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         </main>
         <StatusBar />
       </div>
+      <QuickRollPanel />
 
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-md safe-area-pb">
         <div className="flex justify-around items-center h-16 max-w-lg mx-auto">

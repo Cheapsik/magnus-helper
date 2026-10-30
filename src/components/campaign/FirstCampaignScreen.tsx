@@ -19,8 +19,8 @@ export function FirstCampaignScreen() {
         </header>
         <div className="rounded-lg border border-border bg-card p-4 sm:p-5">
           <CampaignWizard
-            onFinish={({ name, start, refine }) => {
-              const campaign = createCampaign(name, start);
+            onFinish={({ name, start, refine, copyFromCampaignId }) => {
+              const campaign = createCampaign(name, start, copyFromCampaignId);
               switchCampaign(campaign.id, refine ? "settings?tab=karty" : "");
             }}
           />

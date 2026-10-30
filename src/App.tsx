@@ -51,6 +51,9 @@ import TravelPage from "@/pages/TravelPage";
 import SafetyPage from "@/pages/SafetyPage";
 import DungeonGeneratorPage from "@/pages/DungeonGeneratorPage";
 import MaterialsPage from "@/pages/MaterialsPage";
+import EncounterBuilderPage from "@/pages/EncounterBuilderPage";
+import NarrativePage from "@/pages/NarrativePage";
+import SecretsPage from "@/pages/SecretsPage";
 import PlayerApp from "@/pages/PlayerApp";
 import { setPendingInvite, useAppRole, useMemberships, usePendingInvite } from "@/lib/sharedCampaigns";
 import { useAuth } from "@/context/AuthContext";
@@ -146,6 +149,9 @@ function GmApp() {
           <Route path="/safety" element={<SafetyPage />} />
           <Route path="/dungeon" element={<DungeonGeneratorPage />} />
           <Route path="/materials" element={<MaterialsPage />} />
+          <Route path="/encounters" element={<EncounterBuilderPage />} />
+          <Route path="/narrative" element={<NarrativePage />} />
+          <Route path="/secrets" element={<SecretsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

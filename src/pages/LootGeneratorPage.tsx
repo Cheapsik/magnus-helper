@@ -1,6 +1,7 @@
 import { useMemo, useState, useId } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Plus, Trash2, Edit2, Check, Dice5, Pencil, Package, Sword, Shield, Flame, Coins, Minus, X } from "lucide-react";
+import { toast } from "sonner";
 import { useApp } from "@/context/AppContext";
 import { type LootDbItem, type LootRank, NO_COINS, useLootConfig, useLootItems } from "@/lib/lootDb";
 import { useCampaignSystem } from "@/lib/cardStore";
@@ -101,10 +102,19 @@ type ItemFormState = {
   rankName: string;
   price: number;
   description: string;
+  tags: string;
 };
 
 function emptyItemForm(defaultRankName: string): ItemFormState {
-  return { name: "", type: "", rankName: defaultRankName, price: 0, description: "" };
+  return { name: "", type: "", rankName: defaultRankName, price: 0, description: "", tags: "" };
+}
+
+function tagsFromItem(item: LootDbItem): string {
+  return (item.tags ?? []).join(", ");
+}
+
+function tagsToArray(raw: string): string[] {
+  return raw.split(",").map((t) => t.trim()).filter(Boolean);
 }
 
 const CARRY_CATEGORIES = [
@@ -238,6 +248,7 @@ export default function LootGeneratorPage() {
       rankName: item.rankName,
       price: item.price,
       description: item.description,
+      tags: tagsFromItem(item),
     });
     setModalOpen(true);
   };
@@ -247,6 +258,7 @@ export default function LootGeneratorPage() {
     const type = itemForm.type.trim();
     const rankName = itemForm.rankName.trim();
     if (!name || !type || !rankName) return;
+    const tags = tagsToArray(itemForm.tags);
 
     if (editingItemId) {
       setLootItems((prev) =>
@@ -259,6 +271,7 @@ export default function LootGeneratorPage() {
                 rankName,
                 price: Math.max(0, itemForm.price),
                 description: itemForm.description.trim(),
+                tags,
               }
             : i,
         ),
@@ -271,6 +284,7 @@ export default function LootGeneratorPage() {
         rankName,
         price: Math.max(0, itemForm.price),
         description: itemForm.description.trim(),
+        tags,
       };
       setLootItems((prev) => [...prev, newItem]);
     }
@@ -615,11 +629,11 @@ export default function LootGeneratorPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[22%]">Nazwa</TableHead>
-                  <TableHead className="w-[12%]">Typ</TableHead>
-                  <TableHead className="w-[14%]">Ranga</TableHead>
-                  <TableHead className="w-[10%] text-right">Cena</TableHead>
-                  <TableHead>Opis</TableHead>
+                  <TableHead className="w-[18%]">Nazwa</TableHead>
+                  <TableHead className="w-[8%]">Typ</TableHead>
+                  <TableHead className="w-[10%]">Ranga</TableHead>
+                  <TableHead className="w-[8%] text-right">Cena</TableHead>
+                  <TableHead>Cechy / Opis</TableHead>
                   <TableHead className="w-[100px] text-right">Akcje</TableHead>
                 </TableRow>
               </TableHeader>
@@ -627,7 +641,7 @@ export default function LootGeneratorPage() {
                 {filteredItems.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell className="font-medium align-top py-3">{item.name}</TableCell>
-                    <TableCell className="align-top py-3">{item.type}</TableCell>
+                    <TableCell className="align-top py-3 text-xs text-muted-foreground">{item.type}</TableCell>
                     <TableCell className="align-top py-3">
                       <Badge variant="outline" className={cn("text-xs font-normal", rankBadgeClass(item.rankName, rankNames))}>
                         {item.rankName}
@@ -636,8 +650,19 @@ export default function LootGeneratorPage() {
                     <TableCell className="text-right align-top py-3 whitespace-nowrap">
                       {priceLabel(item.price)}
                     </TableCell>
-                    <TableCell className="text-muted-foreground text-sm align-top py-3 max-w-[280px]">
-                      {item.description ? shorten(item.description, 60) : "—"}
+                    <TableCell className="align-top py-2 max-w-[340px]">
+                      {(item.tags?.length ?? 0) > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-1.5">
+                          {item.tags!.map((tag) => (
+                            <span key={tag} className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium bg-muted text-muted-foreground border border-border/60">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {item.description?.trim() ? (
+                        <p className="text-xs text-muted-foreground/80 italic">{shorten(item.description, 80)}</p>
+                      ) : null}
                     </TableCell>
                     <TableCell className="text-right align-top py-2">
                       <div className="flex justify-end gap-1">
@@ -692,8 +717,17 @@ export default function LootGeneratorPage() {
                     <span className="mx-1.5">|</span>
                     <span>{priceLabel(item.price)}</span>
                   </p>
-                  {item.description.trim() ? (
-                    <p className="text-xs text-muted-foreground line-clamp-2">{item.description}</p>
+                  {(item.tags?.length ?? 0) > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {item.tags!.map((tag) => (
+                        <span key={tag} className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium bg-muted text-muted-foreground border border-border/60">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {item.description?.trim() ? (
+                    <p className="text-xs text-muted-foreground/80 italic line-clamp-2">{item.description}</p>
                   ) : null}
                   <div className="flex gap-2 pt-1">
                     <Button type="button" variant="outline" className="min-h-[--h-control] flex-1 gap-1.5" onClick={() => openEditItem(item)}>
@@ -772,14 +806,25 @@ export default function LootGeneratorPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="f-description">Opis</Label>
+                  <Label htmlFor="f-tags">Cechy / Tagi</Label>
+                  <Input
+                    id="f-tags"
+                    value={itemForm.tags}
+                    onChange={(e) => setItemForm((f) => ({ ...f, tags: e.target.value }))}
+                    className="min-h-[--h-control]"
+                    placeholder="np. Fast, Obrażenia: SB+2, Zasięg: krótki"
+                  />
+                  <p className="text-[11px] text-muted-foreground">Oddziel przecinkami. Wyświetlane jako plakietki.</p>
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="f-description">Uwagi (MG)</Label>
                   <Textarea
                     id="f-description"
                     value={itemForm.description}
                     onChange={(e) => setItemForm((f) => ({ ...f, description: e.target.value }))}
-                    rows={3}
-                    placeholder="Opcjonalny opis"
-                    className="min-h-[88px] resize-y"
+                    rows={2}
+                    placeholder="Opcjonalne uwagi dla MG"
+                    className="min-h-[64px] resize-y"
                   />
                 </div>
               </div>

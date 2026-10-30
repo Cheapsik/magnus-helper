@@ -20,6 +20,8 @@ import { CombatantFormFields, emptyCombatant } from "@/components/combat/Combata
 import { ROSTER_CARD_DRAG, isCombatRosterDragEvent, parseRosterCardKey } from "@/lib/combatDrag";
 import { readCards, useCampaignSystem } from "@/lib/cardStore";
 import { cardToCombatant } from "@/lib/cardRoster";
+import { readNumberRef } from "@/lib/cardSchema";
+import { rollDie } from "@/lib/dice";
 import { useFinePointer } from "@/hooks/useFinePointer";
 import {
   MAX_COMBAT_FIGHTS,
@@ -140,6 +142,25 @@ export default function CombatPage() {
 
   const resetCombat = () => { setCombatTurn(0); setCombatRound(1); setActionAttackerId(null); };
 
+  const rollAllInitiative = () => {
+    setCombatants((prev) =>
+      prev.map((c) => {
+        let base = 0;
+        if (c.card) {
+          const cardType = system.cards[c.card.kind];
+          const ref = cardType.roles.initiative;
+          if (ref) {
+            const card = readCards(c.card.kind).find((x) => x.id === c.card!.id);
+            if (card) base = readNumberRef(card.values, ref);
+          }
+        }
+        return { ...c, initiative: rollDie(20) + base };
+      }),
+    );
+    setCombatTurn(0);
+    toast.success("Wylosowano inicjatywę");
+  };
+
   const toggleStatus = (id: string, status: string) => {
     setCombatants((prev) => prev.map((c) =>
       c.id === id ? { ...c, statuses: c.statuses.includes(status) ? c.statuses.filter((s) => s !== status) : [...c.statuses, status] } : c
@@ -212,6 +233,7 @@ export default function CombatPage() {
         showDead={showDead}
         onToggleShowDead={() => setShowDead(!showDead)}
         onReset={resetCombat}
+        onRollAllInitiative={sorted.length > 0 ? rollAllInitiative : undefined}
         onPrevTurn={prevTurn}
         onNextTurn={nextTurn}
         prevDisabled={sorted.length === 0 || (combatRound === 1 && combatTurn === 0)}

@@ -35,7 +35,8 @@ export const CARD_KIND_ROUTES: Record<CardKind, string> = {
 /** Where the card generator draws a value from when a card is rolled. */
 export type RandomRule =
   | { kind: "range"; min: number; max: number }
-  | { kind: "list"; values: string[] };
+  | { kind: "list"; values: string[] }
+  | { kind: "dice"; notation: string; dropLowest?: number; dropHighest?: number };
 
 export type ColumnType = "text" | "number" | "checkbox" | "select" | "dice";
 
@@ -68,7 +69,8 @@ export type FieldType =
   | "multiselect"
   | "table"
   | "dice"
-  | "track";
+  | "track"
+  | "computed";
 
 export const FIELD_TYPE_LABELS: Record<FieldType, string> = {
   text: "Tekst",
@@ -81,6 +83,7 @@ export const FIELD_TYPE_LABELS: Record<FieldType, string> = {
   table: "Tabela / lista wpisów",
   dice: "Notacja kości",
   track: "Tor punktów",
+  computed: "Pole wyliczane",
 };
 
 export type FieldDef = {
@@ -96,6 +99,8 @@ export type FieldDef = {
   /** track: number of boxes */
   trackMax?: number;
   random?: RandomRule;
+  /** computed: a formula string referencing other fields, e.g. "{zdrowie.max} * 2" */
+  formula?: string;
   /**
    * Soft-deleted (docs/adr/0009): gone from the structure and from cards, but
    * values stay on every card so the field can be restored with them.
@@ -217,6 +222,7 @@ export function defaultValueForField(field: FieldDef): FieldValue {
   switch (field.type) {
     case "number":
     case "track":
+    case "computed":
       return 0;
     case "checkbox":
       return false;

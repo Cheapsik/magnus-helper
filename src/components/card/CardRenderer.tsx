@@ -12,6 +12,7 @@ import {
   type TableValue,
 } from "@/lib/cardSchema";
 import { coerceValue } from "@/lib/structureOps";
+import { evaluateFormula } from "@/lib/formulaEngine";
 import { DiceInput } from "@/components/card/DiceInput";
 
 /**
@@ -50,8 +51,8 @@ export function CardRenderer({
                 value={card.values[field.id]}
                 onChange={(value) => setField(field.id, value)}
                 readOnly={readOnly}
-                // A table named like its section would repeat the section header.
                 hideLabel={field.name.trim().toLowerCase() === section.name.trim().toLowerCase()}
+                allValues={card.values}
               />
             ))}
           </div>
@@ -201,12 +202,14 @@ export function FieldRenderer({
   onChange,
   readOnly,
   hideLabel,
+  allValues,
 }: {
   field: FieldDef;
   value: FieldValue | undefined;
   onChange: (next: FieldValue) => void;
   readOnly?: boolean;
   hideLabel?: boolean;
+  allValues?: Record<string, FieldValue>;
 }) {
   const current = coerceValue(field, value);
 
@@ -272,6 +275,18 @@ export function FieldRenderer({
           />
         </div>
       );
+
+    case "computed": {
+      const computed = field.formula && allValues ? evaluateFormula(field.formula, allValues) : 0;
+      return (
+        <label className="paper-field">
+          <span className="paper-field-label">{field.name}</span>
+          <span className="paper-input bg-muted/50 tabular-nums font-semibold cursor-default" aria-readonly>
+            {Number.isInteger(computed) ? computed : computed.toFixed(1)}
+          </span>
+        </label>
+      );
+    }
 
     case "checkbox":
       return (

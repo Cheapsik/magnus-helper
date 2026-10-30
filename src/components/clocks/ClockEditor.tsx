@@ -34,7 +34,7 @@ export function ClockEditor({
 
   const set = (patch: Partial<Clock>) => setDraft((d) => (d ? { ...d, ...patch } : d));
   const save = () => {
-    onSave(normalizeClock({ ...draft, name: draft.name.trim() || "Zegar" }));
+    onSave(normalizeClock({ ...draft, name: draft.name.trim() || "Koło postępu" }));
     onClose();
   };
 
@@ -42,7 +42,7 @@ export function ClockEditor({
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Zegar postępu</DialogTitle>
+          <DialogTitle>Koło postępu</DialogTitle>
         </DialogHeader>
         <form
           className="space-y-4"

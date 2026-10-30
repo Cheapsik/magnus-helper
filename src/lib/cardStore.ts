@@ -45,11 +45,16 @@ export function readCampaignSystem(): CampaignSystem {
  * the campaign is usually not the active one yet, so the scoped helpers
  * would write to the wrong place.
  */
-export function initializeCampaignSystem(campaignId: string, start: StartingPoint): void {
+export function initializeCampaignSystem(campaignId: string, start: StartingPoint, copyFromCampaignId?: string): void {
   try {
+    let system: CampaignSystem | null = null;
+    if (copyFromCampaignId) {
+      const raw = window.localStorage.getItem(getStorageKey(CAMPAIGN_SYSTEM_KEY, copyFromCampaignId));
+      if (raw) system = JSON.parse(raw) as CampaignSystem;
+    }
     window.localStorage.setItem(
       getStorageKey(CAMPAIGN_SYSTEM_KEY, campaignId),
-      JSON.stringify(systemForStartingPoint(start)),
+      JSON.stringify(system ?? systemForStartingPoint(start)),
     );
   } catch {
     // storage unavailable/full — the campaign falls back to an empty system
