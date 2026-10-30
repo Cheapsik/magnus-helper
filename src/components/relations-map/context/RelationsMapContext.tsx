@@ -169,7 +169,7 @@ export function RelationsMapProvider({ children }: { children: ReactNode }) {
   const [sessionMode, setSessionMode] = useState(false);
   const [uiVisible, setUiVisible] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
-  const [showLegend, setShowLegend] = useState(true);
+  const [showLegend, setShowLegend] = useState(false);
   const [showSessions, setShowSessions] = useState(false);
   const [showTimeline, setShowTimeline] = useState(false);
   const [detailPanelOpen, setDetailPanelOpen] = useState(true);

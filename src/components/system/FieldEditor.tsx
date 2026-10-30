@@ -97,11 +97,11 @@ export function FieldEditor({
           className={iconBtn}
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
-          aria-label={`Ustawienia pola: ${field.name}`}
+          aria-label={`Ustawienia pola: ${field.name}`} title={`Ustawienia pola: ${field.name}`}
         >
           <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")} />
         </button>
-        <button type="button" className={cn(iconBtn, "hover:text-destructive")} onClick={onHide} aria-label={`Ukryj pole: ${field.name}`}>
+        <button type="button" className={cn(iconBtn, "hover:text-destructive")} onClick={onHide} aria-label={`Ukryj pole: ${field.name}`} title={`Ukryj pole: ${field.name}`}>
           <EyeOff className="h-3.5 w-3.5" />
         </button>
       </div>
@@ -217,7 +217,7 @@ function TableStructureEditor({
                   type="button"
                   className={cn(iconBtn, "hover:text-destructive")}
                   onClick={() => onChange(removeColumn(type, field.id, column.id))}
-                  aria-label={`Usuń kolumnę: ${column.name}`}
+                  aria-label={`Usuń kolumnę: ${column.name}`} title={`Usuń kolumnę: ${column.name}`}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -271,7 +271,7 @@ function TableStructureEditor({
                   type="button"
                   className={cn(iconBtn, "hover:text-destructive")}
                   onClick={() => onChange(removeFixedRow(type, field.id, row.id))}
-                  aria-label={`Usuń wiersz: ${row.label}`}
+                  aria-label={`Usuń wiersz: ${row.label}`} title={`Usuń wiersz: ${row.label}`}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -371,7 +371,7 @@ export function AddRow({
     >
       <input className={cn(inputCls, "flex-1")} value={value} placeholder={placeholder} onChange={(e) => onValue(e.target.value)} />
       {children}
-      <button type="submit" disabled={disabled} className={cn(iconBtn, "h-8 w-8 border border-input")} aria-label={placeholder}>
+      <button type="submit" disabled={disabled} className={cn(iconBtn, "h-8 w-8 border border-input")} aria-label={placeholder} title={placeholder}>
         <Plus className="h-4 w-4" />
       </button>
     </form>

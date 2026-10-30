@@ -23,10 +23,10 @@ export function MoveButtons({
 }) {
   return (
     <>
-      <button type="button" className={iconBtn} disabled={first} onClick={() => onMove(-1)} aria-label={`Przesuń wyżej: ${label}`}>
+      <button type="button" className={iconBtn} disabled={first} onClick={() => onMove(-1)} aria-label={`Przesuń wyżej: ${label}`} title={`Przesuń wyżej: ${label}`}>
         <ArrowUp className="h-3.5 w-3.5" />
       </button>
-      <button type="button" className={iconBtn} disabled={last} onClick={() => onMove(1)} aria-label={`Przesuń niżej: ${label}`}>
+      <button type="button" className={iconBtn} disabled={last} onClick={() => onMove(1)} aria-label={`Przesuń niżej: ${label}`} title={`Przesuń niżej: ${label}`}>
         <ArrowDown className="h-3.5 w-3.5" />
       </button>
     </>
