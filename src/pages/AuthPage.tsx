@@ -128,14 +128,6 @@ export function AuthShell({ children }: { children: ReactNode }) {
         style={{ backgroundImage: authBackground("auth-mobile.jpg") }}
         aria-hidden
       />
-      {/* Light from the candles in the art, flickering; placed over where they sit in each version. */}
-      <div className="pointer-events-none fixed inset-0 portrait:hidden" aria-hidden>
-        <div className="candle-glow absolute inset-0 mix-blend-screen" style={{ background: "radial-gradient(circle at 16% 4%, hsl(36 90% 55% / 0.2), transparent 32%)" }} />
-        <div className="candle-glow-late absolute inset-0 mix-blend-screen" style={{ background: "radial-gradient(circle at 97% 4%, hsl(36 90% 55% / 0.14), transparent 22%)" }} />
-      </div>
-      <div className="pointer-events-none fixed inset-0 landscape:hidden" aria-hidden>
-        <div className="candle-glow absolute inset-0 mix-blend-screen" style={{ background: "radial-gradient(circle at 25% 3%, hsl(36 90% 55% / 0.2), transparent 40%)" }} />
-      </div>
       {/* The art is already dark; a light veil keeps the form readable without flattening it. */}
       <div className="pointer-events-none fixed inset-0 bg-black/30" aria-hidden />
 

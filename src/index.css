@@ -110,16 +110,9 @@
     z-index: 0;
     background: linear-gradient(
       180deg,
-      hsl(var(--lit-edge) / 0.055) 0%,
+      hsl(var(--lit-edge) / 0.045) 0%,
       transparent 38%
     );
-  }
-
-  /* The candle breathes: the wash wavers so little it reads as light, not motion. */
-  @media (prefers-reduced-motion: no-preference) {
-    body::before {
-      animation: candle-light 9s ease-in-out infinite;
-    }
   }
 
   #root {
@@ -219,49 +212,29 @@
   }
 }
 
-/* Irregular on purpose: an even pulse reads as a loading spinner, not a flame. */
-@keyframes candle-light {
-  0%, 100% { opacity: 1; }
-  12% { opacity: 0.86; }
-  19% { opacity: 0.97; }
-  41% { opacity: 0.8; }
-  47% { opacity: 0.93; }
-  68% { opacity: 0.84; }
-  83% { opacity: 1; }
+/*
+ * Loading die: up slows to a stop, down speeds up into the table, a squash on impact.
+ * The spin runs 1.5 hops per turn, so the die lands on a different face each time.
+ */
+@keyframes die-hop {
+  0%, 100% { transform: translateY(0) scale(1.12, 0.86); animation-timing-function: cubic-bezier(0.2, 0.6, 0.35, 1); }
+  7% { transform: translateY(-5px) scale(1, 1); animation-timing-function: cubic-bezier(0.2, 0.6, 0.35, 1); }
+  50% { transform: translateY(-46px) scale(0.98, 1.03); animation-timing-function: cubic-bezier(0.65, 0, 0.85, 0.4); }
 }
 
-@keyframes flame-sway {
-  0%, 100% { transform: scale(1, 1) skewX(0deg); }
-  21% { transform: scale(0.95, 1.06) skewX(-3deg); }
-  37% { transform: scale(1.02, 0.97) skewX(2deg); }
-  58% { transform: scale(0.96, 1.08) skewX(-1deg); }
-  79% { transform: scale(1.01, 0.98) skewX(3deg); }
+@keyframes die-spin {
+  to { transform: rotate(360deg); }
 }
 
-@keyframes flame-core {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  33% { opacity: 0.82; transform: scale(0.92, 1.05); }
-  64% { opacity: 0.95; transform: scale(1.04, 0.96); }
+@keyframes die-shadow {
+  0%, 100% { transform: scale(1); opacity: 1; animation-timing-function: cubic-bezier(0.2, 0.6, 0.35, 1); }
+  50% { transform: scale(0.55); opacity: 0.35; animation-timing-function: cubic-bezier(0.65, 0, 0.85, 0.4); }
 }
 
-/* Outside reduced motion only: the global rule there would turn an infinite loop into a strobe. */
 @media (prefers-reduced-motion: no-preference) {
-  .candle-flame {
-    transform-origin: 50% 100%;
-    transform-box: fill-box;
-    animation: flame-sway 3.3s ease-in-out infinite;
-  }
-  .candle-flame-core {
-    transform-origin: 50% 100%;
-    transform-box: fill-box;
-    animation: flame-core 1.9s ease-in-out infinite;
-  }
-  .candle-glow {
-    animation: candle-light 6s ease-in-out infinite;
-  }
-  .candle-glow-late {
-    animation: candle-light 7.5s ease-in-out -2.5s infinite;
-  }
+  .die-hop { animation: die-hop 0.9s infinite; }
+  .die-spin { animation: die-spin 1.35s linear infinite; }
+  .die-shadow { animation: die-shadow 0.9s infinite; }
 }
 
 @keyframes dice-bounce {
