@@ -126,16 +126,27 @@ function AuthField({
   );
 }
 
+// The gradient shows while the image loads.
+const authBackground = (file: string) =>
+  `url(${import.meta.env.BASE_URL}assets/images/${file}), radial-gradient(ellipse at 50% 20%, #3a2a1c 0%, #1b1410 55%, #0c0a08 100%)`;
+
 /** `features`: the GM-oriented feature strip; hidden for players arriving with an invite. */
 export function AuthShell({ children, features = true }: { children: ReactNode; features?: boolean }) {
   return (
     <div className="auth-page relative flex min-h-screen flex-col text-white">
+      {/* Own AI-generated art (public/THIRD_PARTY_LICENSES.md); a tall screen gets the portrait version. */}
       <div
-        className="pointer-events-none fixed inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "radial-gradient(ellipse at 50% 20%, #3a2a1c 0%, #1b1410 55%, #0c0a08 100%)" }}
+        className="pointer-events-none fixed inset-0 bg-cover bg-center bg-no-repeat portrait:hidden"
+        style={{ backgroundImage: authBackground("auth-desktop.jpg") }}
         aria-hidden
       />
-      <div className="pointer-events-none fixed inset-0 bg-black/55" aria-hidden />
+      <div
+        className="pointer-events-none fixed inset-0 bg-cover bg-center bg-no-repeat landscape:hidden"
+        style={{ backgroundImage: authBackground("auth-mobile.jpg") }}
+        aria-hidden
+      />
+      {/* The art is already dark; a light veil keeps the form readable without flattening it. */}
+      <div className="pointer-events-none fixed inset-0 bg-black/30" aria-hidden />
 
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-3 py-4 sm:px-4 sm:py-10">
         <div
