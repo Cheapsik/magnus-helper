@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { type ReactNode, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Swords } from "lucide-react";
 import { useApp } from "@/context/AppContext";
@@ -20,11 +20,11 @@ import {
   calculateEncounterBalance,
 } from "@/lib/encounterBuilder";
 
-function Picker({ title, cards, picks, onChange }: { title: string; cards: Card[]; picks: Picks; onChange: (p: Picks) => void }) {
+function Picker({ title, cards, picks, onChange, empty }: { title: string; cards: Card[]; picks: Picks; onChange: (p: Picks) => void; empty: ReactNode }) {
   return (
     <div className="space-y-2">
       <h2 className="font-semibold">{title}</h2>
-      {cards.length === 0 && <p className="text-sm text-muted-foreground">Brak kart.</p>}
+      {cards.length === 0 && <p className="text-sm text-muted-foreground">Brak kart. {empty}</p>}
       {cards.map((card) => {
         const n = picks[card.id] ?? 0;
         const set = (v: number) => {
@@ -103,8 +103,8 @@ export default function EncounterBuilderPage() {
     <div className="mx-auto max-w-5xl space-y-6">
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Picker title="Drużyna (bohaterowie)" cards={heroes} picks={party} onChange={setParty} />
-        <Picker title="Przeciwnicy (bestiariusz)" cards={monsters} picks={enemies} onChange={setEnemies} />
+        <Picker title="Drużyna (bohaterowie)" cards={heroes} picks={party} onChange={setParty} empty={<Link to="/heroes" className="text-primary underline underline-offset-2">Dodaj bohaterów</Link>} />
+        <Picker title="Przeciwnicy (bestiariusz)" cards={monsters} picks={enemies} onChange={setEnemies} empty={<Link to="/monsters" className="text-primary underline underline-offset-2">Dodaj potwory</Link>} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

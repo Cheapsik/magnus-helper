@@ -185,7 +185,7 @@ export default function CalendarPage() {
         <div className="space-y-4">
           <section className="space-y-2">
             <h2 className="text-sm font-medium text-muted-foreground">Nadchodzące</h2>
-            {upcoming.length === 0 && <p className="text-sm text-muted-foreground">Brak nadchodzących wydarzeń.</p>}
+            {upcoming.length === 0 && <p className="text-sm text-muted-foreground">Brak nadchodzących wydarzeń. Wybierz dzień w kalendarzu i wpisz tytuł w „Nowe wydarzenie”.</p>}
             {upcoming.map(renderEvent)}
           </section>
           {past.length > 0 && (

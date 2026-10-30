@@ -179,6 +179,20 @@ export default function DicePage() {
     startRoll(s * c + Math.abs(m), total);
   };
 
+  // Enter or R rolls the current dice unless the GM is typing or a control has focus.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.key !== "Enter" && e.key.toLowerCase() !== "r") || e.ctrlKey || e.metaKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(t.tagName))) return;
+      if (rollBlocked) return;
+      e.preventDefault();
+      handleRoll();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
   const handle3DInitFailed = useCallback((message: string) => {
     toast.error(message, { duration: 6000 });
     setDice3DReady(false);
@@ -420,7 +434,8 @@ export default function DicePage() {
             type="button"
             onClick={() => handleRoll()}
             disabled={rollBlocked}
-            className="mb-3 w-full touch-manipulation gap-2 rounded-xl font-semibold shadow-md sm:mb-4"
+            title="Rzuć (Enter lub R)"
+            className="mb-3 min-w-48 touch-manipulation sm:mb-4"
           >
             <Dice5 className={`h-5 w-5 shrink-0 ${physicsRolling || isRolling ? "animate-spin" : ""}`} />
             <span className="truncate">{rollPrimaryLabel}</span>

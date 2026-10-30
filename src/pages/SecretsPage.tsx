@@ -61,7 +61,7 @@ export default function SecretsPage() {
       {editing && <SecretEditor key={editing.id} secret={editing} onSave={save} onCancel={() => setEditing(null)} />}
 
       <div className="space-y-3">
-        {secrets.length === 0 && <p className="text-sm text-muted-foreground">Brak sekretów.</p>}
+        {secrets.length === 0 && <p className="text-sm text-muted-foreground">Brak sekretów. Zapisz coś, czego gracze jeszcze nie wiedzą, np. „Burmistrz płaci przemytnikom”.</p>}
         {secrets.map((s) => (
           <Card key={s.id}>
             <CardHeader className="pb-2">

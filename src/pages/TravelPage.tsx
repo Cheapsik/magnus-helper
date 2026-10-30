@@ -43,7 +43,7 @@ export default function TravelPage() {
             <Plus className="h-4 w-4 mr-1" /> Nowa podróż
           </Button>
           {journeys.length === 0 ? (
-            <p className="text-muted-foreground text-sm py-4">Brak podróży.</p>
+            <p className="text-muted-foreground text-sm py-4">Brak podróży. Zaplanuj trasę na etapy i odliczaj dni w drodze.</p>
           ) : (
             <ul className="space-y-1">
               {journeys.map((j) => (

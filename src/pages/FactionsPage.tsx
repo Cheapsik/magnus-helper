@@ -56,7 +56,7 @@ export default function FactionsPage() {
       <section className="space-y-1.5">
         <label className="field-label block">Frakcje ({factions.length})</label>
         {factions.length === 0 ? (
-          <Card><CardContent className="p-4 text-center text-sm text-muted-foreground">Brak frakcji</CardContent></Card>
+          <Card><CardContent className="p-4 text-center text-sm text-muted-foreground">Brak frakcji. Dodaj grupę, której zdanie o drużynie ma znaczenie, np. gildię kupców albo straż miejską.</CardContent></Card>
         ) : (
           factions.map((f) => (
             <FactionCard

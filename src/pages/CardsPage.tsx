@@ -40,9 +40,9 @@ type CardGroup = { id: string; name: string; collapsed: boolean };
 const NEW_CARD_NAME: Record<CardKind, string> = { hero: "Nowy bohater", npc: "Nowy NPC", monster: "Nowy potwór" };
 const ADD_LABEL: Record<CardKind, string> = { hero: "Dodaj bohatera", npc: "Dodaj NPC", monster: "Dodaj potwora" };
 const EMPTY_TEXT: Record<CardKind, string> = {
-  hero: "Brak bohaterów w tej kampanii.",
-  npc: "Brak NPC w tej kampanii.",
-  monster: "Brak potworów w tej kampanii.",
+  hero: "Brak bohaterów. Dodaj postacie graczy, a Start i tracker pokażą ich stan.",
+  npc: "Brak NPC. Dodaj postacie, które drużyna spotka, a będziesz mógł je wspominać w notatkach przez @.",
+  monster: "Brak potworów. Dodaj przeciwników, a trafią do trackera i kreatora spotkań.",
 };
 
 /** The card list for one card kind: groups, add, open, send to combat. */

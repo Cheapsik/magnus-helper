@@ -1,11 +1,10 @@
 import { cn } from "@/lib/utils";
 
-export type CombatViewMode = "walka" | "potwory" | "presety" | "postacie";
+export type CombatViewMode = "walka" | "karty" | "presety";
 
 const MODES: { id: CombatViewMode; label: string }[] = [
   { id: "walka", label: "Walka" },
-  { id: "potwory", label: "Potwory" },
-  { id: "postacie", label: "Postacie" },
+  { id: "karty", label: "Karty" },
   { id: "presety", label: "Presety" },
 ];
 

@@ -373,31 +373,15 @@ export default function LootGeneratorPage() {
 
           <Card>
             <CardContent className="p-3 space-y-2">
-              <label className="text-xs text-muted-foreground font-medium">Ilość przedmiotów</label>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-[12px] text-muted-foreground">Min</label>
-                  <NumberInput
-                    value={lootConfig.itemCount.min}
-                    onChange={(v) => setLootConfig((p) => ({ ...p, itemCount: { ...p.itemCount, min: v } }))}
-                    min={0}
-                    max={20}
-                    className="h-8 text-xs text-center"
-                  />
-                </div>
-                <div>
-                  <label className="text-[12px] text-muted-foreground">Max</label>
-                  <NumberInput
-                    value={lootConfig.itemCount.max}
-                    onChange={(v) => setLootConfig((p) => ({ ...p, itemCount: { ...p.itemCount, max: v } }))}
-                    min={0}
-                    max={20}
-                    className="h-8 text-xs text-center"
-                  />
-                </div>
-              </div>
+              <RangeRow
+                label="Przedmioty"
+                min={lootConfig.itemCount.min}
+                max={lootConfig.itemCount.max}
+                limit={20}
+                onChange={(patch) => setLootConfig((p) => ({ ...p, itemCount: { ...p.itemCount, ...patch } }))}
+              />
 
-              <label className="text-xs text-muted-foreground font-medium">Monety (zakresy)</label>
+              <label className="field-label block pt-1">Monety</label>
               {currency.length === 0 ? (
                 <p className="text-xs text-muted-foreground">
                   Kampania nie ma waluty, więc łup nie zawiera monet.{" "}
@@ -407,7 +391,7 @@ export default function LootGeneratorPage() {
                   .
                 </p>
               ) : (
-                <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+                <div className="space-y-1.5">
                   {currency.map((denomination) => {
                     const range = lootConfig.coinRanges[denomination.id] ?? NO_COINS;
                     const setRange = (patch: Partial<typeof range>) =>
@@ -419,27 +403,13 @@ export default function LootGeneratorPage() {
                         },
                       }));
                     return (
-                      <div key={denomination.id}>
-                        <label className="text-[12px] text-muted-foreground">
-                          {denomination.name} ({denomination.short})
-                        </label>
-                        <div className="flex gap-0.5">
-                          <NumberInput
-                            value={range.min}
-                            min={0}
-                            onChange={(v) => setRange({ min: v })}
-                            className="h-7 text-[12px] text-center"
-                            aria-label={`${denomination.name}: od`}
-                          />
-                          <NumberInput
-                            value={range.max}
-                            min={0}
-                            onChange={(v) => setRange({ max: v })}
-                            className="h-7 text-[12px] text-center"
-                            aria-label={`${denomination.name}: do`}
-                          />
-                        </div>
-                      </div>
+                      <RangeRow
+                        key={denomination.id}
+                        label={`${denomination.name} (${denomination.short})`}
+                        min={range.min}
+                        max={range.max}
+                        onChange={setRange}
+                      />
                     );
                   })}
                 </div>
@@ -1009,6 +979,24 @@ export default function LootGeneratorPage() {
           </section>
         </div>
       )}
+    </div>
+  );
+}
+
+/** One "label  od – do" line, so ranges read as a short table instead of a grid of boxes. */
+function RangeRow({ label, min, max, limit, onChange }: {
+  label: string;
+  min: number;
+  max: number;
+  limit?: number;
+  onChange: (patch: { min?: number; max?: number }) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="min-w-0 flex-1 truncate text-sm">{label}</span>
+      <NumberInput value={min} min={0} max={limit} onChange={(v) => onChange({ min: v })} className="field-sm w-16 text-center" aria-label={`${label}: od`} />
+      <span className="text-muted-foreground">–</span>
+      <NumberInput value={max} min={0} max={limit} onChange={(v) => onChange({ max: v })} className="field-sm w-16 text-center" aria-label={`${label}: do`} />
     </div>
   );
 }

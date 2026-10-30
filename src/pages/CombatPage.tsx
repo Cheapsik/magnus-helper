@@ -85,7 +85,7 @@ export default function CombatPage() {
 
   useEffect(() => {
     const tab = (location.state as { combatTab?: string } | null)?.combatTab;
-    if (tab === "potwory") setCombatTab("potwory");
+    if (tab === "potwory") setCombatTab("karty");
   }, [location.state]);
 
   useEffect(() => {
@@ -302,7 +302,7 @@ export default function CombatPage() {
             <CardContent className="p-6 text-center text-sm text-muted-foreground">
               {finePointer
                 ? "Brak uczestników. Przeciągnij kartę z prawej kolumny lub dodaj poniżej."
-                : "Brak uczestników. Dodaj poniżej lub użyj zakładki „Potwory”."}
+                : "Brak uczestników. Dodaj poniżej lub użyj zakładki „Karty”."}
             </CardContent>
           </Card>
         )}
@@ -398,11 +398,10 @@ export default function CombatPage() {
 
         {combatTab === "walka" && <div className="space-y-3">{renderFightBody()}</div>}
 
-        {(combatTab === "potwory" || combatTab === "postacie") && (
+        {combatTab === "karty" && (
           <div className="flex min-h-[200px] flex-col rounded-lg border border-border bg-card/40">
             <CombatRosterPanel
-              key={combatTab}
-              kinds={combatTab === "potwory" ? ["monster"] : ["hero", "npc"]}
+              kinds={["monster", "npc", "hero"]}
               setCombatants={setCombatants}
               dragKey={dragKey}
               onDragStart={setDragKey}
