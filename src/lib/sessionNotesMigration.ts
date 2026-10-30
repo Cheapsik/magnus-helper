@@ -1,4 +1,5 @@
 import type { SessionNote, SessionNoteScope, NamedNoteSession, NoteSessionCatalog } from "@/lib/sessionNoteModel";
+import { getStorageKey, markKeyDirty } from "@/lib/campaignStorage";
 
 export const DEFAULT_NOTE_CATEGORY_IDS = ["general", "npc", "location", "objective", "clue"] as const;
 
@@ -20,7 +21,7 @@ function coerceScope(raw: unknown): SessionNoteScope {
 
 function readRawNotesFromStorage(): unknown[] {
   try {
-    const raw = window.localStorage.getItem("rpg_session_notes");
+    const raw = window.localStorage.getItem(getStorageKey("rpg_session_notes"));
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) return parsed;
@@ -135,7 +136,7 @@ function mergeSessionsWithNotes(sessions: NamedNoteSession[], notes: SessionNote
 export function readNoteSessionCatalogFromStorage(): NoteSessionCatalog {
   if (typeof window === "undefined") return EMPTY_NOTE_SESSION_CATALOG;
   try {
-    const raw = window.localStorage.getItem("rpg_notes_session_catalog");
+    const raw = window.localStorage.getItem(getStorageKey("rpg_notes_session_catalog"));
     if (raw) return reviveNoteSessionCatalog(JSON.parse(raw));
     return reviveNoteSessionCatalog(null);
   } catch {
@@ -156,14 +157,18 @@ export function reviveNoteSessionCatalog(parsed: unknown): NoteSessionCatalog {
         typeof activeRaw === "string" && activeRaw.trim() && baseSessions.some((s) => s.id === activeRaw.trim())
           ? activeRaw.trim()
           : baseSessions[0].id;
-      const notes = migrateSessionNotesFromUnknown(JSON.parse(window.localStorage.getItem("rpg_session_notes") || "null"));
+      const notes = migrateSessionNotesFromUnknown(JSON.parse(window.localStorage.getItem(getStorageKey("rpg_session_notes")) || "null"));
       const sessions = mergeSessionsWithNotes(baseSessions, notes);
       if (!sessions.some((s) => s.id === activeSessionId)) activeSessionId = sessions[0].id;
       const prevActiveOk =
         typeof activeRaw === "string" && activeRaw.trim() && baseSessions.some((s) => s.id === activeRaw.trim());
       if (sessions.length > baseSessions.length || !prevActiveOk) {
         try {
-          window.localStorage.setItem("rpg_notes_session_catalog", JSON.stringify({ sessions, activeSessionId }));
+          window.localStorage.setItem(
+            getStorageKey("rpg_notes_session_catalog"),
+            JSON.stringify({ sessions, activeSessionId }),
+          );
+          markKeyDirty(getStorageKey("rpg_notes_session_catalog"));
         } catch {
                   }
       }
@@ -185,7 +190,7 @@ export function reviveNoteSessionCatalog(parsed: unknown): NoteSessionCatalog {
 
   let oldActiveNum = 1;
   try {
-    const legacy = window.localStorage.getItem("rpg_notes_active_session");
+    const legacy = window.localStorage.getItem(getStorageKey("rpg_notes_active_session"));
     if (legacy != null) {
       const n = JSON.parse(legacy);
       if (typeof n === "number" && Number.isFinite(n) && n >= 1) oldActiveNum = Math.floor(n);
@@ -206,20 +211,22 @@ export function reviveNoteSessionCatalog(parsed: unknown): NoteSessionCatalog {
     : sessions[0].id;
 
   try {
-    window.localStorage.removeItem("rpg_notes_active_session");
+    window.localStorage.removeItem(getStorageKey("rpg_notes_active_session"));
+    markKeyDirty(getStorageKey("rpg_notes_active_session"));
   } catch {
       }
 
-  const notes = migrateSessionNotesFromUnknown(JSON.parse(window.localStorage.getItem("rpg_session_notes") || "null"));
+  const notes = migrateSessionNotesFromUnknown(JSON.parse(window.localStorage.getItem(getStorageKey("rpg_session_notes")) || "null"));
   const mergedSessions = mergeSessionsWithNotes(sessions, notes);
   const finalSessions = mergedSessions.length ? mergedSessions : EMPTY_NOTE_SESSION_CATALOG.sessions;
   const finalActive = finalSessions.some((s) => s.id === activeSessionId) ? activeSessionId : finalSessions[0].id;
 
   try {
     window.localStorage.setItem(
-      "rpg_notes_session_catalog",
+      getStorageKey("rpg_notes_session_catalog"),
       JSON.stringify({ sessions: finalSessions, activeSessionId: finalActive }),
     );
+    markKeyDirty(getStorageKey("rpg_notes_session_catalog"));
   } catch {
       }
 

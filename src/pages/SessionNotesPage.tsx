@@ -18,7 +18,9 @@ import {
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import type { SessionNote, NamedNoteSession } from "@/context/AppContext";
-import { getNpcDisplayName, NpcQuickPreview } from "@/components/character-sheet";
+import { CardQuickPreview } from "@/components/card/CardQuickPreview";
+import { CARD_KIND_ROUTES, cardSubtitle, cardTitle } from "@/lib/cardSchema";
+import { useCardType, useCards } from "@/lib/cardStore";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import {
   categoryLabel,
@@ -179,7 +181,9 @@ function SessionEditRow({
 }
 
 export default function SessionNotesPage() {
-  const { sessionNotes, setSessionNotes, noteSessionCatalog, setNoteSessionCatalog, savedNpcs } = useApp();
+  const { sessionNotes, setSessionNotes, noteSessionCatalog, setNoteSessionCatalog } = useApp();
+  const [npcCards] = useCards("npc");
+  const npcCardType = useCardType("npc");
   const [noteCategories, setNoteCategories] = useLocalStorage<string[]>("rpg_notes_categories", [...DEFAULT_NOTE_CATEGORY_IDS], {
     revive: reviveNoteCategories,
   });
@@ -260,7 +264,7 @@ export default function SessionNotesPage() {
     return { all: sessionNotes.length, global, session };
   }, [sessionNotes, activeSessionId]);
 
-  const openNpc = openNpcId ? savedNpcs.find((n) => n.id === openNpcId) : null;
+  const openNpc = openNpcId ? npcCards.find((n) => n.id === openNpcId) : null;
 
   const applyTemplate = useCallback((t: SessionNoteTemplate) => {
     setEditorDraft((d) => ({ ...d, title: t.title, text: t.body }));
@@ -451,10 +455,12 @@ export default function SessionNotesPage() {
   const filteredNpcsForPicker = useMemo(() => {
     const ids = editorDraft.linkedNpcIds;
     const q = npcQuery.trim().toLowerCase();
-    return savedNpcs.filter(
-      (n) => !ids.includes(n.id) && (!q || getNpcDisplayName(n).toLowerCase().includes(q)),
+    return npcCards.filter(
+      (n) =>
+        !ids.includes(n.id) &&
+        (!q || `${cardTitle(n)} ${cardSubtitle(npcCardType, n)}`.toLowerCase().includes(q)),
     );
-  }, [savedNpcs, npcQuery, editorDraft.linkedNpcIds]);
+  }, [npcCards, npcCardType, npcQuery, editorDraft.linkedNpcIds]);
 
   const lastUsedTemplates = useMemo(() => {
     return lastUsedTemplateIds.map((id) => templates.find((t) => t.id === id)).filter(Boolean) as SessionNoteTemplate[];
@@ -468,7 +474,6 @@ export default function SessionNotesPage() {
   return (
     <div className="space-y-3 animate-fade-in pb-8">
       <div className="flex items-center justify-between gap-2">
-        <h1 className="font-app-brand text-base font-semibold tracking-tight">Notatki</h1>
         <div className="flex items-center gap-1">
           <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => setSettingsOpen(true)} aria-label="Szablony, kategorie i sesje">
             <Settings2 className="h-4 w-4" />
@@ -592,7 +597,7 @@ export default function SessionNotesPage() {
                 {note.linkedNpcIds && note.linkedNpcIds.length > 0 && (
                   <div className="mt-1 flex flex-wrap gap-1">
                     {note.linkedNpcIds.map((id) => {
-                      const npc = savedNpcs.find((n) => n.id === id);
+                      const npc = npcCards.find((n) => n.id === id);
                       return (
                         <span
                           key={id}
@@ -611,7 +616,7 @@ export default function SessionNotesPage() {
                             }
                           }}
                         >
-                          {npc ? getNpcDisplayName(npc) : "NPC"}
+                          {npc ? cardTitle(npc) : "NPC"}
                         </span>
                       );
                     })}
@@ -745,11 +750,11 @@ export default function SessionNotesPage() {
               {editorDraft.linkedNpcIds.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1">
                   {editorDraft.linkedNpcIds.map((id) => {
-                    const npc = savedNpcs.find((n) => n.id === id);
+                    const npc = npcCards.find((n) => n.id === id);
                     return (
                       <span key={id} className="inline-flex items-center gap-0.5 rounded-full border bg-muted/40 px-2 py-0.5 text-[11px]">
                         <button type="button" className="truncate max-w-[120px]" onClick={() => setOpenNpcId(id)}>
-                          {npc ? getNpcDisplayName(npc) : id.slice(0, 6)}
+                          {npc ? cardTitle(npc) : id.slice(0, 6)}
                         </button>
                         <button
                           type="button"
@@ -796,7 +801,7 @@ export default function SessionNotesPage() {
               id="new-session-name"
               value={newSessionName}
               onChange={(e) => setNewSessionName(e.target.value)}
-              placeholder="np. Sesja 12 — Zjazd w Ubersreiku"
+              placeholder="np. Sesja 12 — powrót do stolicy"
               className="h-9 text-sm"
               autoFocus
               onKeyDown={(e) => {
@@ -1041,13 +1046,13 @@ export default function SessionNotesPage() {
           <div className="mt-3 space-y-2">
             <Input value={npcQuery} onChange={(e) => setNpcQuery(e.target.value)} placeholder="Szukaj…" className="h-9 text-sm" />
             {filteredNpcsForPicker.length === 0 ? (
-              <p className="text-xs text-muted-foreground">{savedNpcs.length === 0 ? "Brak NPC w bazie." : "Brak wyników."}</p>
+              <p className="text-xs text-muted-foreground">{npcCards.length === 0 ? "Brak NPC w kampanii." : "Brak wyników."}</p>
             ) : (
               <ul className="space-y-1">
                 {filteredNpcsForPicker.map((npc) => (
                   <li key={npc.id}>
                     <Button type="button" variant="ghost" className="h-9 w-full justify-start px-2 text-sm font-normal" onClick={() => addNpcFromPicker(npc.id)}>
-                      {getNpcDisplayName(npc)}
+                      {cardTitle(npc)}
                     </Button>
                   </li>
                 ))}
@@ -1060,13 +1065,15 @@ export default function SessionNotesPage() {
       <Sheet open={!!openNpcId} onOpenChange={(v) => !v && setOpenNpcId(null)}>
         <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
           <SheetHeader>
-            <SheetTitle>{openNpc ? getNpcDisplayName(openNpc) : "NPC"}</SheetTitle>
+            <SheetTitle>{openNpc ? cardTitle(openNpc) : "NPC"}</SheetTitle>
           </SheetHeader>
           {openNpc ? (
             <>
-              <NpcQuickPreview npc={openNpc} />
+              <div className="mt-4">
+                <CardQuickPreview card={openNpc} cardType={npcCardType} />
+              </div>
               <Button type="button" variant="outline" size="sm" className="mt-4 w-full h-9 text-xs" asChild>
-                <Link to="/npcs">Otwórz w NPC</Link>
+                <Link to={`${CARD_KIND_ROUTES.npc}?id=${encodeURIComponent(openNpc.id)}`}>Otwórz kartę NPC</Link>
               </Button>
             </>
           ) : (

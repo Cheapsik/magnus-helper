@@ -1,4 +1,4 @@
-
+import { readJson, writeJson } from "@/lib/storage";
 
 const STORAGE_QUESTS = "rpg_quests";
 const STORAGE_QUEST_LAYOUT = "rpg_quests_layout";
@@ -41,13 +41,7 @@ interface QuestsState {
 }
 
 function readLayout(): QuestLayoutRaw {
-  try {
-    const raw = localStorage.getItem(STORAGE_QUEST_LAYOUT);
-    if (!raw) return {};
-    return JSON.parse(raw) as QuestLayoutRaw;
-  } catch {
-    return {};
-  }
+  return readJson<QuestLayoutRaw>(STORAGE_QUEST_LAYOUT, {});
 }
 
 function defaultColumnId(layout: QuestLayoutRaw): string {
@@ -82,15 +76,8 @@ export function appendQuestToStorage(opts: {
   const typeId = opts.typeId ?? defaultTypeId(layout);
 
   let state: QuestsState = { quests: [], order: {} };
-  try {
-    const raw = localStorage.getItem(STORAGE_QUESTS);
-    if (raw) {
-      const parsed = JSON.parse(raw) as QuestsState;
-      if (parsed?.quests && parsed?.order) state = parsed;
-    }
-  } catch {
-
-  }
+  const parsed = readJson<QuestsState | null>(STORAGE_QUESTS, null);
+  if (parsed?.quests && parsed?.order) state = parsed;
 
   if (!state.order) state.order = {};
   const cols = layout.columns?.length ? layout.columns.map((c) => c.id) : [columnId];
@@ -117,9 +104,7 @@ export function appendQuestToStorage(opts: {
   state.quests = [...(state.quests || []), quest];
   state.order[columnId] = [...(state.order[columnId] ?? []), id];
 
-  try {
-    localStorage.setItem(STORAGE_QUESTS, JSON.stringify(state));
-  } catch {
+  if (!writeJson(STORAGE_QUESTS, state)) {
     return { ok: false, error: "Nie udało się zapisać" };
   }
   return { ok: true };

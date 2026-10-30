@@ -77,7 +77,7 @@ export function SessionPanel({ embedded }: { embedded?: boolean }) {
       </div>
       {currentSessionName && timeline.length > 0 && (
         <div className="mt-2 border-t border-border/60 pt-2">
-          <div className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">
+          <div className="field-label mb-1">
             Ostatnie zmiany
           </div>
           {timeline

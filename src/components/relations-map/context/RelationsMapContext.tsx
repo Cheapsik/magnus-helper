@@ -9,9 +9,9 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
-import { useApp } from "@/context/AppContext";
-import type { SavedNpc } from "@/components/character-sheet/types";
+import type { Card, CardTypeDef } from "@/lib/cardSchema";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { toCardSummaries, useCardType, useCards } from "@/lib/cardStore";
 import { toast } from "sonner";
 import { BUILTIN_TYPES, DEFAULT_PERSISTED_MAP, STORAGE_KEY } from "../constants";
 import { statusLabel } from "../colors";
@@ -55,7 +55,7 @@ const INITIAL_FILTERS: FilterState = {
 interface RelationsMapContextValue {
   persisted: PersistedMap;
   setPersisted: (fn: PersistedMap | ((prev: PersistedMap) => PersistedMap)) => void;
-  savedNpcs: SavedNpc[];
+  npcCards: Card[];
   heroes: StoredHero[];
   lookup: Map<string, EntityLookupEntry>;
   displayEdges: PersistedEdge[];
@@ -99,8 +99,9 @@ interface RelationsMapContextValue {
   setActiveTab: (t: string) => void;
   editingNode: PersistedNode | null;
   editingEntity: EntityLookupEntry | null | undefined;
-  editingFullNpc: SavedNpc | undefined;
-  editingFullHero: StoredHero | undefined;
+  /** The full card behind the selected node (NPC or hero), if it still exists. */
+  editingCard: Card | undefined;
+  editingCardType: CardTypeDef | undefined;
   editingEdges: PersistedEdge[];
   currentSessionName: string;
   changedCount: number;
@@ -151,8 +152,11 @@ export function useRelationsMapActions() {
 }
 
 export function RelationsMapProvider({ children }: { children: ReactNode }) {
-  const { savedNpcs } = useApp();
-  const [heroes] = useLocalStorage<StoredHero[]>("rpg_characters", []);
+  const npcCardType = useCardType("npc");
+  const [npcCards] = useCards("npc");
+  const heroCardType = useCardType("hero");
+  const [heroCards] = useCards("hero");
+  const heroes = useMemo(() => toCardSummaries(heroCards, heroCardType), [heroCards, heroCardType]);
   const [persisted, setPersisted] = useLocalStorage<PersistedMap>(
     STORAGE_KEY,
     DEFAULT_PERSISTED_MAP,
@@ -176,7 +180,7 @@ export function RelationsMapProvider({ children }: { children: ReactNode }) {
   const autoLayoutRef = { current: null as (() => void) | null };
 
   const quickLink = useQuickLinkMode();
-  const lookup = useMemo(() => buildLookup(savedNpcs, heroes), [savedNpcs, heroes]);
+  const lookup = useMemo(() => buildLookup(npcCards, npcCardType, heroes), [npcCards, npcCardType, heroes]);
 
   useEffect(() => {
     if (sessionMode) setDetailPanelOpen(false);
@@ -208,8 +212,8 @@ export function RelationsMapProvider({ children }: { children: ReactNode }) {
   );
 
   const sidebarEntries = useMemo(
-    () => buildSidebarEntries(savedNpcs, heroes, search),
-    [savedNpcs, heroes, search]
+    () => buildSidebarEntries(npcCards, npcCardType, heroes, search),
+    [npcCards, npcCardType, heroes, search]
   );
 
   const onCanvasIds = useMemo(
@@ -223,14 +227,14 @@ export function RelationsMapProvider({ children }: { children: ReactNode }) {
     ? persisted.nodes.find((n) => n.id === selectedNodeId) ?? null
     : null;
   const editingEntity = editingNode ? lookup.get(editingNode.entityId) : null;
-  const editingFullNpc =
-    editingNode?.type === "npc"
-      ? savedNpcs.find((n) => n.id === editingNode.entityId)
-      : undefined;
-  const editingFullHero =
-    editingNode?.type === "hero"
-      ? heroes.find((h) => h.id === editingNode.entityId)
-      : undefined;
+  const editingCard = editingNode
+    ? (editingNode.type === "npc" ? npcCards : heroCards).find((c) => c.id === editingNode.entityId)
+    : undefined;
+  const editingCardType = editingNode
+    ? editingNode.type === "npc"
+      ? npcCardType
+      : heroCardType
+    : undefined;
   const editingEdges = useMemo(
     () =>
       editingNode
@@ -570,7 +574,7 @@ export function RelationsMapProvider({ children }: { children: ReactNode }) {
   const value: RelationsMapContextValue = {
     persisted,
     setPersisted,
-    savedNpcs,
+    npcCards,
     heroes,
     lookup,
     displayEdges,
@@ -614,8 +618,8 @@ export function RelationsMapProvider({ children }: { children: ReactNode }) {
     setActiveTab,
     editingNode,
     editingEntity,
-    editingFullNpc,
-    editingFullHero,
+    editingCard,
+    editingCardType,
     editingEdges,
     currentSessionName,
     changedCount,

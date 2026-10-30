@@ -1,18 +1,89 @@
-import { Settings as SettingsIcon } from "lucide-react";
-import ThemeSelector from "./ThemeSelector";
+import { useSearchParams } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import CampaignManager from "./CampaignManager";
+import { useAppRole } from "@/lib/sharedCampaigns";
+import { Button } from "@/components/ui/button";
 import DataManager from "./DataManager";
+import { CardStructureEditor } from "@/components/system/CardStructureEditor";
+import { TestTypesEditor } from "@/components/system/TestTypesEditor";
+import { CombatSettingsEditor } from "@/components/system/CombatSettingsEditor";
+import { ConditionsEditor } from "@/components/system/ConditionsEditor";
+import { ProgressionSettings } from "@/components/progression/ProgressionSettings";
+import { CurrencyEditor } from "@/components/system/CurrencyEditor";
+
+const TABS = [
+  { value: "kampanie", label: "Kampanie i dane" },
+  { value: "karty", label: "Karty" },
+  { value: "testy", label: "Testy" },
+  { value: "walka", label: "Walka" },
+  { value: "stany", label: "Stany" },
+  { value: "waluta", label: "Waluta" },
+  { value: "rozwoj", label: "Rozwój" },
+] as const;
+type Tab = (typeof TABS)[number]["value"];
 
 export default function SettingsPage() {
-  return (
-    <div className="w-full max-w-none space-y-6">
-      <header className="flex items-center gap-2.5">
-        <SettingsIcon className="h-5 w-5 text-primary" />
-        <h1 className="font-app-brand text-2xl tracking-wide text-foreground">Ustawienia</h1>
-      </header>
+  const [params, setParams] = useSearchParams();
+  const requested = params.get("tab");
+  const tab: Tab = TABS.some((t) => t.value === requested) ? (requested as Tab) : "kampanie";
 
-      <ThemeSelector />
-      <div className="h-px bg-border" />
-      <DataManager />
-    </div>
+  return (
+    <Tabs value={tab} onValueChange={(next) => setParams({ tab: next }, { replace: true })} className="space-y-4">
+      <TabsList className="h-auto flex-wrap justify-start">
+        {TABS.map((t) => (
+          <TabsTrigger key={t.value} value={t.value}>
+            {t.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+      <TabsContent value="kampanie" className="space-y-6">
+        <RoleSwitch />
+        <CampaignManager />
+        <DataManager />
+      </TabsContent>
+      <TabsContent value="karty">
+        <CardStructureEditor />
+      </TabsContent>
+      <TabsContent value="testy">
+        <TestTypesEditor />
+      </TabsContent>
+      <TabsContent value="walka">
+        <CombatSettingsEditor />
+      </TabsContent>
+      <TabsContent value="stany">
+        <ConditionsEditor />
+      </TabsContent>
+      <TabsContent value="waluta">
+        <CurrencyEditor />
+      </TabsContent>
+      <TabsContent value="rozwoj">
+        <ProgressionSettings />
+      </TabsContent>
+    </Tabs>
+  );
+}
+
+/** shortcut: the role is picked by hand on each device; access itself is checked by the server. */
+function RoleSwitch() {
+  const [role, setRole] = useAppRole();
+  return (
+    <section className="space-y-2">
+      <h2 className="text-sm font-medium">Tryb aplikacji</h2>
+      <div className="flex gap-2">
+        <Button variant={role === null ? "default" : "outline"} size="sm" onClick={() => setRole(null)}>
+          Automatycznie
+        </Button>
+        <Button variant={role === "gm" ? "default" : "outline"} size="sm" onClick={() => setRole("gm")}>
+          Mistrz gry
+        </Button>
+        <Button variant={role === "player" ? "default" : "outline"} size="sm" onClick={() => setRole("player")}>
+          Gracz
+        </Button>
+      </div>
+      <p className="text-[length:--fs-meta] text-muted-foreground">
+        Automatycznie: masz własne kampanie, to prowadzisz je jako Mistrz gry; należysz tylko do cudzych, to widzisz Panel gracza.
+        W trybie Gracz widzisz kampanie, do których dołączyłeś przez link, i materiały od Mistrza gry.
+      </p>
+    </section>
   );
 }

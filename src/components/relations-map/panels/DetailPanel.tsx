@@ -4,8 +4,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { CardQuickPreview } from "@/components/card/CardQuickPreview";
 import { typeColor, statusLabel } from "../colors";
-import { Field } from "../shared/FormBits";
 import { TagEditor, QuickHistoryAdder } from "../shared/TagEditor";
 import { useRelationsMap } from "../context/RelationsMapContext";
 import { getSessionName } from "../storage";
@@ -18,8 +18,8 @@ export function DetailPanel() {
     selectedNodeId,
     editingNode,
     editingEntity,
-    editingFullNpc,
-    editingFullHero,
+    editingCard,
+    editingCardType,
     editingEdges,
     lookup,
     persisted,
@@ -122,22 +122,13 @@ export function DetailPanel() {
 
           <div className="flex-1 overflow-y-auto min-h-0 mt-3">
             <TabsContent value="opis" className="space-y-3 mt-0 text-sm">
-              {editingFullNpc && (
-                <>
-                  <Field label="Profesja" value={editingFullNpc.daneOgolne.obecnaProfesja} />
-                  <Field label="Cechy" value={editingFullNpc.cechyCharakteru} />
-                  <Field label="Opis" value={editingFullNpc.opisOgolny} multiline />
-                </>
-              )}
-              {editingFullHero && (
-                <>
-                  <Field label="Rasa" value={editingFullHero.daneOgolne.rasa} />
-                  <Field label="Profesja" value={editingFullHero.daneOgolne.obecnaProfesja} />
-                  <Field label="Znaki" value={editingFullHero.opis.znakiSzczegolne} multiline />
-                </>
+              {editingCard && editingCardType ? (
+                <CardQuickPreview card={editingCard} cardType={editingCardType} />
+              ) : (
+                <p className="text-xs text-muted-foreground">Karta tej postaci nie istnieje.</p>
               )}
               <div>
-                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                <Label className="field-label">
                   Opis (mapa)
                 </Label>
                 <Textarea
@@ -164,7 +155,7 @@ export function DetailPanel() {
                   <div key={e.id} className="border border-border p-2 bg-secondary/30">
                     <div className="flex items-center justify-between">
                       <span
-                        className="text-[10px] uppercase tracking-wider"
+                        className="field-label"
                         style={{ color: typeColor(label) }}
                       >
                         {label}
@@ -191,7 +182,7 @@ export function DetailPanel() {
 
             <TabsContent value="mg" className="mt-0 space-y-4">
               <div>
-                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                <Label className="field-label">
                   Sekrety
                 </Label>
                 <Textarea
@@ -202,7 +193,7 @@ export function DetailPanel() {
                 />
               </div>
               <div>
-                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                <Label className="field-label">
                   Cele
                 </Label>
                 <Textarea
@@ -213,7 +204,7 @@ export function DetailPanel() {
                 />
               </div>
               <div>
-                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                <Label className="field-label">
                   Notatki
                 </Label>
                 <Textarea
@@ -224,7 +215,7 @@ export function DetailPanel() {
                 />
               </div>
               <div>
-                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 block">
+                <Label className="field-label mb-1 block">
                   Historia
                 </Label>
                 <QuickHistoryAdder onAdd={(m) => addNodeHistory(editingNode.id, m)} />

@@ -10,7 +10,6 @@ import {
   ChevronUp,
   Settings2,
 } from "lucide-react";
-import { useApp } from "@/context/AppContext";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,8 +32,12 @@ import {
 import { cn } from "@/lib/utils";
 import { EmojiPickerButton } from "@/components/emoji/EmojiPickerButton";
 import { toast } from "sonner";
-import { getNpcDisplayName, NpcQuickPreview } from "@/components/character-sheet";
+import { CardQuickPreview } from "@/components/card/CardQuickPreview";
+import { CARD_KIND_ROUTES, cardSubtitle, cardTitle } from "@/lib/cardSchema";
+import { useCardType, useCards } from "@/lib/cardStore";
 import { MentionTextarea } from "@/components/mention/MentionTextarea";
+import { readJson, writeJson } from "@/lib/storage";
+import { Link } from "react-router-dom";
 
 const STORAGE_QUEST_LAYOUT = "rpg_quests_layout";
 const STORAGE_QUESTS = "rpg_quests";
@@ -163,9 +166,7 @@ function repairQuestsState(raw: QuestsState, layout: QuestsLayoutConfig): Quests
 
 function readQuestsStateFromStorage(layout: QuestsLayoutConfig): QuestsState | null {
   try {
-    const item = window.localStorage.getItem(STORAGE_QUESTS);
-    if (!item) return null;
-    const parsed = JSON.parse(item) as QuestsState;
+    const parsed = readJson<QuestsState | null>(STORAGE_QUESTS, null);
     if (!parsed?.quests || !parsed?.order) return null;
     return repairQuestsState(parsed, layout);
   } catch {
@@ -239,9 +240,8 @@ function normalizeQuestsLayout(raw: QuestsLayoutConfig): QuestsLayoutConfig {
 
 function loadNormalizedLayoutFromStorage(): QuestsLayoutConfig {
   try {
-    const item = window.localStorage.getItem(STORAGE_QUEST_LAYOUT);
-    if (!item) return normalizeQuestsLayout(DEFAULT_QUEST_LAYOUT);
-    const parsed = JSON.parse(item) as QuestsLayoutConfig;
+    const parsed = readJson<QuestsLayoutConfig | null>(STORAGE_QUEST_LAYOUT, null);
+    if (!parsed) return normalizeQuestsLayout(DEFAULT_QUEST_LAYOUT);
     return normalizeQuestsLayout(parsed);
   } catch {
     return normalizeQuestsLayout(DEFAULT_QUEST_LAYOUT);
@@ -332,7 +332,8 @@ function QuestCard({
   onDragStart,
   onDragEnd,
 }: QuestCardProps) {
-  const { savedNpcs } = useApp();
+  const [npcCards] = useCards("npc");
+  const npcCardType = useCardType("npc");
   const [editTitle, setEditTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState(quest.title);
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -361,18 +362,20 @@ function QuestCard({
   const showActions = finePointer || actionsOpen;
 
   const linkedNpcsObjs = quest.linkedNpcs
-    .map((id) => savedNpcs.find((n) => n.id === id))
-    .filter(Boolean)
-    .map((n) => ({ id: n!.id, name: getNpcDisplayName(n!) }));
+    .map((id) => npcCards.find((n) => n.id === id))
+    .filter((n) => n !== undefined)
+    .map((n) => ({ id: n.id, name: cardTitle(n) }));
 
   const linkedQuestsObjs = quest.linkedQuests
     .map((id) => allQuests.find((q) => q.id === id))
     .filter(Boolean) as Quest[];
 
-  const npcOptions = savedNpcs
+  const npcOptions = npcCards
     .filter((n) => !quest.linkedNpcs.includes(n.id))
     .filter(
-      (n) => !npcQuery || getNpcDisplayName(n).toLowerCase().includes(npcQuery.toLowerCase()),
+      (n) =>
+        !npcQuery ||
+        `${cardTitle(n)} ${cardSubtitle(npcCardType, n)}`.toLowerCase().includes(npcQuery.toLowerCase()),
     );
 
   const questOptions = allQuests
@@ -543,7 +546,7 @@ function QuestCard({
                   </div>
                   {npcOptions.length === 0 && (
                     <div className="px-3 py-2 text-xs text-muted-foreground">
-                      {savedNpcs.length === 0 ? "Brak zapisanych NPC" : "Brak wyników"}
+                      {npcCards.length === 0 ? "Brak NPC w kampanii" : "Brak wyników"}
                     </div>
                   )}
                   {npcOptions.map((npc) => (
@@ -558,7 +561,7 @@ function QuestCard({
                         setShowNpcPicker(false);
                       }}
                     >
-                      👤 {getNpcDisplayName(npc)}
+                      👤 {cardTitle(npc)}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -720,7 +723,8 @@ function validateLayoutDraft(d: QuestsLayoutConfig): string | null {
 }
 
 export default function QuestsPage() {
-  const { savedNpcs } = useApp();
+  const [npcCards] = useCards("npc");
+  const npcCardType = useCardType("npc");
   const finePointer = useFinePointer();
   const [layoutRaw, setLayoutRaw] = useLocalStorage<QuestsLayoutConfig>(STORAGE_QUEST_LAYOUT, DEFAULT_QUEST_LAYOUT);
   const layout = useMemo(() => normalizeQuestsLayout(layoutRaw), [layoutRaw]);
@@ -747,11 +751,7 @@ export default function QuestsPage() {
   }, [layout]);
 
   useEffect(() => {
-    try {
-      window.localStorage.setItem(STORAGE_QUESTS, JSON.stringify(state));
-    } catch {
-
-    }
+    writeJson(STORAGE_QUESTS, state);
   }, [state]);
 
   const typeMap = useMemo(() => Object.fromEntries(layout.types.map((t) => [t.id, t])) as Record<string, QuestTypeConfig>, [layout.types]);
@@ -918,7 +918,7 @@ export default function QuestsPage() {
   }, [state, layout.columns]);
 
   const totalQuests = state.quests.length;
-  const openNpc = openNpcId ? savedNpcs.find((n) => n.id === openNpcId) : null;
+  const openNpc = openNpcId ? npcCards.find((n) => n.id === openNpcId) : null;
 
   const toggleCardCollapsed = useCallback(
     (questId: string) => {
@@ -1068,7 +1068,6 @@ export default function QuestsPage() {
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <h1 className="font-app-brand text-xl font-bold text-foreground">Wątki</h1>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           <Button
@@ -1160,7 +1159,7 @@ export default function QuestsPage() {
             <div className="space-y-6 text-sm">
               <section className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Typy wątków</h3>
+                  <h3 className="field-label">Typy wątków</h3>
                   <Button type="button" size="sm" variant="secondary" onClick={addTypeToDraft}>
                     Dodaj typ
                   </Button>
@@ -1231,7 +1230,7 @@ export default function QuestsPage() {
 
               <section className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Kolumny</h3>
+                  <h3 className="field-label">Kolumny</h3>
                   <Button type="button" size="sm" variant="secondary" onClick={addColumnToDraft}>
                     Dodaj kolumnę
                   </Button>
@@ -1403,10 +1402,17 @@ export default function QuestsPage() {
       <Sheet open={!!openNpcId} onOpenChange={(v) => !v && setOpenNpcId(null)}>
         <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
           <SheetHeader>
-            <SheetTitle>{openNpc ? getNpcDisplayName(openNpc) : "NPC"}</SheetTitle>
+            <SheetTitle>{openNpc ? cardTitle(openNpc) : "NPC"}</SheetTitle>
           </SheetHeader>
           {openNpc ? (
-            <NpcQuickPreview npc={openNpc} />
+            <>
+              <div className="mt-4">
+                <CardQuickPreview card={openNpc} cardType={npcCardType} />
+              </div>
+              <Button type="button" variant="outline" size="sm" className="mt-4 w-full h-9 text-xs" asChild>
+                <Link to={`${CARD_KIND_ROUTES.npc}?id=${encodeURIComponent(openNpc.id)}`}>Otwórz kartę NPC</Link>
+              </Button>
+            </>
           ) : (
             <div className="mt-4 text-sm text-muted-foreground">NPC nie znaleziony</div>
           )}

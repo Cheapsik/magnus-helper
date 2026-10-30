@@ -2,81 +2,207 @@
 @tailwind components;
 @tailwind utilities;
 
+
+/**
+ * Magnus — one theme, one lamp.
+ *
+ * The console is operated live at a table, in a dim room, glanced at between
+ * players' turns. Two rules carry the whole look:
+ *
+ *   1. Light comes from above and there are no shadows anywhere. A raised
+ *      surface is marked by a hairline highlight on its TOP edge only.
+ *   2. The palette is near-monochrome. Gold is pale metal and carries
+ *      interaction; crimson is the single saturated colour in the product and
+ *      is spent only on live state — whose turn it is, an enemy, a deletion.
+ *
+ * Everything else is spacing and type. Change values here, not in pages.
+ */
 @layer base {
   :root {
-    --background: 35 25% 93%;
-    --foreground: 25 20% 12%;
-    --card: 35 20% 97%;
-    --card-foreground: 25 20% 12%;
-    --popover: 35 20% 97%;
-    --popover-foreground: 25 20% 12%;
-    --primary: 38 60% 35%;
-    --primary-foreground: 35 25% 95%;
-    --secondary: 30 15% 85%;
-    --secondary-foreground: 25 15% 25%;
-    --muted: 30 10% 88%;
-    --muted-foreground: 25 10% 45%;
-    --accent: 30 15% 85%;
-    --accent-foreground: 25 20% 12%;
-    --destructive: 0 70% 50%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 30 15% 82%;
-    --input: 30 15% 82%;
-    --ring: 38 60% 35%;
-    --radius: 0.5rem;
-    --success: 140 35% 30%;
-    --success-foreground: 140 15% 92%;
-    --sidebar-background: 35 20% 95%;
-    --sidebar-foreground: 25 15% 25%;
-    --sidebar-primary: 38 60% 35%;
-    --sidebar-primary-foreground: 35 25% 95%;
-    --sidebar-accent: 30 15% 88%;
-    --sidebar-accent-foreground: 25 15% 25%;
-    --sidebar-border: 30 15% 82%;
-    --sidebar-ring: 38 60% 35%;
+    /* Surfaces, darkest to lightest. */
+    --background: 222 22% 6%;
+    --card: 222 20% 9%;
+    --popover: 222 19% 11%;
+    --secondary: 222 17% 13%;
+    --muted: 222 15% 15%;
+    --accent: 222 16% 18%;
+    --border: 222 14% 17%;
+    --input: 222 14% 22%;
+
+    --foreground: 220 20% 93%;
+    --card-foreground: 220 20% 93%;
+    --popover-foreground: 220 20% 93%;
+    --secondary-foreground: 220 12% 80%;
+    --muted-foreground: 220 10% 56%;
+    --accent-foreground: 220 20% 93%;
+
+    /* Pale metal, not fantasy gold. */
+    --primary: 42 34% 62%;
+    --primary-foreground: 222 25% 8%;
+    --ring: 42 34% 62%;
+
+    --destructive: 352 72% 54%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 38% 44%;
+    --success-foreground: 152 20% 96%;
+
+    --sidebar-background: 222 24% 5%;
+    --sidebar-foreground: 220 10% 62%;
+    --sidebar-primary: 42 34% 62%;
+    --sidebar-primary-foreground: 222 25% 8%;
+    --sidebar-accent: 222 17% 12%;
+    --sidebar-accent-foreground: 220 20% 93%;
+    --sidebar-border: 222 14% 14%;
+    --sidebar-ring: 42 34% 62%;
+
+    /* The lamp. A top edge catches light; nothing else does. */
+    --lit-edge: 220 40% 90%;
+    --lit-edge-strength: 0.055;
+
+    /* Control geometry; pointer-coarse devices get real touch targets below. */
+    --h-control: 1.875rem;
+    --h-control-sm: 1.625rem;
+    --h-control-lg: 2.25rem;
+    --h-row: 2rem;
+
+    /* Type scale. Families are fixed; only size, weight and colour vary. */
+    --fs-meta: 0.71875rem;
+    --fs-sm: 0.8125rem;
+    --fs-base: 0.84375rem;
+    --fs-section: 0.9375rem;
+    --fs-title: 1.625rem;
+
+    --radius: 0.375rem;
   }
 
+  @media (pointer: coarse) {
+    :root {
+      --h-control: 2.75rem;
+      --h-control-sm: 2.5rem;
+      --h-control-lg: 2.75rem;
+      --h-row: 2.75rem;
+    }
+  }
+
+  /* The theme is not optional, so .dark only has to agree with :root. */
   .dark {
-    --background: 20 12% 8%;
-    --foreground: 35 15% 87%;
-    --card: 20 10% 12%;
-    --card-foreground: 35 15% 87%;
-    --popover: 20 10% 14%;
-    --popover-foreground: 35 15% 87%;
-    --primary: 38 55% 48%;
-    --primary-foreground: 20 15% 7%;
-    --secondary: 20 8% 16%;
-    --secondary-foreground: 35 10% 75%;
-    --muted: 20 6% 18%;
-    --muted-foreground: 25 8% 50%;
-    --accent: 20 8% 20%;
-    --accent-foreground: 35 15% 87%;
-    --destructive: 0 55% 45%;
-    --destructive-foreground: 0 0% 95%;
-    --border: 20 6% 22%;
-    --input: 20 6% 22%;
-    --ring: 38 55% 48%;
-    --success: 140 30% 38%;
-    --success-foreground: 140 15% 90%;
-    --sidebar-background: 20 10% 10%;
-    --sidebar-foreground: 35 10% 75%;
-    --sidebar-primary: 38 55% 48%;
-    --sidebar-primary-foreground: 20 15% 7%;
-    --sidebar-accent: 20 8% 18%;
-    --sidebar-accent-foreground: 35 15% 87%;
-    --sidebar-border: 20 6% 22%;
-    --sidebar-ring: 38 55% 48%;
+    color-scheme: dark;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+    font-size: var(--fs-base);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* One slow wash down the whole shell — the lamp, not a gradient effect. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: linear-gradient(
+      180deg,
+      hsl(var(--lit-edge) / 0.045) 0%,
+      transparent 38%
+    );
+  }
+
+  #root {
+    position: relative;
+    z-index: 1;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.28);
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 1px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
+
+@layer components {
+  /**
+   * A surface that sits above the page. Lit on its top edge and nowhere else,
+   * which is why nothing in this product casts a shadow.
+   */
+  .surface {
+    @apply relative rounded-[--radius] bg-card;
+  }
+  .surface::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    border-radius: var(--radius) var(--radius) 0 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--lit-edge) / var(--lit-edge-strength)) 12%,
+      hsl(var(--lit-edge) / var(--lit-edge-strength)) 88%,
+      transparent
+    );
+    pointer-events: none;
+  }
+
+  /** Kept for surfaces that only need the fill. */
+  .panel {
+    @apply rounded-[--radius] bg-card;
+  }
+  .panel-raised {
+    @apply rounded-[--radius] bg-secondary;
+  }
+
+  /** Small caption beside a value. Sentence case, never tracked caps. */
+  .field-label {
+    font-size: var(--fs-meta);
+    @apply font-medium text-muted-foreground;
+  }
+
+  /** A number a GM reads mid-turn. */
+  .readout {
+    @apply font-semibold tabular-nums text-foreground;
+  }
+
+  /** The one loud element: whose turn it is. */
+  .live-marker {
+    @apply relative;
+  }
+  .live-marker::before {
+    content: "";
+    @apply absolute inset-y-0 -left-px w-0.5 rounded-full bg-destructive;
+  }
+
+  /**
+   * Meta items on a page masthead, separated by a hairline rather than by a
+   * middle dot.
+   */
+  .meta-row {
+    @apply flex flex-wrap items-center;
+    font-size: var(--fs-meta);
+    @apply text-muted-foreground;
+  }
+  .meta-row > * + * {
+    @apply ml-3 border-l border-border pl-3;
+  }
+}
+
 
 @layer utilities {
   .text-balance {
@@ -145,7 +271,7 @@
   }
 }
 
-/* ─── Paper character sheet (WFRP2) ─── */
+/* ─── Paper character sheet ─── */
 .paper-sheet {
   color: #1a1a1a;
   font-family: Georgia, "Times New Roman", serif;
@@ -370,399 +496,9 @@
   gap: 0.5rem;
 }
 
-/* ─── WFRP2: układ stron jak na karcie PDF (KOSMIT) ─── */
-.wfrp-sheet {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  margin: 0 auto;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-.wfrp-page {
-  background: #fdfbf7;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.14);
-  padding: clamp(10px, 2.2vw, 14mm) clamp(10px, 2.2vw, 14mm) clamp(8px, 1.8vw, 7mm);
-  color: #1a1a1a;
-  box-sizing: border-box;
-}
-.wfrp-lead {
-  font-size: 0.55rem;
-  line-height: 1.3;
-  color: #444;
-  margin: 0 0 0.55rem;
-  text-align: justify;
-  font-family: Georgia, "Times New Roman", serif;
-}
-.wfrp-p1-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr);
-  gap: 0.5rem 0.65rem;
-  align-items: start;
-  margin-bottom: 0.55rem;
-}
-.wfrp-p1-left,
-.wfrp-p1-mid {
-  min-width: 0;
-}
-.wfrp-mt-section {
-  margin-top: 0.45rem;
-}
-.wfrp-section-cechy .paper-section-body {
-  gap: 0.3rem;
-}
-/* Szerokie tabele cech: przewijanie w poziomie (jak na PDF) */
-.wfrp-section-cechy .paper-table-wrap,
-.wfrp-section-bron .paper-table-wrap {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-.wfrp-section-cechy .paper-table,
-.wfrp-section-bron .paper-table {
-  min-width: 560px;
-}
-.wfrp-subhead-tight {
-  margin-top: 0.35rem !important;
-  margin-bottom: 0.1rem !important;
-}
-.wfrp-section-bron {
-  margin-top: 0.15rem;
-}
-.wfrp-xp-ruch-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-  margin-top: 0.45rem;
-  min-width: 0;
-}
-.wfrp-xp-ruch-armor {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto auto;
-  gap: 0.45rem;
-  min-width: 0;
-}
-.wfrp-gracz-span {
-  grid-column: 1 / -1;
-  grid-row: 1;
-}
-.wfrp-xp-box {
-  grid-column: 1;
-  grid-row: 2;
-}
-.wfrp-ruch-box {
-  grid-column: 2;
-  grid-row: 2;
-}
-.wfrp-armor-block {
-  width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-.wfrp-gracz-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-.wfrp-akcje-section {
-  margin-bottom: 0.5rem;
-}
-.wfrp-akcje-body {
-  padding: 0.4rem 0.45rem !important;
-}
-.wfrp-akcje-groups {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem 0.65rem;
-  align-items: start;
-}
-.wfrp-akcje-group {
-  min-width: 0;
-}
-.wfrp-akcje-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 0.58rem;
-  color: #1a1a1a;
-  line-height: 1.2;
-}
-.wfrp-akcje-table th,
-.wfrp-akcje-table td {
-  border: 1px solid #1a1a1a;
-  padding: 0.1rem 0.22rem;
-  vertical-align: top;
-}
-.wfrp-akcje-table thead th {
-  background: #1a1a1a;
-  color: #fff;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-size: 0.52rem;
-  padding: 0.18rem 0.25rem;
-}
-.wfrp-akcje-table thead th.wfrp-akcje-grupa {
-  background: #e8e8e8;
-  color: #1a1a1a;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-size: 0.52rem;
-  padding: 0.12rem 0.25rem;
-  text-align: center;
-}
-.wfrp-akcje-th-left {
-  text-align: left;
-  width: 62%;
-}
-.wfrp-akcje-th-right {
-  text-align: left;
-  width: 38%;
-}
-.wfrp-akcje-td-akcja {
-  text-align: left;
-}
-.wfrp-akcje-td-typ {
-  text-align: left;
-  white-space: normal;
-  word-break: break-word;
-}
-.wfrp-kosmit {
-  text-align: right;
-  font-size: 0.58rem;
-  color: #666;
-  margin: 0.45rem 0 0;
-  font-family: Georgia, "Times New Roman", serif;
-}
-.wfrp-p2-columns {
-  display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
-  gap: 0.55rem;
-  align-items: start;
-  margin-bottom: 0.55rem;
-}
-.wfrp-p2-skills-section,
-.wfrp-p2-talents-section {
-  min-width: 0;
-}
-.wfrp-money-row {
-  gap: 0.55rem;
-}
-@media (max-width: 1023px) {
-  .wfrp-p1-grid {
-    grid-template-columns: 1fr;
-  }
-  .wfrp-page {
-    padding: 12px 10px 10px;
-  }
-  .wfrp-xp-ruch-armor {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto;
-  }
-  .wfrp-gracz-span,
-  .wfrp-xp-box,
-  .wfrp-ruch-box {
-    grid-column: 1 !important;
-    grid-row: auto !important;
-  }
-  .wfrp-akcje-groups {
-    grid-template-columns: 1fr;
-  }
-}
-@media (max-width: 720px) {
-  .wfrp-p2-columns {
-    grid-template-columns: 1fr;
-  }
-  .paper-money.wfrp-money-row {
-    grid-template-columns: 1fr;
-  }
-}
 @media print {
-  .wfrp-page-2 {
-    page-break-before: always;
-  }
-  .wfrp-sheet {
-    max-width: none;
-    min-width: 0;
-  }
   .paper-topbar {
     border-bottom-color: #000;
-  }
-}
-
-/* ─── Schemat ciała / lokacje trafień (PUNKTY ZBROI) — siatka 3×3 ─── */
-.armor-diagram {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 1fr);
-  grid-template-rows: auto auto minmax(72px, 1fr) auto;
-  gap: clamp(4px, 1vw, 8px) clamp(4px, 1.2vw, 10px);
-  align-items: center;
-  justify-items: center;
-  font-family: Georgia, "Times New Roman", serif;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-}
-.armor-slot {
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.armor-slot-head {
-  grid-column: 2;
-  grid-row: 1;
-  align-self: end;
-}
-.armor-slot-larm {
-  grid-column: 1;
-  grid-row: 2;
-  justify-self: end;
-  align-self: center;
-}
-.armor-slot-body {
-  grid-column: 2;
-  grid-row: 2;
-  align-self: center;
-  justify-self: center;
-}
-.armor-slot-rarm {
-  grid-column: 3;
-  grid-row: 2;
-  justify-self: start;
-  align-self: center;
-}
-.armor-slot-figure {
-  grid-column: 1 / -1;
-  grid-row: 3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.15rem;
-}
-.armor-slot-lleg {
-  grid-column: 1;
-  grid-row: 4;
-  justify-self: end;
-  align-self: start;
-}
-.armor-slot-rleg {
-  grid-column: 3;
-  grid-row: 4;
-  justify-self: start;
-  align-self: start;
-}
-.armor-svg {
-  display: block;
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: clamp(100px, 22vh, 200px);
-}
-.armor-cell {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.12rem;
-  min-width: 0;
-}
-.armor-cell-label {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  line-height: 1.05;
-  text-align: center;
-}
-.armor-cell-name {
-  font-size: 0.58rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: #1a1a1a;
-  max-width: 100%;
-  overflow-wrap: break-word;
-}
-.armor-cell-range {
-  font-size: 0.52rem;
-  color: #555;
-  font-style: italic;
-}
-.armor-input {
-  width: 58px;
-  max-width: 100%;
-  box-sizing: border-box;
-  background: transparent;
-  border: 1px solid #1a1a1a;
-  text-align: center;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #1a1a1a;
-  padding: 0.12rem;
-  outline: none;
-  border-radius: 0;
-  min-height: 28px;
-}
-.armor-input:focus { background: rgba(0, 0, 0, 0.05); }
-.armor-input::-webkit-outer-spin-button,
-.armor-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.armor-input[type="number"] { -moz-appearance: textfield; }
-
-@media (max-width: 560px) {
-  .armor-diagram {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: auto auto minmax(72px, auto) auto;
-    gap: 0.35rem 0.25rem;
-  }
-  .armor-slot-head {
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: center;
-    align-self: end;
-  }
-  .armor-slot-larm {
-    grid-column: 1;
-    grid-row: 2;
-    justify-self: center;
-    align-self: center;
-  }
-  .armor-slot-body {
-    grid-column: 2;
-    grid-row: 2;
-    justify-self: center;
-    align-self: center;
-  }
-  .armor-slot-rarm {
-    grid-column: 3;
-    grid-row: 2;
-    justify-self: center;
-    align-self: center;
-  }
-  .armor-slot-figure {
-    grid-column: 1 / -1;
-    grid-row: 3;
-    justify-self: center;
-  }
-  .armor-slot-lleg {
-    grid-column: 1;
-    grid-row: 4;
-    justify-self: center;
-    align-self: center;
-  }
-  .armor-slot-rleg {
-    grid-column: 3;
-    grid-row: 4;
-    justify-self: center;
-    align-self: center;
-  }
-  .armor-cell-name {
-    font-size: 0.52rem;
-  }
-  .armor-svg {
-    max-height: 160px;
   }
 }
 

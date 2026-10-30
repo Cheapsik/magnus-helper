@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
-  Plus,
-  Trash2,
-  Edit2,
-  Check,
-  X,
   Swords,
   Dices,
   Gem,
@@ -20,6 +15,7 @@ import {
   Pause,
   MapPin,
   Tag,
+  Settings2,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -44,6 +40,8 @@ import type { DiceRoll } from "@/lib/dice";
 import { formatTimerMs } from "@/lib/rpgTimersStorage";
 import { appendQuestToStorage, type QuestLayoutRaw } from "@/lib/gmAppendQuest";
 import { useGmTimersMirror } from "@/hooks/useGmTimersMirror";
+import { getStorageKey, markKeyDirty } from "@/lib/campaignStorage";
+import { readJson } from "@/lib/storage";
 
 const SESSION_NOTES_KEY = "mg_session_notes";
 
@@ -122,15 +120,12 @@ function QuickActionTile({
 export default function GmToolboxPage() {
   const navigate = useNavigate();
   const {
-    difficultyPresets,
-    setDifficultyPresets,
     combatants,
     setCombatants,
     combatRound,
     setCombatRound,
     combatTurn,
     setCombatTurn,
-    character,
     addRoll,
   } = useApp();
 
@@ -139,12 +134,10 @@ export default function GmToolboxPage() {
 
   const { timers, gmTick, addTimer } = useGmTimersMirror();
 
-  const [editingDiffIdx, setEditingDiffIdx] = useState<number | null>(null);
-  const [diffDraft, setDiffDraft] = useState<{ labelPl: string; modifier: number }>({ labelPl: "", modifier: 0 });
 
   const [sessionNotes, setSessionNotes] = useState(() => {
     try {
-      return localStorage.getItem(SESSION_NOTES_KEY) ?? "";
+      return localStorage.getItem(getStorageKey(SESSION_NOTES_KEY)) ?? "";
     } catch {
       return "";
     }
@@ -156,7 +149,8 @@ export default function GmToolboxPage() {
     if (notesDebounce.current) clearTimeout(notesDebounce.current);
     notesDebounce.current = setTimeout(() => {
       try {
-        localStorage.setItem(SESSION_NOTES_KEY, sessionNotes);
+        localStorage.setItem(getStorageKey(SESSION_NOTES_KEY), sessionNotes);
+        markKeyDirty(getStorageKey(SESSION_NOTES_KEY));
         setNotesSaved(true);
         window.setTimeout(() => setNotesSaved(false), 2000);
       } catch {
@@ -214,13 +208,7 @@ export default function GmToolboxPage() {
   const [npcLine, setNpcLine] = useState("");
 
   const openQuestModal = () => {
-    let layout: QuestLayoutRaw = {};
-    try {
-      const raw = localStorage.getItem("rpg_quests_layout");
-      if (raw) layout = JSON.parse(raw) as QuestLayoutRaw;
-    } catch {
-      layout = {};
-    }
+    const layout = readJson<QuestLayoutRaw>("rpg_quests_layout", {});
     setQuestLayout(layout);
     const types = layout.types ?? [];
     const cols = layout.columns ?? [];
@@ -236,28 +224,7 @@ export default function GmToolboxPage() {
   const questTypes = questLayout.types?.length ? questLayout.types : [];
   const questCols = questLayout.columns?.length ? questLayout.columns : [];
 
-  const startDiffEdit = (idx: number) => {
-    setEditingDiffIdx(idx);
-    setDiffDraft({ labelPl: difficultyPresets[idx].labelPl, modifier: difficultyPresets[idx].modifier });
-  };
-
-  const saveDiffEdit = () => {
-    if (editingDiffIdx === null) return;
-    setDifficultyPresets((prev) =>
-      prev.map((d, i) => (i === editingDiffIdx ? { ...d, labelPl: diffDraft.labelPl, modifier: diffDraft.modifier } : d)),
-    );
-    setEditingDiffIdx(null);
-  };
-
-  const addDiffPreset = () => {
-    setDifficultyPresets((prev) => [...prev, { label: `custom-${Date.now()}`, labelPl: "Nowy poziom", modifier: 0 }]);
-  };
-
-  const removeDiffPreset = (idx: number) => {
-    setDifficultyPresets((prev) => prev.filter((_, i) => i !== idx));
-  };
-
-  const enemyAlive = combatants.filter((c) => c.isEnemy && c.hp.current > 0).length;
+  const enemyAlive = combatants.filter((c) => c.isEnemy && c.resource.current > 0).length;
   const combatActive = enemyAlive > 0 && combatants.length > 1;
   const sorted = useMemo(() => [...combatants].sort((a, b) => b.initiative - a.initiative), [combatants]);
   const currentTurnName = combatActive ? sorted[combatTurn % sorted.length]?.name : null;
@@ -284,14 +251,6 @@ export default function GmToolboxPage() {
 
   const conditionRows = useMemo(() => {
     const rows: { key: string; title: string; detail: string; to: string }[] = [];
-    if (character.conditions?.length) {
-      rows.push({
-        key: "pc",
-        title: character.name?.trim() || "Postać",
-        detail: character.conditions.join(" · "),
-        to: "/conditions",
-      });
-    }
     combatants.forEach((c) => {
       if (c.statuses?.length) {
         rows.push({
@@ -303,7 +262,7 @@ export default function GmToolboxPage() {
       }
     });
     return rows;
-  }, [character.conditions, character.name, combatants]);
+  }, [combatants]);
 
   const healthy = conditionRows.length === 0;
 
@@ -339,12 +298,11 @@ export default function GmToolboxPage() {
   return (
     <div className="space-y-8 animate-fade-in pb-4">
       <div>
-        <h1 className="font-app-brand text-lg font-bold text-foreground">Centrum dowodzenia sesji</h1>
         <p className="text-xs text-muted-foreground mt-1">Skróty, stan sesji i narzędzia MG w jednym miejscu.</p>
       </div>
 
       <section className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Szybkie akcje</h2>
+        <h2 className="field-label">Szybkie akcje</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3">
           <QuickActionTile icon={<Swords className="h-5 w-5" />} label="Rozpocznij walkę" onClick={startFreshCombat} />
           <QuickActionTile icon={<Dices className="h-5 w-5" />} label="Rzut kością" onClick={() => { setDiceOpen(true); setDiceResult(null); setDiceSpin(null); }} />
@@ -386,7 +344,7 @@ export default function GmToolboxPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stan sesji</h2>
+        <h2 className="field-label">Stan sesji</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <Card className="border-border/80">
             <CardHeader className="p-4 pb-2 space-y-0">
@@ -530,7 +488,7 @@ export default function GmToolboxPage() {
                       <div className="text-muted-foreground mt-0.5">{r.detail}</div>
                       <Link
                         to={r.to}
-                        className="inline-block mt-1 text-[10px] uppercase tracking-wide text-primary hover:underline"
+                        className="field-label mt-1 inline-block text-primary hover:underline"
                       >
                         Moduł Stany →
                       </Link>
@@ -548,7 +506,7 @@ export default function GmToolboxPage() {
 
       <section className="space-y-2">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Notatki MG (prywatne)</h2>
+          <h2 className="field-label">Notatki MG (prywatne)</h2>
           {notesSaved && <span className="text-[10px] text-muted-foreground">Zapisano</span>}
         </div>
         <Textarea
@@ -561,68 +519,17 @@ export default function GmToolboxPage() {
       </section>
 
       <section>
-        <div className="flex items-center justify-between mb-2">
-          <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Poziomy trudności</label>
-          <Button size="sm" variant="ghost" className="h-6 text-xs gap-1" onClick={addDiffPreset}>
-            <Plus className="h-3 w-3" />
-            Dodaj
-          </Button>
-        </div>
-        <div className="space-y-1">
-          {difficultyPresets.map((d, idx) =>
-            editingDiffIdx === idx ? (
-              <div key={idx} className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-card border">
-                <Input
-                  value={diffDraft.labelPl}
-                  onChange={(e) => setDiffDraft({ ...diffDraft, labelPl: e.target.value })}
-                  className="h-7 text-xs flex-1"
-                />
-                <NumberInput
-                  value={diffDraft.modifier}
-                  onChange={(v) => setDiffDraft({ ...diffDraft, modifier: v })}
-                  className="h-7 w-16 text-xs text-center"
-                />
-                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={saveDiffEdit}>
-                  <Check className="h-3 w-3" />
-                </Button>
-                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditingDiffIdx(null)}>
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-            ) : (
-              <div key={idx} className="flex items-center justify-between text-sm px-3 py-1.5 rounded-md bg-card border group">
-                <span className="text-muted-foreground">{d.labelPl}</span>
-                <div className="flex items-center gap-1">
-                  <span
-                    className={`font-bold ${d.modifier > 0 ? "text-success" : d.modifier < 0 ? "text-destructive" : "text-foreground"}`}
-                  >
-                    {d.modifier > 0 ? `+${d.modifier}` : d.modifier}
-                  </span>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => startDiffEdit(idx)}
-                  >
-                    <Edit2 className="h-2.5 w-2.5" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground"
-                    onClick={() => removeDiffPreset(idx)}
-                  >
-                    <Trash2 className="h-2.5 w-2.5" />
-                  </Button>
-                </div>
-              </div>
-            ),
-          )}
-        </div>
+        <Link
+          to="/settings?tab=testy"
+          className="flex items-center justify-between rounded-md border bg-card px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
+        >
+          Rodzaje testów i poziomy trudności
+          <Settings2 className="h-4 w-4" />
+        </Link>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Zarządzanie</h2>
+        <h2 className="field-label">Zarządzanie</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           <Button variant="outline" className="justify-start gap-2 h-auto py-3" asChild>
             <Link to="/npcs">
@@ -630,7 +537,7 @@ export default function GmToolboxPage() {
               Zarządzaj NPC
             </Link>
           </Button>
-          <Button variant="outline" className="justify-start gap-2 h-auto py-3" onClick={() => navigate("/combat", { state: { combatTab: "gotowi" } })}>
+          <Button variant="outline" className="justify-start gap-2 h-auto py-3" onClick={() => navigate("/combat", { state: { combatTab: "potwory" } })}>
             <Swords className="h-4 w-4 shrink-0" />
             Gotowi przeciwnicy
           </Button>
@@ -702,7 +609,7 @@ export default function GmToolboxPage() {
               <button
                 type="button"
                 className={cn(
-                  "flex-1 py-2 text-xs font-medium min-h-[44px] transition-colors",
+                  "flex-1 py-2 text-xs font-medium transition-colors",
                   timerDraft.mode === "stopwatch" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground",
                 )}
                 onClick={() => setTimerDraft((d) => ({ ...d, mode: "stopwatch" }))}
@@ -712,7 +619,7 @@ export default function GmToolboxPage() {
               <button
                 type="button"
                 className={cn(
-                  "flex-1 py-2 text-xs font-medium min-h-[44px] transition-colors",
+                  "flex-1 py-2 text-xs font-medium transition-colors",
                   timerDraft.mode === "countdown" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground",
                 )}
                 onClick={() => setTimerDraft((d) => ({ ...d, mode: "countdown" }))}

@@ -1,4 +1,5 @@
 import type { ActiveCondition, Combatant } from "@/context/AppContext";
+import { readJson } from "@/lib/storage";
 
 export const COMBAT_SESSIONS_STORAGE_KEY = "rpg_combat_sessions";
 export const MAX_COMBAT_FIGHTS = 6;
@@ -27,39 +28,29 @@ export interface CombatSessionsState {
   presets: CombatPreset[];
 }
 
-const LEGACY_COMBATANTS_KEY = "rpg_combatants";
-const LEGACY_ROUND_KEY = "rpg_combat_round";
-const LEGACY_TURN_KEY = "rpg_combat_turn";
-const LEGACY_CONDITIONS_KEY = "rpg_conditions";
-
-function readLegacyJson<T>(key: string, fallback: T): T {
-  try {
-    const raw = window.localStorage.getItem(key);
-    if (!raw) return fallback;
-    return JSON.parse(raw) as T;
-  } catch {
-    return fallback;
-  }
-}
-
 function normalizeCombatant(raw: unknown): Combatant | null {
   if (!raw || typeof raw !== "object") return null;
   const c = raw as Record<string, unknown>;
   if (typeof c.id !== "string" || typeof c.name !== "string") return null;
-  const hp = c.hp as { current?: number; max?: number } | undefined;
+  const resource = c.resource as { current?: number; max?: number } | undefined;
+  const card = c.card as { kind?: unknown; id?: unknown } | undefined;
   return {
     id: c.id,
     name: c.name,
     initiative: Number(c.initiative) || 0,
-    ww: Number(c.ww) || 0,
-    us: Number(c.us) || 0,
-    sb: Number(c.sb) || 0,
-    hp: {
-      current: Number(hp?.current) || 0,
-      max: Number(hp?.max) || 1,
-    },
-    armor: Number(c.armor) || 0,
-    toughness: Number(c.toughness) || 0,
+    resource: { current: Number(resource?.current) || 0, max: Number(resource?.max) || 0 },
+    resourceLabel: typeof c.resourceLabel === "string" ? c.resourceLabel : undefined,
+    stats: Array.isArray(c.stats)
+      ? c.stats
+          .filter((s): s is { label: string; value: unknown } =>
+            !!s && typeof s === "object" && typeof (s as { label?: unknown }).label === "string",
+          )
+          .map((s) => ({ label: s.label, value: Number(s.value) || 0 }))
+      : [],
+    card:
+      card && typeof card.id === "string" && (card.kind === "hero" || card.kind === "npc" || card.kind === "monster")
+        ? { kind: card.kind, id: card.id }
+        : undefined,
     statuses: Array.isArray(c.statuses) ? c.statuses.filter((s): s is string => typeof s === "string") : [],
     notes: typeof c.notes === "string" ? c.notes : "",
     isEnemy: Boolean(c.isEnemy),
@@ -74,7 +65,7 @@ function normalizeCombatantList(parsed: unknown): Combatant[] {
 function normalizeConditions(parsed: unknown): ActiveCondition[] {
   if (!Array.isArray(parsed)) return [];
   return parsed
-    .map((raw) => {
+    .map((raw): ActiveCondition | null => {
       if (!raw || typeof raw !== "object") return null;
       const c = raw as Record<string, unknown>;
       if (typeof c.id !== "string" || typeof c.name !== "string") return null;
@@ -118,43 +109,8 @@ function normalizePreset(raw: unknown): CombatPreset | null {
   };
 }
 
-function migrateFromLegacyStorage(): CombatSessionsState | null {
-  if (typeof window === "undefined") return null;
-  const hasLegacy =
-    window.localStorage.getItem(LEGACY_COMBATANTS_KEY) !== null ||
-    window.localStorage.getItem(LEGACY_ROUND_KEY) !== null ||
-    window.localStorage.getItem(LEGACY_TURN_KEY) !== null;
-
-  if (!hasLegacy) return null;
-
-  const combatants = normalizeCombatantList(readLegacyJson(LEGACY_COMBATANTS_KEY, []));
-  const combatRound = Math.max(1, readLegacyJson(LEGACY_ROUND_KEY, 1));
-  const combatTurn = Math.max(0, readLegacyJson(LEGACY_TURN_KEY, 0));
-  const conditions = normalizeConditions(readLegacyJson(LEGACY_CONDITIONS_KEY, []));
-
-  const fightId = crypto.randomUUID();
-  return {
-    fights: [
-      {
-        id: fightId,
-        name: "Walka 1",
-        combatants,
-        combatRound,
-        combatTurn,
-        conditions,
-        status: "active",
-      },
-    ],
-    activeFightId: fightId,
-    presets: [],
-  };
-}
-
 export function reviveCombatSessions(parsed: unknown): CombatSessionsState {
-  if (!parsed || typeof parsed !== "object") {
-    const legacy = migrateFromLegacyStorage();
-    return legacy ?? createDefaultSessions();
-  }
+  if (!parsed || typeof parsed !== "object") return createDefaultSessions();
 
   const data = parsed as Record<string, unknown>;
   const fightsRaw = Array.isArray(data.fights) ? data.fights : [];
@@ -181,14 +137,10 @@ export function readCombatSessionsFromStorage(
   fallbackCombatants: Combatant[] = [],
 ): CombatSessionsState {
   if (typeof window === "undefined") return createDefaultSessions(fallbackCombatants);
-  try {
-    const item = window.localStorage.getItem(COMBAT_SESSIONS_STORAGE_KEY);
-    if (item) return reviveCombatSessions(JSON.parse(item));
-  } catch {
-  }
-  const legacy = migrateFromLegacyStorage();
-  if (legacy) return legacy;
-  return createDefaultSessions(fallbackCombatants);
+  const stored = readJson<CombatSessionsState | null>(COMBAT_SESSIONS_STORAGE_KEY, null, {
+    revive: (parsed) => reviveCombatSessions(parsed),
+  });
+  return stored ?? createDefaultSessions(fallbackCombatants);
 }
 
 export function createDefaultSessions(
@@ -243,7 +195,8 @@ export function cloneCombatantsForFight(combatants: Combatant[]): Combatant[] {
   return combatants.map((c) => ({
     ...c,
     id: crypto.randomUUID(),
-    hp: { ...c.hp },
+    resource: { ...c.resource },
+    stats: c.stats.map((stat) => ({ ...stat })),
     statuses: [...c.statuses],
   }));
 }

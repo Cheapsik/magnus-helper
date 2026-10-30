@@ -1,0 +1,3 @@
+# Pełna izolacja danych między kampaniami
+
+Dziś wszystkie dane MG (bohaterowie, NPC, walka, notatki, questy, sceny, ambient, timery, relacje, generatory, presety) żyją w jednym współdzielonym zbiorze danych. Po wprowadzeniu wielu kampanii na konto, zdecydowano, że **każdy z tych typów danych będzie w pełni przypisany do konkretnej kampanii** — bez żadnej globalnej, współdzielonej między kampaniami biblioteki czy toolboxa. Rozważano alternatywę z osobistą, wspólną dla konta "biblioteką" MG (np. do ponownego użycia ulubionych NPC czy domowych zasad między kampaniami), ale odrzucono ją na rzecz prostszego modelu mentalnego "kampania = osobny, odizolowany świat", kosztem tego, że MG nie będzie mógł łatwo ponownie użyć treści między kampaniami bez ręcznego odtwarzania.

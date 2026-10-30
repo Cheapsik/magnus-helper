@@ -2,20 +2,23 @@ import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Home, Dice5, Target, BookOpen, MoreHorizontal, Search,
-  Swords, User, BarChart3, Activity, Package, StickyNote, Wrench, Users, Gem, Timer, MessageSquare, Music, Network, ScrollText,
-  Drama, KeyRound, MapPin, Settings as SettingsIcon, LogOut,
+  Swords, Activity, Package, StickyNote, Wrench, Users, Gem, Timer, MessageSquare, Music, Network, ScrollText,
+  MapPin, Skull, SlidersHorizontal, Settings as SettingsIcon, LogOut,
   type LucideIcon,
-  Waypoints,
+  Waypoints, Lightbulb, PieChart, Flag, Shuffle, CalendarDays, LayoutDashboard, BookMarked, Map as MapIcon, Route, ShieldCheck, Castle, Presentation,
+  Crosshair, KeyRound, Drama,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useScene } from "@/context/SceneContext";
 import { useCommandPalette } from "@/context/CommandPaletteContext";
+import { usePageHeaderSlots } from "@/context/PageHeaderContext";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useMode, isVisibleInMode } from "@/context/ModeContext";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import StatusBar from "@/components/StatusBar";
+import QuickRollPanel from "@/components/tables/QuickRollPanel";
+import CampaignSwitcher from "@/components/CampaignSwitcher";
 import Logo from "./Logo";
 
 const SIDEBAR_MIN_WIDTH = 200;
@@ -25,6 +28,11 @@ const SIDEBAR_WIDTH_STORAGE_KEY = "magnus_sidebar_width";
 
 const clampSidebarWidth = (w: number) =>
   Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, Math.round(w)));
+
+const EXTRA_TITLES: Record<string, string> = {
+  "/settings": "Ustawienia",
+  "/shop": "Sklep",
+};
 
 const NAV_TABS = [
   { path: "/", label: "Start", icon: Home },
@@ -46,20 +54,28 @@ const SIDEBAR_GROUPS: { label: string; items: { path: string; label: string; ico
   {
     label: "Sesja",
     items: [
+      { path: "/gm-screen", label: "Ekran MG", icon: LayoutDashboard },
+      { path: "/prep", label: "Przygotowanie sesji", icon: Lightbulb },
       { path: "/combat", label: "Tracker walki", icon: Swords },
       { path: "/scena", label: "Scena", icon: MapPin },
       { path: "/quests", label: "Wątki", icon: Network },
       { path: "/conditions", label: "Stany", icon: Activity },
+      { path: "/clocks", label: "Koła postępu", icon: PieChart },
+      { path: "/calendar", label: "Kalendarz", icon: CalendarDays },
       { path: "/timers", label: "Timery", icon: Timer },
       { path: "/notes", label: "Notatki", icon: StickyNote },
+      { path: "/chronicle", label: "Kronika", icon: BookMarked },
+      { path: "/narrative", label: "Narracja", icon: Drama },
+      { path: "/secrets", label: "Sekrety", icon: KeyRound },
+      { path: "/encounters", label: "Kreator spotkań", icon: Crosshair },
     ],
   },
   {
     label: "Postacie",
     items: [
       { path: "/heroes", label: "Bohaterowie", icon: ScrollText },
-      { path: "/character", label: "Postać", icon: User },
       { path: "/npcs", label: "NPC", icon: Users },
+      { path: "/monsters", label: "Potwory", icon: Skull },
       { path: "/inventory", label: "Ekwipunek", icon: Package },
     ],
   },
@@ -67,11 +83,18 @@ const SIDEBAR_GROUPS: { label: string; items: { path: string; label: string; ico
     label: "MG",
     items: [
       { path: "/gm-toolbox", label: "Skrzynka MG", icon: Wrench },
+      { path: "/materials", label: "Materiały dla graczy", icon: Presentation },
+      { path: "/settings?tab=karty", label: "System kampanii", icon: SlidersHorizontal },
+      { path: "/maps", label: "Mapy", icon: MapIcon },
+      { path: "/dungeon", label: "Generator podziemi", icon: Castle },
       { path: "/relations", label: "Mapa relacji", icon: Waypoints },
+      { path: "/factions", label: "Frakcje", icon: Flag },
+      { path: "/tables", label: "Tabele losowe", icon: Shuffle },
+      { path: "/travel", label: "Podróże", icon: Route },
+      { path: "/safety", label: "Bezpieczeństwo", icon: ShieldCheck },
       { path: "/loot", label: "Generator łupu", icon: Gem },
       { path: "/rumors", label: "Plotki", icon: MessageSquare },
       { path: "/ambient", label: "Ambient", icon: Music },
-      { path: "/simulations", label: "Symulacje", icon: BarChart3 },
     ],
   },
 ];
@@ -84,13 +107,13 @@ export default function Layout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const [moreOpen, setMoreOpen] = useState(false);
   const palette = useCommandPalette();
-  const { mode, setMode } = useMode();
   const { activeScene } = useScene();
   const { signOut } = useAuth();
 
   const [storedWidth, setStoredWidth] = useLocalStorage<number>(
     SIDEBAR_WIDTH_STORAGE_KEY,
     SIDEBAR_DEFAULT_WIDTH,
+    { global: true },
   );
   const [sidebarWidth, setSidebarWidth] = useState<number>(() => clampSidebarWidth(storedWidth));
   const [isResizing, setIsResizing] = useState(false);
@@ -155,18 +178,21 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   const resetSidebarWidth = () => setSidebarWidth(SIDEBAR_DEFAULT_WIDTH);
 
-  const visibleGroups = SIDEBAR_GROUPS
-    .map((g) => ({ ...g, items: g.items.filter((it) => isVisibleInMode(it.path, mode)) }))
-    .filter((g) => g.items.length > 0);
-  const visibleTabs = NAV_TABS.filter((t) => isVisibleInMode(t.path, mode));
-  const visibleMore = MORE_LINKS.filter((l) => isVisibleInMode(l.path, mode));
 
-  const isActive = (path: string) =>
-    path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
+  const isActive = (path: string) => {
+    const [pathname, query] = path.split("?");
+    if (query) return location.pathname === pathname && location.search === `?${query}`;
+    return pathname === "/" ? location.pathname === "/" : location.pathname.startsWith(pathname);
+  };
 
-  const isMoreActive = visibleMore.some((l) => isActive(l.path));
+  const isMoreActive = MORE_LINKS.some((l) => isActive(l.path));
   const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
   const isDicePage = location.pathname === "/dice";
+  const pageTitle =
+    SIDEBAR_GROUPS.flatMap((group) => group.items).find((item) => item.path === location.pathname)
+      ?.label ??
+    EXTRA_TITLES[location.pathname] ??
+    "Magnus Helper";
 
   return (
     <div className="h-screen flex overflow-hidden">
@@ -176,42 +202,50 @@ export default function Layout({ children }: { children: ReactNode }) {
       >
         <Link
           to="/"
-          className="flex min-h-[4.75rem] shrink-0 items-center gap-3 border-b border-border px-5 py-3 min-w-0"
+          className="flex h-16 min-w-0 shrink-0 items-center gap-2.5 border-b border-sidebar-border px-4"
         >
-          <Logo className="h-9 w-9" />
-          <span className="font-app-brand text-lg leading-tight tracking-wide text-foreground truncate min-w-0">
+          <Logo className="h-6 w-6" />
+          <span className="font-app-brand min-w-0 truncate text-[1.0625rem] leading-none text-foreground">
             Magnus Helper
           </span>
         </Link>
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-        <nav className="px-2 py-3 space-y-4 animate-fade-in" key={mode}>
-          {visibleGroups.map((g) => (
-            <div key={g.label}>
-              <div className="px-3 mb-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/35 font-sans font-semibold">
-                {g.label}
-              </div>
-              <ul className="space-y-px">
+        <nav className="px-2 py-2 animate-fade-in">
+          {SIDEBAR_GROUPS.map((g, groupIndex) => (
+            <div key={g.label} className={groupIndex > 0 ? "mt-1 border-t border-sidebar-border/60 pt-1" : undefined}>
+              <ul>
                 {g.items.map((it) => {
                   const active = isActive(it.path);
                   return (
                     <li key={it.path}>
                       <Link
                         to={it.path}
+                        title={g.label}
                         className={cn(
-                          "group flex items-center gap-2.5 pl-3 pr-2 py-2 text-sm transition-colors border-l-2",
+                          "group relative flex h-[--h-row] items-center gap-2.5 rounded-[--radius] pl-3 pr-2.5 text-[length:--fs-sm] transition-colors",
+                          "before:absolute before:left-0 before:top-1/2 before:h-3.5 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:transition-colors",
                           active
-                            ? "border-primary text-primary bg-white/[0.04]"
-                            : "border-transparent text-muted-foreground hover:text-foreground hover:bg-white/[0.06]"
+                            ? "bg-sidebar-accent text-foreground before:bg-primary"
+                            : "text-muted-foreground before:bg-transparent hover:bg-sidebar-accent/50 hover:text-foreground",
                         )}
                       >
-                        <it.icon className={cn("h-4 w-4", active ? "text-primary" : (it.path === "/scena" && activeScene ? "text-primary" : "text-muted-foreground group-hover:text-foreground"))} />
-                        <span className="flex-1 min-w-0">
-                          <span className="block truncate">{it.label}</span>
-                          {it.path === "/scena" && activeScene && (
-                            <span className="block text-[10px] text-muted-foreground/70 truncate">{activeScene.name}</span>
+                        <it.icon
+                          className={cn(
+                            "h-3.5 w-3.5 shrink-0",
+                            active
+                              ? "text-foreground"
+                              : it.path === "/scena" && activeScene
+                                ? "text-primary"
+                                : "text-muted-foreground/70 group-hover:text-foreground",
                           )}
-                        </span>
+                        />
+                        <span className="min-w-0 flex-1 truncate">{it.label}</span>
+                        {it.path === "/scena" && activeScene && (
+                          <span className="max-w-[45%] truncate text-[length:--fs-meta] text-muted-foreground/70">
+                            {activeScene.name}
+                          </span>
+                        )}
                       </Link>
                     </li>
                   );
@@ -220,31 +254,6 @@ export default function Layout({ children }: { children: ReactNode }) {
             </div>
           ))}
         </nav>
-        </div>
-
-        <div className="shrink-0 border-t border-border px-2 py-2">
-          <div className="grid grid-cols-2 gap-1 border border-border bg-background/40 p-1">
-            <button
-              onClick={() => setMode("player")}
-              className={cn(
-                "flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-medium transition-colors",
-                mode === "player" ? "bg-white/[0.06] text-primary" : "text-muted-foreground hover:text-foreground",
-              )}
-              title="Tryb Gracza"
-            >
-              <Drama className="h-3.5 w-3.5" /> Gracz
-            </button>
-            <button
-              onClick={() => setMode("gm")}
-              className={cn(
-                "flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-medium transition-colors",
-                mode === "gm" ? "bg-white/[0.06] text-primary" : "text-muted-foreground hover:text-foreground",
-              )}
-              title="Tryb Mistrza Gry"
-            >
-              <KeyRound className="h-3.5 w-3.5" /> MG
-            </button>
-          </div>
         </div>
 
         <div
@@ -299,6 +308,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               >
                 <Search className="h-4 w-4" />
               </button>
+              <CampaignSwitcher className="!px-2" />
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
@@ -340,6 +350,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             </kbd>
           </button>
           <div className="flex items-center gap-2">
+            <CampaignSwitcher />
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
@@ -379,18 +390,19 @@ export default function Layout({ children }: { children: ReactNode }) {
               "w-full max-w-none min-w-0",
               isDicePage
                 ? "flex min-h-0 flex-1 flex-col overflow-hidden p-0 pb-20 md:pb-0"
-                : "px-3 md:px-4 py-4 pb-20 md:pb-4",
+                : "px-5 pb-20 md:px-8 md:pb-6",
             )}
           >
-            {children}
+            {isDicePage ? children : <PageFrame title={pageTitle}>{children}</PageFrame>}
           </div>
         </main>
         <StatusBar />
       </div>
+      <QuickRollPanel />
 
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-md safe-area-pb">
         <div className="flex justify-around items-center h-16 max-w-lg mx-auto">
-          {visibleTabs.map((tab) => (
+          {NAV_TABS.map((tab) => (
             <Link
               key={tab.path}
               to={tab.path}
@@ -419,7 +431,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                 <SheetTitle className="text-foreground">Więcej narzędzi</SheetTitle>
               </SheetHeader>
               <div className="grid grid-cols-2 gap-2 py-4">
-                {visibleMore.map((link) => (
+                {MORE_LINKS.map((link) => (
                   <Link
                     key={link.path}
                     to={link.path}
@@ -440,6 +452,38 @@ export default function Layout({ children }: { children: ReactNode }) {
           </Sheet>
         </div>
       </nav>
+    </div>
+  );
+}
+
+/**
+ * Every page is framed the same way: room above the title, the page's own
+ * state on one line, then a single hairline. That rule is the only full-width
+ * line on a page — the horizon its content hangs from.
+ */
+function PageFrame({ title, children }: { title: string; children: ReactNode }) {
+  const { actions, meta } = usePageHeaderSlots();
+  const shownMeta = meta.filter(Boolean);
+
+  return (
+    <div className="mx-auto w-full max-w-[86rem]">
+      <header className="pb-4 pt-8">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-3">
+          <h1 className="text-[length:--fs-title] font-semibold leading-none tracking-[-0.02em]">
+            {title}
+          </h1>
+          {actions && <div className="flex shrink-0 items-center gap-1.5">{actions}</div>}
+        </div>
+        {shownMeta.length > 0 && (
+          <div className="meta-row mt-2.5">
+            {shownMeta.map((item, i) => (
+              <span key={i}>{item}</span>
+            ))}
+          </div>
+        )}
+      </header>
+      <hr className="border-t border-border" />
+      <div className="pt-6">{children}</div>
     </div>
   );
 }

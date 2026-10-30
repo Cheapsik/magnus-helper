@@ -1,0 +1,3 @@
+# Brak migracji danych sprzed przebudowy — czyszczenie przy pierwszym uruchomieniu
+
+Dotychczasowe dane (karty, NPC, wrogowie, walki, ale też notatki i questy) mają kształt zaszytej na sztywno mechaniki jednego systemu. Zamiast utrzymywać warstwę migracji do konfigurowalnego modelu, zdecydowano, że **nowa wersja przy pierwszym uruchomieniu usuwa wszystkie dane aplikacji** (poza ustawieniami interfejsu) i zaczyna od kreatora pierwszej kampanii. Użytkowników jest kilku i ich karty zostaną przepisane ręcznie; w zamian cały kod legacy (stare typy kart, migracje, akcesory cech, słownik cech) znika bez śladu, a w kodzie nie zostaje żadne mapowanie na terminologię konkretnego systemu.

@@ -1,24 +1,11 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Plus, X, Timer, AlertTriangle } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+import { useCampaignSystem } from "@/lib/cardStore";
 import type { ActiveCondition } from "@/context/AppContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
-const COMMON_CONDITIONS: { name: string; severity: ActiveCondition["severity"] }[] = [
-  { name: "Ogłuszony", severity: "high" },
-  { name: "Krwawienie", severity: "high" },
-  { name: "Zmęczony", severity: "medium" },
-  { name: "Powalony", severity: "medium" },
-  { name: "Przestraszony", severity: "medium" },
-  { name: "Oślepiony", severity: "high" },
-  { name: "Oszołomiony", severity: "medium" },
-  { name: "Bezbronny", severity: "high" },
-  { name: "Unieruchomiony", severity: "medium" },
-  { name: "Zatruty", severity: "high" },
-  { name: "Kara -10", severity: "low" },
-  { name: "Kara -20", severity: "medium" },
-];
 
 const SEVERITY_STYLES = {
   low: "bg-muted text-muted-foreground border-border",
@@ -26,25 +13,34 @@ const SEVERITY_STYLES = {
   high: "bg-destructive/15 text-destructive border-destructive/30",
 };
 
+const SEVERITY_ORDER: ActiveCondition["severity"][] = ["low", "medium", "high"];
+
+const SEVERITY_LABELS: Record<ActiveCondition["severity"], string> = {
+  low: "Niska",
+  medium: "Średnia",
+  high: "Wysoka",
+};
+
 export default function ConditionsPage() {
-  const { conditions, setConditions, character, updateCharacter } = useApp();
+  const { conditions, setConditions } = useApp();
+  const [system] = useCampaignSystem();
   const [customName, setCustomName] = useState("");
 
   const addCondition = (name: string, severity: ActiveCondition["severity"] = "medium") => {
     if (conditions.some((c) => c.name === name)) return;
     setConditions((prev) => [...prev, { id: crypto.randomUUID(), name, severity }]);
-        if (!character.conditions.includes(name)) {
-      updateCharacter({ ...character, conditions: [...character.conditions, name] });
-    }
   };
 
   const removeCondition = (id: string) => {
-    const cond = conditions.find((c) => c.id === id);
     setConditions((prev) => prev.filter((c) => c.id !== id));
-        if (cond) {
-      updateCharacter({ ...character, conditions: character.conditions.filter((c) => c !== cond.name) });
-    }
   };
+
+  const cycleSeverity = (id: string) =>
+    setConditions((prev) =>
+      prev.map((c) =>
+        c.id === id ? { ...c, severity: SEVERITY_ORDER[(SEVERITY_ORDER.indexOf(c.severity) + 1) % SEVERITY_ORDER.length] } : c,
+      ),
+    );
 
   const updateRounds = (id: string, delta: number) =>
     setConditions((prev) => prev.map((c) => c.id === id ? { ...c, rounds: Math.max(0, (c.rounds ?? 0) + delta) } : c));
@@ -58,10 +54,9 @@ export default function ConditionsPage() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <h1 className="font-app-brand text-lg font-bold">Stany i efekty</h1>
 
       <section>
-        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">
+        <label className="field-label mb-1.5 block">
           Aktywne ({conditions.length})
         </label>
         {conditions.length === 0 ? (
@@ -70,10 +65,15 @@ export default function ConditionsPage() {
           <div className="space-y-1.5">
             {conditions.map((c) => (
               <div key={c.id} className={`flex items-center justify-between px-3 py-2.5 rounded-md border ${SEVERITY_STYLES[c.severity]}`}>
-                <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="flex items-center gap-2 text-left"
+                  onClick={() => cycleSeverity(c.id)}
+                  title={`Waga: ${SEVERITY_LABELS[c.severity]} — kliknij, aby zmienić`}
+                >
                   {c.severity === "high" && <AlertTriangle className="h-3.5 w-3.5" />}
                   <span className="text-sm font-medium">{c.name}</span>
-                </div>
+                </button>
                 <div className="flex items-center gap-1.5">
                   {c.rounds !== undefined ? (
                     <div className="flex items-center gap-1 mr-1">
@@ -96,22 +96,32 @@ export default function ConditionsPage() {
       </section>
 
       <section>
-        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Szybkie dodawanie</label>
-        <div className="flex flex-wrap gap-1.5">
-          {COMMON_CONDITIONS.map((c) => {
-            const active = conditions.some((a) => a.name === c.name);
-            return (
-              <Button key={c.name} size="sm" variant={active ? "default" : "outline"} className="text-xs"
-                onClick={() => active ? removeCondition(conditions.find((a) => a.name === c.name)!.id) : addCondition(c.name, c.severity)}>
-                {c.name}
-              </Button>
-            );
-          })}
-        </div>
+        <label className="field-label mb-1.5 block">Szybkie dodawanie</label>
+        {system.conditions.length === 0 ? (
+          <p className="rounded-md border border-dashed px-3 py-3 text-sm text-muted-foreground">
+            Kampania nie ma jeszcze listy stanów.{" "}
+            <Link to="/settings?tab=stany" className="font-medium text-primary underline underline-offset-2">
+              Dodaj stany w ustawieniach kampanii
+            </Link>
+            .
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-1.5">
+            {system.conditions.map((c) => {
+              const active = conditions.find((a) => a.name === c.name);
+              return (
+                <Button key={c.id} size="sm" variant={active ? "default" : "outline"} className="text-xs"
+                  onClick={() => active ? removeCondition(active.id) : addCondition(c.name)}>
+                  {c.name}
+                </Button>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       <section>
-        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Własny stan</label>
+        <label className="field-label mb-1.5 block">Własny stan</label>
         <div className="flex gap-2">
           <input type="text" value={customName} onChange={(e) => setCustomName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleCustomAdd()}
             placeholder="Nazwa stanu…" className="flex-1 h-9 px-3 text-sm rounded-md border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring" />

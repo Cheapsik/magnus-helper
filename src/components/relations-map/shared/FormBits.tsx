@@ -9,7 +9,7 @@ export function FilterRow({
 }) {
   return (
     <div>
-      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+      <Label className="field-label">
         {label}
       </Label>
       <div className="mt-0.5">{children}</div>
@@ -29,7 +29,7 @@ export function Field({
   if (!value) return null;
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+      <div className="field-label mb-0.5">
         {label}
       </div>
       <div className={multiline ? "text-foreground whitespace-pre-wrap text-sm" : "text-foreground text-sm"}>

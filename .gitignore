@@ -24,3 +24,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Agent skills
+.agents/skills/
+skills-lock.json
+
+# Claude Code agent worktrees
+.claude/

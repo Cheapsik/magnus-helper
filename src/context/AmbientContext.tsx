@@ -1,11 +1,15 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, ReactNode } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { readJson, writeJson } from "@/lib/storage";
+import { getAudio, hasAudio } from "@/lib/audioStore";
 
 export interface SoundItem {
   id: string;
   name: string;
   emoji: string;
   url: string;
+  /** Set for the GM's own file; its blob lives in IndexedDB under the sound id (lib/audioStore). */
+  file?: { name: string; size: number };
   type: "loop" | "effect";
   categoryId: string;
   volume: number;
@@ -29,15 +33,8 @@ const DEFAULT_CONFIG: SoundboardConfig = {
     { id: "music", name: "Muzyka", collapsed: false, emoji: "🎵" },
     { id: "fx", name: "Efekty", collapsed: false, emoji: "✨" },
   ],
-  sounds: [
-    { id: "s1", name: "Deszcz", emoji: "🌧️", url: "https://www.youtube.com/watch?v=q76bMs-NwRk", type: "loop", categoryId: "env", volume: 70 },
-    { id: "s2", name: "Las — ptaki", emoji: "🌲", url: "https://www.youtube.com/watch?v=xNN7iTA57jM", type: "loop", categoryId: "env", volume: 70 },
-    { id: "s3", name: "Miasto — gwar", emoji: "🏙️", url: "https://www.youtube.com/watch?v=3sL0omwElxw", type: "loop", categoryId: "env", volume: 70 },
-    { id: "s4", name: "Karczma — muzyka", emoji: "🏰", url: "https://www.youtube.com/watch?v=vyg5jJrZ42s", type: "loop", categoryId: "music", volume: 70 },
-    { id: "s5", name: "Bitwa — epicka", emoji: "⚔️", url: "https://www.youtube.com/watch?v=nso6Vhg0p9k", type: "loop", categoryId: "music", volume: 70 },
-    { id: "s6", name: "Podziemia — mroczny ambient", emoji: "🕌", url: "https://www.youtube.com/watch?v=TVGsIU4WFF4", type: "loop", categoryId: "music", volume: 70 },
-    { id: "s8", name: "Dzwon kościelny", emoji: "🔔", url: "https://www.youtube.com/watch?v=D1hddNfO7C0", type: "loop", categoryId: "fx", volume: 70 },
-  ],
+  // No bundled tracks: every link is the GM's own, and so is the right to play it.
+  sounds: [],
 };
 
 function reviveSoundboardConfig(parsed: unknown): SoundboardConfig {
@@ -120,6 +117,8 @@ interface AmbientContextValue {
   paused: Record<string, boolean>;
   fading: Record<string, boolean>;
   errors: Record<string, boolean>;
+  /** File sounds whose blob isn't on this device (e.g. config synced from elsewhere). */
+  missing: Record<string, boolean>;
   volumes: Record<string, number>;
   masterVolume: number;
   setMasterVolume: (v: number) => void;
@@ -147,7 +146,9 @@ export function AmbientProvider({ children }: { children: ReactNode }) {
   const [paused, setPaused] = useState<Record<string, boolean>>({});
   const [fading, setFading] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<Record<string, boolean>>({});
+  const [missing, setMissing] = useState<Record<string, boolean>>({});
   const audioRefs = useRef<Record<string, HTMLAudioElement>>({});
+  const objectUrls = useRef<Record<string, string>>({});
   const ytPlayerRefs = useRef<Record<string, { stopVideo?: () => void; destroy?: () => void; pauseVideo?: () => void; playVideo?: () => void; setVolume?: (v: number) => void; getVolume?: () => number }>>({});
   const ytContainerRef = useRef<HTMLDivElement | null>(null);
   const initialized = useRef(false);
@@ -181,6 +182,21 @@ export function AmbientProvider({ children }: { children: ReactNode }) {
     });
   }, [config.sounds]);
 
+  useEffect(() => {
+    let cancelled = false;
+    const files = config.sounds.filter((s) => s.file);
+    Promise.all(files.map((s) => hasAudio(s.id).catch(() => false))).then((has) => {
+      if (cancelled) return;
+      setMissing(Object.fromEntries(files.map((s, i) => [s.id, !has[i]])));
+    });
+    return () => { cancelled = true; };
+  }, [config.sounds]);
+
+  const releaseObjectUrl = (id: string) => {
+    const url = objectUrls.current[id];
+    if (url) { URL.revokeObjectURL(url); delete objectUrls.current[id]; }
+  };
+
   const setActualVolume = (id: string, actual0to100: number) => {
     const a = audioRefs.current[id];
     if (a) a.volume = Math.max(0, Math.min(1, actual0to100 / 100));
@@ -200,6 +216,7 @@ export function AmbientProvider({ children }: { children: ReactNode }) {
   const killSound = useCallback((id: string) => {
     const audio = audioRefs.current[id];
     if (audio) { audio.pause(); audio.currentTime = 0; delete audioRefs.current[id]; }
+    releaseObjectUrl(id);
     const yt = ytPlayerRefs.current[id];
     if (yt) {
       try { yt.stopVideo?.(); yt.destroy?.(); } catch {}
@@ -250,8 +267,23 @@ export function AmbientProvider({ children }: { children: ReactNode }) {
         });
         ytPlayerRefs.current[sound.id] = player as typeof ytPlayerRefs.current[string];
       });
+    } else if (sound.file) {
+      getAudio(sound.id).then((blob) => {
+        if (!blob) {
+          setMissing((m) => ({ ...m, [sound.id]: true }));
+          setErrors((er) => ({ ...er, [sound.id]: true }));
+          return;
+        }
+        if (audioRefs.current[sound.id]) return; // a second click started it while the blob was loading
+        objectUrls.current[sound.id] = URL.createObjectURL(blob);
+        startAudio(objectUrls.current[sound.id]);
+      }).catch(() => setErrors((er) => ({ ...er, [sound.id]: true })));
     } else {
-      const audio = new Audio(sound.url);
+      startAudio(sound.url);
+    }
+
+    function startAudio(src: string) {
+      const audio = new Audio(src);
       audio.loop = sound.type === "loop";
       audio.volume = 0;
       audioRefs.current[sound.id] = audio;
@@ -263,6 +295,7 @@ export function AmbientProvider({ children }: { children: ReactNode }) {
         if (sound.type === "effect") {
           setPlaying((p) => ({ ...p, [sound.id]: false }));
           delete audioRefs.current[sound.id];
+          releaseObjectUrl(sound.id);
         }
       });
       audio.play().then(() => {
@@ -366,10 +399,8 @@ export function AmbientProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    try {
-      const data = playingLayers.map((s) => ({ trackId: s.id, volume: volumes[s.id] ?? s.volume }));
-      localStorage.setItem("rpg_ambient_session", JSON.stringify(data));
-    } catch {}
+    const data = playingLayers.map((s) => ({ trackId: s.id, volume: volumes[s.id] ?? s.volume }));
+    writeJson("rpg_ambient_session", data);
   }, [playingLayers, volumes]);
 
   const restored = useRef(false);
@@ -378,9 +409,7 @@ export function AmbientProvider({ children }: { children: ReactNode }) {
     if (!config.sounds.length) return;
     restored.current = true;
     try {
-      const raw = localStorage.getItem("rpg_ambient_session");
-      if (!raw) return;
-      const saved: { trackId: string; volume?: number }[] = JSON.parse(raw);
+      const saved = readJson<{ trackId: string; volume?: number }[]>("rpg_ambient_session", []);
       saved.forEach(({ trackId, volume }) => {
         const sound = config.sounds.find((s) => s.id === trackId);
         if (!sound || sound.type !== "loop") return;
@@ -395,7 +424,7 @@ export function AmbientProvider({ children }: { children: ReactNode }) {
     <AmbientContext.Provider
       value={{
         config, setConfig,
-        playing, paused, fading, errors, volumes,
+        playing, paused, fading, errors, missing, volumes,
         masterVolume, setMasterVolume,
         toggleSound, stopSoundWithFade, stopAll, changeVolume, killSound,
         activeLayers, playingLayers,

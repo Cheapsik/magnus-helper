@@ -1,59 +1,39 @@
 import { useState } from "react";
 import { Settings2 } from "lucide-react";
-import type { GmEnemy } from "@/lib/gmEnemy";
 import type { Combatant } from "@/context/AppContext";
 import type { CombatPreset } from "@/lib/combatSessions";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ReadyOpponentsPanel } from "@/components/combat/ReadyOpponentsPanel";
 import { CombatPresetsPanel } from "@/components/combat/CombatPresetsPanel";
-import { CombatMonstersPanel } from "@/components/combat/CombatMonstersPanel";
 import { CombatRosterPanel } from "@/components/combat/CombatRosterPanel";
-import type { SavedNpc } from "@/components/character-sheet/types";
-import type { HeroRosterEntry } from "@/lib/combatRoster";
+import { ClocksPanel } from "@/components/clocks/ClocksPanel";
+import { PlayerScreenControls } from "@/components/player-screen/PlayerScreenControls";
 
-type SideTab = "gotowi" | "presety" | "postacie";
+type SideTab = "potwory" | "postacie" | "presety" | "zegary" | "ekran";
 
 interface CombatSidePanelProps {
-  gmEnemies: GmEnemy[];
-  setGmEnemies: (fn: GmEnemy[] | ((prev: GmEnemy[]) => GmEnemy[])) => void;
-  savedNpcs: SavedNpc[];
-  heroes: HeroRosterEntry[];
   setCombatants: (fn: Combatant[] | ((prev: Combatant[]) => Combatant[])) => void;
   presets: CombatPreset[];
   onSavePresets: (presets: CombatPreset[]) => void;
   onSaveAsPresetFromFight: (name: string) => void;
-  dragEnemyId: string | null;
-  dragNpcId: string | null;
-  dragHeroId: string | null;
-  onDragEnemyStart: (id: string) => void;
-  onDragNpcStart: (id: string) => void;
-  onDragHeroStart: (id: string) => void;
+  dragKey: string | null;
+  onDragStart: (key: string) => void;
   onDragEnd: () => void;
   className?: string;
 }
 
 export function CombatSidePanel({
-  gmEnemies,
-  setGmEnemies,
-  savedNpcs,
-  heroes,
   setCombatants,
   presets,
   onSavePresets,
   onSaveAsPresetFromFight,
-  dragEnemyId,
-  dragNpcId,
-  dragHeroId,
-  onDragEnemyStart,
-  onDragNpcStart,
-  onDragHeroStart,
+  dragKey,
+  onDragStart,
   onDragEnd,
   className,
 }: CombatSidePanelProps) {
-  const [tab, setTab] = useState<SideTab>("gotowi");
-  const [manageEnemiesOpen, setManageEnemiesOpen] = useState(false);
+  const [tab, setTab] = useState<SideTab>("potwory");
   const [managePresetsOpen, setManagePresetsOpen] = useState(false);
 
   return (
@@ -66,9 +46,11 @@ export function CombatSidePanel({
       <div className="flex border-b border-border shrink-0">
         {(
           [
-            { id: "gotowi" as const, label: "Potwory" },
+            { id: "potwory" as const, label: "Potwory" },
             { id: "postacie" as const, label: "Postacie" },
             { id: "presety" as const, label: "Presety" },
+            { id: "zegary" as const, label: "Koła postępu" },
+            { id: "ekran" as const, label: "Ekran" },
           ] as const
         ).map(({ id, label }) => (
           <button
@@ -88,49 +70,23 @@ export function CombatSidePanel({
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col">
-        {tab === "postacie" ? (
+        {tab === "zegary" ? (
+          <div className="min-h-0 flex-1 overflow-y-auto p-2">
+            <ClocksPanel />
+          </div>
+        ) : tab === "ekran" ? (
+          <div className="min-h-0 flex-1 overflow-y-auto p-2">
+            <PlayerScreenControls />
+          </div>
+        ) : tab === "postacie" || tab === "potwory" ? (
           <CombatRosterPanel
-            savedNpcs={savedNpcs}
-            heroes={heroes}
+            key={tab}
+            kinds={tab === "potwory" ? ["monster"] : ["hero", "npc"]}
             setCombatants={setCombatants}
-            dragNpcId={dragNpcId}
-            dragHeroId={dragHeroId}
-            onDragNpcStart={onDragNpcStart}
-            onDragHeroStart={onDragHeroStart}
+            dragKey={dragKey}
+            onDragStart={onDragStart}
             onDragEnd={onDragEnd}
           />
-        ) : tab === "gotowi" ? (
-          <>
-            <CombatMonstersPanel
-              gmEnemies={gmEnemies}
-              setCombatants={setCombatants}
-              dragEnemyId={dragEnemyId}
-              onDragEnemyStart={onDragEnemyStart}
-              onDragEnd={onDragEnd}
-            />
-            <div className="shrink-0 border-t border-border p-2">
-              <Sheet open={manageEnemiesOpen} onOpenChange={setManageEnemiesOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-9 w-full gap-1.5 text-xs">
-                    <Settings2 className="h-3.5 w-3.5" />
-                    Zarządzaj biblioteką
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-lg">
-                  <SheetHeader>
-                    <SheetTitle>Biblioteka potworów</SheetTitle>
-                  </SheetHeader>
-                  <div className="mt-4">
-                    <ReadyOpponentsPanel
-                      gmEnemies={gmEnemies}
-                      setGmEnemies={setGmEnemies}
-                      setCombatants={setCombatants}
-                    />
-                  </div>
-                </SheetContent>
-              </Sheet>
-            </div>
-          </>
         ) : (
           <div className="flex min-h-0 flex-1 flex-col">
             <CombatPresetsPanel

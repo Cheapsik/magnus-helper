@@ -1,4 +1,4 @@
-import { ChevronLeft, Eye, EyeOff, RotateCcw, Swords } from "lucide-react";
+import { ChevronLeft, Dices, Eye, EyeOff, RotateCcw, Swords } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -9,6 +9,7 @@ interface CombatTurnBarProps {
   showDead: boolean;
   onToggleShowDead: () => void;
   onReset: () => void;
+  onRollAllInitiative?: () => void;
   onPrevTurn: () => void;
   onNextTurn: () => void;
   prevDisabled: boolean;
@@ -22,6 +23,7 @@ export function CombatTurnBar({
   showDead,
   onToggleShowDead,
   onReset,
+  onRollAllInitiative,
   onPrevTurn,
   onNextTurn,
   prevDisabled,
@@ -48,7 +50,7 @@ export function CombatTurnBar({
 
       <div className="flex min-w-0 flex-1 items-center justify-center gap-2 border-x border-border/60 px-2">
         <div className="flex items-baseline gap-1.5 whitespace-nowrap">
-          <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Runda</span>
+          <span className="field-label">Runda</span>
           <span className="font-mono text-xl font-bold leading-none text-primary">{combatRound}</span>
           <span className="text-xs text-muted-foreground">· tura {turnLabel}</span>
         </div>
@@ -63,6 +65,11 @@ export function CombatTurnBar({
           >
             {showDead ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
           </Button>
+          {onRollAllInitiative && (
+            <Button type="button" size="icon" variant="ghost" className="h-9 w-9" onClick={onRollAllInitiative} title="Rzuć inicjatywę wszystkim">
+              <Dices className="h-4 w-4" />
+            </Button>
+          )}
           <Button type="button" size="icon" variant="ghost" className="h-9 w-9" onClick={onReset} title="Reset rund i tur">
             <RotateCcw className="h-4 w-4" />
           </Button>
