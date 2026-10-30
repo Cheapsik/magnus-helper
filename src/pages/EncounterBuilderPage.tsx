@@ -1,4 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { Swords } from "lucide-react";
+import { useApp } from "@/context/AppContext";
+import { cardToCombatant } from "@/lib/cardRoster";
+import { MAX_COMBAT_FIGHTS, createEmptyFight } from "@/lib/combatSessions";
 import { Button } from "@/components/ui/button";
 import { Card as UiCard, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -64,6 +70,28 @@ export default function EncounterBuilderPage() {
   const [enemies, setEnemies] = useState<Picks>({});
   const [name, setName] = useState("");
 
+  const { combatSessions, setCombatSessions } = useApp();
+  const navigate = useNavigate();
+
+  // Opens the encounter as a new fight in the tracker; repeated monsters get numbered names.
+  const startFight = () => {
+    if (combatSessions.fights.length >= MAX_COMBAT_FIGHTS) {
+      toast.error(`Można prowadzić najwyżej ${MAX_COMBAT_FIGHTS} walk naraz. Zakończ którąś w trackerze.`);
+      return;
+    }
+    const expand = (cards: Card[], picks: Picks, isEnemy: boolean) =>
+      cards.flatMap((card) => {
+        const n = picks[card.id] ?? 0;
+        return Array.from({ length: n }, (_, i) => {
+          const c = cardToCombatant(card, system.cards[isEnemy ? "monster" : "hero"], isEnemy);
+          return n > 1 ? { ...c, name: `${c.name} ${i + 1}` } : c;
+        });
+      });
+    const combatants = [...expand(heroes, party, false), ...expand(monsters, enemies, true)];
+    setCombatSessions((prev) => createEmptyFight(prev, { id: "", name: name.trim(), combatants }));
+    navigate("/combat");
+  };
+
   const b = calculateEncounterBalance(system.cards.hero, system.cards.monster, heroes, monsters, { party, enemies });
 
   const save = () => {
@@ -95,7 +123,8 @@ export default function EncounterBuilderPage() {
 
       <div className="flex gap-2">
         <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nazwa spotkania" />
-        <Button onClick={save} disabled={!b.party.count && !b.enemies.count}>Zapisz spotkanie</Button>
+        <Button variant="outline" onClick={save} disabled={!b.party.count && !b.enemies.count}>Zapisz spotkanie</Button>
+        <Button onClick={startFight} disabled={!b.party.count && !b.enemies.count}><Swords /> Rozpocznij walkę</Button>
       </div>
 
       {presets.length > 0 && (

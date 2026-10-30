@@ -334,6 +334,21 @@ export default function LootGeneratorPage() {
     setNewCarryName("");
   };
 
+  // Same-named items stack, so taking the same loot twice raises the count instead of adding a row.
+  const takeLoot = () => {
+    if (!result || result.items.length === 0) return;
+    setInventory((prev) => {
+      const next = [...prev];
+      for (const item of result.items) {
+        const i = next.findIndex((x) => x.name === item.name);
+        if (i >= 0) next[i] = { ...next[i], quantity: next[i].quantity + 1 };
+        else next.push({ id: crypto.randomUUID(), name: item.name, category: "gear", quantity: 1 });
+      }
+      return next;
+    });
+    toast.success(`Dodano do ekwipunku drużyny: ${result.items.length}`);
+  };
+
   const getCarryCategoryIcon = (cat: string) => CARRY_CATEGORIES.find((c) => c.id === cat)?.icon ?? Package;
 
   return (
@@ -478,9 +493,14 @@ export default function LootGeneratorPage() {
                   )}
                 </div>
 
-                <Button onClick={generateLoot} variant="secondary" className="w-full min-h-[--h-control] gap-1">
-                  <Dice5 className="h-3 w-3" /> Generuj ponownie
-                </Button>
+                <div className="flex flex-wrap gap-2">
+                  <Button onClick={takeLoot} disabled={result.items.length === 0}>
+                    <Package /> Dodaj do ekwipunku drużyny
+                  </Button>
+                  <Button onClick={generateLoot} variant="secondary">
+                    <Dice5 /> Generuj ponownie
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}

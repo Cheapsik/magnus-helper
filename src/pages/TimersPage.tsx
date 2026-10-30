@@ -287,6 +287,13 @@ function TimerCard({
   );
 }
 
+const TIMER_PRESETS = [
+  { label: "Pochodnia", hint: "1 h", seconds: 3600 },
+  { label: "Odpoczynek", hint: "10 min", seconds: 600 },
+  { label: "Narada graczy", hint: "5 min", seconds: 300 },
+  { label: "Na decyzję", hint: "1 min", seconds: 60 },
+];
+
 export default function TimersPage() {
   const [timers, setTimers] = useState<TimerRuntime[]>(() =>
     loadTimersFromStorage().map(dataToRuntime)
@@ -338,14 +345,14 @@ export default function TimersPage() {
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  const addTimer = () => {
+  const addTimer = (label = "", seconds?: number) => {
     const t: TimerRuntime = {
       id: crypto.randomUUID(),
-      label: "",
-      mode: "stopwatch",
-      countdownSet: 60,
+      label,
+      mode: seconds ? "countdown" : "stopwatch",
+      countdownSet: seconds ?? 60,
       running: false,
-      displayMs: 0,
+      displayMs: seconds ? seconds * 1000 : 0,
       startedAt: null,
       accumulatedMs: 0,
       finished: false,
@@ -381,15 +388,20 @@ export default function TimersPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Button onClick={addTimer} size="sm">
+      <div className="flex flex-wrap items-center gap-2">
+        <Button onClick={() => addTimer()} size="sm">
           <Plus className="h-4 w-4 mr-1" /> Dodaj timer
         </Button>
+        {TIMER_PRESETS.map((p) => (
+          <Button key={p.label} size="sm" variant="outline" onClick={() => addTimer(p.label, p.seconds)}>
+            {p.label} · {p.hint}
+          </Button>
+        ))}
       </div>
 
       {timers.length === 0 ? (
         <p className="text-muted-foreground text-center py-12">
-          Brak timerów. Dodaj pierwszy przyciskiem powyżej.
+          Brak timerów. Dodaj własny albo wybierz gotowy powyżej.
         </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4">

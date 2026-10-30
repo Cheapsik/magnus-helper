@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -46,7 +47,11 @@ export default function SecretsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-end">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm text-muted-foreground">
+          Te same sekrety wybierasz na konkretną sesję w{" "}
+          <Link to="/prep" className="text-primary underline underline-offset-2">Przygotowaniu</Link>.
+        </p>
         <Button type="button" onClick={() => setEditing({ id: newId(), text: "", category: "plot" })}>
           <Plus className="h-4 w-4 mr-1.5" />
           Nowy sekret

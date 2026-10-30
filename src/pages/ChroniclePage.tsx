@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy } from "lucide-react";
+import { Copy, Download } from "lucide-react";
 import { toast } from "sonner";
 import { useApp } from "@/context/AppContext";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -53,6 +53,17 @@ export default function ChroniclePage() {
     }
   };
 
+  const download = () => {
+    if (!session) return;
+    const blob = new Blob([recapToText(session.name, groups, summary)], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Kronika - ${session.name}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-4">
       <div className="grid gap-4 lg:grid-cols-[18rem_1fr]">
@@ -79,9 +90,14 @@ export default function ChroniclePage() {
           <Card>
             <CardHeader className="flex-row flex-wrap items-center justify-between gap-2 space-y-0 pb-2">
               <CardTitle className="text-base">{session.name}</CardTitle>
-              <Button size="sm" variant="outline" onClick={copy}>
-                <Copy className="h-4 w-4" /> Kopiuj jako tekst
-              </Button>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={copy}>
+                  <Copy className="h-4 w-4" /> Kopiuj jako tekst
+                </Button>
+                <Button size="sm" variant="outline" onClick={download}>
+                  <Download className="h-4 w-4" /> Pobierz
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <MentionTextarea

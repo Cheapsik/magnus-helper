@@ -325,6 +325,18 @@ export default function SessionNotesPage() {
     closeEditor();
   };
 
+  // One line typed during play becomes a note on the active session; details can be added later.
+  const [quickText, setQuickText] = useState("");
+  const saveQuick = () => {
+    const text = quickText.trim();
+    if (!text || !sessions.some((s) => s.id === activeSessionId)) return;
+    setSessionNotes((prev) => [
+      { id: crypto.randomUUID(), text, category: "general", scope: "session", sessionId: activeSessionId, timestamp: Date.now() },
+      ...prev,
+    ]);
+    setQuickText("");
+  };
+
   const confirmDelete = () => {
     if (!deleteTargetId) return;
     setSessionNotes((prev) => prev.filter((n) => n.id !== deleteTargetId));
@@ -484,6 +496,23 @@ export default function SessionNotesPage() {
           </Button>
         </div>
       </div>
+
+      <form
+        className="flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          saveQuick();
+        }}
+      >
+        <Input
+          value={quickText}
+          onChange={(e) => setQuickText(e.target.value)}
+          placeholder="Szybka notatka do bieżącej sesji, Enter zapisuje"
+          aria-label="Szybka notatka"
+          className="flex-1"
+        />
+        <Button type="submit" variant="secondary" disabled={!quickText.trim()}>Zapisz</Button>
+      </form>
 
       <div className="flex flex-col gap-2 rounded-md border border-border/60 bg-card/50 px-2.5 py-2">
         <div className="flex flex-col gap-1.5">
