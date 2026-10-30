@@ -22,7 +22,7 @@ npm test                             # Vitest, single run (jsdom)
 npx vitest run src/lib/clocks.test.ts    # one test file
 npx vitest run -t "name of test"         # tests matching a name
 npx tsc -p tsconfig.app.json --noEmit    # type check (vite build does not type check)
-npm run deploy                       # publishes dist/ to gh-pages
+npm run deploy                       # builds, then replaces the gh-pages branch with this build (no history kept)
 ```
 
 Tests live next to the code as `src/**/*.test.ts(x)`. `src/test/setup.ts` clears the storage snapshot cache before each test.
