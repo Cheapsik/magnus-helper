@@ -18,12 +18,12 @@ export function ReputationLadderEditor({ ladder, onChange }: Props) {
     <div className="space-y-1.5">
       {[...ladder].sort((a, b) => a.min - b.min).map((t) => (
         <div key={t.id} className="flex items-center gap-2">
-          <Input className="h-8 flex-1" value={t.name} placeholder="Nazwa progu" onChange={(e) => update(t.id, { name: e.target.value })} />
+          <Input className="field-sm flex-1" value={t.name} placeholder="Nazwa progu" onChange={(e) => update(t.id, { name: e.target.value })} />
           <label className="flex items-center gap-1 text-xs text-muted-foreground">
             od
             <NumberInput className="h-8 w-16" value={t.min} onChange={(v) => update(t.id, { min: Math.round(v) })} />
           </label>
-          <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Usuń próg" onClick={() => onChange(ladder.filter((x) => x.id !== t.id))}>
+          <Button size="icon-sm" variant="ghost" aria-label="Usuń próg" onClick={() => onChange(ladder.filter((x) => x.id !== t.id))}>
             <X className="h-3.5 w-3.5" />
           </Button>
         </div>

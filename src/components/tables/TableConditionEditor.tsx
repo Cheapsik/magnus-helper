@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { describeCondition, SEASONS, TIMES_OF_DAY, type TableCondition, type TableContext } from "@/lib/tableConditions";
 
-const selectClass = "h-8 rounded-md border border-input bg-background px-2 text-xs";
+const selectClass = "field field-sm";
 
 function toggle<T>(list: T[] | undefined, item: T): T[] {
   const l = list ?? [];
@@ -47,7 +47,7 @@ export default function TableConditionEditor({ value, onChange, context }: Props
                 <option value="min">wypełnione co najmniej</option>
               </select>
               {c.op === "min" && (
-                <Input type="number" min={0} aria-label="Liczba segmentów" className="h-8 w-16 text-xs" value={c.value ?? 0} onChange={(e) => patch(i, { ...c, value: Number(e.target.value) })} />
+                <Input type="number" min={0} aria-label="Liczba segmentów" className="field-sm w-16" value={c.value ?? 0} onChange={(e) => patch(i, { ...c, value: Number(e.target.value) })} />
               )}
             </>
           )}
@@ -63,7 +63,7 @@ export default function TableConditionEditor({ value, onChange, context }: Props
                 <option value="<=">co najwyżej</option>
                 <option value="=">równa</option>
               </select>
-              <Input type="number" aria-label="Wartość reputacji" className="h-8 w-16 text-xs" value={c.value} onChange={(e) => patch(i, { ...c, value: Number(e.target.value) })} />
+              <Input type="number" aria-label="Wartość reputacji" className="field-sm w-16" value={c.value} onChange={(e) => patch(i, { ...c, value: Number(e.target.value) })} />
             </>
           )}
           {c.type === "time" && (
@@ -85,9 +85,9 @@ export default function TableConditionEditor({ value, onChange, context }: Props
             </div>
           )}
           {c.type === "location" && (
-            <Input aria-label="Miejsce" placeholder="Miejsce (jak w panelu losowania)" className="h-8 w-48 text-xs" value={c.value} onChange={(e) => patch(i, { ...c, value: e.target.value })} />
+            <Input aria-label="Miejsce" placeholder="Miejsce (jak w panelu losowania)" className="field-sm w-48" value={c.value} onChange={(e) => patch(i, { ...c, value: e.target.value })} />
           )}
-          <Button type="button" variant="ghost" size="icon" className="ml-auto h-6 w-6" aria-label={`Usuń warunek: ${describeCondition(c, context)}`} onClick={() => set(list.filter((_, j) => j !== i))}>
+          <Button type="button" variant="ghost" size="icon-sm" className="ml-auto" aria-label={`Usuń warunek: ${describeCondition(c, context)}`} onClick={() => set(list.filter((_, j) => j !== i))}>
             <X className="h-3.5 w-3.5" />
           </Button>
         </div>

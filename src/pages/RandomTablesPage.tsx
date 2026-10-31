@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertTriangle, Dices, Plus, Trash2, Upload } from "lucide-react";
+import { AlertTriangle, Dices, Pencil, Plus, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -12,6 +12,7 @@ import { entryLabel, parseTableText, randomTablesFileSchema, rollTable, tableDic
 import { mergeById, readJsonFile } from "@/lib/jsonImport";
 import TableConditionEditor from "@/components/tables/TableConditionEditor";
 import { useTableContext } from "@/components/tables/useTableContext";
+import { confirmDialog } from "@/components/ui/dialogs";
 
 type HistoryItem = TableRoll & { id: string; at: number };
 
@@ -21,6 +22,7 @@ export default function RandomTablesPage() {
   const [tables, setTables] = useLocalStorage<RandomTable[]>("rpg_random_tables", []);
   const [history, setHistory] = useLocalStorage<HistoryItem[]>("rpg_random_tables_history", []);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const { context } = useTableContext();
 
@@ -52,15 +54,16 @@ export default function RandomTablesPage() {
     setTables((prev) => prev.map((t) => (t.id === selected.id ? { ...t, ...patch } : t)));
   };
 
-  const remove = () => {
-    if (!selected || !confirm(`Usunąć tabelę '${selected.name}'?`)) return;
+  const remove = async () => {
+    if (!selected || !(await confirmDialog(`Usunąć tabelę „${selected.name}”?`, { confirmLabel: "Usuń", destructive: true }))) return;
     setTables((prev) => prev.filter((t) => t.id !== selected.id));
     setSelectedId(null);
   };
 
-  const roll = () => {
-    if (!selected) return;
-    const result = rollTable(selected, tables, undefined, context);
+  const roll = (table = selected) => {
+    if (!table) return;
+    setSelectedId(table.id);
+    const result = rollTable(table, tables, undefined, context);
     if (!result) return;
     setHistory((prev) => [{ ...result, id: crypto.randomUUID(), at: Date.now() }, ...prev].slice(0, HISTORY_LIMIT));
   };
@@ -74,6 +77,8 @@ export default function RandomTablesPage() {
     update({ entryMeta: meta });
   };
 
+  // A new or empty table opens in the editor; a filled one opens ready to roll.
+  const editing = !!selected && (editingId === selected.id || selected.text.trim() === "");
   const diceInvalid = !!selected && selected.dice.trim() !== "" && !isDiceNotation(selected.dice);
 
   return (
@@ -109,16 +114,14 @@ export default function RandomTablesPage() {
             {tables
               .filter((t) => t.folder.trim() === folder)
               .map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => setSelectedId(t.id)}
-                  className={cn(
-                    "w-full text-left text-sm px-3 py-2 rounded-md hover:bg-accent truncate",
-                    t.id === selected?.id && "bg-accent font-medium",
-                  )}
-                >
-                  {t.name || "(bez nazwy)"}
-                </button>
+                <div key={t.id} className={cn("flex items-center rounded-md hover:bg-accent", t.id === selected?.id && "bg-accent font-medium")}>
+                  <button type="button" onClick={() => setSelectedId(t.id)} className="min-w-0 flex-1 truncate px-3 py-2 text-left text-sm">
+                    {t.name || "(bez nazwy)"}
+                  </button>
+                  <Button size="icon-sm" variant="ghost" onClick={() => roll(t)} aria-label={`Losuj z ${t.name}`} title="Losuj">
+                    <Dices />
+                  </Button>
+                </div>
               ))}
           </div>
         ))}
@@ -130,50 +133,58 @@ export default function RandomTablesPage() {
         <div className="space-y-4">
           <Card>
             <CardContent className="p-4 space-y-3">
-              <div className="grid gap-2 sm:grid-cols-[1fr_160px_120px]">
-                <Input value={selected.name} onChange={(e) => update({ name: e.target.value })} placeholder="Nazwa tabeli" aria-label="Nazwa tabeli" className="font-medium" />
-                <Input value={selected.folder} onChange={(e) => update({ folder: e.target.value })} placeholder="Folder" aria-label="Folder" />
-                <Input
-                  value={selected.dice}
-                  onChange={(e) => update({ dice: e.target.value })}
-                  placeholder={tableDice({ ...selected, dice: "" }, parsed.entries)}
-                  aria-label="Kość"
-                  className={cn(diceInvalid && "border-destructive")}
-                />
-              </div>
-              <Textarea
-                value={selected.text}
-                onChange={(e) => update({ text: e.target.value })}
-                placeholder={"Jeden wpis na linię. Można wkleić gotową tabelę:\n01-05 Wilki\n06-10 Bandyci\n11. Kupiec z [[Towary]]"}
-                aria-label="Wpisy"
-                className="min-h-[200px] font-mono text-sm"
-              />
-              <p className="text-xs text-muted-foreground">
-                {parsed.entries.length} wpisów · <code>[[Nazwa tabeli]]</code> losuje z innej tabeli
-              </p>
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Cała tabela losuje się tylko, gdy:</p>
-                <TableConditionEditor value={selected.conditions} onChange={(conditions) => update({ conditions })} context={context} />
-              </div>
-              {(diceInvalid || parsed.issues.length > 0) && (
-                <ul className="text-xs text-destructive space-y-0.5">
-                  {diceInvalid && <li>Nieprawidłowy zapis kości: {selected.dice}</li>}
-                  {parsed.issues.map((issue, i) => (
-                    <li key={i} className="flex gap-1 items-start">
-                      <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-px" /> {issue}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <div className="flex gap-2">
-                <Button onClick={roll} disabled={diceInvalid || parsed.entries.length === 0} className="flex-1">
-                  <Dices className="h-4 w-4 mr-1" /> Losuj{parsed.entries.length > 0 && ` (${tableDice(selected, parsed.entries)})`}
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="min-w-0 flex-1 truncate font-display text-[length:--fs-section] font-medium">{selected.name || "(bez nazwy)"}</h2>
+                <Button onClick={() => roll()} disabled={diceInvalid || parsed.entries.length === 0}>
+                  <Dices /> Losuj{parsed.entries.length > 0 && ` (${tableDice(selected, parsed.entries)})`}
                 </Button>
-                <Button onClick={remove} variant="outline" size="icon" aria-label="Usuń tabelę" className="text-destructive">
-                  <Trash2 className="h-4 w-4" />
+                <Button variant={editing ? "secondary" : "outline"} onClick={() => setEditingId(editing ? null : selected.id)} aria-pressed={editing}>
+                  <Pencil /> Edytuj
                 </Button>
               </div>
               {lastRoll && <RollView roll={lastRoll} highlight />}
+              {editing && (
+                <div className="space-y-3 border-t border-border pt-3">
+                  <div className="grid gap-2 sm:grid-cols-[1fr_160px_120px]">
+                    <Input value={selected.name} onChange={(e) => update({ name: e.target.value })} placeholder="Nazwa tabeli" aria-label="Nazwa tabeli" className="font-medium" />
+                    <Input value={selected.folder} onChange={(e) => update({ folder: e.target.value })} placeholder="Folder" aria-label="Folder" />
+                    <Input
+                      value={selected.dice}
+                      onChange={(e) => update({ dice: e.target.value })}
+                      placeholder={tableDice({ ...selected, dice: "" }, parsed.entries)}
+                      aria-label="Kość"
+                      className={cn(diceInvalid && "border-destructive")}
+                    />
+                  </div>
+                  <Textarea
+                    value={selected.text}
+                    onChange={(e) => update({ text: e.target.value })}
+                    placeholder={"Jeden wpis na linię. Można wkleić gotową tabelę:\n01-05 Wilki\n06-10 Bandyci\n11. Kupiec z [[Towary]]"}
+                    aria-label="Wpisy"
+                    className="min-h-[200px] font-mono"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {parsed.entries.length} wpisów · <code>[[Nazwa tabeli]]</code> losuje z innej tabeli
+                  </p>
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Cała tabela losuje się tylko, gdy:</p>
+                    <TableConditionEditor value={selected.conditions} onChange={(conditions) => update({ conditions })} context={context} />
+                  </div>
+                  {(diceInvalid || parsed.issues.length > 0) && (
+                    <ul className="text-xs text-destructive space-y-0.5">
+                      {diceInvalid && <li>Nieprawidłowy zapis kości: {selected.dice}</li>}
+                      {parsed.issues.map((issue, i) => (
+                        <li key={i} className="flex gap-1 items-start">
+                          <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-px" /> {issue}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <Button onClick={remove} variant="outline" size="sm" className="text-destructive">
+                    <Trash2 /> Usuń tabelę
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -195,7 +206,7 @@ export default function RandomTablesPage() {
                         aria-label={`Waga: ${e.text}`}
                         title="Waga (puste = zwykłe losowanie)"
                         placeholder="waga"
-                        className="h-7 w-20 text-xs"
+                        className="field-sm w-20"
                         value={meta?.weight ?? ""}
                         onChange={(ev) => updateMeta(e.text, { weight: ev.target.value === "" ? undefined : Math.max(1, Number(ev.target.value)) })}
                       />

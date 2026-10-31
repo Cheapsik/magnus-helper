@@ -56,7 +56,7 @@ export default function FactionsPage() {
       <section className="space-y-1.5">
         <label className="field-label block">Frakcje ({factions.length})</label>
         {factions.length === 0 ? (
-          <Card><CardContent className="p-4 text-center text-sm text-muted-foreground">Brak frakcji</CardContent></Card>
+          <Card><CardContent className="p-4 text-center text-sm text-muted-foreground">Brak frakcji. Dodaj grupę, której zdanie o drużynie ma znaczenie, np. gildię kupców albo straż miejską.</CardContent></Card>
         ) : (
           factions.map((f) => (
             <FactionCard
@@ -82,7 +82,7 @@ export default function FactionsPage() {
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addFaction()}
             placeholder="Nazwa nowej frakcji…"
-            className="flex-1 h-9 px-3 text-sm rounded-md border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            className="field flex-1"
           />
           <Button size="sm" onClick={addFaction} className="gap-1"><Plus className="h-3.5 w-3.5" />Dodaj</Button>
         </div>

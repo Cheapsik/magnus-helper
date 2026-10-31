@@ -43,7 +43,7 @@ function PlayerPanel() {
       {!vis.heroId && (
         <select
           aria-label="Bohater"
-          className="w-full rounded-md border bg-background px-2 py-1.5"
+          className="field w-full"
           value={picked}
           onChange={(e) => setPicked(e.target.value)}
         >

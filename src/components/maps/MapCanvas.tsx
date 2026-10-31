@@ -187,8 +187,8 @@ export function MapCanvas({ imageUrl, pins, addMode, selectedPinId, onSelect, on
               >
                 <Icon className="h-3.5 w-3.5" />
               </span>
-              {pinBadge?.(pin) && <span className="absolute -right-3 -top-2 rounded-full bg-amber-500 px-1 text-[9px] font-bold leading-tight text-black">{pinBadge(pin)}</span>}
-              <span className="mt-0.5 max-w-32 truncate rounded bg-background/80 px-1 text-[10px] font-medium leading-tight">{pin.label}</span>
+              {pinBadge?.(pin) && <span className="absolute -right-3 -top-2 rounded-full bg-amber-500 px-1 text-[12px] font-bold leading-tight text-black">{pinBadge(pin)}</span>}
+              <span className="mt-0.5 max-w-32 truncate rounded bg-background/80 px-1 text-[12px] font-medium leading-tight">{pin.label}</span>
             </div>
           );
         })}
@@ -207,9 +207,9 @@ export function MapCanvas({ imageUrl, pins, addMode, selectedPinId, onSelect, on
       })()}
 
       <div data-map-ui className="absolute right-2 top-2 z-20 flex flex-col gap-1">
-        <Button size="icon" variant="secondary" className="h-8 w-8" onClick={() => zoomCenter(1.25)} aria-label="Przybliż"><ZoomIn className="h-4 w-4" /></Button>
-        <Button size="icon" variant="secondary" className="h-8 w-8" onClick={() => zoomCenter(0.8)} aria-label="Oddal"><ZoomOut className="h-4 w-4" /></Button>
-        <Button size="icon" variant="secondary" className="h-8 w-8" onClick={() => fit()} aria-label="Dopasuj"><Maximize className="h-4 w-4" /></Button>
+        <Button size="icon-sm" variant="secondary" onClick={() => zoomCenter(1.25)} aria-label="Przybliż"><ZoomIn className="h-4 w-4" /></Button>
+        <Button size="icon-sm" variant="secondary" onClick={() => zoomCenter(0.8)} aria-label="Oddal"><ZoomOut className="h-4 w-4" /></Button>
+        <Button size="icon-sm" variant="secondary" onClick={() => fit()} aria-label="Dopasuj"><Maximize className="h-4 w-4" /></Button>
       </div>
     </div>
   );

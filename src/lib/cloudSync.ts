@@ -104,13 +104,17 @@ export async function startCloudSync(): Promise<void> {
     if (event === "SIGNED_OUT") userId = null;
   });
   if (!userId) return;
+  setStatus({ active: true });
   try {
     adoptLocalCopy(userId);
     applyRemote(await withTimeout(fetchRemote(), BOOT_TIMEOUT_MS));
   } catch (e) {
     console.error("[Magnus Helper] cloud sync: using this device's copy:", errorMessage(e));
   }
-  onDirty(scheduleFlush);
+  onDirty(() => {
+    setStatus({});
+    scheduleFlush();
+  });
   window.addEventListener("online", () => void flush());
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") void flush();
@@ -212,6 +216,26 @@ function writeSynced(ids: Set<string>): void {
   window.localStorage.setItem(SYNCED_CAMPAIGNS_KEY, JSON.stringify([...ids]));
 }
 
+// ─── Status (shown in the status bar) ─────────────────────────────────────────
+
+/** `stalled`: the last push stopped on a failure worth retrying (offline, server down); it retries on the next change or when back online. */
+export type SyncStatus = { active: boolean; sending: boolean; stalled: boolean; pending: number };
+
+let status: SyncStatus = { active: false, sending: false, stalled: false, pending: 0 };
+const statusListeners = new Set<() => void>();
+
+function setStatus(patch: Partial<SyncStatus>): void {
+  status = { ...status, ...patch, pending: pendingEntries().length };
+  for (const listener of statusListeners) listener();
+}
+
+export const getSyncStatus = (): SyncStatus => status;
+
+export function onSyncStatus(listener: () => void): () => void {
+  statusListeners.add(listener);
+  return () => statusListeners.delete(listener);
+}
+
 // ─── Push ─────────────────────────────────────────────────────────────────────
 
 let timer: ReturnType<typeof setTimeout> | undefined;
@@ -228,14 +252,17 @@ function scheduleFlush(): void {
 /** Pushes everything queued. Stops at the first network failure; the rest waits for the next try. */
 export function flush(): Promise<void> {
   if (!userId) return Promise.resolve();
+  if (!flushing) setStatus({ sending: true });
   flushing ??= push()
     .then((done) => {
       flushing = null;
+      setStatus({ sending: false, stalled: !done });
       // Changes made while sending found the flush busy; send them now unless the cloud is unreachable.
       if (done && pendingEntries().length > 0) scheduleFlush();
     })
     .catch((e) => {
       flushing = null;
+      setStatus({ sending: false, stalled: true });
       console.error("[Magnus Helper] cloud sync failed:", errorMessage(e));
     });
   return flushing;

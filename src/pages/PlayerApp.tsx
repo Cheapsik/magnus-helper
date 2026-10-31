@@ -27,6 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { MaterialViewer } from "@/components/materials/MaterialViewer";
 import Logo from "@/components/Logo";
 import { AuthCard, AuthHeader, AuthShell, GoldButton } from "@/pages/AuthPage";
+import { confirmDialog, promptDialog } from "@/components/ui/dialogs";
 
 const fail = (e: unknown) => toast.error(e instanceof Error ? e.message : "Coś poszło nie tak");
 
@@ -201,7 +202,7 @@ function InviteJoinScreen({
                 maxLength={60}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="h-9 w-full rounded-md border border-white/15 bg-black/40 px-3 text-sm text-white placeholder:text-white/40 focus:border-[#c5a059] focus:outline-none sm:h-[--h-control] sm:rounded-lg"
+                className="h-9 w-full rounded-md border border-white/15 bg-black/40 px-3 text-sm text-white placeholder:text-white/40 focus:border-primary focus:outline-none sm:h-[--h-control] sm:rounded-lg"
               />
             </div>
             {error && <p className="text-sm text-red-400">{error}</p>}
@@ -286,7 +287,7 @@ function CampaignGallery({
           size="sm"
           className="gap-1.5"
           onClick={async () => {
-            const name = prompt("Jak ma Cię widzieć Mistrz gry?", membership.display_name)?.trim();
+            const name = (await promptDialog("Jak ma Cię widzieć Mistrz gry?", { defaultValue: membership.display_name }))?.trim();
             if (!name) return;
             try {
               await renameSelf(cid, userId, name.slice(0, 60));
@@ -312,7 +313,7 @@ function CampaignGallery({
           size="sm"
           className="gap-1.5 text-destructive"
           onClick={async () => {
-            if (!confirm(`Opuścić kampanię „${membership.campaign_name}”? Stracisz dostęp do jej materiałów.`)) return;
+            if (!(await confirmDialog(`Opuścić kampanię „${membership.campaign_name}”?`, { description: "Stracisz dostęp do jej materiałów.", confirmLabel: "Opuść", destructive: true }))) return;
             try {
               await leaveCampaign(cid, userId);
               onBack();
@@ -359,7 +360,7 @@ function CampaignGallery({
                 </div>
                 <div className="flex items-center gap-2 px-3 py-2">
                   <span className="flex-1 truncate font-medium">{m.title}</span>
-                  {isNew(m) && <span className="rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">Nowe</span>}
+                  {isNew(m) && <span className="rounded bg-primary px-1.5 py-0.5 text-[12px] font-semibold text-primary-foreground">Nowe</span>}
                 </div>
               </button>
             </li>

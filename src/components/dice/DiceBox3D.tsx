@@ -292,7 +292,7 @@ const DiceBox3D = forwardRef<DiceBox3DHandle, DiceBox3DProps>(function DiceBox3D
             type="button"
             size="sm"
             variant="ghost"
-            className="h-8 px-2 text-muted-foreground hover:text-foreground"
+            className="px-2 text-muted-foreground hover:text-foreground"
             onClick={onClose}
             aria-label="Zamknij 3D"
           >

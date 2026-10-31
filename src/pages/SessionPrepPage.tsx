@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import NarrativePage from "@/pages/NarrativePage";
 import { Plus, Trash2, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,7 +23,27 @@ import {
   type SessionPrepMap,
 } from "@/lib/secrets";
 
+/** Two horizons of preparation: this session's list, and the campaign's story graph. */
 export default function SessionPrepPage() {
+  const [params, setParams] = useSearchParams();
+  const tab = params.get("tab") === "fabula" ? "fabula" : "sesja";
+  return (
+    <Tabs value={tab} onValueChange={(v) => setParams(v === "fabula" ? { tab: v } : {}, { replace: true })} className="space-y-4">
+      <TabsList>
+        <TabsTrigger value="sesja">Ta sesja</TabsTrigger>
+        <TabsTrigger value="fabula">Fabuła</TabsTrigger>
+      </TabsList>
+      <TabsContent value="sesja">
+        <SessionChecklist />
+      </TabsContent>
+      <TabsContent value="fabula">
+        <NarrativePage />
+      </TabsContent>
+    </Tabs>
+  );
+}
+
+function SessionChecklist() {
   const { noteSessionCatalog } = useApp();
   const { sessions } = noteSessionCatalog;
   const [secrets, setSecrets] = useLocalStorage<Secret[]>("rpg_secrets", [], { revive: reviveSecrets });

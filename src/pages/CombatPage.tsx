@@ -15,6 +15,7 @@ import { CombatViewModeNav, type CombatViewMode } from "@/components/combat/Comb
 import { CombatTurnBar } from "@/components/combat/CombatTurnBar";
 import { CombatantCard } from "@/components/combat/CombatantCard";
 import { CombatSidePanel } from "@/components/combat/CombatSidePanel";
+import { FightConditions } from "@/components/combat/FightConditions";
 import { CombatAttackPanel } from "@/components/combat/CombatAttackPanel";
 import { CombatantFormFields, emptyCombatant } from "@/components/combat/CombatantFormFields";
 import { ROSTER_CARD_DRAG, isCombatRosterDragEvent, parseRosterCardKey } from "@/lib/combatDrag";
@@ -85,7 +86,7 @@ export default function CombatPage() {
 
   useEffect(() => {
     const tab = (location.state as { combatTab?: string } | null)?.combatTab;
-    if (tab === "potwory") setCombatTab("potwory");
+    if (tab === "potwory") setCombatTab("karty");
   }, [location.state]);
 
   useEffect(() => {
@@ -139,6 +140,19 @@ export default function CombatPage() {
     } else setCombatTurn((t) => t - 1);
     setActionAttackerId(null);
   };
+
+  // N / Shift+N move the turn without reaching for the mouse; ignored while typing.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() !== "n" || e.ctrlKey || e.metaKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+      e.preventDefault();
+      (e.shiftKey ? prevTurn : nextTurn)();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
 
   const resetCombat = () => { setCombatTurn(0); setCombatRound(1); setActionAttackerId(null); };
 
@@ -289,7 +303,7 @@ export default function CombatPage() {
             <CardContent className="p-6 text-center text-sm text-muted-foreground">
               {finePointer
                 ? "Brak uczestników. Przeciągnij kartę z prawej kolumny lub dodaj poniżej."
-                : "Brak uczestników. Dodaj poniżej lub użyj zakładki „Potwory”."}
+                : "Brak uczestników. Dodaj poniżej lub użyj zakładki „Karty”."}
             </CardContent>
           </Card>
         )}
@@ -309,13 +323,13 @@ export default function CombatPage() {
           <CardContent className="space-y-2 p-2.5">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-sm font-semibold">Nowy uczestnik</h3>
-              <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => setShowAddForm(false)}>
+              <Button size="sm" variant="ghost" onClick={() => setShowAddForm(false)}>
                 Anuluj
               </Button>
             </div>
             <CombatantFormFields combatant={newCombatant} onChange={setNewCombatant} idPrefix="new" />
             <div className="flex justify-end">
-              <Button size="sm" onClick={addCombatant} disabled={!newCombatant.name.trim()} className="h-7 gap-1 text-xs">
+              <Button size="sm" onClick={addCombatant} disabled={!newCombatant.name.trim()} className="gap-1">
                 <Plus className="h-3 w-3" />
                 Dodaj
               </Button>
@@ -323,6 +337,7 @@ export default function CombatPage() {
           </CardContent>
         </Card>
       )}
+      <FightConditions />
     </>
   );
 
@@ -385,11 +400,10 @@ export default function CombatPage() {
 
         {combatTab === "walka" && <div className="space-y-3">{renderFightBody()}</div>}
 
-        {(combatTab === "potwory" || combatTab === "postacie") && (
+        {combatTab === "karty" && (
           <div className="flex min-h-[200px] flex-col rounded-lg border border-border bg-card/40">
             <CombatRosterPanel
-              key={combatTab}
-              kinds={combatTab === "potwory" ? ["monster"] : ["hero", "npc"]}
+              kinds={["monster", "npc", "hero"]}
               setCombatants={setCombatants}
               dragKey={dragKey}
               onDragStart={setDragKey}

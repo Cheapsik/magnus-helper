@@ -38,6 +38,7 @@ import { useCardType, useCards } from "@/lib/cardStore";
 import { MentionTextarea } from "@/components/mention/MentionTextarea";
 import { readJson, writeJson } from "@/lib/storage";
 import { Link } from "react-router-dom";
+import { confirmDialog } from "@/components/ui/dialogs";
 
 const STORAGE_QUEST_LAYOUT = "rpg_quests_layout";
 const STORAGE_QUESTS = "rpg_quests";
@@ -435,13 +436,13 @@ function QuestCard({
                           }
                         }}
                         autoFocus
-                        className="h-8 text-sm"
+                        className="field-sm"
                         onClick={(e) => e.stopPropagation()}
                       />
                       <Button
-                        size="sm"
+                        size="icon-sm"
                         variant="ghost"
-                        className="h-8 w-8 shrink-0 p-0"
+                        className="shrink-0 p-0"
                         onClick={(e) => {
                           e.stopPropagation();
                           saveTitle();
@@ -463,14 +464,14 @@ function QuestCard({
                   )}
                 </div>
               </div>
-              <div className="mt-0.5 pl-10 pr-10 text-[10px] text-muted-foreground">{type?.label ?? "Typ"}</div>
+              <div className="mt-0.5 pl-10 pr-10 text-[12px] text-muted-foreground">{type?.label ?? "Typ"}</div>
             </>
           )}
           <Button
             type="button"
             variant="ghost"
             size="icon"
-            className="absolute right-0 top-0 z-20 h-9 w-9 text-muted-foreground hover:bg-background/60 hover:text-foreground"
+            className="absolute right-0 top-0 z-20 text-muted-foreground hover:bg-background/60 hover:text-foreground"
             title={bodyCollapsed ? "Rozwiń wątek" : "Zwiń wątek"}
             onClick={(e) => {
               e.stopPropagation();
@@ -496,7 +497,7 @@ function QuestCard({
                   {linkedNpcsObjs.map((npc) => (
                     <span
                       key={npc.id}
-                      className="inline-flex items-center gap-1 rounded bg-secondary px-1.5 py-0.5 text-[11px] text-secondary-foreground"
+                      className="inline-flex items-center gap-1 rounded bg-secondary px-1.5 py-0.5 text-[length:--fs-meta] text-secondary-foreground"
                     >
                       <button
                         onClick={(e) => {
@@ -529,7 +530,7 @@ function QuestCard({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 text-[11px] text-muted-foreground hover:text-foreground"
+                    className="px-2 text-muted-foreground hover:text-foreground"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Plus className="mr-1 h-3 w-3" /> NPC
@@ -541,7 +542,7 @@ function QuestCard({
                       placeholder="Szukaj NPC…"
                       value={npcQuery}
                       onChange={(e) => setNpcQuery(e.target.value)}
-                      className="h-8 text-sm"
+                      className="field-sm"
                     />
                   </div>
                   {npcOptions.length === 0 && (
@@ -572,7 +573,7 @@ function QuestCard({
               {linkedQuestsObjs.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {linkedQuestsObjs.map((q) => (
-                    <span key={q.id} className="inline-flex items-center gap-1 rounded bg-accent px-1.5 py-0.5 text-[11px]">
+                    <span key={q.id} className="inline-flex items-center gap-1 rounded bg-accent px-1.5 py-0.5 text-[length:--fs-meta]">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -604,7 +605,7 @@ function QuestCard({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 text-[11px] text-muted-foreground hover:text-foreground"
+                    className="px-2 text-muted-foreground hover:text-foreground"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Plus className="mr-1 h-3 w-3" /> Powiąż wątek
@@ -616,7 +617,7 @@ function QuestCard({
                       placeholder="Szukaj wątku…"
                       value={questQuery}
                       onChange={(e) => setQuestQuery(e.target.value)}
-                      className="h-8 text-sm"
+                      className="field-sm"
                     />
                   </div>
                   {questOptions.length === 0 && (
@@ -647,14 +648,14 @@ function QuestCard({
                 className="flex items-center justify-between gap-1 border-t border-border/50 pt-2"
                 onClick={(e) => e.stopPropagation()}
               >
-                <Button variant="ghost" size="sm" className="h-9 px-2 text-xs" onClick={() => setEditTitle(true)} title="Edytuj tytuł">
+                <Button variant="ghost" className="px-2" onClick={() => setEditTitle(true)} title="Edytuj tytuł">
                   <Edit2 className="h-3.5 w-3.5" />
                 </Button>
 
                 {!finePointer && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-9 flex-1 gap-1 px-3 text-xs">
+                      <Button variant="outline" className="flex-1 gap-1 px-3">
                         Przenieś <ChevronDown className="h-3.5 w-3.5" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -674,8 +675,8 @@ function QuestCard({
                   variant="ghost"
                   size="sm"
                   className={cn("h-9 px-2 text-xs text-muted-foreground hover:text-destructive", finePointer && "ml-auto")}
-                  onClick={() => {
-                    if (confirm(`Usunąć wątek '${quest.title}'?`)) onDelete();
+                  onClick={async () => {
+                    if (await confirmDialog(`Usunąć wątek „${quest.title}”?`, { confirmLabel: "Usuń", destructive: true })) onDelete();
                   }}
                   title="Usuń wątek"
                 >
@@ -1070,11 +1071,11 @@ export default function QuestsPage() {
     <div className="space-y-4 animate-fade-in">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
-          <Button
+          <Button size="lg"
             type="button"
             variant="outline"
-            size="sm"
-            className="h-10 gap-2"
+           
+            className="gap-2"
             onClick={() => {
               setConfigDraft(cloneLayout(layout));
               setConfigOpen(true);
@@ -1088,7 +1089,7 @@ export default function QuestsPage() {
         <div className="flex items-center gap-2">
           {searchOpen ? (
             <div className="flex flex-1 items-center gap-1">
-              <Input
+              <Input className="field-lg"
                 autoFocus
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -1099,12 +1100,12 @@ export default function QuestsPage() {
                   }
                 }}
                 placeholder="Szukaj…"
-                className="h-10 text-sm"
+               
               />
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-10 w-10 shrink-0"
+                className="shrink-0"
                 onClick={() => {
                   setSearch("");
                   setSearchOpen(false);
@@ -1114,11 +1115,11 @@ export default function QuestsPage() {
               </Button>
             </div>
           ) : (
-            <Button size="icon" variant="outline" className="h-10 w-10" onClick={() => setSearchOpen(true)} title="Szukaj">
+            <Button size="icon" variant="outline" onClick={() => setSearchOpen(true)} title="Szukaj">
               <Search className="h-4 w-4" />
             </Button>
           )}
-          <Button size="sm" className="h-10 gap-1.5" onClick={() => setCreateOpen(true)}>
+          <Button size="lg" className="gap-1.5" onClick={() => setCreateOpen(true)}>
             <Plus className="h-4 w-4" /> Nowy wątek
           </Button>
         </div>
@@ -1181,7 +1182,7 @@ export default function QuestsPage() {
                         }
                       />
                       <Input
-                        className="h-9 min-w-[8rem] flex-1 text-xs"
+                        className="min-w-[8rem] flex-1"
                         value={t.label}
                         onChange={(e) =>
                           setConfigDraft((d) =>
@@ -1194,7 +1195,7 @@ export default function QuestsPage() {
                           )
                         }
                       />
-                      <label className="flex shrink-0 items-center gap-1 text-[10px] text-muted-foreground">
+                      <label className="flex shrink-0 items-center gap-1 text-[12px] text-muted-foreground">
                         Kolor
                         <input
                           type="color"
@@ -1216,7 +1217,7 @@ export default function QuestsPage() {
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="ml-auto h-8 text-destructive hover:text-destructive"
+                        className="ml-auto text-destructive hover:text-destructive"
                         disabled={(typeUsage[t.id] ?? 0) > 0}
                         title={(typeUsage[t.id] ?? 0) > 0 ? "Usuń dopiero gdy żaden wątek nie ma tego typu" : "Usuń typ"}
                         onClick={() => removeTypeFromDraft(t.id)}
@@ -1252,7 +1253,7 @@ export default function QuestsPage() {
                         }
                       />
                       <Input
-                        className="h-9 min-w-[8rem] flex-1 text-xs font-medium"
+                        className="min-w-[8rem] flex-1 font-medium"
                         value={c.label}
                         onChange={(e) =>
                           setConfigDraft((d) =>
@@ -1265,7 +1266,7 @@ export default function QuestsPage() {
                           )
                         }
                       />
-                      <label className="flex shrink-0 items-center gap-1 text-[10px] text-muted-foreground">
+                      <label className="flex shrink-0 items-center gap-1 text-[12px] text-muted-foreground">
                         Kolor
                         <input
                           type="color"
@@ -1287,7 +1288,7 @@ export default function QuestsPage() {
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="ml-auto h-8 text-destructive hover:text-destructive"
+                        className="ml-auto text-destructive hover:text-destructive"
                         disabled={(columnUsage[c.id] ?? 0) > 0 || configDraft.columns.length <= 1}
                         title={
                           (columnUsage[c.id] ?? 0) > 0
@@ -1332,7 +1333,7 @@ export default function QuestsPage() {
                     type="button"
                     onClick={() => setDraftType(t.id)}
                     className={cn(
-                      "flex min-h-[60px] flex-col items-center gap-1 rounded-md border p-2 text-[10px] transition-colors",
+                      "flex min-h-[60px] flex-col items-center gap-1 rounded-md border p-2 text-[12px] transition-colors",
                       draftType === t.id
                         ? "border-primary bg-primary/10 text-foreground"
                         : "border-border text-muted-foreground hover:bg-accent",
@@ -1386,7 +1387,7 @@ export default function QuestsPage() {
                 value={draftNotes}
                 onChange={(e) => setDraftNotes(e.target.value)}
                 placeholder="Pierwsze przemyślenia…"
-                className="min-h-[80px] text-sm"
+                className="min-h-[80px]"
               />
             </div>
           </div>
@@ -1409,7 +1410,7 @@ export default function QuestsPage() {
               <div className="mt-4">
                 <CardQuickPreview card={openNpc} cardType={npcCardType} />
               </div>
-              <Button type="button" variant="outline" size="sm" className="mt-4 w-full h-9 text-xs" asChild>
+              <Button type="button" variant="outline" className="mt-4 w-full" asChild>
                 <Link to={`${CARD_KIND_ROUTES.npc}?id=${encodeURIComponent(openNpc.id)}`}>Otwórz kartę NPC</Link>
               </Button>
             </>

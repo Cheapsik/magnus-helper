@@ -223,7 +223,7 @@ function TestTypeSection({
           {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </button>
         <input
-          className={cn(inputCls, "flex-1 border-transparent bg-transparent font-medium hover:border-input")}
+          className={cn(inputCls, "flex-1 field-inline font-medium")}
           value={type.name}
           onChange={(e) => onChange((t) => ({ ...t, name: e.target.value }))}
           aria-label="Nazwa rodzaju testu"
@@ -742,7 +742,7 @@ function SourceList({
               />
               {entry ? (
                 <input
-                  className={cn(inputCls, "h-7 flex-1")}
+                  className={cn(inputCls, "flex-1")}
                   value={entry.label}
                   placeholder={target.label}
                   title={target.label}

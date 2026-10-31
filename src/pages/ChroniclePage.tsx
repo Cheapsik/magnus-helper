@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy } from "lucide-react";
+import { Copy, Download } from "lucide-react";
 import { toast } from "sonner";
 import { useApp } from "@/context/AppContext";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -10,6 +10,11 @@ import { CHRONICLE_EVENTS_KEY, reviveChronicleEvents, type ChronicleEvent } from
 import { buildRecap, CHRONICLE_SUMMARIES_KEY, recapCounts, recapToText } from "@/lib/chronicleRecap";
 import { FACTIONS_KEY, type Faction } from "@/lib/factions";
 import { reviveSecrets, type Secret } from "@/lib/secrets";
+import {
+  EMPTY_STATE, EMPTY_STRUCTURE, NARRATIVE_STATE_KEY, NARRATIVE_STRUCTURE_KEY, narrativeRecapLines,
+  type NarrativeState, type NarrativeStructure,
+} from "@/lib/narrativeEngine";
+import type { RecapGroup } from "@/lib/chronicleRecap";
 import { cn } from "@/lib/utils";
 
 export default function ChroniclePage() {
@@ -20,11 +25,22 @@ export default function ChroniclePage() {
   const [factions] = useLocalStorage<Faction[]>(FACTIONS_KEY, []);
   const [summaries, setSummaries] = useLocalStorage<Record<string, string>>(CHRONICLE_SUMMARIES_KEY, {});
   const [pickedSessionId, setPickedSessionId] = useState(noteSessionCatalog.activeSessionId);
+  const [structure] = useLocalStorage<NarrativeStructure>(NARRATIVE_STRUCTURE_KEY, EMPTY_STRUCTURE);
+  const [story] = useLocalStorage<NarrativeState>(NARRATIVE_STATE_KEY, EMPTY_STATE);
 
   const sources = { events, notes: sessionNotes, secrets, factions };
+  // Scenes visited and decisions taken (Przygotowanie → Fabuła) come first: they are the session's story.
+  const recapFor = (id: string): RecapGroup[] => {
+    const lines = narrativeRecapLines(structure, story, id);
+    return [
+      ...(lines.scenes.length ? [{ kind: "other" as const, label: "Odwiedzone sceny", lines: lines.scenes }] : []),
+      ...(lines.decisions.length ? [{ kind: "other" as const, label: "Kluczowe decyzje", lines: lines.decisions }] : []),
+      ...buildRecap(id, sources),
+    ];
+  };
   const sessionId = sessions.some((s) => s.id === pickedSessionId) ? pickedSessionId : sessions[0]?.id;
   const session = sessions.find((s) => s.id === sessionId);
-  const groups = session ? buildRecap(session.id, sources) : [];
+  const groups = session ? recapFor(session.id) : [];
   const summary = (session && summaries[session.id]) || "";
 
   const copy = async () => {
@@ -37,12 +53,19 @@ export default function ChroniclePage() {
     }
   };
 
+  const download = () => {
+    if (!session) return;
+    const blob = new Blob([recapToText(session.name, groups, summary)], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Kronika - ${session.name}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-4">
-      <p className="max-w-2xl text-sm text-muted-foreground">
-        Kronika sama zbiera, co wydarzyło się na sesji: upływ czasu w świecie, zakończone walki, ruchy kół postępu, ujawnione
-        sekrety, zmiany reputacji frakcji i notatki z tej sesji. Dopisz własne podsumowanie i skopiuj całość dla graczy.
-      </p>
       <div className="grid gap-4 lg:grid-cols-[18rem_1fr]">
         <ul className="space-y-2" aria-label="Sesje">
           {sessions.map((s) => (
@@ -57,7 +80,7 @@ export default function ChroniclePage() {
                 )}
               >
                 <div className="truncate text-sm font-medium">{s.name}</div>
-                <div className="truncate text-xs text-muted-foreground">{recapCounts(buildRecap(s.id, sources))}</div>
+                <div className="truncate text-xs text-muted-foreground">{recapCounts(recapFor(s.id))}</div>
               </button>
             </li>
           ))}
@@ -67,9 +90,14 @@ export default function ChroniclePage() {
           <Card>
             <CardHeader className="flex-row flex-wrap items-center justify-between gap-2 space-y-0 pb-2">
               <CardTitle className="text-base">{session.name}</CardTitle>
-              <Button size="sm" variant="outline" onClick={copy}>
-                <Copy className="h-4 w-4" /> Kopiuj jako tekst
-              </Button>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={copy}>
+                  <Copy className="h-4 w-4" /> Kopiuj jako tekst
+                </Button>
+                <Button size="sm" variant="outline" onClick={download}>
+                  <Download className="h-4 w-4" /> Pobierz
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <MentionTextarea
@@ -81,7 +109,7 @@ export default function ChroniclePage() {
                 <p className="text-sm text-muted-foreground">Na tej sesji nic jeszcze nie zapisano.</p>
               )}
               {groups.map((g) => (
-                <section key={g.kind} className="space-y-1">
+                <section key={g.label} className="space-y-1">
                   <h2 className="text-sm font-medium text-muted-foreground">{g.label}</h2>
                   <ul className="list-disc space-y-0.5 pl-5 text-sm">
                     {g.lines.map((line, i) => (

@@ -89,9 +89,9 @@ export function FightTabsBar({
                     if (e.key === "Escape") setEditingId(null);
                   }}
                   onBlur={commitRename}
-                  className="h-9 w-32 text-sm"
+                  className="w-32"
                 />
-                <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0" onMouseDown={(e) => e.preventDefault()} onClick={commitRename}>
+                <Button size="icon" variant="ghost" className="shrink-0" onMouseDown={(e) => e.preventDefault()} onClick={commitRename}>
                   <Check className="h-4 w-4" />
                 </Button>
               </div>
@@ -135,7 +135,7 @@ export function FightTabsBar({
                   >
                     {fight.name}
                   </span>
-                  <span className="text-[10px] font-medium text-muted-foreground">
+                  <span className="text-[12px] font-medium text-muted-foreground">
                     Runda {fight.combatRound}
                     {fight.combatants.length > 0 && ` · ${fight.combatants.length} ucz.`}
                   </span>
@@ -194,7 +194,7 @@ export function FightTabsBar({
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="min-h-[48px] shrink-0 gap-1.5 self-start px-3 text-sm font-semibold"
+              className="min-h-[48px] shrink-0 gap-1.5 self-start px-3 font-semibold"
               title="Dodaj nową równoległą walkę"
             >
               <Plus className="h-4 w-4" />
@@ -208,11 +208,11 @@ export function FightTabsBar({
             </div>
             {presets.length > 0 && (
               <div className="space-y-1">
-                <label className="text-[11px] font-medium text-muted-foreground">Zacznij od</label>
+                <label className="text-[length:--fs-meta] font-medium text-muted-foreground">Zacznij od</label>
                 <select
                   value={selectedPresetId}
                   onChange={(e) => setSelectedPresetId(e.target.value)}
-                  className="h-9 w-full rounded-md border bg-card px-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="field w-full"
                 >
                   <option value="">Pusty tracker</option>
                   {presets.map((p) => (
@@ -223,16 +223,16 @@ export function FightTabsBar({
                 </select>
               </div>
             )}
-            <Button className="h-10 w-full text-sm" onClick={handleNewFight}>
+            <Button size="lg" className="w-full" onClick={handleNewFight}>
               {selectedPresetId ? "Utwórz z presetu" : "Utwórz pustą walkę"}
             </Button>
-            <p className="text-center text-[10px] text-muted-foreground">
+            <p className="text-center text-[12px] text-muted-foreground">
               {fights.length} / {MAX_COMBAT_FIGHTS} walk
             </p>
           </PopoverContent>
         </Popover>
       ) : (
-        <div className="flex min-h-[48px] shrink-0 items-center self-start rounded-lg border border-dashed border-border px-3 text-[10px] font-medium text-muted-foreground">
+        <div className="flex min-h-[48px] shrink-0 items-center self-start rounded-lg border border-dashed border-border px-3 text-[12px] font-medium text-muted-foreground">
           Limit {MAX_COMBAT_FIGHTS}
         </div>
       )}

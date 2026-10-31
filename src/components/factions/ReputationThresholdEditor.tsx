@@ -21,7 +21,7 @@ export function ReputationThresholdEditor({ factions, thresholds, onChange }: Pr
       {thresholds.map((t) => (
         <div key={t.id} className="flex flex-wrap items-center gap-2">
           <select
-            className="h-8 rounded-md border border-input bg-background px-2 text-sm"
+            className="field field-sm"
             aria-label="Frakcja"
             value={t.factionId}
             onChange={(e) => update(t.id, { factionId: e.target.value })}
@@ -32,8 +32,8 @@ export function ReputationThresholdEditor({ factions, thresholds, onChange }: Pr
             od
             <NumberInput className="h-8 w-16" value={t.min} onChange={(v) => update(t.id, { min: Math.round(v) })} />
           </label>
-          <Input className="h-8 min-w-40 flex-1" value={t.effect} placeholder="Efekt, np. kupcy dają 10% zniżki" onChange={(e) => update(t.id, { effect: e.target.value })} />
-          <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Usuń próg efektu" onClick={() => onChange(thresholds.filter((x) => x.id !== t.id))}>
+          <Input className="field-sm min-w-40 flex-1" value={t.effect} placeholder="Efekt, np. kupcy dają 10% zniżki" onChange={(e) => update(t.id, { effect: e.target.value })} />
+          <Button size="icon-sm" variant="ghost" aria-label="Usuń próg efektu" onClick={() => onChange(thresholds.filter((x) => x.id !== t.id))}>
             <X className="h-3.5 w-3.5" />
           </Button>
         </div>

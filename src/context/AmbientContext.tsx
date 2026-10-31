@@ -398,12 +398,14 @@ export function AmbientProvider({ children }: { children: ReactNode }) {
     [config.sounds, playing],
   );
 
+  const restored = useRef(false);
   useEffect(() => {
+    // Until the saved session is restored, nothing plays, and writing that would erase it.
+    if (!restored.current) return;
     const data = playingLayers.map((s) => ({ trackId: s.id, volume: volumes[s.id] ?? s.volume }));
     writeJson("rpg_ambient_session", data);
   }, [playingLayers, volumes]);
 
-  const restored = useRef(false);
   useEffect(() => {
     if (restored.current) return;
     if (!config.sounds.length) return;

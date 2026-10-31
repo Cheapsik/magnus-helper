@@ -18,6 +18,7 @@ import {
   eventDayIndex, formatDate, fromDayIndex, moonPhase, toDayIndex,
   type CalendarDate, type CalendarEvent,
 } from "@/lib/campaignCalendar";
+import { confirmDialog } from "@/components/ui/dialogs";
 
 function relative(days: number): string {
   if (days === 0) return "dziś";
@@ -81,8 +82,8 @@ export default function CalendarPage() {
             variant="ghost"
             size="icon"
             aria-label="Usuń wydarzenie"
-            onClick={() => {
-              if (confirm(`Usunąć wydarzenie '${event.title}'?`)) {
+            onClick={async () => {
+              if (await confirmDialog(`Usunąć wydarzenie „${event.title}”?`, { confirmLabel: "Usuń", destructive: true })) {
                 setState((s) => ({ ...s, events: s.events.filter((e) => e.id !== event.id) }));
               }
             }}
@@ -102,11 +103,6 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-4">
-      <p className="max-w-2xl text-sm text-muted-foreground">
-        Kalendarz odmierza czas w świecie gry, niezależnie od prawdziwych dat sesji. Ustaw własne miesiące i dni tygodnia
-        (albo zacznij od zwykłego kalendarza), przesuwaj „dziś” w miarę upływu czasu w grze i wpisuj wydarzenia: święta,
-        terminy, ultimatum. Aktualna data świata jest zawsze widoczna na dolnym pasku.
-      </p>
       <Card>
         <CardContent className="space-y-3 p-4">
           <div className="flex flex-wrap items-start justify-between gap-2">
@@ -189,7 +185,7 @@ export default function CalendarPage() {
         <div className="space-y-4">
           <section className="space-y-2">
             <h2 className="text-sm font-medium text-muted-foreground">Nadchodzące</h2>
-            {upcoming.length === 0 && <p className="text-sm text-muted-foreground">Brak nadchodzących wydarzeń.</p>}
+            {upcoming.length === 0 && <p className="text-sm text-muted-foreground">Brak nadchodzących wydarzeń. Wybierz dzień w kalendarzu i wpisz tytuł w „Nowe wydarzenie”.</p>}
             {upcoming.map(renderEvent)}
           </section>
           {past.length > 0 && (

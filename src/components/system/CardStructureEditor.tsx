@@ -144,14 +144,14 @@ function KindEditor({ kind, type, onChange }: { kind: CardKind; type: CardTypeDe
                   <span className="min-w-0 flex-1 truncate">
                     {field.name} <span className="text-muted-foreground">({sectionName})</span>
                   </span>
-                  <button type="button" className={iconBtn} onClick={() => onChange(restoreField(type, field.id))} aria-label={`Przywróć: ${field.name}`}>
+                  <button type="button" className={iconBtn} onClick={() => onChange(restoreField(type, field.id))} aria-label={`Przywróć: ${field.name}`} title={`Przywróć: ${field.name}`}>
                     <RotateCcw className="h-3.5 w-3.5" />
                   </button>
                   <button
                     type="button"
                     className={cn(iconBtn, "hover:text-destructive")}
                     onClick={() => setPurgeTarget({ id: field.id, name: field.name })}
-                    aria-label={`Usuń na stałe: ${field.name}`}
+                    aria-label={`Usuń na stałe: ${field.name}`} title={`Usuń na stałe: ${field.name}`}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
@@ -221,7 +221,7 @@ function SectionEditor({
     <section className="rounded-md border border-border">
       <header className="flex items-center gap-1.5 border-b border-border bg-white/[0.03] px-2 py-1.5">
         <input
-          className={cn(inputCls, "flex-1 border-transparent bg-transparent font-medium hover:border-input")}
+          className={cn(inputCls, "flex-1 field-inline font-medium")}
           value={section.name}
           onChange={(e) => onChange(updateSection(type, sectionId, { name: e.target.value }))}
           aria-label="Nazwa sekcji"
@@ -242,7 +242,7 @@ function SectionEditor({
             onChange(hideSection(type, sectionId));
             if (section.fields.length > 0) toast(`Ukryto sekcję „${section.name}”. Jej pola są na liście ukrytych.`);
           }}
-          aria-label={`Ukryj sekcję: ${section.name}`}
+          aria-label={`Ukryj sekcję: ${section.name}`} title={`Ukryj sekcję: ${section.name}`}
         >
           <EyeOff className="h-3.5 w-3.5" />
         </button>

@@ -41,8 +41,8 @@ export function SafetyItemList({
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 shrink-0"
+                  size="icon-sm"
+                  className="shrink-0"
                   aria-label={`Usuń: ${item}`}
                   onClick={() => onChange(items.filter((i) => i !== item))}
                 >

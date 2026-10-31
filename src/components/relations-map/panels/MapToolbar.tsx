@@ -54,7 +54,7 @@ export function MapToolbar({ onAutoLayout }: MapToolbarProps) {
           size="sm"
           variant="outline"
           onClick={() => setUiVisible(true)}
-          className="h-8 bg-card/95 border-border backdrop-blur shadow-sm"
+          className="bg-card/95 border-border backdrop-blur shadow-sm"
         >
           <PanelLeft className="h-3.5 w-3.5 mr-1.5" />
           Pokaż UI
@@ -71,7 +71,7 @@ export function MapToolbar({ onAutoLayout }: MapToolbarProps) {
             {linkingBanner || `Podgląd sesji: ${previewSessionName} (read-only)`}
           </span>
           {previewSessionName && (
-            <button type="button" className="underline text-[10px]" onClick={exitPreview}>
+            <button type="button" className="underline text-[12px]" onClick={exitPreview}>
               Wyjdź
             </button>
           )}
@@ -87,7 +87,7 @@ export function MapToolbar({ onAutoLayout }: MapToolbarProps) {
           <Sparkles className="h-3 w-3 text-primary shrink-0" />
           <span className="font-display">{currentSessionName || "Tryb sesji"}</span>
           {changedCount > 0 && (
-            <span className="text-primary text-[10px]">· {changedCount} NEW</span>
+            <span className="text-primary text-[12px]">· {changedCount} NEW</span>
           )}
           {pinnedNodes.map((n) => {
             const name = lookup.get(n.entityId)?.name ?? "?";
@@ -96,7 +96,7 @@ export function MapToolbar({ onAutoLayout }: MapToolbarProps) {
                 key={n.id}
                 type="button"
                 onClick={() => onOpenDetail(n.id)}
-                className="text-[10px] px-1.5 py-0.5 border border-primary/40 hover:bg-primary/10 truncate max-w-[100px]"
+                className="text-[12px] px-1.5 py-0.5 border border-primary/40 hover:bg-primary/10 truncate max-w-[100px]"
               >
                 {name}
               </button>
@@ -121,7 +121,7 @@ export function MapToolbar({ onAutoLayout }: MapToolbarProps) {
             size="sm"
             variant="outline"
             onClick={() => setUiVisible(false)}
-            className="h-7 text-xs"
+           
             title="Ukryj panele"
           >
             <PanelLeftClose className="h-3 w-3 mr-1" />
@@ -131,13 +131,13 @@ export function MapToolbar({ onAutoLayout }: MapToolbarProps) {
             size="sm"
             variant={sessionMode ? "default" : "outline"}
             onClick={() => setSessionMode((v) => !v)}
-            className="h-7 text-xs"
+           
           >
             <Sparkles className="h-3 w-3 mr-1" />
             Tryb sesji
           </Button>
           {!sessionMode && (
-            <Button size="sm" variant="outline" onClick={onAutoLayout} className="h-7 text-xs">
+            <Button size="sm" variant="outline" onClick={onAutoLayout}>
               <LayoutGrid className="h-3 w-3 mr-1" />
               Ułóż
             </Button>
@@ -148,7 +148,7 @@ export function MapToolbar({ onAutoLayout }: MapToolbarProps) {
                 size="sm"
                 variant={showFilters ? "default" : "outline"}
                 onClick={() => setShowFilters((v) => !v)}
-                className="h-7 text-xs"
+               
               >
                 <Filter className="h-3 w-3 mr-1" />
                 Filtry
@@ -157,7 +157,7 @@ export function MapToolbar({ onAutoLayout }: MapToolbarProps) {
                 size="sm"
                 variant={showLegend ? "default" : "outline"}
                 onClick={() => setShowLegend((v) => !v)}
-                className="h-7 text-xs"
+               
               >
                 {showLegend ? (
                   <EyeOff className="h-3 w-3 mr-1" />
@@ -170,7 +170,7 @@ export function MapToolbar({ onAutoLayout }: MapToolbarProps) {
                 size="sm"
                 variant={showSessions ? "default" : "outline"}
                 onClick={() => setShowSessions((v) => !v)}
-                className="h-7 text-xs"
+               
               >
                 <Calendar className="h-3 w-3 mr-1" />
                 Sesje
@@ -179,7 +179,7 @@ export function MapToolbar({ onAutoLayout }: MapToolbarProps) {
                 size="sm"
                 variant={showTimeline ? "default" : "outline"}
                 onClick={() => setShowTimeline((v) => !v)}
-                className="h-7 text-xs"
+               
               >
                 <History className="h-3 w-3 mr-1" />
                 Historia
@@ -190,7 +190,7 @@ export function MapToolbar({ onAutoLayout }: MapToolbarProps) {
             size="sm"
             variant="outline"
             onClick={() => setDetailPanelOpen((v) => !v)}
-            className="h-7 text-xs"
+           
           >
             {detailPanelOpen ? (
               <ChevronRight className="h-3 w-3 mr-1" />

@@ -179,6 +179,20 @@ export default function DicePage() {
     startRoll(s * c + Math.abs(m), total);
   };
 
+  // Enter or R rolls the current dice unless the GM is typing or a control has focus.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.key !== "Enter" && e.key.toLowerCase() !== "r") || e.ctrlKey || e.metaKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(t.tagName))) return;
+      if (rollBlocked) return;
+      e.preventDefault();
+      handleRoll();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
   const handle3DInitFailed = useCallback((message: string) => {
     toast.error(message, { duration: 6000 });
     setDice3DReady(false);
@@ -261,7 +275,7 @@ export default function DicePage() {
                 Historia rzutów
               </span>
               {rollHistory.length > 0 && (
-                <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground gap-1 px-2" onClick={clearRollHistory}>
+                <Button size="sm" variant="ghost" className="text-muted-foreground gap-1 px-2" onClick={clearRollHistory}>
                   <Trash2 className="h-3 w-3" />
                   Wyczyść
                 </Button>
@@ -308,7 +322,7 @@ export default function DicePage() {
                     type="button"
                     variant="secondary"
                     onClick={() => setSides(d)}
-                    className={`flex min-h-[2.75rem] items-center justify-center rounded-lg border-2 p-1.5 text-xs font-bold tabular-nums leading-none transition-colors active:scale-[0.98] sm:aspect-square sm:min-h-0 sm:text-[11px] ${
+                    className={`flex min-h-[2.75rem] items-center justify-center rounded-lg border-2 p-1.5 text-xs font-bold tabular-nums leading-none transition-colors active:scale-[0.98] sm:aspect-square sm:min-h-0 sm:text-[length:--fs-meta] ${
                       selected
                         ? "border-primary bg-primary/15 text-primary ring-2 ring-primary/30"
                         : isPrimary
@@ -331,7 +345,7 @@ export default function DicePage() {
                   type="button"
                   size="sm"
                   variant="ghost"
-                  className="h-7 gap-1 px-2 text-[10px] text-muted-foreground touch-manipulation"
+                  className="gap-1 px-2 text-muted-foreground touch-manipulation"
                   onClick={() => setCount(DICE_COUNT_MIN)}
                   title="Wyzeruj do 1 kości"
                   aria-label="Wyzeruj ilość do 1"
@@ -344,7 +358,7 @@ export default function DicePage() {
                 <Button
                   type="button"
                   variant="secondary"
-                  className="h-9 w-14 shrink-0 touch-manipulation px-0 sm:h-8"
+                  className="w-14 shrink-0 touch-manipulation px-0 sm:h-8"
                   onClick={() => setCount(Math.max(DICE_COUNT_MIN, count - 1))}
                   aria-label="Zmniejsz ilość"
                 >
@@ -360,7 +374,7 @@ export default function DicePage() {
                 <Button
                   type="button"
                   variant="secondary"
-                  className="h-9 w-14 shrink-0 touch-manipulation px-0 sm:h-8"
+                  className="w-14 shrink-0 touch-manipulation px-0 sm:h-8"
                   onClick={() => setCount(Math.min(DICE_COUNT_MAX, count + 1))}
                   aria-label="Zwiększ ilość"
                 >
@@ -375,7 +389,7 @@ export default function DicePage() {
                   type="button"
                   size="sm"
                   variant="ghost"
-                  className="h-7 gap-1 px-2 text-[10px] text-muted-foreground touch-manipulation"
+                  className="gap-1 px-2 text-muted-foreground touch-manipulation"
                   onClick={() => setModifier(0)}
                   title="Wyzeruj do 0"
                   aria-label="Wyzeruj modyfikator do 0"
@@ -388,7 +402,7 @@ export default function DicePage() {
                 <Button
                   type="button"
                   variant="secondary"
-                  className="h-9 w-14 shrink-0 touch-manipulation px-0 sm:h-8"
+                  className="w-14 shrink-0 touch-manipulation px-0 sm:h-8"
                   onClick={() => setModifier(Math.max(DICE_MODIFIER_MIN, modifier - 1))}
                   aria-label="Zmniejsz modyfikator"
                 >
@@ -406,7 +420,7 @@ export default function DicePage() {
                 <Button
                   type="button"
                   variant="secondary"
-                  className="h-9 w-14 shrink-0 touch-manipulation px-0 sm:h-8"
+                  className="w-14 shrink-0 touch-manipulation px-0 sm:h-8"
                   onClick={() => setModifier(Math.min(DICE_MODIFIER_MAX, modifier + 1))}
                   aria-label="Zwiększ modyfikator"
                 >
@@ -416,11 +430,12 @@ export default function DicePage() {
             </div>
           </div>
 
-          <Button
+          <Button size="lg"
             type="button"
             onClick={() => handleRoll()}
             disabled={rollBlocked}
-            className="mb-3 h-12 w-full touch-manipulation gap-2 rounded-xl text-sm font-semibold shadow-md sm:mb-4"
+            title="Rzuć (Enter lub R)"
+            className="mb-3 min-w-48 touch-manipulation sm:mb-4"
           >
             <Dice5 className={`h-5 w-5 shrink-0 ${physicsRolling || isRolling ? "animate-spin" : ""}`} />
             <span className="truncate">{rollPrimaryLabel}</span>
@@ -432,12 +447,12 @@ export default function DicePage() {
             </label>
             <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-1.5">
               {DEFAULT_PRESETS.map((p) => (
-                <Button
+                <Button size="lg"
                   key={p.label}
                   type="button"
-                  size="sm"
+                 
                   variant="outline"
-                  className="h-10 touch-manipulation rounded-lg px-2 text-xs font-medium gap-1 sm:h-8 sm:px-2.5"
+                  className="touch-manipulation px-2 font-medium gap-1 sm:h-8 sm:px-2.5"
                   disabled={rollBlocked}
                   onClick={() => handleRoll(p.count, p.sides, p.modifier, p.label)}
                 >

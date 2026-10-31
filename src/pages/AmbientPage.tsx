@@ -12,11 +12,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, plural } from "@/lib/utils";
 import { useAmbient, type SoundItem, type Category } from "@/context/AmbientContext";
 import { unlockMobileAudio } from "@/lib/mobileAudioUnlock";
 import { EmojiPickerButton } from "@/components/emoji/EmojiPickerButton";
 import { AUDIO_ACCEPT, AUDIO_FILE_WARN_BYTES, deleteAudio, formatBytes, isAudioFile, putAudio } from "@/lib/audioStore";
+import { confirmDialog } from "@/components/ui/dialogs";
 
 function genId() { return Math.random().toString(36).slice(2, 10); }
 
@@ -128,9 +129,9 @@ export default function AmbientPage() {
   const moveToCategory = (soundId: string, catId: string) => { save((c) => ({ ...c, sounds: c.sounds.map((s) => s.id === soundId ? { ...s, categoryId: catId } : s) })); };
   const toggleCollapse = (catId: string) => { save((c) => ({ ...c, categories: c.categories.map((cat) => cat.id === catId ? { ...cat, collapsed: !cat.collapsed } : cat) })); };
   const renameCategory = (catId: string, name: string) => { save((c) => ({ ...c, categories: c.categories.map((cat) => cat.id === catId ? { ...cat, name } : cat) })); };
-  const deleteCategory = (cat: Category) => {
+  const deleteCategory = async (cat: Category) => {
     if (cat.id === "__uncategorized__") return;
-    if (!confirm(`Usunąć kategorię '${cat.name}'? Dźwięki zostaną przeniesione do 'Bez kategorii'`)) return;
+    if (!(await confirmDialog(`Usunąć kategorię „${cat.name}”?`, { description: "Dźwięki trafią do „Bez kategorii”.", confirmLabel: "Usuń", destructive: true }))) return;
     save((c) => {
       const cats = c.categories.filter((ct) => ct.id !== cat.id);
       const sounds = c.sounds.map((s) => s.categoryId === cat.id ? { ...s, categoryId: "__uncategorized__" } : s);
@@ -169,10 +170,10 @@ export default function AmbientPage() {
 
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={stopAll} className="" disabled={!anyPlaying}>
+          <Button size="sm" variant="outline" onClick={stopAll} disabled={!anyPlaying}>
             <Square className="h-4 w-4 mr-1" /> Zatrzymaj wszystko
           </Button>
-          <Button size="sm" onClick={openAddModal} className="">
+          <Button size="sm" onClick={openAddModal}>
             <Plus className="h-4 w-4 mr-1" /> Dodaj dźwięk
           </Button>
         </div>
@@ -182,7 +183,7 @@ export default function AmbientPage() {
         <Volume2 className="h-4 w-4 text-primary shrink-0" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
-            <Label className="field-label">Master Volume</Label>
+            <Label className="field-label">Głośność</Label>
             <span className="text-xs tabular-nums text-muted-foreground">{masterVolume}%</span>
           </div>
           <Slider value={[masterVolume]} onValueChange={([v]) => setMasterVolume(v)} min={0} max={100} step={1} />
@@ -201,7 +202,7 @@ export default function AmbientPage() {
               className="h-8 min-w-[2rem] shrink-0 text-base"
             />
             <CategoryName name={cat.name} onRename={(n) => renameCategory(cat.id, n)} />
-            <Badge variant="secondary" className="text-xs">{sounds.length} dźwięk{sounds.length === 1 ? "" : sounds.length < 5 ? "i" : "ów"}</Badge>
+            <Badge variant="secondary" className="text-xs">{sounds.length} {plural(sounds.length, "dźwięk", "dźwięki", "dźwięków")}</Badge>
             {cat.id !== "__uncategorized__" && (
               <button onClick={() => deleteCategory(cat)} className="flex items-center justify-center text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity">
                 <Trash2 className="h-4 w-4" />
@@ -234,7 +235,13 @@ export default function AmbientPage() {
         </section>
       ))}
 
-      <Button variant="outline" size="sm" onClick={addCategory} className="">
+      {config.sounds.length === 0 && (
+        <p className="text-sm text-muted-foreground">
+          Nie ma jeszcze dźwięków. „Dodaj dźwięk” przyjmuje własny plik (mp3, ogg, wav) albo link do YouTube.
+        </p>
+      )}
+
+      <Button variant="outline" size="sm" onClick={addCategory}>
         <Plus className="h-4 w-4 mr-1" /> Dodaj kategorię
       </Button>
 
@@ -334,8 +341,8 @@ export default function AmbientPage() {
             </div>
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setModalOpen(false)} className="">Anuluj</Button>
-            <Button onClick={saveModal} disabled={saving} className="">{saving ? "Zapisywanie…" : "Zapisz"}</Button>
+            <Button variant="outline" onClick={() => setModalOpen(false)}>Anuluj</Button>
+            <Button onClick={saveModal} disabled={saving}>{saving ? "Zapisywanie…" : "Zapisz"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -353,7 +360,7 @@ function CategoryName({ name, onRename }: { name: string; onRename: (n: string) 
         onChange={(e) => setVal(e.target.value)}
         onBlur={() => { onRename(val.trim() || name); setEditing(false); }}
         onKeyDown={(e) => { if (e.key === "Enter") { onRename(val.trim() || name); setEditing(false); } }}
-        className="h-8 text-sm font-semibold w-40"
+        className="field-sm font-semibold w-40"
       />
     );
   }
@@ -413,7 +420,7 @@ function SoundTile({
         <span className="text-2xl leading-none">{sound.emoji}</span>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium leading-tight line-clamp-2">{sound.name}</p>
-          <Badge variant="secondary" className="text-[10px] mt-1">{sound.type === "loop" ? "pętla" : "efekt"}</Badge>
+          <Badge variant="secondary" className="text-[12px] mt-1">{sound.type === "loop" ? "pętla" : "efekt"}</Badge>
         </div>
       </div>
 

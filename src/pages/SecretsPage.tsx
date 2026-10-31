@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -45,9 +46,12 @@ export default function SecretsPage() {
   };
 
   return (
-    <div className="space-y-6 p-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Sekrety i wiedza</h1>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm text-muted-foreground">
+          Te same sekrety wybierasz na konkretną sesję w{" "}
+          <Link to="/prep" className="text-primary underline underline-offset-2">Przygotowaniu</Link>.
+        </p>
         <Button type="button" onClick={() => setEditing({ id: newId(), text: "", category: "plot" })}>
           <Plus className="h-4 w-4 mr-1.5" />
           Nowy sekret
@@ -57,7 +61,7 @@ export default function SecretsPage() {
       {editing && <SecretEditor key={editing.id} secret={editing} onSave={save} onCancel={() => setEditing(null)} />}
 
       <div className="space-y-3">
-        {secrets.length === 0 && <p className="text-sm text-muted-foreground">Brak sekretów.</p>}
+        {secrets.length === 0 && <p className="text-sm text-muted-foreground">Brak sekretów. Zapisz coś, czego gracze jeszcze nie wiedzą, np. „Burmistrz płaci przemytnikom”.</p>}
         {secrets.map((s) => (
           <Card key={s.id}>
             <CardHeader className="pb-2">

@@ -33,7 +33,7 @@ const NUM = "h-8 w-20";
 function Field({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-px">
-      <label htmlFor={id} className="block text-[10px] leading-tight text-muted-foreground">
+      <label htmlFor={id} className="block text-[12px] leading-tight text-muted-foreground">
         {label}
       </label>
       {children}
@@ -63,7 +63,7 @@ export function CombatantFormFields({
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end">
         <div className="min-w-0 flex-1">
           <Field id={`${base}-name`} label="Nazwa">
-            <Input id={`${base}-name`} value={d.name} onChange={(e) => onChange({ ...d, name: e.target.value })} className="h-8 text-sm" />
+            <Input id={`${base}-name`} value={d.name} onChange={(e) => onChange({ ...d, name: e.target.value })} className="field-sm" />
           </Field>
         </div>
         <div className="flex shrink-0 items-center gap-1" role="radiogroup" aria-label="Strona">
@@ -71,7 +71,7 @@ export function CombatantFormFields({
             type="button"
             size="sm"
             variant={!d.isEnemy ? "default" : "outline"}
-            className="h-8 px-2 text-xs"
+            className="px-2"
             role="radio"
             aria-checked={!d.isEnemy}
             onClick={() => onChange({ ...d, isEnemy: false })}
@@ -82,7 +82,7 @@ export function CombatantFormFields({
             type="button"
             size="sm"
             variant={d.isEnemy ? "destructive" : "outline"}
-            className="h-8 px-2 text-xs"
+            className="px-2"
             role="radio"
             aria-checked={d.isEnemy}
             onClick={() => onChange({ ...d, isEnemy: true })}
@@ -102,7 +102,7 @@ export function CombatantFormFields({
             value={d.resourceLabel ?? ""}
             placeholder="np. Zdrowie"
             onChange={(e) => onChange({ ...d, resourceLabel: e.target.value || undefined })}
-            className="h-8 w-28 text-sm"
+            className="field-sm w-28"
           />
         </Field>
         <Field id={`${base}-res-cur`} label="Aktualnie">
@@ -124,22 +124,22 @@ export function CombatantFormFields({
       </div>
 
       <div className="space-y-1">
-        <span className="block text-[10px] leading-tight text-muted-foreground">Inne wartości widoczne w trackerze</span>
+        <span className="block text-[12px] leading-tight text-muted-foreground">Inne wartości widoczne w trackerze</span>
         {d.stats.map((stat, index) => (
           <div key={index} className="flex items-center gap-1.5">
             <Input
               value={stat.label}
               onChange={(e) => setStat(index, { label: e.target.value })}
               placeholder="Nazwa"
-              className="h-8 flex-1 text-sm"
+              className="field-sm flex-1"
               aria-label="Nazwa wartości"
             />
             <NumberInput value={stat.value} onChange={(v) => setStat(index, { value: v })} className={NUM} aria-label="Wartość" />
             <Button
               type="button"
-              size="icon"
+              size="icon-sm"
               variant="ghost"
-              className="h-8 w-8"
+             
               onClick={() => onChange({ ...d, stats: d.stats.filter((_, i) => i !== index) })}
               aria-label="Usuń wartość"
             >
@@ -151,7 +151,7 @@ export function CombatantFormFields({
           type="button"
           size="sm"
           variant="ghost"
-          className="h-7 gap-1 px-2 text-xs text-muted-foreground"
+          className="gap-1 px-2 text-muted-foreground"
           onClick={() => onChange({ ...d, stats: [...d.stats, { label: "", value: 0 }] })}
         >
           <Plus className="h-3.5 w-3.5" /> Dodaj wartość
@@ -164,7 +164,7 @@ export function CombatantFormFields({
           value={d.notes}
           onChange={(e) => onChange({ ...d, notes: e.target.value })}
           rows={2}
-          className="min-h-[40px] text-xs"
+          className="min-h-[40px]"
         />
       </Field>
     </div>
@@ -173,7 +173,7 @@ export function CombatantFormFields({
 
 export function CombatantStatLine({ c }: { c: Combatant }) {
   return (
-    <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-muted-foreground">
+    <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[12px] text-muted-foreground">
       <span>
         Inicjatywa <span className="font-bold text-foreground">{c.initiative}</span>
       </span>

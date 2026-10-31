@@ -68,7 +68,7 @@ export function JourneyView({ journey, tables, onChange }: {
             return (
               <div key={s.id} className="relative overflow-hidden rounded bg-secondary" style={{ flexGrow: s.days, flexBasis: 0 }} title={`${stageLabel(s)}: ${s.days} dni`}>
                 <div className="h-full bg-primary transition-all" style={{ width: `${(done / s.days) * 100}%` }} />
-                <span className="absolute inset-0 truncate px-1 text-[10px] leading-6 mix-blend-difference text-white">{s.to}</span>
+                <span className="absolute inset-0 truncate px-1 text-[12px] leading-6 mix-blend-difference text-white">{s.to}</span>
               </div>
             );
           })}

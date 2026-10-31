@@ -7,10 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { CombatPresetsPanel } from "@/components/combat/CombatPresetsPanel";
 import { CombatRosterPanel } from "@/components/combat/CombatRosterPanel";
-import { ClocksPanel } from "@/components/clocks/ClocksPanel";
 import { PlayerScreenControls } from "@/components/player-screen/PlayerScreenControls";
 
-type SideTab = "potwory" | "postacie" | "presety" | "zegary" | "ekran";
+type SideTab = "karty" | "presety" | "ekran";
 
 interface CombatSidePanelProps {
   setCombatants: (fn: Combatant[] | ((prev: Combatant[]) => Combatant[])) => void;
@@ -33,7 +32,7 @@ export function CombatSidePanel({
   onDragEnd,
   className,
 }: CombatSidePanelProps) {
-  const [tab, setTab] = useState<SideTab>("potwory");
+  const [tab, setTab] = useState<SideTab>("karty");
   const [managePresetsOpen, setManagePresetsOpen] = useState(false);
 
   return (
@@ -46,10 +45,8 @@ export function CombatSidePanel({
       <div className="flex border-b border-border shrink-0">
         {(
           [
-            { id: "potwory" as const, label: "Potwory" },
-            { id: "postacie" as const, label: "Postacie" },
+            { id: "karty" as const, label: "Karty" },
             { id: "presety" as const, label: "Presety" },
-            { id: "zegary" as const, label: "Koła postępu" },
             { id: "ekran" as const, label: "Ekran" },
           ] as const
         ).map(({ id, label }) => (
@@ -58,7 +55,7 @@ export function CombatSidePanel({
             type="button"
             onClick={() => setTab(id)}
             className={cn(
-              "flex-1 py-2.5 text-[10px] sm:text-xs font-semibold transition-colors",
+              "flex-1 py-2.5 text-[12px] sm:text-xs font-semibold transition-colors",
               tab === id
                 ? "bg-card text-primary border-b-2 border-primary -mb-px"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/30",
@@ -70,18 +67,13 @@ export function CombatSidePanel({
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col">
-        {tab === "zegary" ? (
-          <div className="min-h-0 flex-1 overflow-y-auto p-2">
-            <ClocksPanel />
-          </div>
-        ) : tab === "ekran" ? (
+        {tab === "ekran" ? (
           <div className="min-h-0 flex-1 overflow-y-auto p-2">
             <PlayerScreenControls />
           </div>
-        ) : tab === "postacie" || tab === "potwory" ? (
+        ) : tab === "karty" ? (
           <CombatRosterPanel
-            key={tab}
-            kinds={tab === "potwory" ? ["monster"] : ["hero", "npc"]}
+            kinds={["monster", "npc", "hero"]}
             setCombatants={setCombatants}
             dragKey={dragKey}
             onDragStart={onDragStart}
@@ -98,7 +90,7 @@ export function CombatSidePanel({
             <div className="shrink-0 border-t border-border p-2">
               <Sheet open={managePresetsOpen} onOpenChange={setManagePresetsOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-9 w-full gap-1.5 text-xs">
+                  <Button variant="outline" className="w-full gap-1.5">
                     <Settings2 className="h-3.5 w-3.5" />
                     Zarządzaj presetami
                   </Button>

@@ -147,13 +147,13 @@ function SessionEditRow({
   return (
     <li className="space-y-1.5 rounded-md border border-border/50 bg-card/40 p-2">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <Input value={name} onChange={(e) => setName(e.target.value)} className="h-9 flex-1 text-sm" placeholder="Nazwa sesji" />
+        <Input value={name} onChange={(e) => setName(e.target.value)} className="flex-1" placeholder="Nazwa sesji" />
         <div className="flex shrink-0 gap-1.5">
           <Button
             type="button"
             size="sm"
             variant="secondary"
-            className="h-8 text-xs"
+           
             disabled={!name.trim() || name.trim() === session.name}
             onClick={() => onRename(session.id, name)}
           >
@@ -163,7 +163,7 @@ function SessionEditRow({
             type="button"
             size="sm"
             variant="outline"
-            className="h-8 text-xs text-destructive hover:text-destructive"
+            className="text-destructive hover:text-destructive"
             disabled={!canDelete}
             onClick={() => onRequestDelete(session.id)}
           >
@@ -172,7 +172,7 @@ function SessionEditRow({
         </div>
       </div>
       {noteCount > 0 && (
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-[length:--fs-meta] text-muted-foreground">
           {noteCount} {noteCount === 1 ? "notatka przypisana" : "notatek przypisanych"} do tej sesji.
         </p>
       )}
@@ -325,6 +325,18 @@ export default function SessionNotesPage() {
     closeEditor();
   };
 
+  // One line typed during play becomes a note on the active session; details can be added later.
+  const [quickText, setQuickText] = useState("");
+  const saveQuick = () => {
+    const text = quickText.trim();
+    if (!text || !sessions.some((s) => s.id === activeSessionId)) return;
+    setSessionNotes((prev) => [
+      { id: crypto.randomUUID(), text, category: "general", scope: "session", sessionId: activeSessionId, timestamp: Date.now() },
+      ...prev,
+    ]);
+    setQuickText("");
+  };
+
   const confirmDelete = () => {
     if (!deleteTargetId) return;
     setSessionNotes((prev) => prev.filter((n) => n.id !== deleteTargetId));
@@ -475,22 +487,39 @@ export default function SessionNotesPage() {
     <div className="space-y-3 animate-fade-in pb-8">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1">
-          <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => setSettingsOpen(true)} aria-label="Szablony, kategorie i sesje">
+          <Button type="button" variant="ghost" size="icon-sm" className="text-muted-foreground" onClick={() => setSettingsOpen(true)} aria-label="Szablony, kategorie i sesje">
             <Settings2 className="h-4 w-4" />
           </Button>
-          <Button type="button" size="sm" className="h-8 gap-1 px-2.5 text-xs" onClick={openNewNote}>
+          <Button type="button" size="sm" className="gap-1 px-2.5" onClick={openNewNote}>
             <Plus className="h-3.5 w-3.5" />
-            Dodaj
+            Nowa notatka
           </Button>
         </div>
       </div>
 
+      <form
+        className="flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          saveQuick();
+        }}
+      >
+        <Input
+          value={quickText}
+          onChange={(e) => setQuickText(e.target.value)}
+          placeholder="Szybka notatka do bieżącej sesji, Enter zapisuje"
+          aria-label="Szybka notatka"
+          className="flex-1"
+        />
+        <Button type="submit" variant="secondary" disabled={!quickText.trim()}>Zapisz</Button>
+      </form>
+
       <div className="flex flex-col gap-2 rounded-md border border-border/60 bg-card/50 px-2.5 py-2">
         <div className="flex flex-col gap-1.5">
-          <Label className="text-[11px] text-muted-foreground">Aktywna sesja</Label>
+          <Label className="text-[length:--fs-meta] text-muted-foreground">Aktywna sesja</Label>
           <div className="flex gap-1.5">
             <Select value={activeSessionId} onValueChange={setActiveSessionId}>
-              <SelectTrigger className="h-8 min-w-0 flex-1 text-xs">
+              <SelectTrigger className="field-sm min-w-0 flex-1">
                 <SelectValue placeholder="Wybierz sesję" />
               </SelectTrigger>
               <SelectContent>
@@ -504,8 +533,8 @@ export default function SessionNotesPage() {
             <Button
               type="button"
               variant="outline"
-              size="icon"
-              className="h-8 w-8 shrink-0"
+              size="icon-sm"
+              className="shrink-0"
               aria-label="Nowa sesja"
               onClick={() => setAddSessionOpen(true)}
             >
@@ -514,8 +543,8 @@ export default function SessionNotesPage() {
             <Button
               type="button"
               variant="outline"
-              size="icon"
-              className="h-8 w-8 shrink-0"
+              size="icon-sm"
+              className="shrink-0"
               aria-label="Zmień nazwę lub usuń sesję"
               onClick={() => setSessionsManageOpen(true)}
             >
@@ -523,8 +552,8 @@ export default function SessionNotesPage() {
             </Button>
           </div>
         </div>
-        <button type="button" className="self-start text-left text-[11px] text-primary hover:underline" onClick={handleTodaySession}>
-          Dziś ta sesja (filtr + ostatnia not. sesyjna)
+        <button type="button" className="self-start text-left text-[length:--fs-meta] text-primary hover:underline" onClick={handleTodaySession}>
+          Pokaż notatki z dzisiejszej sesji
         </button>
         <div className="flex gap-1">
           {(
@@ -539,7 +568,7 @@ export default function SessionNotesPage() {
               type="button"
               size="sm"
               variant={scopeFilter === key ? "secondary" : "ghost"}
-              className={cn("h-7 flex-1 px-1.5 text-[11px] font-normal", scopeFilter === key && "bg-secondary ring-1 ring-border")}
+              className={cn("h-7 flex-1 px-1.5 text-[length:--fs-meta] font-normal", scopeFilter === key && "bg-secondary ring-1 ring-border")}
               onClick={() => setScopeFilter(key)}
             >
               {label}
@@ -551,10 +580,10 @@ export default function SessionNotesPage() {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-          <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Szukaj…" className="h-8 pl-8 text-xs" />
+          <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Szukaj…" className="field-sm pl-8" />
         </div>
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="h-8 w-full sm:w-[200px] text-xs">
+          <SelectTrigger className="field-sm w-full sm:w-[200px]">
             <SelectValue placeholder="Kategoria" />
           </SelectTrigger>
           <SelectContent>
@@ -582,7 +611,7 @@ export default function SessionNotesPage() {
                 {note.pinned ? <Pin className="h-3.5 w-3.5 text-primary" /> : <PinOff className="h-3.5 w-3.5 opacity-60" />}
               </button>
               <button type="button" className="min-w-0 flex-1 text-left" onClick={() => openEditNote(note)}>
-                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
                   <Icon className="h-3 w-3 shrink-0" />
                   <span>{formatNoteTime(note.timestamp)}</span>
                   <span>·</span>
@@ -603,7 +632,7 @@ export default function SessionNotesPage() {
                           key={id}
                           role="button"
                           tabIndex={0}
-                          className="cursor-pointer rounded bg-muted/80 px-1.5 py-0 text-[10px] text-foreground/90"
+                          className="cursor-pointer rounded bg-muted/80 px-1.5 py-0 text-[12px] text-foreground/90"
                           onClick={(e) => {
                             e.stopPropagation();
                             setOpenNpcId(id);
@@ -624,10 +653,10 @@ export default function SessionNotesPage() {
                 )}
               </button>
               <div className="flex shrink-0 flex-col gap-0.5">
-                <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditNote(note)} aria-label="Edytuj">
+                <Button type="button" variant="ghost" size="icon-sm" onClick={() => openEditNote(note)} aria-label="Edytuj">
                   <Pencil className="h-3.5 w-3.5" />
                 </Button>
-                <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-destructive/80 hover:text-destructive" onClick={() => setDeleteTargetId(note.id)} aria-label="Usuń">
+                <Button type="button" variant="ghost" size="icon-sm" className="text-destructive/80 hover:text-destructive" onClick={() => setDeleteTargetId(note.id)} aria-label="Usuń">
                   <X className="h-3.5 w-3.5" />
                 </Button>
               </div>
@@ -646,7 +675,7 @@ export default function SessionNotesPage() {
             <div className="flex justify-end">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button type="button" variant="outline" size="sm" className="h-8 gap-1 text-xs">
+                  <Button type="button" variant="outline" size="sm" className="gap-1">
                     Wstaw szablon
                     <ChevronDown className="h-3 w-3 opacity-60" />
                   </Button>
@@ -679,7 +708,7 @@ export default function SessionNotesPage() {
 
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">Tytuł (opcjonalnie)</label>
-              <Input value={editorDraft.title} onChange={(e) => setEditorDraft((d) => ({ ...d, title: e.target.value }))} className="h-9 text-sm" placeholder="Krótki nagłówek" />
+              <Input value={editorDraft.title} onChange={(e) => setEditorDraft((d) => ({ ...d, title: e.target.value }))} placeholder="Krótki nagłówek" />
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">Treść *</label>
@@ -694,7 +723,7 @@ export default function SessionNotesPage() {
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">Kategoria</label>
               <Select value={editorDraft.category} onValueChange={(v) => setEditorDraft((d) => ({ ...d, category: v }))}>
-                <SelectTrigger className="h-9 text-sm">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -728,7 +757,7 @@ export default function SessionNotesPage() {
                     Sesja
                   </Label>
                   <Select value={editorDraft.sessionId} onValueChange={(id) => setEditorDraft((d) => ({ ...d, sessionId: id }))}>
-                    <SelectTrigger id="ed-session" className="h-9 w-full text-sm">
+                    <SelectTrigger id="ed-session" className="w-full">
                       <SelectValue placeholder="Wybierz sesję" />
                     </SelectTrigger>
                     <SelectContent>
@@ -744,7 +773,7 @@ export default function SessionNotesPage() {
             </div>
 
             <div>
-              <Button type="button" variant="outline" size="sm" className="h-8 text-xs" onClick={() => setNpcPickerOpen(true)}>
+              <Button type="button" variant="outline" size="sm" onClick={() => setNpcPickerOpen(true)}>
                 Powiąż NPC{editorDraft.linkedNpcIds.length > 0 ? ` · ${editorDraft.linkedNpcIds.length}` : ""}
               </Button>
               {editorDraft.linkedNpcIds.length > 0 && (
@@ -752,7 +781,7 @@ export default function SessionNotesPage() {
                   {editorDraft.linkedNpcIds.map((id) => {
                     const npc = npcCards.find((n) => n.id === id);
                     return (
-                      <span key={id} className="inline-flex items-center gap-0.5 rounded-full border bg-muted/40 px-2 py-0.5 text-[11px]">
+                      <span key={id} className="inline-flex items-center gap-0.5 rounded-full border bg-muted/40 px-2 py-0.5 text-[length:--fs-meta]">
                         <button type="button" className="truncate max-w-[120px]" onClick={() => setOpenNpcId(id)}>
                           {npc ? cardTitle(npc) : id.slice(0, 6)}
                         </button>
@@ -772,10 +801,10 @@ export default function SessionNotesPage() {
             </div>
           </div>
           <DialogFooter className="border-t border-border/60 px-4 py-3 sm:justify-end">
-            <Button type="button" variant="ghost" size="sm" className="h-9" onClick={closeEditor}>
+            <Button type="button" variant="ghost" onClick={closeEditor}>
               Anuluj
             </Button>
-            <Button type="button" size="sm" className="h-9" onClick={saveFromEditor}>
+            <Button type="button" onClick={saveFromEditor}>
               {editingNoteId ? "Zapisz" : "Dodaj"}
             </Button>
           </DialogFooter>
@@ -802,7 +831,7 @@ export default function SessionNotesPage() {
               value={newSessionName}
               onChange={(e) => setNewSessionName(e.target.value)}
               placeholder="np. Sesja 12 — powrót do stolicy"
-              className="h-9 text-sm"
+             
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === "Enter") submitNewSession();
@@ -810,10 +839,10 @@ export default function SessionNotesPage() {
             />
           </div>
           <DialogFooter className="gap-2 sm:gap-2">
-            <Button type="button" variant="ghost" size="sm" className="h-9" onClick={() => setAddSessionOpen(false)}>
+            <Button type="button" variant="ghost" onClick={() => setAddSessionOpen(false)}>
               Anuluj
             </Button>
-            <Button type="button" size="sm" className="h-9" onClick={submitNewSession}>
+            <Button type="button" onClick={submitNewSession}>
               Dodaj i ustaw jako aktywną
             </Button>
           </DialogFooter>
@@ -844,8 +873,8 @@ export default function SessionNotesPage() {
             <Button
               type="button"
               variant="secondary"
-              size="sm"
-              className="h-9 w-full gap-1.5 text-xs"
+             
+              className="w-full gap-1.5"
               onClick={() => {
                 setSessionsManageOpen(false);
                 setAddSessionOpen(true);
@@ -854,7 +883,7 @@ export default function SessionNotesPage() {
               <CalendarPlus className="h-3.5 w-3.5" />
               Dodaj nową sesję…
             </Button>
-            <Button type="button" variant="ghost" size="sm" className="h-9 w-full text-xs" onClick={() => setSessionsManageOpen(false)}>
+            <Button type="button" variant="ghost" className="w-full" onClick={() => setSessionsManageOpen(false)}>
               Zamknij
             </Button>
           </DialogFooter>
@@ -898,7 +927,7 @@ export default function SessionNotesPage() {
           <div className="space-y-2 py-2">
             <Label className="text-xs text-muted-foreground">Przenieś notatki do sesji</Label>
             <Select value={reassignToSessionId} onValueChange={setReassignToSessionId}>
-              <SelectTrigger className="h-9 text-sm">
+              <SelectTrigger>
                 <SelectValue placeholder="Wybierz sesję" />
               </SelectTrigger>
               <SelectContent>
@@ -915,17 +944,17 @@ export default function SessionNotesPage() {
           <DialogFooter className="flex-col gap-2 sm:flex-col">
             <Button
               type="button"
-              size="sm"
-              className="h-9 w-full"
+             
+              className="w-full"
               disabled={!reassignToSessionId || reassignToSessionId === notesDeleteSessionId}
               onClick={reassignNotesAndDeleteSession}
             >
               Przenieś notatki i usuń sesję
             </Button>
-            <Button type="button" size="sm" variant="secondary" className="h-9 w-full" onClick={globalizeNotesAndDeleteSession}>
+            <Button type="button" variant="secondary" className="w-full" onClick={globalizeNotesAndDeleteSession}>
               Ustaw notatki jako globalne i usuń sesję
             </Button>
-            <Button type="button" variant="ghost" size="sm" className="h-9 w-full" onClick={() => setNotesDeleteSessionId(null)}>
+            <Button type="button" variant="ghost" className="w-full" onClick={() => setNotesDeleteSessionId(null)}>
               Anuluj
             </Button>
           </DialogFooter>
@@ -940,13 +969,13 @@ export default function SessionNotesPage() {
           <div className="space-y-4 px-4 py-3">
             <section className="space-y-2">
               <h3 className="text-xs font-medium text-muted-foreground">Sesje</h3>
-              <p className="text-[11px] text-muted-foreground">Wybór aktywnej sesji jest na górze strony. Zmiana nazwy i usuwanie — ikona ołówka lub przycisk poniżej.</p>
+              <p className="text-[length:--fs-meta] text-muted-foreground">Wybór aktywnej sesji jest na górze strony. Zmiana nazwy i usuwanie — ikona ołówka lub przycisk poniżej.</p>
               <div className="flex flex-col gap-1.5">
                 <Button
                   type="button"
                   variant="secondary"
-                  size="sm"
-                  className="h-9 w-full justify-start gap-2 text-xs"
+                 
+                  className="w-full justify-start gap-2"
                   onClick={() => {
                     setSettingsOpen(false);
                     setSessionsManageOpen(true);
@@ -958,8 +987,8 @@ export default function SessionNotesPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
-                  className="h-9 w-full justify-start gap-2 text-xs"
+                 
+                  className="w-full justify-start gap-2"
                   onClick={() => {
                     setSettingsOpen(false);
                     setAddSessionOpen(true);
@@ -973,9 +1002,9 @@ export default function SessionNotesPage() {
 
             <section className="space-y-2 border-t border-border/60 pt-3">
               <h3 className="text-xs font-medium text-muted-foreground">Szablony</h3>
-              <Input value={templateTitle} onChange={(e) => setTemplateTitle(e.target.value)} placeholder="Tytuł" className="h-8 text-xs" />
-              <Textarea value={templateBody} onChange={(e) => setTemplateBody(e.target.value)} placeholder="Treść" rows={2} className="min-h-[52px] text-xs" />
-              <Button type="button" size="sm" variant="secondary" className="h-8 text-xs" onClick={addTemplate}>
+              <Input value={templateTitle} onChange={(e) => setTemplateTitle(e.target.value)} placeholder="Tytuł" className="field-sm" />
+              <Textarea value={templateBody} onChange={(e) => setTemplateBody(e.target.value)} placeholder="Treść" rows={2} className="min-h-[52px]" />
+              <Button type="button" size="sm" variant="secondary" onClick={addTemplate}>
                 Dodaj szablon
               </Button>
               {templates.length > 0 && (
@@ -983,7 +1012,7 @@ export default function SessionNotesPage() {
                   {templates.map((t) => (
                     <li key={t.id} className="flex items-center justify-between gap-2 rounded px-2 py-1 text-xs hover:bg-muted/50">
                       <span className="truncate">{t.title}</span>
-                      <Button type="button" variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => removeTemplate(t.id)} aria-label="Usuń">
+                      <Button type="button" variant="ghost" size="icon-sm" className="shrink-0" onClick={() => removeTemplate(t.id)} aria-label="Usuń">
                         <X className="h-3 w-3" />
                       </Button>
                     </li>
@@ -994,16 +1023,16 @@ export default function SessionNotesPage() {
 
             <section className="space-y-2 border-t border-border/60 pt-3">
               <h3 className="text-xs font-medium text-muted-foreground">Kategorie</h3>
-              <p className="text-[11px] text-muted-foreground">Wielkość liter jest zachowana.</p>
+              <p className="text-[length:--fs-meta] text-muted-foreground">Wielkość liter jest zachowana.</p>
               <div className="flex gap-2">
-                <Input value={newCategoryId} onChange={(e) => setNewCategoryId(e.target.value)} placeholder="Nowa kategoria" className="h-8 text-xs" />
-                <Button type="button" size="sm" className="h-8 shrink-0 text-xs" onClick={addCustomCategory}>
+                <Input value={newCategoryId} onChange={(e) => setNewCategoryId(e.target.value)} placeholder="Nowa kategoria" className="field-sm" />
+                <Button type="button" size="sm" className="shrink-0" onClick={addCustomCategory}>
                   Dodaj
                 </Button>
               </div>
               <div className="flex flex-wrap gap-1">
                 {noteCategories.map((id) => (
-                  <span key={id} className="inline-flex items-center gap-1 rounded-md border bg-background px-2 py-0.5 text-[11px]">
+                  <span key={id} className="inline-flex items-center gap-1 rounded-md border bg-background px-2 py-0.5 text-[length:--fs-meta]">
                     {categoryLabel(id)}
                     {!(DEFAULT_NOTE_CATEGORY_IDS as readonly string[]).includes(id.toLowerCase()) && (
                       <button type="button" className="text-muted-foreground hover:text-foreground" onClick={() => removeCategory(id)} aria-label={`Usuń ${id}`}>
@@ -1016,7 +1045,7 @@ export default function SessionNotesPage() {
             </section>
           </div>
           <DialogFooter className="border-t border-border/60 px-4 py-3">
-            <Button type="button" size="sm" variant="secondary" className="h-8" onClick={() => setSettingsOpen(false)}>
+            <Button type="button" size="sm" variant="secondary" onClick={() => setSettingsOpen(false)}>
               Zamknij
             </Button>
           </DialogFooter>
@@ -1044,14 +1073,14 @@ export default function SessionNotesPage() {
             <SheetTitle className="text-left text-base">Wybierz NPC</SheetTitle>
           </SheetHeader>
           <div className="mt-3 space-y-2">
-            <Input value={npcQuery} onChange={(e) => setNpcQuery(e.target.value)} placeholder="Szukaj…" className="h-9 text-sm" />
+            <Input value={npcQuery} onChange={(e) => setNpcQuery(e.target.value)} placeholder="Szukaj…" />
             {filteredNpcsForPicker.length === 0 ? (
               <p className="text-xs text-muted-foreground">{npcCards.length === 0 ? "Brak NPC w kampanii." : "Brak wyników."}</p>
             ) : (
               <ul className="space-y-1">
                 {filteredNpcsForPicker.map((npc) => (
                   <li key={npc.id}>
-                    <Button type="button" variant="ghost" className="h-9 w-full justify-start px-2 text-sm font-normal" onClick={() => addNpcFromPicker(npc.id)}>
+                    <Button type="button" variant="ghost" className="w-full justify-start px-2 font-normal" onClick={() => addNpcFromPicker(npc.id)}>
                       {cardTitle(npc)}
                     </Button>
                   </li>
@@ -1072,7 +1101,7 @@ export default function SessionNotesPage() {
               <div className="mt-4">
                 <CardQuickPreview card={openNpc} cardType={npcCardType} />
               </div>
-              <Button type="button" variant="outline" size="sm" className="mt-4 w-full h-9 text-xs" asChild>
+              <Button type="button" variant="outline" className="mt-4 w-full" asChild>
                 <Link to={`${CARD_KIND_ROUTES.npc}?id=${encodeURIComponent(openNpc.id)}`}>Otwórz kartę NPC</Link>
               </Button>
             </>

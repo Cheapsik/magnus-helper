@@ -69,7 +69,7 @@ export function CombatRosterPanel({ kinds, setCombatants, dragKey, onDragStart, 
               type="button"
               onClick={() => setKind(k)}
               className={cn(
-                "flex-1 rounded-md py-1.5 text-[10px] font-semibold transition-colors",
+                "flex-1 rounded-md py-1.5 text-[12px] font-semibold transition-colors",
                 kind === k ? "bg-primary/15 text-primary" : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
               )}
             >
@@ -86,13 +86,13 @@ export function CombatRosterPanel({ kinds, setCombatants, dragKey, onDragStart, 
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Szukaj…"
-            className="h-8 pl-8 text-xs"
+            className="field-sm pl-8"
             aria-label={`Szukaj: ${CARD_KIND_PLURAL[kind]}`}
           />
         </div>
       </div>
 
-      <p className="shrink-0 px-3 pt-2 text-[10px] leading-snug text-muted-foreground">
+      <p className="shrink-0 px-3 pt-2 text-[12px] leading-snug text-muted-foreground">
         {finePointer ? "Przeciągnij na walkę po lewej lub użyj „+ Do walki”." : "Dotknij „+ Do walki”, aby dodać uczestnika."}
       </p>
 
@@ -129,7 +129,7 @@ export function CombatRosterPanel({ kinds, setCombatants, dragKey, onDragStart, 
       </div>
 
       <div className="shrink-0 border-t border-border p-2">
-        <Button variant="outline" size="sm" className="h-9 w-full gap-1.5 text-xs" asChild>
+        <Button variant="outline" className="w-full gap-1.5" asChild>
           <Link to={CARD_KIND_ROUTES[kind]}>
             <ExternalLink className="h-3.5 w-3.5" />
             {CARD_KIND_PLURAL[kind]}

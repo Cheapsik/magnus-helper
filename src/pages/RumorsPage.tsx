@@ -7,8 +7,9 @@ import {
   Plus, Trash2, ChevronUp, ChevronDown, ChevronLeft, ChevronRight,
   Copy, Check, Dice5, Pencil,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, plural } from "@/lib/utils";
 import { readJson, writeJson } from "@/lib/storage";
+import { confirmDialog } from "@/components/ui/dialogs";
 
 interface RumorSegment {
   id: string;
@@ -38,7 +39,7 @@ const DEFAULT_CONFIG: RumorsConfig = {
       name: "Plotka karczmana",
       prefix: "Podobno ",
       segments: [
-        { id: "s1", name: "Kto", entries: ["stary kowal", "tajemnicza elfka", "kupiec z południa", "miejscowy pijak", "wędrowny mnich", "szlachcic w przebraniu"] },
+        { id: "s1", name: "Kto", entries: ["stary kowal", "tajemniczy elf", "kupiec z południa", "miejscowy pijak", "wędrowny mnich", "szlachcic w przebraniu"] },
         { id: "s2", name: "Co zrobił", entries: ["ukradł coś cennego", "zniknął bez śladu", "zawarł pakt z diabłem", "ożenił się potajemnie", "sprzedał coś czego nie powinien"] },
         { id: "s3", name: "Gdzie", entries: ["w miejskiej zbrojowni", "za starym młynem", "na targowisku w środku nocy", "w podziemiach zamku", "w opuszczonej świątyni"] },
         { id: "s4", name: "Dlaczego", entries: ["bo był zdesperowany", "dla złota", "z miłości do kogoś nieodpowiedniego", "pod przymusem", "bo nie miał wyboru"] },
@@ -131,7 +132,7 @@ function SegmentEditor({
               onBlur={commitName}
               onKeyDown={(e) => { e.stopPropagation(); if (e.key === "Enter") commitName(); }}
               onClick={(e) => e.stopPropagation()}
-              className="h-8 text-sm font-medium max-w-[200px]"
+              className="field-sm font-medium max-w-[200px]"
             />
           ) : (
             <span className="text-sm font-medium text-foreground truncate">{segment.name}</span>
@@ -163,7 +164,8 @@ function SegmentEditor({
           )}
           <button
             onClick={(e) => { e.stopPropagation(); onRemove(); }}
-            className="p-1.5 rounded hover:bg-accent text-destructive min-w-[32px] min-h-[32px] flex items-center justify-center"
+            aria-label={`Usuń segment ${segment.name}`}
+            className="p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-destructive min-w-[32px] min-h-[32px] flex items-center justify-center"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
@@ -183,7 +185,8 @@ function SegmentEditor({
               <span className="text-sm text-foreground flex-1 truncate">{entry}</span>
               <button
                 onClick={() => removeEntry(i)}
-                className="p-1.5 rounded hover:bg-accent text-destructive shrink-0 min-w-[32px] min-h-[32px] flex items-center justify-center"
+                aria-label={`Usuń wpis ${entry}`}
+                className="p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-destructive shrink-0 min-w-[32px] min-h-[32px] flex items-center justify-center"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
@@ -195,7 +198,7 @@ function SegmentEditor({
               onChange={(e) => setNewEntry(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addEntry()}
               placeholder="Nowy wpis..."
-              className="text-sm h-9 flex-1"
+              className="flex-1"
             />
             <Button onClick={addEntry} size="sm" variant="outline" className="min-h-[36px] shrink-0">
               <Plus className="h-4 w-4" />
@@ -219,6 +222,7 @@ function TemplateEditor({
   const [result, setResult] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   useEffect(() => { setNameDraft(template.name); setResult(""); }, [template.id, template.name]);
 
@@ -282,64 +286,37 @@ function TemplateEditor({
 
   const hasEntries = template.segments.some((s) => s.entries.length > 0);
 
+  // A template with entries opens ready to generate; its segments stay behind Edytuj.
+  const showEditor = editing || !hasEntries;
+
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto space-y-4 pb-4">
-        <div>
-          {editingName ? (
-            <Input
-              autoFocus
-              value={nameDraft}
-              onChange={(e) => setNameDraft(e.target.value)}
-              onBlur={commitName}
-              onKeyDown={(e) => e.key === "Enter" && commitName()}
-              className="text-lg font-bold"
-            />
-          ) : (
-            <button
-              onClick={() => setEditingName(true)}
-              className="text-lg font-bold text-foreground hover:text-primary transition-colors text-left w-full flex items-center"
-            >
-              {template.name}
-            </button>
-          )}
-        </div>
-
-        <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Prefiks zdania</label>
+    <div className="space-y-4 pb-4">
+      <div>
+        {editingName ? (
           <Input
-            value={template.prefix}
-            onChange={(e) => onUpdate({ ...template, prefix: e.target.value })}
-            placeholder='np. "Podobno ", "Mówi się, że "'
-            className="text-sm"
+            autoFocus
+            value={nameDraft}
+            onChange={(e) => setNameDraft(e.target.value)}
+            onBlur={commitName}
+            onKeyDown={(e) => e.key === "Enter" && commitName()}
+            className="text-lg font-bold"
           />
-        </div>
-
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium text-muted-foreground">Segmenty</h3>
-          {template.segments.map((seg, i) => (
-            <SegmentEditor
-              key={seg.id}
-              segment={seg}
-              index={i}
-              total={template.segments.length}
-              onUpdate={updateSegment}
-              onRemove={() => removeSegment(seg.id)}
-              onMove={(dir) => moveSegment(i, dir)}
-            />
-          ))}
-          <Button onClick={addSegment} variant="outline" size="sm" className="w-full">
-            <Plus className="h-4 w-4 mr-1" /> Dodaj segment
-          </Button>
-        </div>
+        ) : (
+          <button
+            onClick={() => setEditingName(true)}
+            className="text-lg font-bold text-foreground hover:text-primary transition-colors text-left w-full flex items-center"
+          >
+            {template.name}
+          </button>
+        )}
       </div>
 
-      <div className="border-t border-border pt-4 space-y-3 bg-background sticky bottom-0">
+      <div className="space-y-3">
         <Textarea
           readOnly
           value={result}
-          placeholder="Naciśnij Generuj aby stworzyć plotkę..."
-          className="text-sm min-h-[60px] resize-none"
+          placeholder={hasEntries ? "Naciśnij Generuj, aby stworzyć plotkę" : "Dodaj wpisy do segmentów w edycji, aby generować plotki"}
+          className="min-h-[60px] resize-none"
         />
         <div className="flex gap-2">
           <Button
@@ -349,10 +326,12 @@ function TemplateEditor({
           >
             <Dice5 className="h-4 w-4 mr-1" /> Generuj
           </Button>
+          <Button variant={showEditor ? "secondary" : "outline"} onClick={() => setEditing(!showEditor)} aria-pressed={showEditor} disabled={!hasEntries}>
+            <Pencil className="h-4 w-4 mr-1" /> Edytuj
+          </Button>
           <Button
             onClick={() => result && copyText(result, "main")}
             variant="outline"
-            className=""
             disabled={!result}
           >
             {copiedId === "main" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -388,13 +367,38 @@ function TemplateEditor({
             </div>
           </div>
         )}
-
-        {!hasEntries && (
-          <p className="text-xs text-muted-foreground text-center">
-            Dodaj wpisy do segmentów aby generować plotki
-          </p>
-        )}
       </div>
+
+      {showEditor && (
+        <div className="space-y-4 border-t border-border pt-4">
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Prefiks zdania</label>
+            <Input
+              value={template.prefix}
+              onChange={(e) => onUpdate({ ...template, prefix: e.target.value })}
+              placeholder='np. "Podobno ", "Mówi się, że "'
+            />
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-muted-foreground">Segmenty</h3>
+            {template.segments.map((seg, i) => (
+              <SegmentEditor
+                key={seg.id}
+                segment={seg}
+                index={i}
+                total={template.segments.length}
+                onUpdate={updateSegment}
+                onRemove={() => removeSegment(seg.id)}
+                onMove={(dir) => moveSegment(i, dir)}
+              />
+            ))}
+            <Button onClick={addSegment} variant="outline" size="sm" className="w-full">
+              <Plus className="h-4 w-4 mr-1" /> Dodaj segment
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -428,10 +432,10 @@ export default function RumorsPage() {
     setMobileView("editor");
   };
 
-  const removeTemplate = (id: string) => {
+  const removeTemplate = async (id: string) => {
     const tpl = config.templates.find((t) => t.id === id);
     if (!tpl) return;
-    if (!confirm(`Czy na pewno usunąć szablon '${tpl.name}'?`)) return;
+    if (!(await confirmDialog(`Usunąć szablon „${tpl.name}”?`, { confirmLabel: "Usuń", destructive: true }))) return;
     setConfig((c) => ({
       ...c,
       templates: c.templates.filter((t) => t.id !== id),
@@ -464,11 +468,12 @@ export default function RumorsPage() {
           <CardContent className="p-3 flex items-center justify-between">
             <div className="min-w-0">
               <p className="text-sm font-medium text-foreground truncate">{t.name}</p>
-              <p className="text-xs text-muted-foreground">{t.segments.length} segmentów</p>
+              <p className="text-xs text-muted-foreground">{t.segments.length} {plural(t.segments.length, "segment", "segmenty", "segmentów")}</p>
             </div>
             <button
               onClick={(e) => { e.stopPropagation(); removeTemplate(t.id); }}
-              className="p-2 rounded hover:bg-accent text-destructive shrink-0 flex items-center justify-center"
+              aria-label={`Usuń szablon ${t.name}`}
+              className="p-2 rounded hover:bg-accent text-muted-foreground hover:text-destructive shrink-0 flex items-center justify-center"
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -487,7 +492,7 @@ export default function RumorsPage() {
         <h2 className="text-sm font-medium text-muted-foreground mb-3">Szablony</h2>
         {templateList}
       </div>
-      <div className="overflow-hidden flex flex-col">
+      <div className="overflow-y-auto pr-1">
         {activeTemplate ? (
           <TemplateEditor template={activeTemplate} onUpdate={updateTemplate} />
         ) : (
@@ -508,9 +513,8 @@ export default function RumorsPage() {
                 onClick={() => setMobileView("editor")}
                 variant="ghost"
                 size="sm"
-                className=""
               >
-                Edytuj szablon <ChevronRight className="h-4 w-4 ml-1" />
+                Otwórz szablon <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             )}
           </div>
@@ -522,7 +526,6 @@ export default function RumorsPage() {
             onClick={() => setMobileView("list")}
             variant="ghost"
             size="sm"
-            className=""
           >
             <ChevronLeft className="h-4 w-4 mr-1" /> Szablony
           </Button>

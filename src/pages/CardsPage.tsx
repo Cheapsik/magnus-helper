@@ -40,9 +40,9 @@ type CardGroup = { id: string; name: string; collapsed: boolean };
 const NEW_CARD_NAME: Record<CardKind, string> = { hero: "Nowy bohater", npc: "Nowy NPC", monster: "Nowy potwór" };
 const ADD_LABEL: Record<CardKind, string> = { hero: "Dodaj bohatera", npc: "Dodaj NPC", monster: "Dodaj potwora" };
 const EMPTY_TEXT: Record<CardKind, string> = {
-  hero: "Brak bohaterów w tej kampanii.",
-  npc: "Brak NPC w tej kampanii.",
-  monster: "Brak potworów w tej kampanii.",
+  hero: "Brak bohaterów. Dodaj postacie graczy, a Start i tracker pokażą ich stan.",
+  npc: "Brak NPC. Dodaj postacie, które drużyna spotka, a będziesz mógł je wspominać w notatkach przez @.",
+  monster: "Brak potworów. Dodaj przeciwników, a trafią do trackera i kreatora spotkań.",
 };
 
 /** The card list for one card kind: groups, add, open, send to combat. */
@@ -259,7 +259,7 @@ function CardListItem({
           <select
             value={card.groupId ?? ""}
             onChange={(e) => onMove(e.target.value || undefined)}
-            className="h-8 max-w-[7rem] rounded-md border border-input bg-background px-1 text-xs"
+            className="field field-sm max-w-[7rem]"
             aria-label="Grupa"
           >
             <option value="">Bez grupy</option>
@@ -270,7 +270,7 @@ function CardListItem({
             ))}
           </select>
         )}
-        <Button size="sm" variant="secondary" className="h-8 gap-1 px-2 text-xs" onClick={onCombat}>
+        <Button size="sm" variant="secondary" className="gap-1 px-2" onClick={onCombat}>
           <Swords className="h-3 w-3" /> Walka
         </Button>
         <button
@@ -344,7 +344,7 @@ function CardSheet({
             <select
               value={draft.groupId ?? ""}
               onChange={(e) => setDraft({ ...draft, groupId: e.target.value || undefined })}
-              className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+              className="field field-sm"
               aria-label="Grupa"
             >
               <option value="">Bez grupy</option>
@@ -355,7 +355,7 @@ function CardSheet({
               ))}
             </select>
           )}
-          <Button size="sm" variant="secondary" className="h-8 gap-1 text-xs" onClick={onAddToCombat}>
+          <Button size="sm" variant="secondary" className="gap-1" onClick={onAddToCombat}>
             <Swords className="h-3 w-3" /> Dodaj do walki
           </Button>
         </div>

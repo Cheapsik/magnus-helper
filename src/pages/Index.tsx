@@ -1,39 +1,45 @@
 import { Link } from "react-router-dom";
-import { Dice5, Target, Swords, Gem, Flame, Pin, Timer as TimerIcon, ScrollText, ChevronRight, CircleDashed, Sword, MapPin } from "lucide-react";
+import { Flame, Pin, ChevronRight, Sword } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useApp } from "@/context/AppContext";
-import { useScene } from "@/context/SceneContext";
 import { Button } from "@/components/ui/button";
 import { useCardType, useCards } from "@/lib/cardStore";
 import { cardTitle, getCardCombatStats } from "@/lib/cardSchema";
 import { readJson } from "@/lib/storage";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import {
+  SECRETS_KEY, prepForSession, reviveSecrets, reviveSessionPreps, secretName, splitSecretsForSession,
+  type Secret, type SessionPrepMap,
+} from "@/lib/secrets";
+import { cn } from "@/lib/utils";
 
 interface QuestLite { id: string; title: string; column: string; type: string; updatedAt: string; }
-interface TimerLite { id: string; label: string; mode: "stopwatch" | "countdown"; countdownSet: number; }
 
 function hpColor(pct: number): string {
-  if (pct > 60) return "#4A7C59";
-  if (pct >= 30) return "#A0892A";
-  return "#8A1C1C";
+  if (pct > 60) return "hsl(var(--success))";
+  if (pct >= 30) return "hsl(var(--primary))";
+  return "hsl(var(--destructive))";
 }
 
-interface LastRoll { type: string; result: number | string; label?: string; timestamp?: string; }
-
 export default function Index() {
-  const { combatants, combatRound, setCombatRound, combatTurn, setCombatTurn } = useApp();
+  const { combatants, combatRound, setCombatRound, combatTurn, setCombatTurn, noteSessionCatalog } = useApp();
   const heroCardType = useCardType("hero");
   const [heroes] = useCards("hero");
-  const { activeScene } = useScene();
+  const [secrets] = useLocalStorage<Secret[]>(SECRETS_KEY, [], { revive: reviveSecrets });
+  const [preps] = useLocalStorage<SessionPrepMap>("rpg_session_prep", {}, { revive: reviveSessionPreps });
+  const session = noteSessionCatalog.sessions.find((x) => x.id === noteSessionCatalog.activeSessionId);
+  const prep = session
+    ? prepForSession(preps, noteSessionCatalog.sessions, session.id, secrets)
+    : { strongStart: "", scenes: [], secretIds: [] };
+  const readySecrets = session ? splitSecretsForSession(secrets, prep, session.id).ready : [];
+  const statusesOf = (heroId: string) =>
+    combatants.find((c) => c.card?.kind === "hero" && c.card.id === heroId)?.statuses ?? [];
 
   const [quests, setQuests] = useState<QuestLite[]>([]);
-  const [timers, setTimers] = useState<TimerLite[]>([]);
-  const [lastRoll, setLastRoll] = useState<LastRoll | null>(null);
 
   useEffect(() => {
     const state = readJson<{ quests?: QuestLite[] }>("rpg_quests", {});
     setQuests(state.quests ?? []);
-    setTimers(readJson<TimerLite[]>("rpg_timers", []));
-    setLastRoll(readJson<LastRoll | null>("magnus_last_roll", null));
   }, []);
 
   const activeQuests = quests
@@ -44,12 +50,6 @@ export default function Index() {
   const enemyCount = combatants.filter((c) => c.isEnemy && c.resource.current > 0).length;
   const combatActive = enemyCount > 0 && combatants.length > 1;
   const currentTurnName = combatActive ? combatants[combatTurn % combatants.length]?.name : null;
-  const QUICK_ROWS = [
-    { path: "/dice", label: "Rzut kośćmi", icon: Dice5 },
-    { path: "/tests", label: "Test", icon: Target },
-    { path: "/combat", label: "Tracker walki", icon: Swords },
-    { path: "/loot", label: "Generuj łup", icon: Gem },
-  ];
 
   const nextTurn = () => {
     const sorted = [...combatants].sort((a, b) => b.initiative - a.initiative);
@@ -114,6 +114,9 @@ export default function Index() {
                     <li key={hero.id} className="flex items-center gap-3 py-1.5">
                       <Link to="/heroes" className="min-w-0 flex-1 truncate text-[length:--fs-sm] hover:text-primary transition-colors">
                         {cardTitle(hero)}
+                        {statusesOf(hero.id).length > 0 && (
+                          <span className="ml-2 text-[length:--fs-meta] text-destructive">{statusesOf(hero.id).join(", ")}</span>
+                        )}
                       </Link>
                       {resource && (
                         <>
@@ -171,66 +174,50 @@ export default function Index() {
         </div>
 
         <div className="space-y-3">
-          {/* Quick actions belong under the thumb, not in a full-width stack. */}
+          {/* Tonight's plan from Przygotowanie, so the GM does not open a second page to remember it. */}
           <section className="panel p-4">
-            <h2 className="mb-2 text-[length:--fs-sm] font-medium">Szybkie akcje</h2>
-            <div className="grid grid-cols-2 gap-1.5">
-              {QUICK_ROWS.map(({ path, label, icon: Icon }) => (
-                <Link
-                  key={path}
-                  to={path}
-                  className="flex h-[--h-control-lg] items-center gap-2 rounded-[--radius] bg-secondary px-2.5 text-[length:--fs-sm] hover:bg-accent hover:text-primary transition-colors"
-                >
-                  <Icon className="h-3.5 w-3.5 shrink-0" />
-                  <span className="truncate">{label}</span>
-                </Link>
-              ))}
+            <div className="mb-2 flex items-baseline justify-between gap-2">
+              <h2 className="truncate text-[length:--fs-sm] font-medium">Dziś na sesji{session ? `: ${session.name}` : ""}</h2>
+              <Link to="/prep" className="field-label shrink-0 hover:text-primary transition-colors">Przygotowanie</Link>
             </div>
-          </section>
-
-          <section className="panel p-4">
-            <h2 className="mb-2 text-[length:--fs-sm] font-medium">Sesja</h2>
-            <dl className="space-y-1.5">
-              <SessionRow to="/scena" icon={MapPin} label="Scena" value={activeScene?.name ?? "—"} />
-              <SessionRow to="/quests" icon={ScrollText} label="Wątki" value={String(activeQuests.length)} />
-              <SessionRow
-                to="/timers"
-                icon={TimerIcon}
-                label="Timery"
-                value={timers.length > 0 ? String(timers.length) : "—"}
-              />
-              <SessionRow
-                to="/dice"
-                icon={lastRoll ? Dice5 : CircleDashed}
-                label="Ostatni rzut"
-                value={lastRoll ? `${lastRoll.type} → ${lastRoll.result}` : "—"}
-              />
-            </dl>
+            {!prep.strongStart && prep.scenes.length === 0 && readySecrets.length === 0 ? (
+              <p className="text-[length:--fs-sm] text-muted-foreground">
+                Nic jeszcze nie zaplanowano.{" "}
+                <Link to="/prep" className="text-primary hover:underline">Zapisz mocny początek i sceny</Link>.
+              </p>
+            ) : (
+              <div className="space-y-3 text-[length:--fs-sm]">
+                {prep.strongStart && (
+                  <div>
+                    <div className="field-label mb-0.5">Mocny początek</div>
+                    <p className="whitespace-pre-line">{prep.strongStart}</p>
+                  </div>
+                )}
+                {prep.scenes.length > 0 && (
+                  <div>
+                    <div className="field-label mb-0.5">Sceny</div>
+                    <ul className="list-disc space-y-0.5 pl-5">
+                      {prep.scenes.map((scene, i) => <li key={i}>{scene}</li>)}
+                    </ul>
+                  </div>
+                )}
+                {readySecrets.length > 0 && (
+                  <div>
+                    <div className="field-label mb-0.5">Sekrety do odkrycia</div>
+                    <ul className="space-y-0.5">
+                      {readySecrets.map((secret) => (
+                        <li key={secret.id} className={cn(secret.revealedInSessionId && "text-muted-foreground line-through")}>
+                          {secretName(secret)}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
           </section>
         </div>
       </div>
     </div>
-  );
-}
-
-function SessionRow({
-  to,
-  icon: Icon,
-  label,
-  value,
-}: {
-  to: string;
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string;
-}) {
-  return (
-    <Link to={to} className="flex items-center gap-2 group">
-      <Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
-      <dt className="text-[length:--fs-sm] text-muted-foreground group-hover:text-foreground transition-colors">
-        {label}
-      </dt>
-      <dd className="ml-auto truncate text-[length:--fs-sm] text-foreground">{value}</dd>
-    </Link>
   );
 }

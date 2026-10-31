@@ -30,7 +30,7 @@ export function CharacterPoolPanel() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Szukaj (imię, alias, tag)…"
-            className="h-8 pl-8 text-xs"
+            className="field-sm pl-8"
           />
         </div>
       </div>
@@ -63,11 +63,11 @@ export function CharacterPoolPanel() {
               <div className="flex-1 min-w-0">
                 <div className="text-xs font-medium text-foreground truncate">{e.name}</div>
                 {e.desc && (
-                  <div className="text-[10px] text-muted-foreground truncate">{e.desc}</div>
+                  <div className="text-[12px] text-muted-foreground truncate">{e.desc}</div>
                 )}
               </div>
               {placed ? (
-                <Badge variant="outline" className="text-[9px] px-1 py-0">
+                <Badge variant="outline" className="text-[12px] px-1 py-0">
                   ✓
                 </Badge>
               ) : (

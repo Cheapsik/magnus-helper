@@ -41,6 +41,7 @@ import type {
   TimelineItem,
 } from "../types";
 import { DEFAULT_EDGE_DRAFT } from "../types";
+import { promptDialog } from "@/components/ui/dialogs";
 
 // re-export defaults
 const INITIAL_FILTERS: FilterState = {
@@ -168,7 +169,7 @@ export function RelationsMapProvider({ children }: { children: ReactNode }) {
   const [sessionMode, setSessionMode] = useState(false);
   const [uiVisible, setUiVisible] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
-  const [showLegend, setShowLegend] = useState(true);
+  const [showLegend, setShowLegend] = useState(false);
   const [showSessions, setShowSessions] = useState(false);
   const [showTimeline, setShowTimeline] = useState(false);
   const [detailPanelOpen, setDetailPanelOpen] = useState(true);
@@ -387,8 +388,8 @@ export function RelationsMapProvider({ children }: { children: ReactNode }) {
     [setPersisted, isReadOnly]
   );
 
-  const startNewSession = useCallback(() => {
-    const name = window.prompt('Nazwa sesji (np. "Sesja 12")');
+  const startNewSession = useCallback(async () => {
+    const name = await promptDialog("Nazwa sesji", { description: "Na przykład „Sesja 12”.", confirmLabel: "Rozpocznij" });
     if (!name?.trim()) return;
     const now = Date.now();
     setPersisted((p) => {

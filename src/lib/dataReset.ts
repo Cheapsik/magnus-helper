@@ -15,6 +15,7 @@ const PRESERVED_KEYS = new Set([
   "magnus_settings",
   "rpg_theme",
   "magnus_sidebar_width",
+  "magnus_nav",
   "magnus-dice-3d-visual",
 ]);
 

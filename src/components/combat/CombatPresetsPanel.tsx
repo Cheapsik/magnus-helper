@@ -44,10 +44,10 @@ function SaveFightAsPresetBlock({
             value={saveFromFightName}
             onChange={(e) => setSaveFromFightName(e.target.value)}
             placeholder="Nazwa presetu, np. Gobliny w tawernie"
-            className="h-9 flex-1 text-sm"
+            className="flex-1"
             onKeyDown={(e) => e.key === "Enter" && onSave()}
           />
-          <Button className="h-9 shrink-0" onClick={onSave} disabled={!saveFromFightName.trim()}>
+          <Button className="shrink-0" onClick={onSave} disabled={!saveFromFightName.trim()}>
             Zapisz
           </Button>
         </div>
@@ -103,14 +103,14 @@ function PresetCombatantEditor({
                   idPrefix={`preset-edit-${c.id}`}
                 />
                 <div className="flex gap-2">
-                  <Button size="sm" className="h-9 flex-1 gap-1" onClick={saveCombatantEdit}>
+                  <Button className="flex-1 gap-1" onClick={saveCombatantEdit}>
                     <Check className="h-3.5 w-3.5" />
                     Zapisz uczestnika
                   </Button>
                   <Button
-                    size="sm"
+                   
                     variant="ghost"
-                    className="h-9"
+                   
                     onClick={() => {
                       setEditingCombatantId(null);
                       setCombatantDraft(null);
@@ -141,9 +141,9 @@ function PresetCombatantEditor({
               <div className="flex shrink-0 gap-0.5">
                 <Button
                   type="button"
-                  size="icon"
+                  size="icon-sm"
                   variant="ghost"
-                  className="h-8 w-8"
+                 
                   onClick={() => startEditCombatant(c)}
                   title="Edytuj"
                 >
@@ -151,9 +151,9 @@ function PresetCombatantEditor({
                 </Button>
                 <Button
                   type="button"
-                  size="icon"
+                  size="icon-sm"
                   variant="ghost"
-                  className="h-8 w-8 text-destructive"
+                  className="text-destructive"
                   onClick={() => onChange(combatants.filter((x) => x.id !== c.id))}
                   title="Usuń"
                 >
@@ -168,13 +168,13 @@ function PresetCombatantEditor({
       {addingNew ? (
         <Card className="border-dashed border-primary/40">
           <CardContent className="space-y-2 p-2.5">
-            <p className="text-[10px] font-medium text-muted-foreground">Nowy uczestnik w presecie</p>
+            <p className="text-[12px] font-medium text-muted-foreground">Nowy uczestnik w presecie</p>
             <CombatantFormFields combatant={newDraft} onChange={setNewDraft} idPrefix="preset-new" />
             <div className="flex gap-2">
-              <Button size="sm" className="h-9 flex-1" onClick={addNewCombatant} disabled={!newDraft.name.trim()}>
+              <Button className="flex-1" onClick={addNewCombatant} disabled={!newDraft.name.trim()}>
                 Dodaj
               </Button>
-              <Button size="sm" variant="ghost" className="h-9" onClick={() => setAddingNew(false)}>
+              <Button variant="ghost" onClick={() => setAddingNew(false)}>
                 Anuluj
               </Button>
             </div>
@@ -184,8 +184,8 @@ function PresetCombatantEditor({
         <Button
           type="button"
           variant="outline"
-          size="sm"
-          className="h-9 w-full gap-1 text-xs"
+         
+          className="w-full gap-1"
           onClick={() => {
             setAddingNew(true);
             setNewDraft(emptyCombatant());
@@ -272,7 +272,7 @@ function CombatPresetsFull({
 
       <div className="flex items-center justify-between gap-2">
         <span className="text-sm font-semibold">Lista presetów ({presets.length})</span>
-        <Button size="sm" variant="outline" className="h-9 gap-1 text-xs" onClick={startCreate}>
+        <Button variant="outline" className="gap-1" onClick={startCreate}>
           <Plus className="h-3.5 w-3.5" />
           Nowy preset
         </Button>
@@ -285,15 +285,15 @@ function CombatPresetsFull({
               value={newPresetName}
               onChange={(e) => setNewPresetName(e.target.value)}
               placeholder="Nazwa presetu"
-              className="h-9 text-sm"
+             
               autoFocus
               onKeyDown={(e) => e.key === "Enter" && commitCreate()}
             />
             <div className="flex gap-2">
-              <Button size="sm" className="h-9 flex-1" onClick={commitCreate} disabled={!newPresetName.trim()}>
+              <Button className="flex-1" onClick={commitCreate} disabled={!newPresetName.trim()}>
                 Utwórz
               </Button>
-              <Button size="sm" variant="ghost" className="h-9" onClick={() => setCreating(false)}>
+              <Button variant="ghost" onClick={() => setCreating(false)}>
                 Anuluj
               </Button>
             </div>
@@ -319,7 +319,7 @@ function CombatPresetsFull({
                 <Input
                   value={draft.name}
                   onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-                  className="h-9 text-sm font-semibold"
+                  className="font-semibold"
                 />
                 <Separator />
                 <PresetCombatantEditor
@@ -327,14 +327,14 @@ function CombatPresetsFull({
                   onChange={(combatants) => setDraft({ ...draft, combatants })}
                 />
                 <div className="flex gap-2">
-                  <Button size="sm" className="h-9 flex-1 gap-1" onClick={saveEdit}>
+                  <Button className="flex-1 gap-1" onClick={saveEdit}>
                     <Check className="h-3.5 w-3.5" />
                     Zapisz preset
                   </Button>
                   <Button
-                    size="sm"
+                   
                     variant="ghost"
-                    className="h-9"
+                   
                     onClick={() => {
                       setEditingId(null);
                       setDraft(null);
@@ -353,7 +353,7 @@ function CombatPresetsFull({
             <CardContent className="flex items-center justify-between gap-2 p-2.5">
               <div className="min-w-0">
                 <span className="block truncate text-sm font-semibold">{preset.name}</span>
-                <Badge variant="secondary" className="mt-0.5 text-[10px]">
+                <Badge variant="secondary" className="mt-0.5 text-[12px]">
                   {preset.combatants.length} uczestników
                 </Badge>
               </div>
@@ -362,7 +362,7 @@ function CombatPresetsFull({
                   type="button"
                   size="icon"
                   variant="ghost"
-                  className="h-9 w-9"
+                 
                   onClick={() => startEdit(preset)}
                   title="Edytuj"
                 >
@@ -372,7 +372,7 @@ function CombatPresetsFull({
                   type="button"
                   size="icon"
                   variant="ghost"
-                  className="h-9 w-9 text-destructive"
+                  className="text-destructive"
                   onClick={() => deletePreset(preset.id)}
                   title="Usuń"
                 >
@@ -426,7 +426,7 @@ function CombatPresetsCompact({
           presets.map((preset) => (
             <div key={preset.id} className="rounded-lg border border-border/80 bg-card px-2.5 py-2">
               <span className="block truncate text-sm font-semibold">{preset.name}</span>
-              <Badge variant="secondary" className="mt-1 text-[10px]">
+              <Badge variant="secondary" className="mt-1 text-[12px]">
                 {preset.combatants.length} uczestników
               </Badge>
             </div>
@@ -448,7 +448,7 @@ function CombatPresetsCompact({
 
   return (
     <>
-      <p className="shrink-0 px-3 pt-2 text-[10px] leading-snug text-muted-foreground">
+      <p className="shrink-0 px-3 pt-2 text-[12px] leading-snug text-muted-foreground">
         Presety wczytujesz przy „+ Nowa walka”. Pełna edycja w szufladzie poniżej.
       </p>
       {list}

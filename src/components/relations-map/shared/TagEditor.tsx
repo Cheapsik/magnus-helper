@@ -39,7 +39,7 @@ export function TagEditor({
         <PopoverTrigger asChild>
           <button
             type="button"
-            className="text-[9px] px-1.5 py-0.5 border border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary"
+            className="text-[12px] px-1.5 py-0.5 border border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary"
           >
             + tag
           </button>
@@ -50,7 +50,7 @@ export function TagEditor({
               value={v}
               onChange={(e) => setV(e.target.value)}
               placeholder="Nowy tag…"
-              className="h-7 text-xs"
+              className="field-sm"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && v.trim()) {
                   onAdd(v.trim());
@@ -60,7 +60,7 @@ export function TagEditor({
             />
             <Button
               size="sm"
-              className="h-7 px-2"
+              className="px-2"
               onClick={() => {
                 if (v.trim()) {
                   onAdd(v.trim());
@@ -78,7 +78,7 @@ export function TagEditor({
                   key={s}
                   type="button"
                   onClick={() => onAdd(s)}
-                  className="text-[9px] px-1 py-0.5 border border-border hover:border-primary"
+                  className="text-[12px] px-1 py-0.5 border border-border hover:border-primary"
                 >
                   {s}
                 </button>
@@ -99,7 +99,7 @@ export function QuickHistoryAdder({ onAdd }: { onAdd: (m: string) => void }) {
         value={v}
         onChange={(e) => setV(e.target.value)}
         placeholder="Dodaj wpis do historii…"
-        className="h-8 text-xs"
+        className="field-sm"
         onKeyDown={(e) => {
           if (e.key === "Enter" && v.trim()) {
             onAdd(v.trim());
@@ -109,7 +109,7 @@ export function QuickHistoryAdder({ onAdd }: { onAdd: (m: string) => void }) {
       />
       <Button
         size="sm"
-        className="h-8"
+       
         onClick={() => {
           if (v.trim()) {
             onAdd(v.trim());

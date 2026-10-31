@@ -28,6 +28,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MaterialViewer } from "@/components/materials/MaterialViewer";
+import { confirmDialog } from "@/components/ui/dialogs";
 
 /** Rejects photos straight off a camera that would only be downscaled anyway after a long upload. */
 const MAX_SOURCE_BYTES = 25 * 1024 * 1024;
@@ -153,15 +154,15 @@ function SharedCampaignView({ campaignId }: { campaignId: string }) {
                 <CardContent className="space-y-2 p-3">
                   <div className="flex items-start gap-1">
                     <p className="flex-1 truncate font-medium">{m.title}</p>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Edytuj" onClick={() => setEditing(m)}>
+                    <Button variant="ghost" size="icon-sm" aria-label="Edytuj" onClick={() => setEditing(m)}>
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
                     <Button
                       variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-destructive"
+                      size="icon-sm"
+                      className="text-destructive"
                       aria-label="Usuń"
-                      onClick={() => confirm(`Usunąć materiał „${m.title}”? Gracze też go stracą.`) && act(() => deleteMaterial(m))}
+                      onClick={async () => (await confirmDialog(`Usunąć materiał „${m.title}”?`, { description: "Gracze też go stracą.", confirmLabel: "Usuń", destructive: true })) && act(() => deleteMaterial(m))}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
@@ -220,7 +221,7 @@ function PlayersPanel({ campaignId, members, onRemove }: { campaignId: string; m
         <CardContent className="space-y-2 p-3">
           <Label htmlFor="invite-link">Link zaproszenia</Label>
           <div className="flex gap-1.5">
-            <Input id="invite-link" readOnly value={link} className="text-xs" onFocus={(e) => e.target.select()} />
+            <Input id="invite-link" readOnly value={link} onFocus={(e) => e.target.select()} />
             <Button
               variant="outline"
               size="icon"
@@ -234,9 +235,9 @@ function PlayersPanel({ campaignId, members, onRemove }: { campaignId: string; m
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 gap-1.5 px-2 text-xs text-muted-foreground"
+            className="gap-1.5 px-2 text-muted-foreground"
             onClick={async () => {
-              if (!confirm("Wygenerować nowy link? Stary przestanie działać; gracze, którzy już dołączyli, zostają.")) return;
+              if (!(await confirmDialog("Wygenerować nowy link?", { description: "Stary przestanie działać; gracze, którzy już dołączyli, zostają.", confirmLabel: "Wygeneruj" }))) return;
               try {
                 setToken(await regenerateInvite(campaignId));
               } catch (e) {
@@ -257,10 +258,10 @@ function PlayersPanel({ campaignId, members, onRemove }: { campaignId: string; m
               <span className="flex-1 truncate">{m.display_name}</span>
               <Button
                 variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                size="icon-sm"
+                className="text-muted-foreground hover:text-destructive"
                 aria-label={`Usuń gracza ${m.display_name}`}
-                onClick={() => confirm(`Usunąć gracza „${m.display_name}” z kampanii?`) && onRemove(m)}
+                onClick={async () => (await confirmDialog(`Usunąć gracza „${m.display_name}” z kampanii?`, { confirmLabel: "Usuń", destructive: true })) && onRemove(m)}
               >
                 <UserMinus className="h-3.5 w-3.5" />
               </Button>

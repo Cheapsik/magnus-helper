@@ -42,7 +42,7 @@ export function MonthGrid({ definition, events, today, view, selected, onView, o
       </div>
       <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
         {definition.weekdays.map((name, i) => (
-          <div key={i} className="text-center text-[10px] text-muted-foreground truncate" title={name}>{name.slice(0, 3)}</div>
+          <div key={i} className="text-center text-[12px] text-muted-foreground truncate" title={name}>{name.slice(0, 3)}</div>
         ))}
         {Array.from({ length: lead }, (_, i) => <div key={`lead-${i}`} />)}
         {Array.from({ length: month.days }, (_, i) => {
@@ -64,7 +64,7 @@ export function MonthGrid({ definition, events, today, view, selected, onView, o
             >
               <div>{i + 1}</div>
               {dayEvents.map((e) => (
-                <div key={e.id} className="truncate rounded bg-primary/20 px-1 text-[10px]" title={e.title}>{e.title}</div>
+                <div key={e.id} className="truncate rounded bg-primary/20 px-1 text-[12px]" title={e.title}>{e.title}</div>
               ))}
             </button>
           );

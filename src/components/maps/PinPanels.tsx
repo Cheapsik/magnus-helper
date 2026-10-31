@@ -73,7 +73,7 @@ export function PinPopover({ pin, targets, onOpenLink, onEdit, onDelete, onClose
                 key={linkKey(l)}
                 type="button"
                 onClick={() => onOpenLink(l)}
-                className="rounded border bg-muted px-1.5 py-0.5 text-[11px] hover:bg-accent"
+                className="rounded border bg-muted px-1.5 py-0.5 text-[length:--fs-meta] hover:bg-accent"
               >
                 <span className="text-muted-foreground">{LINK_KIND_LABEL[l.kind]}:</span> {l.name}
               </button>
@@ -81,8 +81,8 @@ export function PinPopover({ pin, targets, onOpenLink, onEdit, onDelete, onClose
           </div>
         )}
         <div className="flex justify-end gap-1">
-          <Button size="sm" variant="ghost" className="h-7 gap-1" onClick={onEdit}><Pencil className="h-3.5 w-3.5" />Edytuj</Button>
-          <Button size="sm" variant="ghost" className="h-7 gap-1 text-destructive" onClick={onDelete}><Trash2 className="h-3.5 w-3.5" />Usuń</Button>
+          <Button size="sm" variant="ghost" className="gap-1" onClick={onEdit}><Pencil className="h-3.5 w-3.5" />Edytuj</Button>
+          <Button size="sm" variant="ghost" className="gap-1 text-destructive" onClick={onDelete}><Trash2 className="h-3.5 w-3.5" />Usuń</Button>
         </div>
       </CardContent>
     </Card>

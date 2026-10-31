@@ -7,6 +7,7 @@ import { logChronicleEvent } from "@/lib/chronicle";
 import { cn } from "@/lib/utils";
 import { ClockDial } from "./ClockDial";
 import { ClockEditor, useQuestTitles } from "./ClockEditor";
+import { confirmDialog } from "@/components/ui/dialogs";
 
 /**
  * Self-contained clock list: reads and writes campaign storage itself, so it
@@ -21,8 +22,8 @@ export function ClocksPanel({ wide = false }: { wide?: boolean }) {
   const update = (id: string, fn: (c: Clock) => Clock) => setClocks((prev) => prev.map((c) => (c.id === id ? fn(c) : c)));
   const save = (c: Clock) =>
     setClocks((prev) => (prev.some((p) => p.id === c.id) ? prev.map((p) => (p.id === c.id ? c : p)) : [...prev, c]));
-  const remove = (c: Clock) => {
-    if (!confirm(`Czy na pewno usunąć koło postępu '${c.name}'?`)) return;
+  const remove = async (c: Clock) => {
+    if (!(await confirmDialog(`Usunąć koło postępu „${c.name}”?`, { confirmLabel: "Usuń", destructive: true }))) return;
     setClocks((prev) => prev.filter((p) => p.id !== c.id));
   };
   const tickLogged = (c: Clock, delta: number) => {
@@ -36,13 +37,6 @@ export function ClocksPanel({ wide = false }: { wide?: boolean }) {
   const smallBtn = "h-7 w-7 shrink-0";
   return (
     <div className="space-y-3">
-      {wide && (
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          Koło postępu pokazuje, jak blisko jest coś, co się stanie, jeśli gracze nie zareagują: pościg straży, rytuał kultu, burza
-          nad przełęczą. Gdy bohaterowie zwlekają albo coś pójdzie nie tak, zamaluj segment (kliknij tarczę lub „+”).
-          Pełne koło oznacza, że zdarzenie właśnie następuje. Koło oznaczone okiem widzą gracze na ekranie graczy.
-        </p>
-      )}
       <Button size="sm" onClick={() => setEditing(normalizeClock({ segments: 4 }))}>
         <Plus className="h-4 w-4 mr-1" /> Dodaj koło
       </Button>
@@ -78,7 +72,7 @@ export function ClocksPanel({ wide = false }: { wide?: boolean }) {
                       aria-label={`Dodaj segment: ${c.name}`}
                       title="Kliknij, aby dodać segment"
                     >
-                      <ClockDial clock={c} size={wide ? 96 : 56} />
+                      <ClockDial clock={c} size={wide ? 128 : 56} />
                     </button>
                     <div className="min-w-0 flex-1 space-y-1">
                       <div className="flex items-start gap-0.5">

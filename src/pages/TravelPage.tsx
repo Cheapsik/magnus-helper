@@ -11,6 +11,7 @@ import { JourneyView } from "@/components/travel/JourneyView";
 import type { RandomTable } from "@/lib/randomTables";
 import { daysTravelled, normalizeJourney, STATUS_LABELS, totalDays, useJourneys, type Journey } from "@/lib/travel";
 import { cn } from "@/lib/utils";
+import { confirmDialog } from "@/components/ui/dialogs";
 
 export default function TravelPage() {
   const [journeys, setJourneys] = useJourneys();
@@ -25,28 +26,24 @@ export default function TravelPage() {
     setJourneys((prev) => [...prev, j]);
     setSelectedId(j.id);
   };
-  const remove = (j: Journey) => {
-    if (!confirm(`Czy na pewno usunąć podróż '${j.name}'?`)) return;
+  const remove = async (j: Journey) => {
+    if (!(await confirmDialog(`Usunąć podróż „${j.name}”?`, { confirmLabel: "Usuń", destructive: true }))) return;
     setJourneys((prev) => prev.filter((p) => p.id !== j.id));
   };
-  const restart = (j: Journey) => {
-    if (!confirm("Wrócić na początek trasy i wyczyścić dziennik? Zapasy i kalendarz nie zostaną cofnięte.")) return;
+  const restart = async (j: Journey) => {
+    if (!(await confirmDialog("Wrócić na początek trasy i wyczyścić dziennik?", { description: "Zapasy i kalendarz nie zostaną cofnięte.", confirmLabel: "Wróć na początek" }))) return;
     update(j.id)((x) => ({ ...x, status: "planned", stageIndex: 0, dayInStage: 0, log: [] }));
   };
 
   return (
     <div className="space-y-4">
-      <p className="max-w-2xl text-sm text-muted-foreground">
-        Zaplanuj trasę jako etapy z liczbą dni, dodaj własne zapasy i wybierz tabele losowe pogody i zdarzeń. Każdy
-        „Kolejny dzień podróży” przesuwa kalendarz kampanii i trafia do dziennika oraz kroniki.
-      </p>
       <div className="grid gap-4 md:grid-cols-[16rem_1fr]">
         <div className="space-y-2">
           <Button size="sm" onClick={add}>
             <Plus className="h-4 w-4 mr-1" /> Nowa podróż
           </Button>
           {journeys.length === 0 ? (
-            <p className="text-muted-foreground text-sm py-4">Brak podróży.</p>
+            <p className="text-muted-foreground text-sm py-4">Brak podróży. Zaplanuj trasę na etapy i odliczaj dni w drodze.</p>
           ) : (
             <ul className="space-y-1">
               {journeys.map((j) => (
@@ -73,10 +70,10 @@ export default function TravelPage() {
               <div className="flex items-start gap-2">
                 <h2 className="text-lg font-semibold flex-1 truncate">{selected.name || "Bez nazwy"}</h2>
                 {selected.status === "done" && <Badge variant="secondary">zakończona</Badge>}
-                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Zacznij od nowa" title="Zacznij od nowa" onClick={() => restart(selected)}>
+                <Button variant="ghost" size="icon-sm" aria-label="Zacznij od nowa" title="Zacznij od nowa" onClick={() => restart(selected)}>
                   <RotateCcw className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" aria-label="Usuń podróż" onClick={() => remove(selected)}>
+                <Button variant="ghost" size="icon-sm" className="text-destructive" aria-label="Usuń podróż" onClick={() => remove(selected)}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>

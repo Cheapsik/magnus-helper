@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState, useId } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Plus, Trash2, Edit2, Check, Dice5, Pencil, Package, Sword, Shield, Flame, Coins, Minus, Upload, X } from "lucide-react";
+import { Plus, Trash2, Edit2, Check, Dice5, Pencil, Package, Coins, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useApp } from "@/context/AppContext";
 import { type LootDbItem, type LootRank, lootItemsFileSchema, NO_COINS, useLootConfig, useLootItems } from "@/lib/lootDb";
@@ -118,15 +118,7 @@ function tagsToArray(raw: string): string[] {
   return raw.split(",").map((t) => t.trim()).filter(Boolean);
 }
 
-const CARRY_CATEGORIES = [
-  { id: "weapons", label: "Broń", icon: Sword },
-  { id: "armor", label: "Pancerz", icon: Shield },
-  { id: "consumables", label: "Zużywalne", icon: Flame },
-  { id: "gear", label: "Wyposażenie", icon: Package },
-  { id: "coins", label: "Pieniądze", icon: Coins },
-];
-
-const VALID_TABS = ["generate", "ranks", "items", "carry"] as const;
+const VALID_TABS = ["generate", "ranks", "items"] as const;
 
 export default function LootGeneratorPage() {
   const [searchParams] = useSearchParams();
@@ -142,7 +134,7 @@ export default function LootGeneratorPage() {
   const [system] = useCampaignSystem();
   const currency = system.currency;
   const priceLabel = (price: number) => (price > 0 ? formatMoney(price, currency) : "—");
-  const [tab, setTab] = useState<"generate" | "ranks" | "items" | "carry">(initialTab);
+  const [tab, setTab] = useState<"generate" | "ranks" | "items">(initialTab);
   const [result, setResult] = useState<GeneratedLoot | null>(null);
 
   const [editingRankId, setEditingRankId] = useState<string | null>(null);
@@ -157,9 +149,6 @@ export default function LootGeneratorPage() {
   const [itemForm, setItemForm] = useState<ItemFormState>(() => emptyItemForm(""));
   const [deleteTarget, setDeleteTarget] = useState<LootDbItem | null>(null);
   const typeListId = useId();
-  const [activeCarryCategory, setActiveCarryCategory] = useState("all");
-  const [newCarryName, setNewCarryName] = useState("");
-  const [newCarryCategory, setNewCarryCategory] = useState("gear");
 
   const rankNames = useMemo(() => lootConfig.ranks.map((r) => r.name), [lootConfig.ranks]);
   const defaultRankName = rankNames[0] ?? "";
@@ -317,24 +306,20 @@ export default function LootGeneratorPage() {
 
   const canSaveItem = itemForm.name.trim() && itemForm.type.trim() && itemForm.rankName.trim();
 
-  const filteredCarry =
-    activeCarryCategory === "all" ? inventory : inventory.filter((i) => i.category === activeCarryCategory);
-
-  const updateCarryQuantity = (id: string, delta: number) =>
-    setInventory((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity: Math.max(0, item.quantity + delta) } : item)),
-    );
-
-  const removeCarryItem = (id: string) => setInventory((prev) => prev.filter((i) => i.id !== id));
-
-  const addCarryItem = () => {
-    const name = newCarryName.trim();
-    if (!name) return;
-    setInventory((prev) => [...prev, { id: crypto.randomUUID(), name, category: newCarryCategory, quantity: 1 }]);
-    setNewCarryName("");
+  // Same-named items stack, so taking the same loot twice raises the count instead of adding a row.
+  const takeLoot = () => {
+    if (!result || result.items.length === 0) return;
+    setInventory((prev) => {
+      const next = [...prev];
+      for (const item of result.items) {
+        const i = next.findIndex((x) => x.name === item.name);
+        if (i >= 0) next[i] = { ...next[i], quantity: next[i].quantity + 1 };
+        else next.push({ id: crypto.randomUUID(), name: item.name, category: "gear", quantity: 1 });
+      }
+      return next;
+    });
+    toast.success(`Dodano do ekwipunku drużyny: ${result.items.length}`);
   };
-
-  const getCarryCategoryIcon = (cat: string) => CARRY_CATEGORIES.find((c) => c.id === cat)?.icon ?? Package;
 
   return (
     <div className="space-y-4 animate-fade-in">
@@ -342,11 +327,14 @@ export default function LootGeneratorPage() {
       </div>
 
       <div className="flex flex-wrap gap-1.5">
-        {(["generate", "ranks", "items", "carry"] as const).map((t) => (
-          <Button key={t} size="sm" variant={tab === t ? "default" : "outline"} className="text-xs flex-1 min-w-[4.25rem]" onClick={() => setTab(t)}>
-            {t === "generate" ? "Generuj" : t === "ranks" ? "Rangi" : t === "items" ? "Przedmioty" : "Ekwipunek"}
+        {(["generate", "ranks", "items"] as const).map((t) => (
+          <Button key={t} size="sm" variant={tab === t ? "default" : "outline"} className="flex-1 min-w-[4.25rem]" onClick={() => setTab(t)}>
+            {t === "generate" ? "Generuj" : t === "ranks" ? "Rangi" : "Przedmioty"}
           </Button>
         ))}
+        <Button size="sm" variant="outline" className="flex-1 min-w-[4.25rem]" asChild>
+          <Link to="/inventory">Ekwipunek</Link>
+        </Button>
       </div>
 
       {tab === "generate" && (
@@ -358,31 +346,15 @@ export default function LootGeneratorPage() {
 
           <Card>
             <CardContent className="p-3 space-y-2">
-              <label className="text-xs text-muted-foreground font-medium">Ilość przedmiotów</label>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-[9px] text-muted-foreground">Min</label>
-                  <NumberInput
-                    value={lootConfig.itemCount.min}
-                    onChange={(v) => setLootConfig((p) => ({ ...p, itemCount: { ...p.itemCount, min: v } }))}
-                    min={0}
-                    max={20}
-                    className="h-8 text-xs text-center"
-                  />
-                </div>
-                <div>
-                  <label className="text-[9px] text-muted-foreground">Max</label>
-                  <NumberInput
-                    value={lootConfig.itemCount.max}
-                    onChange={(v) => setLootConfig((p) => ({ ...p, itemCount: { ...p.itemCount, max: v } }))}
-                    min={0}
-                    max={20}
-                    className="h-8 text-xs text-center"
-                  />
-                </div>
-              </div>
+              <RangeRow
+                label="Przedmioty"
+                min={lootConfig.itemCount.min}
+                max={lootConfig.itemCount.max}
+                limit={20}
+                onChange={(patch) => setLootConfig((p) => ({ ...p, itemCount: { ...p.itemCount, ...patch } }))}
+              />
 
-              <label className="text-xs text-muted-foreground font-medium">Monety (zakresy)</label>
+              <label className="field-label block pt-1">Monety</label>
               {currency.length === 0 ? (
                 <p className="text-xs text-muted-foreground">
                   Kampania nie ma waluty, więc łup nie zawiera monet.{" "}
@@ -392,7 +364,7 @@ export default function LootGeneratorPage() {
                   .
                 </p>
               ) : (
-                <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+                <div className="space-y-1.5">
                   {currency.map((denomination) => {
                     const range = lootConfig.coinRanges[denomination.id] ?? NO_COINS;
                     const setRange = (patch: Partial<typeof range>) =>
@@ -404,27 +376,13 @@ export default function LootGeneratorPage() {
                         },
                       }));
                     return (
-                      <div key={denomination.id}>
-                        <label className="text-[9px] text-muted-foreground">
-                          {denomination.name} ({denomination.short})
-                        </label>
-                        <div className="flex gap-0.5">
-                          <NumberInput
-                            value={range.min}
-                            min={0}
-                            onChange={(v) => setRange({ min: v })}
-                            className="h-7 text-[10px] text-center"
-                            aria-label={`${denomination.name}: od`}
-                          />
-                          <NumberInput
-                            value={range.max}
-                            min={0}
-                            onChange={(v) => setRange({ max: v })}
-                            className="h-7 text-[10px] text-center"
-                            aria-label={`${denomination.name}: do`}
-                          />
-                        </div>
-                      </div>
+                      <RangeRow
+                        key={denomination.id}
+                        label={`${denomination.name} (${denomination.short})`}
+                        min={range.min}
+                        max={range.max}
+                        onChange={setRange}
+                      />
                     );
                   })}
                 </div>
@@ -432,8 +390,8 @@ export default function LootGeneratorPage() {
             </CardContent>
           </Card>
 
-          <Button onClick={generateLoot} className="w-full min-h-12 text-base font-semibold gap-2">
-            <Dice5 className="h-5 w-5" /> Generuj łup
+          <Button size="lg" onClick={generateLoot}>
+            <Dice5 /> Generuj łup
           </Button>
 
           {result && (
@@ -450,15 +408,15 @@ export default function LootGeneratorPage() {
                         <div className="min-w-0">
                           <span className="font-semibold">{item.name}</span>
                           <div className="flex flex-wrap gap-1 mt-0.5">
-                            <Badge variant="outline" className="text-[9px] px-1 py-0 h-4">
+                            <Badge variant="outline" className="text-[12px] px-1 py-0 h-4">
                               {item.rankName}
                             </Badge>
-                            <Badge variant="secondary" className="text-[9px] px-1 py-0 h-4">
+                            <Badge variant="secondary" className="text-[12px] px-1 py-0 h-4">
                               {item.type}
                             </Badge>
                           </div>
                           {item.description ? <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p> : null}
-                          <p className="text-[10px] text-muted-foreground mt-1">
+                          <p className="text-[12px] text-muted-foreground mt-1">
                             Wartość: {priceLabel(item.price)}
                           </p>
                         </div>
@@ -478,9 +436,14 @@ export default function LootGeneratorPage() {
                   )}
                 </div>
 
-                <Button onClick={generateLoot} variant="secondary" className="w-full text-xs min-h-[--h-control] gap-1">
-                  <Dice5 className="h-3 w-3" /> Generuj ponownie
-                </Button>
+                <div className="flex flex-wrap gap-2">
+                  <Button onClick={takeLoot} disabled={result.items.length === 0}>
+                    <Package /> Dodaj do ekwipunku drużyny
+                  </Button>
+                  <Button onClick={generateLoot} variant="secondary">
+                    <Dice5 /> Generuj ponownie
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}
@@ -496,7 +459,7 @@ export default function LootGeneratorPage() {
                 {totalChance.toFixed(1)}%
               </span>
             </div>
-            <Button size="sm" className="text-xs gap-1 min-h-[--h-control] shrink-0" onClick={() => setAddingRank(true)}>
+            <Button size="sm" className="gap-1 min-h-[--h-control] shrink-0" onClick={() => setAddingRank(true)}>
               <Plus className="h-3 w-3" />
               Dodaj rangę
             </Button>
@@ -510,15 +473,15 @@ export default function LootGeneratorPage() {
                     value={newRank.name}
                     onChange={(e) => setNewRank({ ...newRank, name: e.target.value })}
                     placeholder="Nazwa rangi"
-                    className="h-8 text-xs"
+                    className="field-sm"
                   />
                   <NumberInput value={newRank.chance} onChange={(v) => setNewRank({ ...newRank, chance: v })} className="h-8 text-xs text-center" />
                 </div>
                 <div className="flex gap-1.5">
-                  <Button size="sm" className="h-[--h-control] text-xs flex-1" onClick={addRank}>
+                  <Button size="sm" className="h-[--h-control] flex-1" onClick={addRank}>
                     Dodaj
                   </Button>
-                  <Button size="sm" variant="ghost" className="h-[--h-control] text-xs" onClick={() => setAddingRank(false)}>
+                  <Button size="sm" variant="ghost" className="h-[--h-control]" onClick={() => setAddingRank(false)}>
                     Anuluj
                   </Button>
                 </div>
@@ -536,14 +499,14 @@ export default function LootGeneratorPage() {
                       <Input
                         value={rank.name}
                         onChange={(e) => updateRank(rank.id, { name: e.target.value })}
-                        className="h-[--h-control] text-xs flex-1"
+                        className="h-[--h-control] flex-1"
                       />
                       <NumberInput
                         value={rank.chance}
                         onChange={(v) => updateRank(rank.id, { chance: v })}
                         className="h-[--h-control] text-xs w-20 text-center"
                       />
-                      <span className="text-[10px] text-muted-foreground">%</span>
+                      <span className="text-[12px] text-muted-foreground">%</span>
                       <Button size="icon" variant="ghost" className="min-h-[--h-control] min-w-[--h-control] shrink-0" onClick={() => setEditingRankId(null)}>
                         <Check className="h-3 w-3" />
                       </Button>
@@ -693,7 +656,7 @@ export default function LootGeneratorPage() {
                       {(item.tags?.length ?? 0) > 0 && (
                         <div className="flex flex-wrap gap-1 mb-1.5">
                           {item.tags!.map((tag) => (
-                            <span key={tag} className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium bg-muted text-muted-foreground border border-border/60">
+                            <span key={tag} className="inline-flex items-center rounded px-1.5 py-0.5 text-[12px] font-medium bg-muted text-muted-foreground border border-border/60">
                               {tag}
                             </span>
                           ))}
@@ -745,7 +708,7 @@ export default function LootGeneratorPage() {
                       <p className="font-bold text-sm leading-tight">{item.name}</p>
                       <Badge
                         variant="outline"
-                        className={cn("mt-1.5 text-[10px] font-normal", rankBadgeClass(item.rankName, rankNames))}
+                        className={cn("mt-1.5 text-[12px] font-normal", rankBadgeClass(item.rankName, rankNames))}
                       >
                         {item.rankName}
                       </Badge>
@@ -759,7 +722,7 @@ export default function LootGeneratorPage() {
                   {(item.tags?.length ?? 0) > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {item.tags!.map((tag) => (
-                        <span key={tag} className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium bg-muted text-muted-foreground border border-border/60">
+                        <span key={tag} className="inline-flex items-center rounded px-1.5 py-0.5 text-[12px] font-medium bg-muted text-muted-foreground border border-border/60">
                           {tag}
                         </span>
                       ))}
@@ -853,7 +816,7 @@ export default function LootGeneratorPage() {
                     className="min-h-[--h-control]"
                     placeholder="np. Fast, Obrażenia: SB+2, Zasięg: krótki"
                   />
-                  <p className="text-[11px] text-muted-foreground">Oddziel przecinkami. Wyświetlane jako plakietki.</p>
+                  <p className="text-[length:--fs-meta] text-muted-foreground">Oddziel przecinkami. Wyświetlane jako plakietki.</p>
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="f-description">Uwagi (MG)</Label>
@@ -900,95 +863,24 @@ export default function LootGeneratorPage() {
         </div>
       )}
 
-      {tab === "carry" && (
-        <div className="space-y-4 animate-fade-in">
-          <h2 className="text-sm font-semibold text-muted-foreground">Szybki ekwipunek postaci</h2>
+    </div>
+  );
+}
 
-          <div className="flex flex-wrap gap-1.5">
-            <Button size="sm" variant={activeCarryCategory === "all" ? "default" : "secondary"} className="text-xs" onClick={() => setActiveCarryCategory("all")}>
-              Wszystko
-            </Button>
-            {CARRY_CATEGORIES.map((cat) => (
-              <Button
-                key={cat.id}
-                size="sm"
-                variant={activeCarryCategory === cat.id ? "default" : "secondary"}
-                className="text-xs gap-1"
-                onClick={() => setActiveCarryCategory(cat.id)}
-              >
-                <cat.icon className="h-3 w-3" />
-                {cat.label}
-              </Button>
-            ))}
-          </div>
-
-          <div className="space-y-1">
-            {filteredCarry.map((item) => {
-              const Icon = getCarryCategoryIcon(item.category);
-              const isLow = item.maxQuantity ? item.quantity <= Math.floor(item.maxQuantity * 0.25) : item.quantity === 0;
-              return (
-                <div
-                  key={item.id}
-                  className={`flex items-center justify-between px-3 py-2 rounded-md border bg-card ${isLow ? "border-destructive/30" : ""}`}
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Icon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                    <span className={`text-sm font-medium truncate ${item.quantity === 0 ? "text-muted-foreground line-through" : ""}`}>{item.name}</span>
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => updateCarryQuantity(item.id, -1)}>
-                      <Minus className="h-3 w-3" />
-                    </Button>
-                    <span className={`text-sm font-bold min-w-[2ch] text-center ${isLow ? "text-destructive" : ""}`}>
-                      {item.quantity}
-                      {item.maxQuantity && <span className="text-muted-foreground font-normal">/{item.maxQuantity}</span>}
-                    </span>
-                    <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => updateCarryQuantity(item.id, 1)}>
-                      <Plus className="h-3 w-3" />
-                    </Button>
-                    <Button size="icon" variant="ghost" className="h-6 w-6 text-muted-foreground" onClick={() => removeCarryItem(item.id)}>
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
-            {filteredCarry.length === 0 && (
-              <Card>
-                <CardContent className="p-4 text-center text-sm text-muted-foreground">Brak przedmiotów w tej kategorii</CardContent>
-              </Card>
-            )}
-          </div>
-
-          <section>
-            <label className="field-label mb-1.5 block">Dodaj przedmiot</label>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Input
-                type="text"
-                value={newCarryName}
-                onChange={(e) => setNewCarryName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addCarryItem()}
-                placeholder="Nazwa…"
-                className="flex-1 h-9"
-              />
-              <select
-                value={newCarryCategory}
-                onChange={(e) => setNewCarryCategory(e.target.value)}
-                className="h-9 px-2 text-xs rounded-md border bg-card text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-              >
-                {CARRY_CATEGORIES.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-              <Button size="sm" onClick={addCarryItem} className="gap-1 shrink-0">
-                <Plus className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          </section>
-        </div>
-      )}
+/** One "label  od – do" line, so ranges read as a short table instead of a grid of boxes. */
+function RangeRow({ label, min, max, limit, onChange }: {
+  label: string;
+  min: number;
+  max: number;
+  limit?: number;
+  onChange: (patch: { min?: number; max?: number }) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="min-w-0 flex-1 truncate text-sm">{label}</span>
+      <NumberInput value={min} min={0} max={limit} onChange={(v) => onChange({ min: v })} className="field-sm w-16 text-center" aria-label={`${label}: od`} />
+      <span className="text-muted-foreground">–</span>
+      <NumberInput value={max} min={0} max={limit} onChange={(v) => onChange({ max: v })} className="field-sm w-16 text-center" aria-label={`${label}: do`} />
     </div>
   );
 }

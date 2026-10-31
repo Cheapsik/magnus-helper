@@ -83,7 +83,7 @@ export function CampaignWizard({
           >
             <span
               className={cn(
-                "flex h-5 w-5 items-center justify-center rounded-full border text-[11px]",
+                "flex h-5 w-5 items-center justify-center rounded-full border text-[length:--fs-meta]",
                 index === step ? "border-primary bg-primary text-primary-foreground" : "border-border",
               )}
             >

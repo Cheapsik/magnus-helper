@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NumberInput } from "@/components/ui/number-input";
 import { realCalendar, type CalendarDefinition } from "@/lib/campaignCalendar";
+import { confirmDialog } from "@/components/ui/dialogs";
 
 export function CalendarSettings({ definition, onChange }: {
   definition: CalendarDefinition;
@@ -25,8 +26,8 @@ export function CalendarSettings({ definition, onChange }: {
       <Button
         variant="outline"
         size="sm"
-        onClick={() => {
-          if (confirm("Zastąpić miesiące, dni tygodnia i księżyce kalendarzem rzeczywistym? Wydarzenia zostaną.")) {
+        onClick={async () => {
+          if (await confirmDialog("Zastąpić miesiące, dni tygodnia i księżyce kalendarzem rzeczywistym?", { description: "Wydarzenia zostaną.", confirmLabel: "Zastąp" })) {
             onChange(realCalendar(definition.startYear));
           }
         }}

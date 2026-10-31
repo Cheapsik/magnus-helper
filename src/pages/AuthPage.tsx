@@ -91,7 +91,7 @@ function AuthField({
           minLength={minLength}
           className={cn(
             "h-9 w-full rounded-md border border-white/15 bg-black/45 py-2 text-sm text-white sm:h-11 sm:rounded-lg",
-            "placeholder:text-white/35 focus:border-[#c5a059]/60 focus:outline-none focus:ring-1 focus:ring-[#c5a059]/40",
+            "placeholder:text-white/35 focus:border-primary/60 focus:outline-none focus:ring-1 focus:ring-primary/40",
             showToggle ? "pl-10 pr-10" : "pl-10 pr-3",
           )}
         />
@@ -140,7 +140,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
       </div>
 
       <footer className="relative z-10 shrink-0 px-3 pb-3 sm:px-4 sm:pb-6">
-        <p className="text-center text-[10px] text-white/40 sm:text-xs">
+        <p className="text-center text-[12px] text-white/40 sm:text-xs">
           © 2026 Magnus Helper. Wszystkie prawa zastrzeżone.
         </p>
       </footer>
@@ -166,7 +166,7 @@ export function AuthHeader({ subtitle }: { subtitle?: string }) {
     <div className="mb-4 flex flex-col items-center text-center sm:mb-6">
       <AppLogo className="mb-2 sm:mb-3" />
       <h1 className="font-app-brand text-2xl font-normal tracking-wide text-white sm:text-3xl">Magnus Helper</h1>
-      <p className="mt-0.5 text-xs text-[#c5a059] sm:mt-1 sm:text-sm">
+      <p className="mt-0.5 text-xs text-primary sm:mt-1 sm:text-sm">
         {subtitle ?? "— Twoje wsparcie w każdej sesji RPG —"}
       </p>
     </div>
@@ -190,8 +190,8 @@ export function GoldButton({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "flex h-9 w-full items-center justify-center gap-1 rounded-md text-sm font-semibold text-white transition-colors sm:h-11 sm:rounded-lg",
-        "bg-[#c5a059] hover:bg-[#b8924f] disabled:pointer-events-none disabled:opacity-50",
+        "flex h-9 w-full items-center justify-center gap-1 rounded-md text-sm font-semibold text-primary-foreground transition-colors sm:h-11 sm:rounded-lg",
+        "bg-primary hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50",
       )}
     >
       {children}
@@ -240,7 +240,7 @@ function AuthAlert({ error, success }: { error: string | null; success: string |
         </p>
       )}
       {success && (
-        <p className="rounded-md border border-[#c5a059]/40 bg-[#c5a059]/10 px-2.5 py-1.5 text-xs text-[#e8d4a8] sm:rounded-lg sm:px-3 sm:py-2 sm:text-sm">
+        <p className="rounded-md border border-primary/40 bg-primary/10 px-2.5 py-1.5 text-xs text-[#e8d4a8] sm:rounded-lg sm:px-3 sm:py-2 sm:text-sm">
           {success}
         </p>
       )}
@@ -435,7 +435,7 @@ export default function AuthPage() {
                 Nie masz konta?{" "}
                 <button
                   type="button"
-                  className="font-medium text-[#c5a059] hover:underline"
+                  className="font-medium text-primary hover:underline"
                   onClick={() => switchView("register")}
                 >
                   Zarejestruj się
@@ -505,7 +505,7 @@ export default function AuthPage() {
               Masz już konto?{" "}
               <button
                 type="button"
-                className="font-medium text-[#c5a059] hover:underline"
+                className="font-medium text-primary hover:underline"
                 onClick={() => switchView("login")}
               >
                 Zaloguj się
@@ -532,7 +532,7 @@ export default function AuthPage() {
             <p className="mt-3 text-center text-xs sm:mt-5 sm:text-sm">
               <button
                 type="button"
-                className="text-[#c5a059] hover:underline"
+                className="text-primary hover:underline"
                 onClick={() => switchView("login")}
               >
                 Wróć do logowania

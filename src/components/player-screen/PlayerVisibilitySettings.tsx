@@ -39,7 +39,7 @@ export function PlayerVisibilitySettings() {
         <Label htmlFor="pv-hero">Karta bohatera</Label>
         <select
           id="pv-hero"
-          className="w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+          className="field w-full"
           value={vis.heroId}
           onChange={(e) => patch({ heroId: e.target.value })}
         >
