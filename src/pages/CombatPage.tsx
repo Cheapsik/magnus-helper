@@ -15,6 +15,7 @@ import { CombatViewModeNav, type CombatViewMode } from "@/components/combat/Comb
 import { CombatTurnBar } from "@/components/combat/CombatTurnBar";
 import { CombatantCard } from "@/components/combat/CombatantCard";
 import { CombatSidePanel } from "@/components/combat/CombatSidePanel";
+import { FightConditions } from "@/components/combat/FightConditions";
 import { CombatAttackPanel } from "@/components/combat/CombatAttackPanel";
 import { CombatantFormFields, emptyCombatant } from "@/components/combat/CombatantFormFields";
 import { ROSTER_CARD_DRAG, isCombatRosterDragEvent, parseRosterCardKey } from "@/lib/combatDrag";
@@ -336,6 +337,7 @@ export default function CombatPage() {
           </CardContent>
         </Card>
       )}
+      <FightConditions />
     </>
   );
 

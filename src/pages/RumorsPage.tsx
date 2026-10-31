@@ -7,7 +7,7 @@ import {
   Plus, Trash2, ChevronUp, ChevronDown, ChevronLeft, ChevronRight,
   Copy, Check, Dice5, Pencil,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, plural } from "@/lib/utils";
 import { readJson, writeJson } from "@/lib/storage";
 import { confirmDialog } from "@/components/ui/dialogs";
 
@@ -39,7 +39,7 @@ const DEFAULT_CONFIG: RumorsConfig = {
       name: "Plotka karczmana",
       prefix: "Podobno ",
       segments: [
-        { id: "s1", name: "Kto", entries: ["stary kowal", "tajemnicza elfka", "kupiec z południa", "miejscowy pijak", "wędrowny mnich", "szlachcic w przebraniu"] },
+        { id: "s1", name: "Kto", entries: ["stary kowal", "tajemniczy elf", "kupiec z południa", "miejscowy pijak", "wędrowny mnich", "szlachcic w przebraniu"] },
         { id: "s2", name: "Co zrobił", entries: ["ukradł coś cennego", "zniknął bez śladu", "zawarł pakt z diabłem", "ożenił się potajemnie", "sprzedał coś czego nie powinien"] },
         { id: "s3", name: "Gdzie", entries: ["w miejskiej zbrojowni", "za starym młynem", "na targowisku w środku nocy", "w podziemiach zamku", "w opuszczonej świątyni"] },
         { id: "s4", name: "Dlaczego", entries: ["bo był zdesperowany", "dla złota", "z miłości do kogoś nieodpowiedniego", "pod przymusem", "bo nie miał wyboru"] },
@@ -164,7 +164,8 @@ function SegmentEditor({
           )}
           <button
             onClick={(e) => { e.stopPropagation(); onRemove(); }}
-            className="p-1.5 rounded hover:bg-accent text-destructive min-w-[32px] min-h-[32px] flex items-center justify-center"
+            aria-label={`Usuń segment ${segment.name}`}
+            className="p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-destructive min-w-[32px] min-h-[32px] flex items-center justify-center"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
@@ -184,7 +185,8 @@ function SegmentEditor({
               <span className="text-sm text-foreground flex-1 truncate">{entry}</span>
               <button
                 onClick={() => removeEntry(i)}
-                className="p-1.5 rounded hover:bg-accent text-destructive shrink-0 min-w-[32px] min-h-[32px] flex items-center justify-center"
+                aria-label={`Usuń wpis ${entry}`}
+                className="p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-destructive shrink-0 min-w-[32px] min-h-[32px] flex items-center justify-center"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
@@ -466,11 +468,12 @@ export default function RumorsPage() {
           <CardContent className="p-3 flex items-center justify-between">
             <div className="min-w-0">
               <p className="text-sm font-medium text-foreground truncate">{t.name}</p>
-              <p className="text-xs text-muted-foreground">{t.segments.length} segmentów</p>
+              <p className="text-xs text-muted-foreground">{t.segments.length} {plural(t.segments.length, "segment", "segmenty", "segmentów")}</p>
             </div>
             <button
               onClick={(e) => { e.stopPropagation(); removeTemplate(t.id); }}
-              className="p-2 rounded hover:bg-accent text-destructive shrink-0 flex items-center justify-center"
+              aria-label={`Usuń szablon ${t.name}`}
+              className="p-2 rounded hover:bg-accent text-muted-foreground hover:text-destructive shrink-0 flex items-center justify-center"
             >
               <Trash2 className="h-4 w-4" />
             </button>

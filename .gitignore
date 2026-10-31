@@ -31,3 +31,6 @@ skills-lock.json
 
 # Claude Code agent worktrees
 .claude/
+
+# graphify output
+graphify-out/

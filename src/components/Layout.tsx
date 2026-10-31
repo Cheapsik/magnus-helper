@@ -1,11 +1,11 @@
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  Home, Dice5, Target, BookOpen, MoreHorizontal, Search,
-  Swords, Activity, Package, StickyNote, Users, Gem, Timer, MessageSquare, Music, Network, ScrollText,
+  Home, Dice5, Target, MoreHorizontal, Search,
+  Swords, Package, StickyNote, Users, Gem, Timer, MessageSquare, Music, Network, ScrollText,
   MapPin, Skull, SlidersHorizontal, Settings as SettingsIcon, LogOut,
   type LucideIcon,
-  Waypoints, Lightbulb, PieChart, Flag, Shuffle, CalendarDays, LayoutDashboard, BookMarked, Map as MapIcon, Route, ShieldCheck, Castle, Presentation, Store,
+  Waypoints, Lightbulb, Flag, Shuffle, CalendarDays, LayoutDashboard, BookMarked, Map as MapIcon, Route, ShieldCheck, Castle, Presentation, Store,
   Crosshair, KeyRound, ChevronRight, Pin, PinOff, HelpCircle,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -35,13 +35,14 @@ const clampSidebarWidth = (w: number) =>
 
 const EXTRA_TITLES: Record<string, string> = {
   "/settings": "Ustawienia",
+  "/codex": "Baza wiedzy", // reachable from mentions, hidden from the menu while it has no content
 };
 
 const NAV_TABS = [
   { path: "/", label: "Start", icon: Home },
   { path: "/dice", label: "Rzut kośćmi", icon: Dice5 },
   { path: "/tests", label: "Testy", icon: Target },
-  { path: "/codex", label: "Baza wiedzy", icon: BookOpen },
+  { path: "/combat", label: "Tracker walki", icon: Swords },
 ];
 
 type NavItem = { path: string; label: string; icon: LucideIcon };
@@ -62,8 +63,6 @@ const SIDEBAR_GROUPS: { label: string; items: NavItem[] }[] = [
       { path: "/scena", label: "Scena", icon: MapPin },
       { path: "/dice", label: "Rzut kośćmi", icon: Dice5 },
       { path: "/tests", label: "Testy", icon: Target },
-      { path: "/conditions", label: "Stany", icon: Activity },
-      { path: "/clocks", label: "Koła postępu", icon: PieChart },
       { path: "/timers", label: "Timery", icon: Timer },
       { path: "/tables", label: "Tabele losowe", icon: Shuffle },
       { path: "/ambient", label: "Ambient", icon: Music },
@@ -102,7 +101,6 @@ const SIDEBAR_GROUPS: { label: string; items: NavItem[] }[] = [
     items: [
       { path: "/notes", label: "Notatki", icon: StickyNote },
       { path: "/chronicle", label: "Kronika", icon: BookMarked },
-      { path: "/codex", label: "Baza wiedzy", icon: BookOpen },
     ],
   },
   {
@@ -122,8 +120,6 @@ const DEFAULT_NAV: NavPrefs = { pinned: [], open: ["Przy stole"] };
 
 /** What a page is for, behind the "?" beside its title — read once, not on every visit. */
 const PAGE_HELP: Record<string, string> = {
-  "/clocks":
-    "Koło postępu pokazuje, jak blisko jest coś, co się stanie, jeśli gracze nie zareagują: pościg, rytuał, burza. Zamaluj segment, gdy bohaterowie zwlekają. Pełne koło: zdarzenie następuje. Koło z okiem widzą gracze.",
   "/calendar":
     "Czas w świecie gry, niezależny od dat sesji. Własne miesiące i dni tygodnia ustawisz w ustawieniach kalendarza. Przesuwaj „dziś” w miarę upływu czasu i wpisuj wydarzenia: święta, terminy, ultimatum.",
   "/chronicle":
@@ -312,18 +308,18 @@ export default function Layout({ children }: { children: ReactNode }) {
 
       <div className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden">
         <header className="md:hidden shrink-0 border-b border-border bg-card/80 backdrop-blur-md">
-          <div className="grid grid-cols-3 items-center h-12 px-2 gap-1">
-            <div className="min-w-0" aria-hidden />
+          <div className="flex items-center justify-between h-12 px-2 gap-1">
             <Link
               to="/"
-              className="flex items-center gap-2 min-w-0 max-w-full justify-center"
+              className="flex items-center gap-2 min-w-0 shrink"
+              aria-label="Magnus Helper"
             >
               <Logo className="h-6 w-6 shrink-0" />
-              <span className="font-app-brand text-base tracking-wide text-foreground truncate">
+              <span className="hidden min-[480px]:inline font-app-brand text-base tracking-wide text-foreground truncate">
                 Magnus Helper
               </span>
             </Link>
-            <div className="flex items-center justify-end gap-0.5 min-w-0">
+            <div className="flex items-center justify-end gap-0.5 min-w-0 shrink-0">
               <button
                 onClick={palette.open}
                 className="p-2 text-muted-foreground hover:text-foreground transition-colors"
@@ -332,7 +328,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                 <Search className="h-4 w-4" />
               </button>
               <SyncIndicator compact />
-              <CampaignSwitcher className="!px-2" />
+              <CampaignSwitcher className="!px-2 max-w-[140px]" />
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link

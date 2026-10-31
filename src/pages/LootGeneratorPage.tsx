@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState, useId } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Plus, Trash2, Edit2, Check, Dice5, Pencil, Package, Sword, Shield, Flame, Coins, Minus, Upload, X } from "lucide-react";
+import { Plus, Trash2, Edit2, Check, Dice5, Pencil, Package, Coins, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useApp } from "@/context/AppContext";
 import { type LootDbItem, type LootRank, lootItemsFileSchema, NO_COINS, useLootConfig, useLootItems } from "@/lib/lootDb";
@@ -118,15 +118,7 @@ function tagsToArray(raw: string): string[] {
   return raw.split(",").map((t) => t.trim()).filter(Boolean);
 }
 
-const CARRY_CATEGORIES = [
-  { id: "weapons", label: "Broń", icon: Sword },
-  { id: "armor", label: "Pancerz", icon: Shield },
-  { id: "consumables", label: "Zużywalne", icon: Flame },
-  { id: "gear", label: "Wyposażenie", icon: Package },
-  { id: "coins", label: "Pieniądze", icon: Coins },
-];
-
-const VALID_TABS = ["generate", "ranks", "items", "carry"] as const;
+const VALID_TABS = ["generate", "ranks", "items"] as const;
 
 export default function LootGeneratorPage() {
   const [searchParams] = useSearchParams();
@@ -142,7 +134,7 @@ export default function LootGeneratorPage() {
   const [system] = useCampaignSystem();
   const currency = system.currency;
   const priceLabel = (price: number) => (price > 0 ? formatMoney(price, currency) : "—");
-  const [tab, setTab] = useState<"generate" | "ranks" | "items" | "carry">(initialTab);
+  const [tab, setTab] = useState<"generate" | "ranks" | "items">(initialTab);
   const [result, setResult] = useState<GeneratedLoot | null>(null);
 
   const [editingRankId, setEditingRankId] = useState<string | null>(null);
@@ -157,9 +149,6 @@ export default function LootGeneratorPage() {
   const [itemForm, setItemForm] = useState<ItemFormState>(() => emptyItemForm(""));
   const [deleteTarget, setDeleteTarget] = useState<LootDbItem | null>(null);
   const typeListId = useId();
-  const [activeCarryCategory, setActiveCarryCategory] = useState("all");
-  const [newCarryName, setNewCarryName] = useState("");
-  const [newCarryCategory, setNewCarryCategory] = useState("gear");
 
   const rankNames = useMemo(() => lootConfig.ranks.map((r) => r.name), [lootConfig.ranks]);
   const defaultRankName = rankNames[0] ?? "";
@@ -317,23 +306,6 @@ export default function LootGeneratorPage() {
 
   const canSaveItem = itemForm.name.trim() && itemForm.type.trim() && itemForm.rankName.trim();
 
-  const filteredCarry =
-    activeCarryCategory === "all" ? inventory : inventory.filter((i) => i.category === activeCarryCategory);
-
-  const updateCarryQuantity = (id: string, delta: number) =>
-    setInventory((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity: Math.max(0, item.quantity + delta) } : item)),
-    );
-
-  const removeCarryItem = (id: string) => setInventory((prev) => prev.filter((i) => i.id !== id));
-
-  const addCarryItem = () => {
-    const name = newCarryName.trim();
-    if (!name) return;
-    setInventory((prev) => [...prev, { id: crypto.randomUUID(), name, category: newCarryCategory, quantity: 1 }]);
-    setNewCarryName("");
-  };
-
   // Same-named items stack, so taking the same loot twice raises the count instead of adding a row.
   const takeLoot = () => {
     if (!result || result.items.length === 0) return;
@@ -349,19 +321,20 @@ export default function LootGeneratorPage() {
     toast.success(`Dodano do ekwipunku drużyny: ${result.items.length}`);
   };
 
-  const getCarryCategoryIcon = (cat: string) => CARRY_CATEGORIES.find((c) => c.id === cat)?.icon ?? Package;
-
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center justify-between gap-2">
       </div>
 
       <div className="flex flex-wrap gap-1.5">
-        {(["generate", "ranks", "items", "carry"] as const).map((t) => (
+        {(["generate", "ranks", "items"] as const).map((t) => (
           <Button key={t} size="sm" variant={tab === t ? "default" : "outline"} className="flex-1 min-w-[4.25rem]" onClick={() => setTab(t)}>
-            {t === "generate" ? "Generuj" : t === "ranks" ? "Rangi" : t === "items" ? "Przedmioty" : "Ekwipunek"}
+            {t === "generate" ? "Generuj" : t === "ranks" ? "Rangi" : "Przedmioty"}
           </Button>
         ))}
+        <Button size="sm" variant="outline" className="flex-1 min-w-[4.25rem]" asChild>
+          <Link to="/inventory">Ekwipunek</Link>
+        </Button>
       </div>
 
       {tab === "generate" && (
@@ -890,95 +863,6 @@ export default function LootGeneratorPage() {
         </div>
       )}
 
-      {tab === "carry" && (
-        <div className="space-y-4 animate-fade-in">
-          <h2 className="text-sm font-semibold text-muted-foreground">Szybki ekwipunek postaci</h2>
-
-          <div className="flex flex-wrap gap-1.5">
-            <Button size="sm" variant={activeCarryCategory === "all" ? "default" : "secondary"} onClick={() => setActiveCarryCategory("all")}>
-              Wszystko
-            </Button>
-            {CARRY_CATEGORIES.map((cat) => (
-              <Button
-                key={cat.id}
-                size="sm"
-                variant={activeCarryCategory === cat.id ? "default" : "secondary"}
-                className="gap-1"
-                onClick={() => setActiveCarryCategory(cat.id)}
-              >
-                <cat.icon className="h-3 w-3" />
-                {cat.label}
-              </Button>
-            ))}
-          </div>
-
-          <div className="space-y-1">
-            {filteredCarry.map((item) => {
-              const Icon = getCarryCategoryIcon(item.category);
-              const isLow = item.maxQuantity ? item.quantity <= Math.floor(item.maxQuantity * 0.25) : item.quantity === 0;
-              return (
-                <div
-                  key={item.id}
-                  className={`flex items-center justify-between px-3 py-2 rounded-md border bg-card ${isLow ? "border-destructive/30" : ""}`}
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Icon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                    <span className={`text-sm font-medium truncate ${item.quantity === 0 ? "text-muted-foreground line-through" : ""}`}>{item.name}</span>
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Button size="icon-sm" variant="ghost" onClick={() => updateCarryQuantity(item.id, -1)}>
-                      <Minus className="h-3 w-3" />
-                    </Button>
-                    <span className={`text-sm font-bold min-w-[2ch] text-center ${isLow ? "text-destructive" : ""}`}>
-                      {item.quantity}
-                      {item.maxQuantity && <span className="text-muted-foreground font-normal">/{item.maxQuantity}</span>}
-                    </span>
-                    <Button size="icon-sm" variant="ghost" onClick={() => updateCarryQuantity(item.id, 1)}>
-                      <Plus className="h-3 w-3" />
-                    </Button>
-                    <Button size="icon-sm" variant="ghost" className="text-muted-foreground" onClick={() => removeCarryItem(item.id)}>
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
-            {filteredCarry.length === 0 && (
-              <Card>
-                <CardContent className="p-4 text-center text-sm text-muted-foreground">Brak przedmiotów w tej kategorii</CardContent>
-              </Card>
-            )}
-          </div>
-
-          <section>
-            <label className="field-label mb-1.5 block">Dodaj przedmiot</label>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Input
-                type="text"
-                value={newCarryName}
-                onChange={(e) => setNewCarryName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addCarryItem()}
-                placeholder="Nazwa…"
-                className="flex-1"
-              />
-              <select
-                value={newCarryCategory}
-                onChange={(e) => setNewCarryCategory(e.target.value)}
-                className="field"
-              >
-                {CARRY_CATEGORIES.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-              <Button size="sm" onClick={addCarryItem} className="gap-1 shrink-0">
-                <Plus className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          </section>
-        </div>
-      )}
     </div>
   );
 }

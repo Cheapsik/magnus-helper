@@ -492,7 +492,7 @@ export default function SessionNotesPage() {
           </Button>
           <Button type="button" size="sm" className="gap-1 px-2.5" onClick={openNewNote}>
             <Plus className="h-3.5 w-3.5" />
-            Dodaj
+            Nowa notatka
           </Button>
         </div>
       </div>
@@ -553,7 +553,7 @@ export default function SessionNotesPage() {
           </div>
         </div>
         <button type="button" className="self-start text-left text-[length:--fs-meta] text-primary hover:underline" onClick={handleTodaySession}>
-          Dziś ta sesja (filtr + ostatnia not. sesyjna)
+          Pokaż notatki z dzisiejszej sesji
         </button>
         <div className="flex gap-1">
           {(

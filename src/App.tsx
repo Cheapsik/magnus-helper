@@ -22,7 +22,6 @@ import DicePage from "@/pages/DicePage";
 import TestsPage from "@/pages/TestsPage";
 import CheatSheetsPage from "@/pages/CheatSheetsPage";
 import CombatPage from "@/pages/CombatPage";
-import ConditionsPage from "@/pages/ConditionsPage";
 import SessionNotesPage from "@/pages/SessionNotesPage";
 import InventoryPage from "@/pages/InventoryPage";
 import LootGeneratorPage from "@/pages/LootGeneratorPage";
@@ -39,7 +38,6 @@ import AuthPage from "@/pages/AuthPage";
 import { getRouterBasename } from "@/lib/authUrls";
 import RelationsMapPage from "./pages/RelationsMapPage";
 import SessionPrepPage from "@/pages/SessionPrepPage";
-import ClocksPage from "@/pages/ClocksPage";
 import RandomTablesPage from "@/pages/RandomTablesPage";
 import FactionsPage from "@/pages/FactionsPage";
 import PlayerScreenPage from "@/pages/PlayerScreenPage";
@@ -122,12 +120,13 @@ function GmApp() {
           <Route path="/codex" element={<CheatSheetsPage />} />
           <Route path="/scena" element={<ScenePage />} />
           <Route path="/combat" element={<CombatPage />} />
-          <Route path="/conditions" element={<ConditionsPage />} />
           <Route path="/inventory" element={<InventoryPage />} />
           <Route path="/loot" element={<LootGeneratorPage />} />
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/notes" element={<SessionNotesPage />} />
           <Route path="/relations" element={<RelationsMapPage />} />
+          <Route path="/clocks" element={<Navigate to="/gm-screen" replace />} />
+          <Route path="/conditions" element={<Navigate to="/combat" replace />} />
           <Route path="/gm-toolbox" element={<Navigate to="/gm-screen" replace />} />
           <Route path="/heroes" element={<CardsPage key="hero" kind="hero" />} />
           <Route path="/npcs" element={<CardsPage key="npc" kind="npc" />} />
@@ -137,7 +136,6 @@ function GmApp() {
           <Route path="/ambient" element={<AmbientPage />} />
           <Route path="/quests" element={<QuestsPage />} />
           <Route path="/prep" element={<SessionPrepPage />} />
-          <Route path="/clocks" element={<ClocksPage />} />
           <Route path="/tables" element={<RandomTablesPage />} />
           <Route path="/factions" element={<FactionsPage />} />
           <Route path="/calendar" element={<CalendarPage />} />

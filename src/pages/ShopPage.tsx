@@ -293,7 +293,7 @@ export default function ShopPage() {
               }}
             >
               <Settings2 className="h-4 w-4" />
-              ⚙ Zarządzaj typami sklepów
+              Zarządzaj typami sklepów
             </Button>
           </div>
         </div>
@@ -431,7 +431,7 @@ export default function ShopPage() {
                       onClick={() => loadSnapshot(snap)}
                     >
                       <FolderOpen className="h-4 w-4" />
-                      📂 Wczytaj
+                      Wczytaj
                     </Button>
                     <Button
                       type="button"
@@ -441,7 +441,7 @@ export default function ShopPage() {
                       onClick={() => deleteSnapshot(snap.id)}
                     >
                       <Trash2 className="h-4 w-4" />
-                      🗑 Usuń
+                      Usuń
                     </Button>
                   </div>
                 </div>
@@ -464,7 +464,7 @@ export default function ShopPage() {
       <div className="flex flex-col sm:flex-row gap-2">
         <Button type="button" className="min-h-12 flex-1 gap-2 text-base font-semibold" onClick={handleGenerate}>
           <Dice5 className="h-5 w-5" />
-          🎲 Generuj asortyment
+          Generuj asortyment
         </Button>
         <Button
           type="button"
@@ -474,7 +474,7 @@ export default function ShopPage() {
           disabled={stockLines.length === 0}
         >
           <Save className="h-5 w-5" />
-          💾 Zapisz sklep
+          Zapisz sklep
         </Button>
       </div>
     </div>

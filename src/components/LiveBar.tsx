@@ -6,7 +6,7 @@ import { useAmbient } from "@/context/AmbientContext";
 import { useScene } from "@/context/SceneContext";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { RPG_TIMERS_STORAGE_KEY, dataToRuntime, formatTimerMs, type TimerData } from "@/lib/rpgTimersStorage";
-import { cn } from "@/lib/utils";
+import { cn, plural } from "@/lib/utils";
 
 /**
  * What is happening at the table right now: the fight and whose turn it is, running timers,
@@ -32,7 +32,7 @@ export default function LiveBar() {
   const combatActive = enemyAlive > 0 && combatants.length > 1;
   const current = combatActive ? combatants[combatTurn % combatants.length] : null;
   const ambient =
-    playingLayers.length === 0 ? null : playingLayers.length === 1 ? playingLayers[0].name : `${playingLayers.length} warstwy dźwięku`;
+    playingLayers.length === 0 ? null : playingLayers.length === 1 ? playingLayers[0].name : `${playingLayers.length} ${plural(playingLayers.length, "warstwa", "warstwy", "warstw")} dźwięku`;
 
   if (!current && running.length === 0 && !activeScene && !ambient) return null;
 

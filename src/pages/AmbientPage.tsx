@@ -12,7 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, plural } from "@/lib/utils";
 import { useAmbient, type SoundItem, type Category } from "@/context/AmbientContext";
 import { unlockMobileAudio } from "@/lib/mobileAudioUnlock";
 import { EmojiPickerButton } from "@/components/emoji/EmojiPickerButton";
@@ -202,7 +202,7 @@ export default function AmbientPage() {
               className="h-8 min-w-[2rem] shrink-0 text-base"
             />
             <CategoryName name={cat.name} onRename={(n) => renameCategory(cat.id, n)} />
-            <Badge variant="secondary" className="text-xs">{sounds.length} dźwięk{sounds.length === 1 ? "" : sounds.length < 5 ? "i" : "ów"}</Badge>
+            <Badge variant="secondary" className="text-xs">{sounds.length} {plural(sounds.length, "dźwięk", "dźwięki", "dźwięków")}</Badge>
             {cat.id !== "__uncategorized__" && (
               <button onClick={() => deleteCategory(cat)} className="flex items-center justify-center text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity">
                 <Trash2 className="h-4 w-4" />
@@ -234,6 +234,12 @@ export default function AmbientPage() {
           )}
         </section>
       ))}
+
+      {config.sounds.length === 0 && (
+        <p className="text-sm text-muted-foreground">
+          Nie ma jeszcze dźwięków. „Dodaj dźwięk” przyjmuje własny plik (mp3, ogg, wav) albo link do YouTube.
+        </p>
+      )}
 
       <Button variant="outline" size="sm" onClick={addCategory}>
         <Plus className="h-4 w-4 mr-1" /> Dodaj kategorię
