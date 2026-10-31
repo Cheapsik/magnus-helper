@@ -1,0 +1,13 @@
+<script>
+    // GitHub Pages serves this for any path it has no file for (a refreshed /magnus-helper/auth, an invite
+    // link). Send it to the app's index with the path in "?/…"; index.html turns it back into the real path.
+    // The site lives under /magnus-helper/, so that first segment stays in the path.
+    var pathSegmentsToKeep = 1;
+    var l = window.location;
+    l.replace(l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+      l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') +
+      '/?/' + l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+      (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+      l.hash
+    );
+  </script>
